@@ -1,0 +1,129 @@
+/*
+ * DBS APIs
+ */
+
+package dbs
+
+import (
+	"database/sql"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"strings"
+)
+
+// main record we work with
+type Record map[string]interface{}
+
+// global variable to keep pointer to DB
+var DB *sql.DB
+var DBTYPE string
+
+// Function to access internal back-end and return records for provided
+// api and params
+func GetData(api string, params Record) (string, Record) {
+	res := make(Record)
+	var data []Record
+	switch api {
+	case "blocks":
+		data = blocks(params)
+	case "datasets":
+		data = datasets(params)
+	}
+	res["results"] = data
+	res["params"] = params
+	res["api"] = api
+	status := "ok"
+	return status, res
+}
+
+// helper function to get value from dict
+func getValue(params Record, key string) string {
+	val, ok := params[key]
+	//     fmt.Printf("### val, %v, %T\n", val, val)
+	if ok {
+		values := val.([]string)
+		if len(values) == 1 {
+			return values[0]
+		}
+	}
+	return ""
+}
+
+// function to parse given file name and extract from it dbtype and dburi
+// file should contain the "dbtype dburi" string
+func ParseDBFile(dbfile string) (string, string) {
+	dat, err := ioutil.ReadFile(dbfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	arr := strings.Split(string(dat), " ")
+	return arr[0], strings.Replace(arr[1], "\n", "", -1)
+}
+
+func placeholder(pid int) string {
+	if DBTYPE == "oracle" {
+		return fmt.Sprintf(":param%d", pid)
+	} else if DBTYPE == "PostgreSQL" {
+		return fmt.Sprintf("$%s", pid)
+	} else {
+		return "?"
+	}
+}
+
+// generic query API
+// ideas are taken from
+// http://stackoverflow.com/questions/17845619/how-to-call-the-scan-variadic-function-in-golang-using-reflection
+func query(stm string, args ...interface{}) []Record {
+	var out []Record
+
+	var rows *sql.Rows
+	var err error
+	if len(args) == 1 {
+		rows, err = DB.Query(stm, args[0])
+	} else {
+		rows, err = DB.Query(stm, args)
+	}
+	if err != nil {
+		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Fatal(msg)
+	}
+	defer rows.Close()
+
+	// extract columns from Rows object and create values & valuesPtrs to retrieve results
+	columns, _ := rows.Columns()
+	count := len(columns)
+	values := make([]interface{}, count)
+	valuePtrs := make([]interface{}, count)
+
+	for rows.Next() {
+		// initialize value pointers
+		for i, _ := range columns {
+			valuePtrs[i] = &values[i]
+		}
+		err := rows.Scan(valuePtrs...)
+		if err != nil {
+			msg := fmt.Sprintf("ERROR: rows.Scan, dest='%v', error=%v", valuePtrs, err)
+			log.Fatal(msg)
+		}
+		// store results into generic record (a dict)
+		rec := make(Record)
+		for i, col := range columns {
+			var v interface{}
+			val := values[i]
+			b, ok := val.([]byte)
+			if ok {
+				v = string(b)
+			} else {
+				v = val
+			}
+			rec[col] = v
+		}
+		out = append(out, rec)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return out
+}
