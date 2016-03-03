@@ -21,5 +21,6 @@ func main() {
 	flag.IntVar(&verbose, "verbose", 0, "Verbose level, support 0,1,2")
 	flag.Parse()
 	utils.VERBOSE = verbose
-	web.Server(afile, dbfile, base, port, sdir)
+	utils.STATICDIR = sdir
+	web.Server(afile, dbfile, base, port)
 }
