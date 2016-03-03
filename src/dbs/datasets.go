@@ -50,7 +50,7 @@ func opVal(arg string) (string, string) {
 // datasets API
 func datasets(params Record) []Record {
 	// variables we'll use in where clause
-	var args []string
+	var args []interface{}
 	where := "WHERE "
 
 	// parse is_dataset_valid argument
@@ -73,13 +73,13 @@ func datasets(params Record) []Record {
 		}
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
-		where += fmt.Sprintf(" AND D.DATASET %s %s", op, placeholder(":dataset"))
+		where += fmt.Sprintf(" AND D.DATASET %s %s", op, placeholder("dataset"))
 		args = append(args, val)
 	}
 
 	// get SQL statement from static area
 	stm := getSQL("datasets")
 	// use generic query API to fetch the results from DB
-	out := execute(genSQL+stm+where, args)
+	out := execute(genSQL+stm+where, args...)
 	return out
 }
