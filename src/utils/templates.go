@@ -1,4 +1,4 @@
-package web
+package utils
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ func fileNames(tdir string, filenames ...string) []string {
 }
 
 // parse template with given data
-func parseTmpl(tdir, tmpl string, data interface{}) string {
+func ParseTmpl(tdir, tmpl string, data interface{}) string {
 	buf := new(bytes.Buffer)
 	filenames := fileNames(tdir, tmpl)
 	t := template.Must(template.ParseFiles(filenames...))
