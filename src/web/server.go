@@ -25,7 +25,8 @@ import (
 	"encoding/json"
 	"fmt"
 	//     _ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
+//    _ "github.com/mattn/go-sqlite3"
+	_ "gopkg.in/rana/ora.v3"
 	"log"
 	"net/http"
 	"strings"
@@ -61,14 +62,14 @@ func processRequest(params dbs.Record) dbs.Record {
  */
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	// check if server started with hkey file (auth is required)
-	if len(_afile) > 0 {
-		status := checkAuthnAuthz(r.Header)
-		if !status {
-			msg := "You are not allowed to access this resource"
-			http.Error(w, msg, http.StatusForbidden)
-			return
-		}
-	}
+//    if len(_afile) > 0 {
+//        status := checkAuthnAuthz(r.Header)
+//        if !status {
+//            msg := "You are not allowed to access this resource"
+//            http.Error(w, msg, http.StatusForbidden)
+//            return
+//        }
+//    }
 
 	// TODO: need to implement how to parse input http parameters
 	r.ParseForm() // parse url parameters
@@ -156,7 +157,7 @@ func Server(afile, dbfile, base, port string) {
 	http.HandleFunc(fmt.Sprintf("/%s/", base), RequestHandler)
 
 	// set database connection once
-	dbtype, dburi := dbs.ParseDBFile(dbfile)
+	dbtype, dburi, dbowner := dbs.ParseDBFile(dbfile)
 	db, dberr := sql.Open(dbtype, dburi)
 	if dberr != nil {
 		log.Fatal(dberr)
@@ -166,7 +167,7 @@ func Server(afile, dbfile, base, port string) {
 	defer db.Close()
 
 	// load DBS SQL statements
-	dbsql := dbs.LoadSQL()
+	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
 
 	// start server
