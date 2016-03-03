@@ -88,7 +88,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 		tmplData := make(map[string]interface{})
 		tmplData["Content"] = "Home page"
 		tmplData["User"] = "user"
-		page := parseTmpl(_tdir, "main.tmpl", tmplData)
+		page := utils.ParseTmpl(_tdir, "main.tmpl", tmplData)
 		w.Write([]byte(page))
 		return
 	} else {
@@ -135,15 +135,15 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // proxy server. It defines /fetch public interface
-func Server(afile, dbfile, base, port, sdir string) {
+func Server(afile, dbfile, base, port string) {
 	log.Printf("Start server localhost:%s/%s", port, base)
-	_afile = afile                            // location of auth file
-	_tdir = fmt.Sprintf("%s/templates", sdir) // template area
+	_afile = afile                                       // location of auth file
+	_tdir = fmt.Sprintf("%s/templates", utils.STATICDIR) // template area
 
 	// static content for js/css/images requests
 	for _, dir := range []string{"js", "css", "images"} {
 		m := fmt.Sprintf("/%s/%s/", base, dir)
-		d := fmt.Sprintf("%s/%s", sdir, dir)
+		d := fmt.Sprintf("%s/%s", utils.STATICDIR, dir)
 		http.Handle(m, http.StripPrefix(m, http.FileServer(http.Dir(d))))
 	}
 
@@ -164,6 +164,10 @@ func Server(afile, dbfile, base, port, sdir string) {
 	dbs.DB = db
 	dbs.DBTYPE = dbtype
 	defer db.Close()
+
+	// load DBS SQL statements
+	dbsql := dbs.LoadSQL()
+	dbs.DBSQL = dbsql
 
 	// start server
 	err := http.ListenAndServe(":"+port, nil)
