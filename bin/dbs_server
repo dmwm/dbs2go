@@ -1,0 +1,20 @@
+#!/bin/bash
+cmd=$PWD/dbs2go
+args=${1+"$@"}
+dbs2go_server(){
+    # check if dbs2go is running
+    for (( ; ; )); do
+        local pid=`ps auxwww | egrep "dbs2go" | grep -v grep | awk 'BEGIN{ORS=" "} {print $2}'`
+#        echo "PID=$pid"
+        if [ -z "$pid" ]; then
+            local tstamp=`date "+%Y/%m/%d %H:%M:%S"`
+            echo "$tstamp dbs2go is not running, restart"
+            $cmd $args
+            if [ "$args" == "-help" ] || [ "$args" == "--help" ]; then
+                break
+            fi
+        fi
+        sleep 10
+    done
+}
+dbs2go_server
