@@ -58,6 +58,7 @@ func GetData(api string, params Record) (string, Record) {
 		data = datasets(params)
 	}
 	res["results"] = data
+    res["nresults"] = len(data)
 	res["params"] = params
 	res["api"] = api
 	status := "ok"
@@ -113,6 +114,9 @@ func execute(stm string, args ...interface{}) []Record {
 
 	var rows *sql.Rows
 	var err error
+    if utils.VERBOSE > 1 {
+        fmt.Println(stm, args)
+    }
 	if len(args) == 1 {
 		rows, err = DB.Query(stm, args[0])
 	} else {
@@ -151,7 +155,7 @@ func execute(stm string, args ...interface{}) []Record {
 			} else {
 				v = val
 			}
-			rec[col] = v
+			rec[strings.ToLower(col)] = v
 		}
 		out = append(out, rec)
 	}
