@@ -56,7 +56,7 @@ func datasets(params Record) []Record {
 	// parse is_dataset_valid argument
 	isValid := getSingleValue(params, "is_dataset_valid")
 	if isValid == "" {
-		isValid = "0"
+		isValid = "1"
 	}
 	where += fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
 	args = append(args, isValid)
