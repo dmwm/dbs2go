@@ -9,12 +9,12 @@ build:
 build_all: build_osx build_linux build
 
 build_osx:
-	go clean; rm -rf pkg dbs_osx; GOOS=darwin go build
-	mv dbs dbs_osx
+	go clean; rm -rf pkg dbs2go_osx; GOOS=darwin go build
+	mv dbs2go dbs2go_osx
 
 build_linux:
-	go clean; rm -rf pkg dbs_linux; GOOS=linux go build
-	mv dbs dbs_linux
+	go clean; rm -rf pkg dbs2go_linux; GOOS=linux go build
+	mv dbs2go dbs2go_linux
 
 install:
 	go install
