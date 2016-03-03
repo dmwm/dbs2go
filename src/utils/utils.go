@@ -8,13 +8,16 @@ package utils
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"runtime"
 )
 
 // global variable for this module which we're going to use across
 // many modules
 var VERBOSE int
+var STATICDIR string
 var PROFILE bool
 
 // helper function to return Stack
@@ -108,3 +111,19 @@ type StringList []string
 func (s StringList) Len() int           { return len(s) }
 func (s StringList) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s StringList) Less(i, j int) bool { return s[i] < s[j] }
+
+// helper function to list files in given directory
+func Listfiles(dir string) []string {
+	var out []string
+	entries, err := ioutil.ReadDir(dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "du1: %v\n", err)
+		return nil
+	}
+	for _, f := range entries {
+		if !f.IsDir() {
+			out = append(out, f.Name())
+		}
+	}
+	return out
+}
