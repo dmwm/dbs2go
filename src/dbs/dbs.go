@@ -22,11 +22,11 @@ var DBTYPE string
 var DBSQL Record
 
 // helper function to load DBS SQL statements
-func LoadSQL() Record {
+func LoadSQL(owner string) Record {
 	dbsql := make(Record)
 	// query statement
 	tmplData := make(Record)
-	tmplData["Owner"] = "bla"
+	tmplData["Owner"] = owner
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
 	for _, f := range utils.Listfiles(sdir) {
 		k := strings.Split(f, ".")[0]
@@ -86,17 +86,17 @@ func getSingleValue(params Record, key string) string {
 
 // function to parse given file name and extract from it dbtype and dburi
 // file should contain the "dbtype dburi" string
-func ParseDBFile(dbfile string) (string, string) {
+func ParseDBFile(dbfile string) (string, string, string) {
 	dat, err := ioutil.ReadFile(dbfile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	arr := strings.Split(string(dat), " ")
-	return arr[0], strings.Replace(arr[1], "\n", "", -1)
+	return arr[0], arr[1], strings.Replace(arr[2], "\n", "", -1)
 }
 
 func placeholder(pholder string) string {
-	if DBTYPE == "oracle" {
+	if DBTYPE == "ora" {
 		return fmt.Sprintf(":%s", pholder)
 	} else if DBTYPE == "PostgreSQL" {
 		return fmt.Sprintf("$%s", pholder)
@@ -116,7 +116,7 @@ func execute(stm string, args ...interface{}) []Record {
 	if len(args) == 1 {
 		rows, err = DB.Query(stm, args[0])
 	} else {
-		rows, err = DB.Query(stm, args)
+		rows, err = DB.Query(stm, args...)
 	}
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
