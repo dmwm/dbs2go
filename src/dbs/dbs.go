@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"utils"
 )
 
 // main record we work with
@@ -18,6 +19,32 @@ type Record map[string]interface{}
 // global variable to keep pointer to DB
 var DB *sql.DB
 var DBTYPE string
+var DBSQL Record
+
+// helper function to load DBS SQL statements
+func LoadSQL() Record {
+	dbsql := make(Record)
+	// query statement
+	tmplData := make(Record)
+	tmplData["Owner"] = "bla"
+	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
+	for _, f := range utils.Listfiles(sdir) {
+		k := strings.Split(f, ".")[0]
+		dbsql[k] = utils.ParseTmpl(sdir, f, tmplData)
+	}
+	return dbsql
+}
+
+// helper function to get SQL statement from DBSQL dict for a given key
+func getSQL(key string) string {
+	// use generic query API to fetch the results from DB
+	stm, ok := DBSQL[key]
+	if !ok {
+		msg := fmt.Sprintf("Unable to load %s SQL", key)
+		log.Fatal(msg)
+	}
+	return stm.(string)
+}
 
 // Function to access internal back-end and return records for provided
 // api and params
@@ -37,15 +64,22 @@ func GetData(api string, params Record) (string, Record) {
 	return status, res
 }
 
-// helper function to get value from dict
-func getValue(params Record, key string) string {
+// helper function to get value from record
+func getValues(params Record, key string) []string {
+	var out []string
 	val, ok := params[key]
-	//     fmt.Printf("### val, %v, %T\n", val, val)
 	if ok {
 		values := val.([]string)
-		if len(values) == 1 {
-			return values[0]
-		}
+		return values
+	}
+	return out
+}
+
+// helper function to get single value from a record
+func getSingleValue(params Record, key string) string {
+	values := getValues(params, key)
+	if len(values) > 0 {
+		return values[0]
 	}
 	return ""
 }
@@ -61,20 +95,20 @@ func ParseDBFile(dbfile string) (string, string) {
 	return arr[0], strings.Replace(arr[1], "\n", "", -1)
 }
 
-func placeholder(pid int) string {
+func placeholder(pholder string) string {
 	if DBTYPE == "oracle" {
-		return fmt.Sprintf(":param%d", pid)
+		return fmt.Sprintf(":%s", pholder)
 	} else if DBTYPE == "PostgreSQL" {
-		return fmt.Sprintf("$%s", pid)
+		return fmt.Sprintf("$%s", pholder)
 	} else {
 		return "?"
 	}
 }
 
-// generic query API
+// generic API to execute given statement
 // ideas are taken from
 // http://stackoverflow.com/questions/17845619/how-to-call-the-scan-variadic-function-in-golang-using-reflection
-func query(stm string, args ...interface{}) []Record {
+func execute(stm string, args ...interface{}) []Record {
 	var out []Record
 
 	var rows *sql.Rows
