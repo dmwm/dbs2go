@@ -48,8 +48,7 @@ func getSQL(key string) string {
 
 // Function to access internal back-end and return records for provided
 // api and params
-func GetData(api string, params Record) (string, Record) {
-	res := make(Record)
+func GetData(api string, params Record) []Record {
 	var data []Record
 	switch api {
 	case "blocks":
@@ -57,12 +56,7 @@ func GetData(api string, params Record) (string, Record) {
 	case "datasets":
 		data = datasets(params)
 	}
-	res["results"] = data
-    res["nresults"] = len(data)
-	res["params"] = params
-	res["api"] = api
-	status := "ok"
-	return status, res
+    return data
 }
 
 // helper function to get value from record
