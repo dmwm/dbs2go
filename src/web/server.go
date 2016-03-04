@@ -39,7 +39,7 @@ import _ "net/http/pprof"
 // global variables used in this module
 var _afile, _tdir string
 
-func processRequest(params dbs.Record) dbs.Record {
+func processRequest(params dbs.Record) []dbs.Record {
 	// defer function will propagate panic message to higher level
 	defer utils.ErrPropagate("processRequest")
 	if utils.VERBOSE > 0 {
@@ -47,14 +47,13 @@ func processRequest(params dbs.Record) dbs.Record {
 	}
 
 	// form response from the server
-	response := make(dbs.Record)
 	if api, ok := params["api"]; ok {
 		delete(params, "api") // remove api key from params
-		status, data := dbs.GetData(api.(string), params)
-		response["status"] = status
-		response["data"] = data
+		data := dbs.GetData(api.(string), params)
+        return data
 	}
-	return response
+    var out []dbs.Record
+	return out
 }
 
 /*
