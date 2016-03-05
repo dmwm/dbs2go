@@ -124,6 +124,7 @@ func execute(stm string, args ...interface{}) []Record {
 
 	// extract columns from Rows object and create values & valuesPtrs to retrieve results
 	columns, _ := rows.Columns()
+    var cols []string
 	count := len(columns)
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
@@ -141,15 +142,16 @@ func execute(stm string, args ...interface{}) []Record {
 		// store results into generic record (a dict)
 		rec := make(Record)
 		for i, col := range columns {
-			var v interface{}
+            if len(cols) != len(columns) {
+                cols = append(cols, strings.ToLower(col))
+            }
 			val := values[i]
 			b, ok := val.([]byte)
 			if ok {
-				v = string(b)
+                rec[cols[i]] = string(b)
 			} else {
-				v = val
+                rec[cols[i]] = val
 			}
-			rec[strings.ToLower(col)] = v
 		}
 		out = append(out, rec)
 	}
@@ -157,5 +159,6 @@ func execute(stm string, args ...interface{}) []Record {
 	if err != nil {
 		log.Fatal(err)
 	}
+    rows.Close()
 	return out
 }
