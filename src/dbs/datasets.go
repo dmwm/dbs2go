@@ -80,6 +80,5 @@ func datasets(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("datasets")
 	// use generic query API to fetch the results from DB
-	out := execute(genSQL+stm+where, args...)
-	return out
+	return execute(genSQL+stm+where, args...)
 }
