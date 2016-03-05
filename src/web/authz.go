@@ -13,7 +13,7 @@ import (
 )
 
 // helper function which checks Authentication
-func checkAuthentication(headers http.Header) bool {
+func checkAuthentication(headers http.Header, afile string) bool {
 	var val interface{}
 	val = headers["cms-auth-status"]
 	if val == nil {
@@ -48,10 +48,10 @@ func checkAuthentication(headers http.Header) bool {
 	//     fmt.Println("### value", fmt.Sprintf("%s#%s", prefix, suffix))
 	//     fmt.Println(headers)
 	var sha1hex hash.Hash
-	if len(_afile) != 0 {
-		hkey, err := ioutil.ReadFile(_afile)
+	if len(afile) != 0 {
+		hkey, err := ioutil.ReadFile(afile)
 		if err != nil {
-			fmt.Println("ERROR, unable to read DBS_HKEY_FILE", _afile)
+			fmt.Println("ERROR, unable to read", afile)
 			return false
 		}
 		sha1hex = hmac.New(sha1.New, hkey)
@@ -74,8 +74,8 @@ func checkAuthorization(header http.Header) bool {
 }
 
 // helper function which checks Authentication and Authorization
-func checkAuthnAuthz(header http.Header) bool {
-	status := checkAuthentication(header)
+func checkAuthnAuthz(header http.Header, afile string) bool {
+	status := checkAuthentication(header, afile)
 	if !status {
 		return status
 	}
