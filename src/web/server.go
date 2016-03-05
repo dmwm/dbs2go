@@ -33,7 +33,7 @@ import (
 	"utils"
 )
 
-// profiler
+// profiler, see https://golang.org/pkg/net/http/pprof/
 import _ "net/http/pprof"
 
 // global variables used in this module
@@ -49,8 +49,7 @@ func processRequest(params dbs.Record) []dbs.Record {
 	// form response from the server
 	if api, ok := params["api"]; ok {
 		delete(params, "api") // remove api key from params
-		data := dbs.GetData(api.(string), params)
-        return data
+		return dbs.GetData(api.(string), params)
 	}
     var out []dbs.Record
 	return out
@@ -62,7 +61,7 @@ func processRequest(params dbs.Record) []dbs.Record {
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	// check if server started with hkey file (auth is required)
 //    if len(_afile) > 0 {
-//        status := checkAuthnAuthz(r.Header)
+//        status := checkAuthnAuthz(r.Header, _afile)
 //        if !status {
 //            msg := "You are not allowed to access this resource"
 //            http.Error(w, msg, http.StatusForbidden)
@@ -72,6 +71,9 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: need to implement how to parse input http parameters
 	r.ParseForm() // parse url parameters
+    if utils.VERBOSE > 0 {
+        fmt.Println("Process", r)
+    }
 	params := make(dbs.Record)
 	arr := strings.Split(r.URL.Path, "/") // something like /base/api?param=1
 	api := ""
