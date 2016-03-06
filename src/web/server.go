@@ -16,6 +16,8 @@
 	 _ "github.com/mattn/go-oci8"
  * MySQL driver:
      _ "github.com/go-sql-driver/mysql"
+ * SQLite driver:
+    _ "github.com/mattn/go-sqlite3"
 */
 package web
 
@@ -24,9 +26,10 @@ import (
 	"dbs"
 	"encoding/json"
 	"fmt"
-	//     _ "github.com/go-sql-driver/mysql"
+//    _ "github.com/go-sql-driver/mysql"
 //    _ "github.com/mattn/go-sqlite3"
-	_ "gopkg.in/rana/ora.v3"
+    _ "gopkg.in/rana/ora.v3"
+//    _ "github.com/mattn/go-oci8"
 	"log"
 	"net/http"
 	"strings"
@@ -121,6 +124,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(js)
+            js = nil // cleanup
 		} else if r.Method == "POST" {
 			// TODO: need to implement the logic
 			response := make(dbs.Record)
@@ -163,6 +167,7 @@ func Server(afile, dbfile, base, port string) {
 	if dberr != nil {
 		log.Fatal(dberr)
 	}
+    db.SetMaxOpenConns(100)
 	dbs.DB = db
 	dbs.DBTYPE = dbtype
 	defer db.Close()
