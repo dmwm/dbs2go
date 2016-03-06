@@ -91,7 +91,7 @@ func ParseDBFile(dbfile string) (string, string, string) {
 }
 
 func placeholder(pholder string) string {
-	if DBTYPE == "ora" {
+	if DBTYPE == "ora"  || DBTYPE == "oci8" {
 		return fmt.Sprintf(":%s", pholder)
 	} else if DBTYPE == "PostgreSQL" {
 		return fmt.Sprintf("$%s", pholder)
@@ -106,16 +106,17 @@ func placeholder(pholder string) string {
 func execute(stm string, args ...interface{}) []Record {
 	var out []Record
 
-	var rows *sql.Rows
-	var err error
+//    var rows *sql.Rows
+//    var err error
     if utils.VERBOSE > 1 {
         fmt.Println(stm, args)
     }
-	if len(args) == 1 {
-		rows, err = DB.Query(stm, args[0])
-	} else {
-		rows, err = DB.Query(stm, args...)
-	}
+//    if len(args) == 1 {
+//        rows, err = DB.Query(stm, args[0])
+//    } else {
+//        rows, err = DB.Query(stm, args...)
+//    }
+    rows, err := DB.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		log.Fatal(msg)
@@ -128,17 +129,21 @@ func execute(stm string, args ...interface{}) []Record {
 	count := len(columns)
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
+    rowCount := 0
 
 	for rows.Next() {
-		// initialize value pointers
-		for i, _ := range columns {
-			valuePtrs[i] = &values[i]
-		}
+        if rowCount == 0 {
+            // initialize value pointers
+            for i, _ := range columns {
+                valuePtrs[i] = &values[i]
+            }
+        }
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
 			msg := fmt.Sprintf("ERROR: rows.Scan, dest='%v', error=%v", valuePtrs, err)
 			log.Fatal(msg)
 		}
+        rowCount += 1
 		// store results into generic record (a dict)
 		rec := make(Record)
 		for i, col := range columns {
@@ -159,6 +164,5 @@ func execute(stm string, args ...interface{}) []Record {
 	if err != nil {
 		log.Fatal(err)
 	}
-    rows.Close()
 	return out
 }
