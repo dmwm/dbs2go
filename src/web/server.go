@@ -168,6 +168,7 @@ func Server(afile, dbfile, base, port string) {
 		log.Fatal(dberr)
 	}
     db.SetMaxOpenConns(100)
+    db.SetMaxIdleConns(100)
 	dbs.DB = db
 	dbs.DBTYPE = dbtype
 	defer db.Close()
