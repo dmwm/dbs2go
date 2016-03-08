@@ -56,7 +56,7 @@ func GetData(api string, params Record) []Record {
 	case "datasets":
 		data = datasets(params)
 	}
-    return data
+	return data
 }
 
 // helper function to get value from record
@@ -79,6 +79,15 @@ func getSingleValue(params Record, key string) string {
 	return ""
 }
 
+// helper function to add condition to where clause
+func addCond(where, cond string) string {
+	w := strings.Trim(where, " ")
+	if w == "WHERE" || w == "where" {
+		return fmt.Sprintf("%s %s", w, cond)
+	}
+	return fmt.Sprintf("%s AND %s", w, cond)
+}
+
 // function to parse given file name and extract from it dbtype and dburi
 // file should contain the "dbtype dburi" string
 func ParseDBFile(dbfile string) (string, string, string) {
@@ -91,7 +100,7 @@ func ParseDBFile(dbfile string) (string, string, string) {
 }
 
 func placeholder(pholder string) string {
-	if DBTYPE == "ora"  || DBTYPE == "oci8" {
+	if DBTYPE == "ora" || DBTYPE == "oci8" {
 		return fmt.Sprintf(":%s", pholder)
 	} else if DBTYPE == "PostgreSQL" {
 		return fmt.Sprintf("$%s", pholder)
@@ -106,10 +115,10 @@ func placeholder(pholder string) string {
 func execute(stm string, args ...interface{}) []Record {
 	var out []Record
 
-    if utils.VERBOSE > 1 {
-        fmt.Println(stm, args)
-    }
-    rows, err := DB.Query(stm, args...)
+	if utils.VERBOSE > 1 {
+		fmt.Println(stm, args)
+	}
+	rows, err := DB.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		log.Fatal(msg)
@@ -118,32 +127,32 @@ func execute(stm string, args ...interface{}) []Record {
 
 	// extract columns from Rows object and create values & valuesPtrs to retrieve results
 	columns, _ := rows.Columns()
-    var cols []string
+	var cols []string
 	count := len(columns)
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
-    rowCount := 0
+	rowCount := 0
 
 	for rows.Next() {
-        if rowCount == 0 {
-            // initialize value pointers
-            for i, _ := range columns {
-                valuePtrs[i] = &values[i]
-            }
-        }
+		if rowCount == 0 {
+			// initialize value pointers
+			for i, _ := range columns {
+				valuePtrs[i] = &values[i]
+			}
+		}
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
 			msg := fmt.Sprintf("ERROR: rows.Scan, dest='%v', error=%v", valuePtrs, err)
 			log.Fatal(msg)
 		}
-        rowCount += 1
+		rowCount += 1
 		// store results into generic record (a dict)
-        rec := make(Record)
+		rec := make(Record)
 		for i, col := range columns {
-            if len(cols) != len(columns) {
-                cols = append(cols, strings.ToLower(col))
-            }
-            rec[cols[i]] = values[i]
+			if len(cols) != len(columns) {
+				cols = append(cols, strings.ToLower(col))
+			}
+			rec[cols[i]] = values[i]
 		}
 		out = append(out, rec)
 	}
