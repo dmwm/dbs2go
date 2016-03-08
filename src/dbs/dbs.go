@@ -55,6 +55,8 @@ func GetData(api string, params Record) []Record {
 		data = blocks(params)
 	case "datasets":
 		data = datasets(params)
+	case "files":
+		data = files(params)
 	}
 	return data
 }
@@ -83,9 +85,9 @@ func getSingleValue(params Record, key string) string {
 func addCond(where, cond string) string {
 	w := strings.Trim(where, " ")
 	if w == "WHERE" || w == "where" {
-		return fmt.Sprintf("%s %s", w, cond)
+		return fmt.Sprintf(" %s", cond)
 	}
-	return fmt.Sprintf("%s AND %s", w, cond)
+	return fmt.Sprintf(" AND %s", cond)
 }
 
 // function to parse given file name and extract from it dbtype and dburi
