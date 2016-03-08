@@ -20,6 +20,15 @@ func blocks(params Record) []Record {
 		where += addCond(where, cond)
 		args = append(args, val)
 	}
+	datasets := getValues(params, "dataset")
+	if len(datasets) > 1 {
+		panic("The files API does not support list of datasets")
+	} else if len(datasets) == 1 {
+		op, val := opVal(datasets[0])
+		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	}
 	// get SQL statement from static area
 	stm := getSQL("blocks")
 	// use generic query API to fetch the results from DB
