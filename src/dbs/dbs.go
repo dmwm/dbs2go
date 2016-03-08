@@ -106,16 +106,9 @@ func placeholder(pholder string) string {
 func execute(stm string, args ...interface{}) []Record {
 	var out []Record
 
-//    var rows *sql.Rows
-//    var err error
     if utils.VERBOSE > 1 {
         fmt.Println(stm, args)
     }
-//    if len(args) == 1 {
-//        rows, err = DB.Query(stm, args[0])
-//    } else {
-//        rows, err = DB.Query(stm, args...)
-//    }
     rows, err := DB.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
@@ -145,18 +138,12 @@ func execute(stm string, args ...interface{}) []Record {
 		}
         rowCount += 1
 		// store results into generic record (a dict)
-		rec := make(Record)
+        rec := make(Record)
 		for i, col := range columns {
             if len(cols) != len(columns) {
                 cols = append(cols, strings.ToLower(col))
             }
-			val := values[i]
-			b, ok := val.([]byte)
-			if ok {
-                rec[cols[i]] = string(b)
-			} else {
-                rec[cols[i]] = val
-			}
+            rec[cols[i]] = values[i]
 		}
 		out = append(out, rec)
 	}
