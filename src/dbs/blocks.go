@@ -32,5 +32,5 @@ func blocks(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("blocks")
 	// use generic query API to fetch the results from DB
-	return execute(stm+where, args...)
+	return executeAll(stm+where, args...)
 }
