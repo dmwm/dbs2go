@@ -26,10 +26,10 @@ import (
 	"dbs"
 	"encoding/json"
 	"fmt"
-    _ "github.com/go-sql-driver/mysql"
-    _ "github.com/mattn/go-sqlite3"
-    _ "gopkg.in/rana/ora.v3"
-    _ "github.com/mattn/go-oci8"
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-oci8"
+	_ "github.com/mattn/go-sqlite3"
+	_ "gopkg.in/rana/ora.v3"
 	"log"
 	"net/http"
 	"strings"
@@ -54,7 +54,7 @@ func processRequest(params dbs.Record) []dbs.Record {
 		delete(params, "api") // remove api key from params
 		return dbs.GetData(api.(string), params)
 	}
-    var out []dbs.Record
+	var out []dbs.Record
 	return out
 }
 
@@ -63,20 +63,20 @@ func processRequest(params dbs.Record) []dbs.Record {
  */
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	// check if server started with hkey file (auth is required)
-//    if len(_afile) > 0 {
-//        status := checkAuthnAuthz(r.Header, _afile)
-//        if !status {
-//            msg := "You are not allowed to access this resource"
-//            http.Error(w, msg, http.StatusForbidden)
-//            return
-//        }
-//    }
+	if len(_afile) > 0 {
+		status := checkAuthnAuthz(r.Header, _afile)
+		if !status {
+			msg := "You are not allowed to access this resource"
+			http.Error(w, msg, http.StatusForbidden)
+			return
+		}
+	}
 
 	// TODO: need to implement how to parse input http parameters
 	r.ParseForm() // parse url parameters
-    if utils.VERBOSE > 0 {
-        fmt.Println("Process", r)
-    }
+	if utils.VERBOSE > 2 {
+		fmt.Println("Process", r)
+	}
 	params := make(dbs.Record)
 	arr := strings.Split(r.URL.Path, "/") // something like /base/api?param=1
 	api := ""
@@ -111,6 +111,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				w.Header().Set("Content-Type", "application/json")
 				w.Write(js)
+				return
 			}
 		}()
 
@@ -124,6 +125,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(js)
+			return
 		} else if r.Method == "POST" {
 			// TODO: need to implement the logic
 			response := make(dbs.Record)
@@ -135,6 +137,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(js)
+			return
 		}
 	}
 }
@@ -163,14 +166,18 @@ func Server(afile, dbfile, base, port string) {
 	// set database connection once
 	dbtype, dburi, dbowner := dbs.ParseDBFile(dbfile)
 	db, dberr := sql.Open(dbtype, dburi)
+	defer db.Close()
 	if dberr != nil {
 		log.Fatal(dberr)
 	}
-    db.SetMaxOpenConns(100)
-    db.SetMaxIdleConns(100)
+	dberr = db.Ping()
+	if dberr != nil {
+		log.Fatal(dberr)
+	}
+	db.SetMaxOpenConns(4)
+	db.SetMaxIdleConns(0)
 	dbs.DB = db
 	dbs.DBTYPE = dbtype
-	defer db.Close()
 
 	// load DBS SQL statements
 	dbsql := dbs.LoadSQL(dbowner)
