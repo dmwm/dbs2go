@@ -124,7 +124,6 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(js)
-            js = nil // cleanup
 		} else if r.Method == "POST" {
 			// TODO: need to implement the logic
 			response := make(dbs.Record)
