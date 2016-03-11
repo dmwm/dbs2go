@@ -174,8 +174,8 @@ func Server(afile, dbfile, base, port string) {
 	if dberr != nil {
 		log.Fatal(dberr)
 	}
-	db.SetMaxOpenConns(4)
-	db.SetMaxIdleConns(0)
+	db.SetMaxOpenConns(100)
+	db.SetMaxIdleConns(100)
 	dbs.DB = db
 	dbs.DBTYPE = dbtype
 
