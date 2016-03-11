@@ -40,7 +40,8 @@ import (
 import _ "net/http/pprof"
 
 // global variables used in this module
-var _afile, _tdir string
+var _tdir string
+var _cmsAuth CMSAuth
 
 func processRequest(params dbs.Record) []dbs.Record {
 	// defer function will propagate panic message to higher level
@@ -63,8 +64,8 @@ func processRequest(params dbs.Record) []dbs.Record {
  */
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	// check if server started with hkey file (auth is required)
-	if len(_afile) > 0 {
-		status := checkAuthnAuthz(r.Header, _afile)
+	if len(_cmsAuth.afile) > 0 {
+		status := _cmsAuth.checkAuthnAuthz(r.Header)
 		if !status {
 			msg := "You are not allowed to access this resource"
 			http.Error(w, msg, http.StatusForbidden)
@@ -145,7 +146,6 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 // proxy server. It defines /fetch public interface
 func Server(afile, dbfile, base, port string) {
 	log.Printf("Start server localhost:%s/%s", port, base)
-	_afile = afile                                       // location of auth file
 	_tdir = fmt.Sprintf("%s/templates", utils.STATICDIR) // template area
 
 	// static content for js/css/images requests
@@ -182,6 +182,9 @@ func Server(afile, dbfile, base, port string) {
 	// load DBS SQL statements
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
+
+	// setup location of auth file for CMSAuth global variable
+	_cmsAuth.init(afile) // load hash key from given file
 
 	// start server
 	err := http.ListenAndServe(":"+port, nil)

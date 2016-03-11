@@ -12,8 +12,25 @@ import (
 	"utils"
 )
 
+type CMSAuth struct {
+	afile string
+	hkey  []byte
+}
+
+func (a *CMSAuth) init(afile string) {
+	a.afile = afile
+	if len(afile) != 0 {
+		hkey, err := ioutil.ReadFile(afile)
+		if err != nil {
+			fmt.Println("ERROR, unable to read", afile, err)
+			panic("Unable to init CMSAuth")
+		}
+		a.hkey = hkey
+	}
+}
+
 // helper function which checks Authentication
-func checkAuthentication(headers http.Header, afile string) bool {
+func (a *CMSAuth) checkAuthentication(headers http.Header) bool {
 	var val interface{}
 	val = headers["cms-auth-status"]
 	if val == nil {
@@ -45,23 +62,14 @@ func checkAuthentication(headers http.Header, afile string) bool {
 		}
 	}
 	value := []byte(fmt.Sprintf("%s#%s", prefix, suffix))
-	//     fmt.Println("### value", fmt.Sprintf("%s#%s", prefix, suffix))
-	//     fmt.Println(headers)
 	var sha1hex hash.Hash
-	if len(afile) != 0 {
-		hkey, err := ioutil.ReadFile(afile)
-		if err != nil {
-			fmt.Println("ERROR, unable to read", afile)
-			return false
-		}
-		sha1hex = hmac.New(sha1.New, hkey)
+	if len(a.afile) != 0 {
+		sha1hex = hmac.New(sha1.New, a.hkey)
 	} else {
 		sha1hex = sha1.New()
 	}
 	sha1hex.Write(value)
 	hmacFound := fmt.Sprintf("%x", sha1hex.Sum(nil))
-	//     fmt.Println("### cms-authn-hmac", hmacValue)
-	//     fmt.Println("### found     hmac", hmacFound)
 	if hmacFound != hmacValue {
 		return false
 	}
@@ -69,17 +77,17 @@ func checkAuthentication(headers http.Header, afile string) bool {
 }
 
 // helper function which checks Authorization
-func checkAuthorization(header http.Header) bool {
+func (a *CMSAuth) checkAuthorization(header http.Header) bool {
 	return true
 }
 
 // helper function which checks Authentication and Authorization
-func checkAuthnAuthz(header http.Header, afile string) bool {
-	status := checkAuthentication(header, afile)
+func (a *CMSAuth) checkAuthnAuthz(header http.Header) bool {
+	status := a.checkAuthentication(header)
 	if !status {
 		return status
 	}
-	status = checkAuthorization(header)
+	status = a.checkAuthorization(header)
 	return status
 
 }
