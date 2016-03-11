@@ -6,7 +6,10 @@ This is an example project how to write generic Data Base Service in Go.
 - Setup the environment and build ora.v3 package
 ```
 export CGO_CFLAGS=-I/path/Oracle/instantclient_12_1/sdk/include
+# for Linux
 export CGO_LDFLAGS="-L/path/Oracle/instantclient_12_1/ -locci -lclntsh -lipc1 -lmql1 -lnnz12 -lclntshcore -lons"
+# for OSX
+export CGO_LDFLAGS="-L/opt/Oracle/instantclient_11_2/ -locci -lclntsh -lnnz11"
 go get gopkg.in/rana/ora.v3
 ```
 
