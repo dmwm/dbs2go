@@ -158,14 +158,15 @@ func executeAll(stm string, args ...interface{}) []Record {
 		}
 		out = append(out, rec)
 	}
-    if err = rows.Err(); err != nil {
-        log.Fatal(err)
-    }
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
 	return out
 }
 
 // similar to executeAll function but it takes explicit set of columns and values
-func execute(stm string, cols []string, vals []interface{}, args ...interface{}) []Record {
+//func execute(stm string, cols []string, vals []interface{}, args ...interface{}) []Record {
+func execute(stm string, cols []string, args ...interface{}) []Record {
 	var out []Record
 
 	if utils.VERBOSE > 1 {
@@ -178,22 +179,29 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	}
 	defer rows.Close()
 
-    // loop over rows
+	count := len(cols)
+	vals := make([]interface{}, count)
+	valPtrs := make([]interface{}, count)
+	for i, _ := range cols {
+		valPtrs[i] = &vals[i]
+	}
+
+	// loop over rows
 	for rows.Next() {
-        err := rows.Scan(vals...)
+		err := rows.Scan(valPtrs...)
+		//        err := rows.Scan(vals...)
 		if err != nil {
 			msg := fmt.Sprintf("ERROR: rows.Scan, dest='%v', error=%v", vals, err)
 			log.Fatal(msg)
 		}
-		// store results into generic record (a dict)
 		rec := make(Record)
 		for i, _ := range cols {
 			rec[cols[i]] = vals[i]
 		}
 		out = append(out, rec)
 	}
-    if err = rows.Err(); err != nil {
-        log.Fatal(err)
-    }
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
 	return out
 }
