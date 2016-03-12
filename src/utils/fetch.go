@@ -16,6 +16,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/vkuznet/x509proxy"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -24,7 +25,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	"x509proxy"
 )
 
 /*

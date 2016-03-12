@@ -29,6 +29,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/vkuznet/cmsauth"
 	_ "gopkg.in/rana/ora.v3"
 	"log"
 	"net/http"
@@ -40,8 +41,8 @@ import (
 import _ "net/http/pprof"
 
 // global variables used in this module
-var _tdir string
-var _cmsAuth CMSAuth
+var _afile, _tdir string
+var _cmsAuth cmsauth.CMSAuth
 
 func processRequest(params dbs.Record) []dbs.Record {
 	// defer function will propagate panic message to higher level
@@ -64,8 +65,8 @@ func processRequest(params dbs.Record) []dbs.Record {
  */
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	// check if server started with hkey file (auth is required)
-	if len(_cmsAuth.afile) > 0 {
-		status := _cmsAuth.checkAuthnAuthz(r.Header)
+	if len(_afile) > 0 {
+		status := _cmsAuth.CheckAuthnAuthz(r.Header)
 		if !status {
 			msg := "You are not allowed to access this resource"
 			http.Error(w, msg, http.StatusForbidden)
@@ -184,7 +185,8 @@ func Server(afile, dbfile, base, port string) {
 	dbs.DBSQL = dbsql
 
 	// setup location of auth file for CMSAuth global variable
-	_cmsAuth.init(afile) // load hash key from given file
+	_afile = afile
+	_cmsAuth.Init(afile) // load hash key from given file
 
 	// start server
 	err := http.ListenAndServe(":"+port, nil)
