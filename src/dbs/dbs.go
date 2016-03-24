@@ -11,7 +11,6 @@ import (
 	"log"
 	"strings"
 	"utils"
-//    "gopkg.in/rana/ora.v3"
 )
 
 // main record we work with
@@ -181,14 +180,14 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 
 	// loop over rows
 	for rows.Next() {
-        err := rows.Scan(vals...)
+		err := rows.Scan(vals...)
 		if err != nil {
 			msg := fmt.Sprintf("ERROR: rows.Scan, vals='%v', error=%v", vals, err)
 			log.Fatal(msg)
 		}
 		rec := make(Record)
 		for i, _ := range cols {
-            rec[cols[i]] = vals[i]
+			rec[cols[i]] = vals[i]
 		}
 		out = append(out, rec)
 	}
