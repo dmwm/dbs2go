@@ -1,3 +1,8 @@
+# dbs2go
+
+[![Build Status](https://travis-ci.org/vkuznet/dbs2go.svg?branch=master)](https://travis-ci.org/vkuznet/dbs2go)
+[![GoDoc](https://godoc.org/github.com/vkuznet/dbs2go?status.svg)](https://godoc.org/github.com/vkuznet/dbs2go)
+
 This is an example project how to write generic Data Base Service in Go.
 
 ## Installation instruction for ora Oracle driver
@@ -26,8 +31,8 @@ Then we must point *PKG_CONFIG_PATH* environment variable to location of
 oci8.pc directory. Here is an example of oci8.pc driver
 
 ```
-libdir=/data/vk/Oracle/instantclient_12_1/
-includedir=/data/vk/Oracle/instantclient_12_1/sdk/include/
+libdir=/path/Oracle/instantclient_12_1/
+includedir=/path/Oracle/instantclient_12_1/sdk/include/
 
 Name: oci8
 Description: oci8 library
