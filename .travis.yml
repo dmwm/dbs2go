@@ -2,10 +2,13 @@ language: go
 sudo: false
 go:
   - 1.6
+before_install:
+  - mkdir -p $HOME/gopath/src/github.com/mattn/go-oci8
+  - mkdir -p $HOME/gopath/src/github.com/rana/ora.v3
 install:
   - go get github.com/vkuznet/cmsauth
   - go get github.com/vkuznet/x509proxy
   - go get github.com/go-sql-driver/mysql
-  - go get github.com/mattn/go-oci8
   - go get github.com/mattn/go-sqlite3
-  - go get gopkg.in/rana/ora.v3"
+    #  - go get github.com/mattn/go-oci8
+    #  - go get gopkg.in/rana/ora.v3"
