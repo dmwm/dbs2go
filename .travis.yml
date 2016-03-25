@@ -3,8 +3,8 @@ sudo: false
 go:
   - 1.6
 before_install:
-  - mkdir -p $HOME/gopath/src/github.com/mattn/go-oci8
-  - mkdir -p $HOME/gopath/src/github.com/rana/ora.v3
+  - sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" src/web/server.go
+  - sed -i -e "s,_ \"gopkg.in/rana/ora.v3\",,g" src/web/server.go
 install:
   - go get github.com/vkuznet/cmsauth
   - go get github.com/vkuznet/x509proxy
