@@ -41,7 +41,7 @@ import (
 import _ "net/http/pprof"
 
 // global variables used in this module
-var _afile, _tdir string
+var _tdir string
 var _cmsAuth cmsauth.CMSAuth
 
 func processRequest(params dbs.Record) []dbs.Record {
@@ -65,13 +65,11 @@ func processRequest(params dbs.Record) []dbs.Record {
  */
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	// check if server started with hkey file (auth is required)
-	if len(_afile) > 0 {
-		status := _cmsAuth.CheckAuthnAuthz(r.Header)
-		if !status {
-			msg := "You are not allowed to access this resource"
-			http.Error(w, msg, http.StatusForbidden)
-			return
-		}
+	status := _cmsAuth.CheckAuthnAuthz(r.Header)
+	if !status {
+		msg := "You are not allowed to access this resource"
+		http.Error(w, msg, http.StatusForbidden)
+		return
 	}
 
 	// TODO: need to implement how to parse input http parameters
@@ -184,9 +182,8 @@ func Server(afile, dbfile, base, port string) {
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
 
-	// setup location of auth file for CMSAuth global variable
-	_afile = afile
-	_cmsAuth.Init(afile) // load hash key from given file
+	// setup CMSAuth module
+	_cmsAuth.Init(afile)
 
 	// start server
 	err := http.ListenAndServe(":"+port, nil)
