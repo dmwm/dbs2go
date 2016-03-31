@@ -1,9 +1,13 @@
+// dbs2go - An example code how to write data-base based app
+//
+// Copyright (c) 2016 - Valentin Kuznetsov <vkuznet@gmail.com>
+//
 package main
 
 import (
 	"flag"
-	"utils"
-	"web"
+	"github.com/vkuznet/dbs2go/utils"
+	"github.com/vkuznet/dbs2go/web"
 )
 
 func main() {

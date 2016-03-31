@@ -1,40 +1,38 @@
-/*
- *
- * Author     : Valentin Kuznetsov <vkuznet AT gmail dot com>
- * Description: DBS web server, it handles all DBS requests
- * Created    : Mon Feb 29 13:52:06 EST 2016
- *
- * Some links:  http://www.alexedwards.net/blog/golang-response-snippets
- *              http://blog.golang.org/json-and-go
- * Go patterns: http://www.golangpatterns.info/home
- * Templates:   http://gohugo.io/templates/go-templates/
- *              http://golang.org/pkg/html/template/
- * Go examples: https://gobyexample.com/
- * for Go database API: http://go-database-sql.org/overview.html
- * Oracle drivers:
-	 _ "gopkg.in/rana/ora.v3"
-	 _ "github.com/mattn/go-oci8"
- * MySQL driver:
-     _ "github.com/go-sql-driver/mysql"
- * SQLite driver:
-    _ "github.com/mattn/go-sqlite3"
-*/
+// DBS web server
+// Copyright (c) 2015-2016 - Valentin Kuznetsov <vkuznet@gmail.com>
+//
+//
+// Some links:  http://www.alexedwards.net/blog/golang-response-snippets
+//              http://blog.golang.org/json-and-go
+// Go patterns: http://www.golangpatterns.info/home
+// Templates:   http://gohugo.io/templates/go-templates/
+//              http://golang.org/pkg/html/template/
+// Go examples: https://gobyexample.com/
+// for Go database API: http://go-database-sql.org/overview.html
+// Oracle drivers:
+//   _ "gopkg.in/rana/ora.v3"
+//   _ "github.com/mattn/go-oci8"
+// MySQL driver:
+//   _ "github.com/go-sql-driver/mysql"
+// SQLite driver:
+//  _ "github.com/mattn/go-sqlite3"
+//
 package web
 
 import (
 	"database/sql"
-	"dbs"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/cmsauth"
+	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 	_ "gopkg.in/rana/ora.v3"
 	"log"
 	"net/http"
 	"strings"
-	"utils"
 )
 
 // profiler, see https://golang.org/pkg/net/http/pprof/

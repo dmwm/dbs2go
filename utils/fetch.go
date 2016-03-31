@@ -1,14 +1,10 @@
-/*
- *
- * Author     : Valentin Kuznetsov <vkuznet AT gmail dot com>
- * Description: module to handle URL requests
- * Created    : Fri Jun 26 14:25:01 EDT 2015
- *
- * Some links: http://www.alexedwards.net/bfmt/golang-response-snippets
- * http://bfmt.golang.org/json-and-go
- * http://golang.org/pkg/html/template/
- * https://labix.org/mgo
- */
+// module to handle URL requests
+// Copyright (c) 2015-2016 - Valentin Kuznetsov <vkuznet@gmail.com>
+//
+// Some links: http://www.alexedwards.net/bfmt/golang-response-snippets
+// http://bfmt.golang.org/json-and-go
+// http://golang.org/pkg/html/template/
+// https://labix.org/mgo
 package utils
 
 import (

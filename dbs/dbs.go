@@ -1,16 +1,14 @@
-/*
- * DBS APIs
- */
-
+// DBS APIs
+// Copyright (c) 2015-2016 - Valentin Kuznetsov <vkuznet@gmail.com>
 package dbs
 
 import (
 	"database/sql"
 	"fmt"
+	"github.com/vkuznet/dbs2go/utils"
 	"io/ioutil"
 	"log"
 	"strings"
-	"utils"
 )
 
 // main record we work with
