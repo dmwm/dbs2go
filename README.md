@@ -1,6 +1,7 @@
 # dbs2go
 
 [![Build Status](https://travis-ci.org/vkuznet/dbs2go.svg?branch=master)](https://travis-ci.org/vkuznet/dbs2go)
+[![GoDoc](https://godoc.org/github.com/vkuznet/dbs2go?status.svg)](https://godoc.org/github.com/vkuznet/dbs2go)
 
 This is an example project how to write generic Data Base Service in Go.
 
