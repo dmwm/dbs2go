@@ -4,6 +4,7 @@ package dbs
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/vkuznet/dbs2go/utils"
 	"io/ioutil"
@@ -18,6 +19,23 @@ type Record map[string]interface{}
 var DB *sql.DB
 var DBTYPE string
 var DBSQL Record
+
+// helper function to load DBS Api map
+func LoadApiMap() Record {
+	var apimap Record
+	mfile := fmt.Sprintf("%s/apis.json", utils.STATICDIR)
+	fmt.Println("read", mfile)
+	file, err := ioutil.ReadFile(mfile)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to read DBS api map, error: %v\n", err)
+		panic(msg)
+	}
+	err = json.Unmarshal(file, &apimap)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	return apimap
+}
 
 // helper function to load DBS SQL statements
 func LoadSQL(owner string) Record {
@@ -55,6 +73,8 @@ func GetData(api string, params Record) []Record {
 		data = datasets(params)
 	case "files":
 		data = files(params)
+	case "datatiers":
+		data = tiers(params)
 	}
 	return data
 }
