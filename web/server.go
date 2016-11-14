@@ -153,9 +153,12 @@ func Server(afile, dbfile, base, port string) {
 	}
 
 	// dynamic content
-	apis := []string{"datasets", "blocks"} // list of DBS apis
-	for _, api := range apis {
-		callMethod := fmt.Sprintf("/%s/%s", base, api)
+	apiMap := dbs.LoadApiMap()
+	for api, endpoint := range apiMap {
+		callMethod := fmt.Sprintf("/%s/%s", base, endpoint)
+		if utils.VERBOSE > 0 {
+			fmt.Printf("map %s API to %v endpoint\n", api, endpoint)
+		}
 		http.HandleFunc(callMethod, RequestHandler)
 	}
 	http.HandleFunc(fmt.Sprintf("/%s/", base), RequestHandler)
