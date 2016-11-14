@@ -75,6 +75,8 @@ func GetData(api string, params Record) []Record {
 		data = files(params)
 	case "datatiers":
 		data = tiers(params)
+	case "acquisitioneras":
+		data = acquisitioneras(params)
 	}
 	return data
 }
