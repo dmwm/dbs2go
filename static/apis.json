@@ -4,6 +4,7 @@
     "AcquisitionEras": "acquisitioneras",
     "PhysicsGroups": "physicsgroups",
     "Primarydstypes": "primarydstypes",
+    "PrimaryDatasets": "primarydatasets",
     "Files": "files",
     "Blocks": "blocks"
 }
