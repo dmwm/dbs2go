@@ -5,6 +5,8 @@
     "PhysicsGroups": "physicsgroups",
     "Primarydstypes": "primarydstypes",
     "PrimaryDatasets": "primarydatasets",
+    "ReleaseVersions": "releaseversions",
+    "Runs": "runs",
     "Files": "files",
     "Blocks": "blocks"
 }

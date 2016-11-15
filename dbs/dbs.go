@@ -24,6 +24,7 @@ var DB *sql.DB
 var DBTYPE string
 var DBSQL Record
 var APIMAP Record
+var DBOWNER string
 
 // helper function to load DBS Api map
 func LoadApiMap() Record {
