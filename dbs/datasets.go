@@ -27,7 +27,7 @@ func (API) Datasets(params Record) []Record {
 		var vals []string
 		genSQL, vals = tokens(datasets)
 		for _, d := range vals {
-			args = append(args, d)
+			args = append(args, d, d, d) // append three values since tokens generates placeholders for them
 		}
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
