@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-// helper function to generate token's SQL statement out of given datasets
-func tokens(datasets []string) (string, []string) {
+// helper function to generate token's SQL statement out of given values
+func tokens(inputList []string) (string, []string) {
 	var vals []string
 	values := ""
 	limit := 100
-	for _, d := range datasets {
+	for _, d := range inputList {
 		if values == "" { // first time
 			values = d
 			continue
@@ -21,6 +21,9 @@ func tokens(datasets []string) (string, []string) {
 			vals = append(vals, values)
 			values = d
 		}
+	}
+	if len(vals) == 0 && values != "" {
+		vals = append(vals, values)
 	}
 
 	stm := ""
