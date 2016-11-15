@@ -14,5 +14,6 @@
     "DataTypes": "datatypes",
     "Files": "files",
     "Blocks": "blocks",
-    "BlockSummaries": "blocksummaries"
+    "BlockSummaries": "blocksummaries",
+    "RunSummaries": "runsummaries"
 }
