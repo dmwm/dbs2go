@@ -10,6 +10,7 @@
     "ProcessingEras": "processingeras",
     "DatasetParent": "datasetparents",
     "BlockParent": "blockparents",
+    "FileChildren": "filechildren",
     "FileParent": "fileparents",
     "DataTypes": "datatypes",
     "Files": "files",
