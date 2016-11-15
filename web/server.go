@@ -62,14 +62,12 @@ func processRequest(params dbs.Record) []dbs.Record {
  * RequestHandler is used by web server to handle incoming requests
  */
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
-	if utils.CMSAUTH == 1 {
-		// check if server started with hkey file (auth is required)
-		status := _cmsAuth.CheckAuthnAuthz(r.Header)
-		if !status {
-			msg := "You are not allowed to access this resource"
-			http.Error(w, msg, http.StatusForbidden)
-			return
-		}
+	// check if server started with hkey file (auth is required)
+	status := _cmsAuth.CheckAuthnAuthz(r.Header)
+	if !status {
+		msg := "You are not allowed to access this resource"
+		http.Error(w, msg, http.StatusForbidden)
+		return
 	}
 
 	// TODO: need to implement how to parse input http parameters
