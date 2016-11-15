@@ -2,6 +2,8 @@
     "Datasets": "datasets",
     "DataTiers": "datatiers",
     "AcquisitionEras": "acquisitioneras",
+    "PhysicsGroups": "physicsgroups",
+    "Primarydstypes": "primarydstypes",
     "Files": "files",
     "Blocks": "blocks"
 }
