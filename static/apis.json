@@ -1,7 +1,7 @@
 {
-    "datasets": "datasets",
-    "tiers": "datatiers",
-    "acquisitioneras": "acquisitioneras",
-    "files": "files",
-    "blocks": "blocks"
+    "Datasets": "datasets",
+    "DataTiers": "datatiers",
+    "AcquisitionEras": "acquisitioneras",
+    "Files": "files",
+    "Blocks": "blocks"
 }

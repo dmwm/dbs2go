@@ -154,6 +154,7 @@ func Server(afile, dbfile, base, port string) {
 
 	// dynamic content
 	apiMap := dbs.LoadApiMap()
+	dbs.APIMAP = apiMap
 	for api, endpoint := range apiMap {
 		callMethod := fmt.Sprintf("/%s/%s", base, endpoint)
 		if utils.VERBOSE > 0 {

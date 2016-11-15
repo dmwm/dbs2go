@@ -5,7 +5,7 @@ import (
 )
 
 // files API
-func files(params Record) []Record {
+func (API) Files(params Record) []Record {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "

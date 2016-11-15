@@ -5,7 +5,7 @@ import (
 )
 
 // acquisitioneras API
-func acquisitioneras(params Record) []Record {
+func (API) AcquisitionEras(params Record) []Record {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "

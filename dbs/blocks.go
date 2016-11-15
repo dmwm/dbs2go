@@ -5,7 +5,7 @@ import (
 )
 
 // blocks API
-func blocks(params Record) []Record {
+func (API) Blocks(params Record) []Record {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "

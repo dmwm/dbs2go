@@ -9,8 +9,12 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"strings"
 )
+
+// use API struct for reflection
+type API struct{}
 
 // main record we work with
 type Record map[string]interface{}
@@ -19,6 +23,7 @@ type Record map[string]interface{}
 var DB *sql.DB
 var DBTYPE string
 var DBSQL Record
+var APIMAP Record
 
 // helper function to load DBS Api map
 func LoadApiMap() Record {
@@ -66,17 +71,17 @@ func getSQL(key string) string {
 // api and params
 func GetData(api string, params Record) []Record {
 	var data []Record
-	switch api {
-	case "blocks":
-		data = blocks(params)
-	case "datasets":
-		data = datasets(params)
-	case "files":
-		data = files(params)
-	case "datatiers":
-		data = tiers(params)
-	case "acquisitioneras":
-		data = acquisitioneras(params)
+	for apiname, endpoint := range APIMAP {
+		if api == endpoint {
+			// Use reflection to get proper API from apiname
+			// http://stackoverflow.com/questions/12127585/go-lookup-function-by-name
+			t := reflect.ValueOf(API{})                   // type of API struct
+			m := t.MethodByName(apiname)                  // associative function name for given api
+			p := []reflect.Value{reflect.ValueOf(params)} // list of function arguments
+			r := m.Call(p)[0]                             // return value
+			data = r.Interface().([]Record)               // cast reflect value to its type
+			break
+		}
 	}
 	return data
 }

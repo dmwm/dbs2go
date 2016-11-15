@@ -1,9 +1,9 @@
 package dbs
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
-	"database/sql"
 )
 
 // helper function to generate token's SQL statement out of given datasets
@@ -49,7 +49,7 @@ func opVal(arg string) (string, string) {
 }
 
 // datasets API
-func datasets(params Record) []Record {
+func (API) Datasets(params Record) []Record {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -81,7 +81,7 @@ func datasets(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("datasets")
 	cols := []string{"dataset_id", "dataset", "prep_id", "xtcrosssection", "creation_date", "create_by", "last_modification_date", "last_modified_by", "primary_ds_name", "primary_ds_type", "processed_ds_name", "data_tier_name", "dataset_access_type", "acquisition_era_name", "processing_version", "physics_group_name"}
-    vals := []interface{}{new(sql.NullInt64),new(sql.NullString),new(sql.NullString),new(sql.NullFloat64),new(sql.NullInt64),new(sql.NullString),new(sql.NullInt64),new(sql.NullString),new(sql.NullString),new(sql.NullString),new(sql.NullString),new(sql.NullString),new(sql.NullString),new(sql.NullString),new(sql.NullInt64),new(sql.NullString)}
+	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}
 	// use generic query API to fetch the results from DB
 	return execute(genSQL+stm+where, cols, vals, args...)
 }

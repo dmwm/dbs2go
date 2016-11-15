@@ -5,7 +5,7 @@ import (
 )
 
 // tiers API
-func tiers(params Record) []Record {
+func (API) DataTiers(params Record) []Record {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
