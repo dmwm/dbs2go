@@ -13,6 +13,7 @@ import (
 var VERBOSE int
 var STATICDIR string
 var PROFILE bool
+var CMSAUTH int
 
 // helper function to return Stack
 func Stack() string {

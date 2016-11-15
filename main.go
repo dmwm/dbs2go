@@ -23,8 +23,11 @@ func main() {
 	flag.StringVar(&sdir, "sdir", "static", "location of static area")
 	var verbose int
 	flag.IntVar(&verbose, "verbose", 0, "Verbose level, support 0,1,2")
+	var cmsauth int
+	flag.IntVar(&cmsauth, "cmsauth", 1, "check cmsauth, 1 to turn it on and zero otherwise")
 	flag.Parse()
 	utils.VERBOSE = verbose
 	utils.STATICDIR = sdir
+	utils.CMSAUTH = cmsauth
 	web.Server(afile, dbfile, base, port)
 }
