@@ -8,6 +8,9 @@
     "ReleaseVersions": "releaseversions",
     "Runs": "runs",
     "ProcessingEras": "processingeras",
+    "DatasetParent": "datasetparents",
+    "BlockParent": "blockparents",
+    "FileParent": "fileparents",
     "DataTypes": "datatypes",
     "Files": "files",
     "Blocks": "blocks"
