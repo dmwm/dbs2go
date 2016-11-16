@@ -13,7 +13,8 @@ func (API) ProcessingEras(params Record) []Record {
 	// parse dataset argument
 	processingeras := getValues(params, "processing_version")
 	if len(processingeras) > 1 {
-		panic("The processingeras API does not support list of processingeras")
+		msg := "The processingeras API does not support list of processingeras"
+		return errorRecord(msg)
 	} else if len(processingeras) == 1 {
 		op, val := opVal(processingeras[0])
 		cond := fmt.Sprintf(" PE.PROCESSING_VERSION %s %s", op, placeholder("processing_version"))

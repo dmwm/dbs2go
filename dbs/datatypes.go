@@ -13,7 +13,8 @@ func (API) DataTypes(params Record) []Record {
 	// parse dataset argument
 	datatypes := getValues(params, "datatype")
 	if len(datatypes) > 1 {
-		panic("The datatypes API does not support list of datatypes")
+		msg := "The datatypes API does not support list of datatypes"
+		return errorRecord(msg)
 	} else if len(datatypes) == 1 {
 		op, val := opVal(datatypes[0])
 		cond := fmt.Sprintf(" DT.datatype %s %s", op, placeholder("datatype"))

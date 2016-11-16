@@ -13,7 +13,8 @@ func (API) Primarydstypes(params Record) []Record {
 	// parse dataset argument
 	primarydstypes := getValues(params, "primary_ds_type")
 	if len(primarydstypes) > 1 {
-		panic("The primarydstypes API does not support list of primarydstypes")
+		msg := "The primarydstypes API does not support list of primarydstypes"
+		return errorRecord(msg)
 	} else if len(primarydstypes) == 1 {
 		op, val := opVal(primarydstypes[0])
 		cond := fmt.Sprintf(" PDT.PRIMARY_DS_TYPE %s %s", op, placeholder("primary_ds_type"))

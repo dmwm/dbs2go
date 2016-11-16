@@ -14,7 +14,8 @@ func (API) Blocks(params Record) []Record {
 	// parse dataset argument
 	blocks := getValues(params, "block_name")
 	if len(blocks) > 1 {
-		panic("Unsupported list of blocks")
+		msg := "Unsupported list of blocks"
+		return errorRecord(msg)
 	} else if len(blocks) == 1 {
 		op, val := opVal(blocks[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -23,7 +24,8 @@ func (API) Blocks(params Record) []Record {
 	}
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
-		panic("The files API does not support list of datasets")
+		msg := "The files API does not support list of datasets"
+		return errorRecord(msg)
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
@@ -45,7 +47,8 @@ func (API) BlockParent(params Record) []Record {
 	// parse dataset argument
 	blockparent := getValues(params, "block_name")
 	if len(blockparent) > 1 {
-		panic("Unsupported list of blockparent")
+		msg := "Unsupported list of blockparent"
+		return errorRecord(msg)
 	} else if len(blockparent) == 1 {
 		op, val := opVal(blockparent[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -67,7 +70,8 @@ func (API) BlockChildren(params Record) []Record {
 	// parse dataset argument
 	blockchildren := getValues(params, "block_name")
 	if len(blockchildren) > 1 {
-		panic("Unsupported list of blockchildren")
+		msg := "Unsupported list of blockchildren"
+		return errorRecord(msg)
 	} else if len(blockchildren) == 1 {
 		op, val := opVal(blockchildren[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -108,7 +112,8 @@ func (API) BlockSummaries(params Record) []Record {
 	}
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
-		panic("Unsupported list of dataset")
+		msg := "Unsupported list of dataset"
+		return errorRecord(msg)
 	} else if len(dataset) == 1 {
 		_, val := opVal(dataset[0])
 		args = append(args, val)
@@ -131,7 +136,8 @@ func (API) BlockOrigin(params Record) []Record {
 	// parse dataset argument
 	block := getValues(params, "block_name")
 	if len(block) > 1 {
-		panic("Unsupported list of block")
+		msg := "Unsupported list of block"
+		return errorRecord(msg)
 	} else if len(block) == 1 {
 		op, val := opVal(block[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -140,7 +146,8 @@ func (API) BlockOrigin(params Record) []Record {
 	}
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
-		panic("Unsupported list of dataset")
+		msg := "Unsupported list of dataset"
+		return errorRecord(msg)
 	} else if len(dataset) == 1 {
 		op, val := opVal(dataset[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))

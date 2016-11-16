@@ -13,7 +13,8 @@ func (API) PhysicsGroups(params Record) []Record {
 	// parse dataset argument
 	physicsgroups := getValues(params, "physics_group_name")
 	if len(physicsgroups) > 1 {
-		panic("The physicsgroups API does not support list of physicsgroups")
+		msg := "The physicsgroups API does not support list of physicsgroups"
+		return errorRecord(msg)
 	} else if len(physicsgroups) == 1 {
 		op, val := opVal(physicsgroups[0])
 		cond := fmt.Sprintf(" pg.PHYSICS_GROUP_NAME %s %s", op, placeholder("physics_group_name"))

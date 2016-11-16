@@ -13,7 +13,8 @@ func (API) PrimaryDatasets(params Record) []Record {
 	// parse dataset argument
 	primarydatasets := getValues(params, "primary_ds_name")
 	if len(primarydatasets) > 1 {
-		panic("The primarydatasets API does not support list of primarydatasets")
+		msg := "The primarydatasets API does not support list of primarydatasets"
+		return errorRecord(msg)
 	} else if len(primarydatasets) == 1 {
 		op, val := opVal(primarydatasets[0])
 		cond := fmt.Sprintf(" P.PRIMARY_DS_NAME %s %s", op, placeholder("primary_ds_name"))

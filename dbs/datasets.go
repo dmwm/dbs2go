@@ -52,7 +52,8 @@ func (API) DatasetParent(params Record) []Record {
 	// parse dataset argument
 	datasetparent := getValues(params, "dataset")
 	if len(datasetparent) > 1 {
-		panic("The datasetparent API does not support list of datasetparent")
+		msg := "The datasetparent API does not support list of datasetparent"
+		return errorRecord(msg)
 	} else if len(datasetparent) == 1 {
 		op, val := opVal(datasetparent[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
@@ -60,7 +61,7 @@ func (API) DatasetParent(params Record) []Record {
 		args = append(args, val)
 	} else {
 		msg := fmt.Sprintf("No arguments for datasetparent API")
-		panic(msg)
+		return errorRecord(msg)
 	}
 	// get SQL statement from static area
 	stm := getSQL("datasetparent")
@@ -77,7 +78,8 @@ func (API) DatasetChildren(params Record) []Record {
 	// parse dataset argument
 	datasetchildren := getValues(params, "dataset")
 	if len(datasetchildren) > 1 {
-		panic("The datasetchildren API does not support list of datasetchildren")
+		msg := "The datasetchildren API does not support list of datasetchildren"
+		return errorRecord(msg)
 	} else if len(datasetchildren) == 1 {
 		op, val := opVal(datasetchildren[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
@@ -85,10 +87,35 @@ func (API) DatasetChildren(params Record) []Record {
 		args = append(args, val)
 	} else {
 		msg := fmt.Sprintf("No arguments for datasetchildren API")
-		panic(msg)
+		return errorRecord(msg)
 	}
 	// get SQL statement from static area
 	stm := getSQL("datasetchildren")
+	// use generic query API to fetch the results from DB
+	return executeAll(stm+where, args...)
+}
+
+// datasetaccesstypes API
+func (API) DatasetAccessTypes(params Record) []Record {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := " WHERE "
+
+	// parse dataset argument
+	datasetaccesstypes := getValues(params, "dataset_access_type")
+	if len(datasetaccesstypes) > 1 {
+		msg := "The datasetaccesstypes API does not support list of datasetaccesstypes"
+		return errorRecord(msg)
+	} else if len(datasetaccesstypes) == 1 {
+		op, val := opVal(datasetaccesstypes[0])
+		cond := fmt.Sprintf(" DT.DATASET_ACCESS_TYPE %s %s", op, placeholder("dataset_access_type"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		where = ""
+	}
+	// get SQL statement from static area
+	stm := getSQL("datasetaccesstypes")
 	// use generic query API to fetch the results from DB
 	return executeAll(stm+where, args...)
 }

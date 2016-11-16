@@ -13,7 +13,8 @@ func (API) DataTiers(params Record) []Record {
 	// parse dataset argument
 	tiers := getValues(params, "data_tier_name")
 	if len(tiers) > 1 {
-		panic("The tiers API does not support list of tiers")
+		msg := "The datatiers API does not support list of tiers"
+		return errorRecord(msg)
 	} else if len(tiers) == 1 {
 		op, val := opVal(tiers[0])
 		cond := fmt.Sprintf(" DT.DATA_TIER_NAME %s %s", op, placeholder("data_tier_name"))

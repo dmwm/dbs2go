@@ -16,7 +16,8 @@ func (API) OutputConfigs(params Record) []Record {
 	bid := "0"
 	block_id := getValues(params, "block_id")
 	if len(block_id) > 1 {
-		panic("The outputconfigs API does not support list of block_id")
+		msg := "The outputconfigs API does not support list of block_id"
+		return errorRecord(msg)
 	} else if len(block_id) == 1 {
 		_, bid = opVal(block_id[0])
 	}
