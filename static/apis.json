@@ -17,5 +17,6 @@
     "Blocks": "blocks",
     "BlockOrigin": "blockorigin",
     "BlockSummaries": "blocksummaries",
-    "RunSummaries": "runsummaries"
+    "RunSummaries": "runsummaries",
+    "OutputConfigs": "outputconfigs"
 }
