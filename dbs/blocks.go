@@ -58,6 +58,28 @@ func (API) BlockParent(params Record) []Record {
 	return executeAll(stm+where, args...)
 }
 
+// blockchildren API
+func (API) BlockChildren(params Record) []Record {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := "WHERE "
+
+	// parse dataset argument
+	blockchildren := getValues(params, "block_name")
+	if len(blockchildren) > 1 {
+		panic("Unsupported list of blockchildren")
+	} else if len(blockchildren) == 1 {
+		op, val := opVal(blockchildren[0])
+		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	}
+	// get SQL statement from static area
+	stm := getSQL("blockchildren")
+	// use generic query API to fetch the results from DB
+	return executeAll(stm+where, args...)
+}
+
 // blocksummaries API
 func (API) BlockSummaries(params Record) []Record {
 	// variables we'll use in where clause
