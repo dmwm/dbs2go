@@ -149,7 +149,7 @@ func executeAll(stm string, args ...interface{}) []Record {
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		log.Fatal(msg)
+		return errorRecord(msg)
 	}
 	defer rows.Close()
 
@@ -171,7 +171,7 @@ func executeAll(stm string, args ...interface{}) []Record {
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
 			msg := fmt.Sprintf("ERROR: rows.Scan, dest='%v', error=%v", valuePtrs, err)
-			log.Fatal(msg)
+			return errorRecord(msg)
 		}
 		rowCount += 1
 		// store results into generic record (a dict)
@@ -185,7 +185,7 @@ func executeAll(stm string, args ...interface{}) []Record {
 		out = append(out, rec)
 	}
 	if err = rows.Err(); err != nil {
-		log.Fatal(err)
+		return errorRecord(fmt.Sprintf("Error: %v", err))
 	}
 	return out
 }
@@ -200,7 +200,7 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		log.Fatal(msg)
+		return errorRecord(msg)
 	}
 	defer rows.Close()
 
@@ -209,7 +209,7 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 		err := rows.Scan(vals...)
 		if err != nil {
 			msg := fmt.Sprintf("ERROR: rows.Scan, vals='%v', error=%v", vals, err)
-			log.Fatal(msg)
+			return errorRecord(msg)
 		}
 		rec := make(Record)
 		for i, _ := range cols {
@@ -218,7 +218,7 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 		out = append(out, rec)
 	}
 	if err = rows.Err(); err != nil {
-		log.Fatal(err)
+		return errorRecord(fmt.Sprintf("Error: %v", err))
 	}
 	return out
 }
