@@ -67,3 +67,28 @@ func (API) DatasetParent(params Record) []Record {
 	// use generic query API to fetch the results from DB
 	return executeAll(stm+where, args...)
 }
+
+// datasetchildren API
+func (API) DatasetChildren(params Record) []Record {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := "WHERE "
+
+	// parse dataset argument
+	datasetchildren := getValues(params, "dataset")
+	if len(datasetchildren) > 1 {
+		panic("The datasetchildren API does not support list of datasetchildren")
+	} else if len(datasetchildren) == 1 {
+		op, val := opVal(datasetchildren[0])
+		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		msg := fmt.Sprintf("No arguments for datasetchildren API")
+		panic(msg)
+	}
+	// get SQL statement from static area
+	stm := getSQL("datasetchildren")
+	// use generic query API to fetch the results from DB
+	return executeAll(stm+where, args...)
+}

@@ -9,6 +9,7 @@
     "Runs": "runs",
     "ProcessingEras": "processingeras",
     "DatasetParent": "datasetparents",
+    "DatasetChildren": "datasetchildren",
     "BlockParent": "blockparents",
     "FileChildren": "filechildren",
     "FileParent": "fileparents",
