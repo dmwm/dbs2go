@@ -222,3 +222,12 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	}
 	return out
 }
+
+// helper function to generate error record
+func errorRecord(msg string) []Record {
+	var out []Record
+	erec := make(Record)
+	erec["error"] = msg
+	out = append(out, erec)
+	return out
+}

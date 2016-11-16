@@ -18,6 +18,7 @@
     "Blocks": "blocks",
     "BlockOrigin": "blockorigin",
     "BlockSummaries": "blocksummaries",
+    "FileSummaries": "filesummaries",
     "RunSummaries": "runsummaries",
     "OutputConfigs": "outputconfigs"
 }
