@@ -10,7 +10,7 @@
 // Go examples: https://gobyexample.com/
 // for Go database API: http://go-database-sql.org/overview.html
 // Oracle drivers:
-//   _ "gopkg.in/rana/ora.v3"
+//   _ "gopkg.in/rana/ora.v4"
 //   _ "github.com/mattn/go-oci8"
 // MySQL driver:
 //   _ "github.com/go-sql-driver/mysql"
@@ -20,27 +20,75 @@
 package web
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-oci8"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/vkuznet/cmsauth"
-	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/utils"
-	_ "gopkg.in/rana/ora.v3"
 	"log"
 	"net/http"
 	"strings"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-oci8"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
+	_ "gopkg.in/rana/ora.v4"
+
+	logs "github.com/sirupsen/logrus"
+
+	_ "net/http/pprof"
 )
 
 // profiler, see https://golang.org/pkg/net/http/pprof/
-import _ "net/http/pprof"
+
+// global variable which we initialize once
+var _userDNs []string
 
 // global variables used in this module
 var _tdir string
-var _cmsAuth cmsauth.CMSAuth
+
+// var _cmsAuth cmsauth.CMSAuth
+
+// UserDN function parses user Distinguished Name (DN) from client's HTTP request
+func UserDN(r *http.Request) string {
+	var names []interface{}
+	for _, cert := range r.TLS.PeerCertificates {
+		for _, name := range cert.Subject.Names {
+			switch v := name.Value.(type) {
+			case string:
+				names = append(names, v)
+			}
+		}
+	}
+	parts := names[:7]
+	return fmt.Sprintf("/DC=%s/DC=%s/OU=%s/OU=%s/CN=%s/CN=%s/CN=%s", parts...)
+}
+
+// custom logic for CMS authentication, users may implement their own logic here
+func auth(r *http.Request) bool {
+
+	userDN := UserDN(r)
+	match := utils.InList(userDN, _userDNs)
+	if !match {
+		logs.WithFields(logs.Fields{
+			"User DN": userDN,
+		}).Error("Auth userDN not found in SiteDB")
+	}
+	return match
+}
+
+// AuthHandler authenticate incoming requests and route them to appropriate handler
+func AuthHandler(w http.ResponseWriter, r *http.Request) {
+	// check if server started with hkey file (auth is required)
+	status := auth(r)
+	if !status {
+		msg := "You are not allowed to access this resource"
+		http.Error(w, msg, http.StatusForbidden)
+		return
+	}
+	RequestHandler(w, r)
+}
 
 func processRequest(params dbs.Record) []dbs.Record {
 	// defer function will propagate panic message to higher level
@@ -58,17 +106,16 @@ func processRequest(params dbs.Record) []dbs.Record {
 	return out
 }
 
-/*
- * RequestHandler is used by web server to handle incoming requests
- */
+// RequestHandler is used by web server to handle incoming requests
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
+	// This is an example of cmsAuth used in cmsweb
 	// check if server started with hkey file (auth is required)
-	status := _cmsAuth.CheckAuthnAuthz(r.Header)
-	if !status {
-		msg := "You are not allowed to access this resource"
-		http.Error(w, msg, http.StatusForbidden)
-		return
-	}
+	//     status := _cmsAuth.CheckAuthnAuthz(r.Header)
+	//     if !status {
+	//         msg := "You are not allowed to access this resource"
+	//         http.Error(w, msg, http.StatusForbidden)
+	//         return
+	//     }
 
 	// TODO: need to implement how to parse input http parameters
 	r.ParseForm() // parse url parameters
@@ -140,8 +187,11 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// proxy server. It defines /fetch public interface
-func Server(afile, dbfile, base, port string) {
+// use this signature if we need to use afile
+// func Server(afile, dbfile, base, port string) {
+
+// Server provides HTTPs server for our application
+func Server(dbfile, base, port string) {
 	log.Printf("Start server localhost:%s/%s", port, base)
 	_tdir = fmt.Sprintf("%s/templates", utils.STATICDIR) // template area
 
@@ -185,15 +235,21 @@ func Server(afile, dbfile, base, port string) {
 	dbs.DBSQL = dbsql
 
 	// setup CMSAuth module
-	_cmsAuth.Init(afile)
+	//     _cmsAuth.Init(afile)
 
 	// start server
-	err := http.ListenAndServe(":"+port, nil)
-	// NOTE: later this can be replaced with secure connection
-	// replace ListenAndServe(addr string, handler Handler)
-	// with TLS function
-	// ListenAndServeTLS(addr string, certFile string, keyFile string, handler
-	// Handler)
+	// http server on certain port should be used behind frontend, cmsweb way
+	//     err := http.ListenAndServe(":"+port, nil)
+
+	// we will use https server and use AuthHandler to allow access to it
+	http.HandleFunc("/", AuthHandler)
+	server := &http.Server{
+		Addr: ":" + port,
+		TLSConfig: &tls.Config{
+			ClientAuth: tls.RequestClientCert,
+		},
+	}
+	err := server.ListenAndServeTLS("server.crt", "server.key")
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
