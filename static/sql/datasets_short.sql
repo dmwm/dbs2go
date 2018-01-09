@@ -1,0 +1,3 @@
+SELECT
+        D.DATASET
+	FROM {{.Owner}}.DATASETS D
