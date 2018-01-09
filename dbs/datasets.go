@@ -3,13 +3,17 @@ package dbs
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
-// datasets API
+// Datasets API
 func (API) Datasets(params Record) []Record {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
+
+	// parse detail arugment
+	detail := getSingleValue(params, "detail")
 
 	// parse is_dataset_valid argument
 	isValid := getSingleValue(params, "is_dataset_valid")
@@ -39,6 +43,11 @@ func (API) Datasets(params Record) []Record {
 	stm := getSQL("datasets")
 	cols := []string{"dataset_id", "dataset", "prep_id", "xtcrosssection", "creation_date", "create_by", "last_modification_date", "last_modified_by", "primary_ds_name", "primary_ds_type", "processed_ds_name", "data_tier_name", "dataset_access_type", "acquisition_era_name", "processing_version", "physics_group_name"}
 	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}
+	if strings.ToLower(detail) != "true" {
+		stm = getSQL("datasets_short")
+		cols = []string{"dataset"}
+		vals = []interface{}{new(sql.NullString)}
+	}
 	// use generic query API to fetch the results from DB
 	return execute(genSQL+stm+where, cols, vals, args...)
 }
