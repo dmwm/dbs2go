@@ -13,7 +13,8 @@ func (API) AcquisitionEras(params Record) []Record {
 	// parse dataset argument
 	acquisitioneras := getValues(params, "data_tier_name")
 	if len(acquisitioneras) > 1 {
-		panic("The acquisitioneras API does not support list of acquisitioneras")
+		msg := "The acquisitioneras API does not support list of acquisitioneras"
+		return errorRecord(msg)
 	} else if len(acquisitioneras) == 1 {
 		op, val := opVal(acquisitioneras[0])
 		cond := fmt.Sprintf(" AE.ACQUISITION_ERA_NAME %s %s", op, placeholder("acquisition_era_name"))

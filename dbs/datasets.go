@@ -3,50 +3,7 @@ package dbs
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 )
-
-// helper function to generate token's SQL statement out of given datasets
-func tokens(datasets []string) (string, []string) {
-	var vals []string
-	values := ""
-	limit := 100
-	for _, d := range datasets {
-		if values == "" { // first time
-			values = d
-			continue
-		}
-		if len(values)+1+len(d) < limit {
-			values += fmt.Sprintf(",%s", d)
-		} else {
-			vals = append(vals, values)
-			values = d
-		}
-	}
-
-	stm := ""
-	for i, _ := range vals {
-		if i > 0 {
-			stm += "\n UNION ALL \n"
-		}
-		t := fmt.Sprintf(":token%d", i)
-		stm += fmt.Sprintf("SELECT REGEXP_SUBSTR(%s, '[^,]+', 1, LEVEL) token FROM DUAL ", t)
-		stm += fmt.Sprintf("CONNECT BY LEVEL <= LENGTH(%s) - LENGTH(REPLACE(%s, ',', '')) + 1\n", t, t)
-	}
-	out := fmt.Sprintf("WITH TOKEN_GENERATOR AS(\n%s)", stm)
-	return out, vals
-}
-
-// helper function to generate operator, value pair for given argument
-func opVal(arg string) (string, string) {
-	op := "="
-	val := arg
-	if strings.Contains(arg, "*") {
-		op = "like"
-		val = strings.Replace(arg, "*", "%", -1)
-	}
-	return op, val
-}
 
 // datasets API
 func (API) Datasets(params Record) []Record {
@@ -70,7 +27,7 @@ func (API) Datasets(params Record) []Record {
 		var vals []string
 		genSQL, vals = tokens(datasets)
 		for _, d := range vals {
-			args = append(args, d)
+			args = append(args, d, d, d) // append three values since tokens generates placeholders for them
 		}
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
@@ -84,4 +41,81 @@ func (API) Datasets(params Record) []Record {
 	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}
 	// use generic query API to fetch the results from DB
 	return execute(genSQL+stm+where, cols, vals, args...)
+}
+
+// datasetparent API
+func (API) DatasetParent(params Record) []Record {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := "WHERE "
+
+	// parse dataset argument
+	datasetparent := getValues(params, "dataset")
+	if len(datasetparent) > 1 {
+		msg := "The datasetparent API does not support list of datasetparent"
+		return errorRecord(msg)
+	} else if len(datasetparent) == 1 {
+		op, val := opVal(datasetparent[0])
+		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		msg := fmt.Sprintf("No arguments for datasetparent API")
+		return errorRecord(msg)
+	}
+	// get SQL statement from static area
+	stm := getSQL("datasetparent")
+	// use generic query API to fetch the results from DB
+	return executeAll(stm+where, args...)
+}
+
+// datasetchildren API
+func (API) DatasetChildren(params Record) []Record {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := "WHERE "
+
+	// parse dataset argument
+	datasetchildren := getValues(params, "dataset")
+	if len(datasetchildren) > 1 {
+		msg := "The datasetchildren API does not support list of datasetchildren"
+		return errorRecord(msg)
+	} else if len(datasetchildren) == 1 {
+		op, val := opVal(datasetchildren[0])
+		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		msg := fmt.Sprintf("No arguments for datasetchildren API")
+		return errorRecord(msg)
+	}
+	// get SQL statement from static area
+	stm := getSQL("datasetchildren")
+	// use generic query API to fetch the results from DB
+	return executeAll(stm+where, args...)
+}
+
+// datasetaccesstypes API
+func (API) DatasetAccessTypes(params Record) []Record {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := " WHERE "
+
+	// parse dataset argument
+	datasetaccesstypes := getValues(params, "dataset_access_type")
+	if len(datasetaccesstypes) > 1 {
+		msg := "The datasetaccesstypes API does not support list of datasetaccesstypes"
+		return errorRecord(msg)
+	} else if len(datasetaccesstypes) == 1 {
+		op, val := opVal(datasetaccesstypes[0])
+		cond := fmt.Sprintf(" DT.DATASET_ACCESS_TYPE %s %s", op, placeholder("dataset_access_type"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		where = ""
+	}
+	// get SQL statement from static area
+	stm := getSQL("datasetaccesstypes")
+	// use generic query API to fetch the results from DB
+	return executeAll(stm+where, args...)
 }

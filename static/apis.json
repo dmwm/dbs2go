@@ -1,7 +1,27 @@
 {
     "Datasets": "datasets",
+    "DatasetAccessTypes": "datasetaccesstypes",
     "DataTiers": "datatiers",
     "AcquisitionEras": "acquisitioneras",
+    "PhysicsGroups": "physicsgroups",
+    "Primarydstypes": "primarydstypes",
+    "PrimaryDatasets": "primarydatasets",
+    "ReleaseVersions": "releaseversions",
+    "Runs": "runs",
+    "ProcessingEras": "processingeras",
+    "DatasetParent": "datasetparents",
+    "DatasetChildren": "datasetchildren",
+    "BlockParent": "blockparents",
+    "BlockChildren": "blockchildren",
+    "FileChildren": "filechildren",
+    "FileParent": "fileparents",
+    "DataTypes": "datatypes",
     "Files": "files",
-    "Blocks": "blocks"
+    "FileLumis": "filelumis",
+    "Blocks": "blocks",
+    "BlockOrigin": "blockorigin",
+    "BlockSummaries": "blocksummaries",
+    "FileSummaries": "filesummaries",
+    "RunSummaries": "runsummaries",
+    "OutputConfigs": "outputconfigs"
 }

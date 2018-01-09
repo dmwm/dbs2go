@@ -233,6 +233,7 @@ func Server(dbfile, base, port string) {
 	// load DBS SQL statements
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
+	dbs.DBOWNER = dbowner
 
 	// setup CMSAuth module
 	//     _cmsAuth.Init(afile)
