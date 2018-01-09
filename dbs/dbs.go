@@ -180,7 +180,32 @@ func executeAll(stm string, args ...interface{}) []Record {
 			if len(cols) != len(columns) {
 				cols = append(cols, strings.ToLower(col))
 			}
-			rec[cols[i]] = values[i]
+			vvv := values[i]
+			switch val := vvv.(type) {
+			case *sql.NullString:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullInt64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullFloat64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullBool:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			default:
+				fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
+			}
+			//             rec[cols[i]] = values[i]
 		}
 		out = append(out, rec)
 	}
@@ -213,7 +238,32 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 		}
 		rec := make(Record)
 		for i, _ := range cols {
-			rec[cols[i]] = vals[i]
+			vvv := vals[i]
+			switch val := vvv.(type) {
+			case *sql.NullString:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullInt64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullFloat64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullBool:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			default:
+				fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
+			}
+			//             rec[cols[i]] = vals[i]
 		}
 		out = append(out, rec)
 	}
