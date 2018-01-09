@@ -5,6 +5,7 @@ ifeq ($(OS),Darwin)
 flags=-ldflags="-s -w"
 else
 flags=-ldflags="-s -w -extldflags -static"
+flags=""
 endif
 TAG := $(shell git tag | sort -r | head -n 1)
 
