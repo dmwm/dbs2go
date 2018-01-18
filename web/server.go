@@ -49,6 +49,43 @@ var _userDNs []string
 var _tdir string
 
 // var _cmsAuth cmsauth.CMSAuth
+func userDNs() []string {
+	var out []string
+	rurl := "https://cmsweb.cern.ch/sitedb/data/prod/people"
+	resp := utils.FetchResponse(rurl, []byte{})
+	if resp.Error != nil {
+		logs.WithFields(logs.Fields{
+			"Error": resp.Error,
+		}).Error("Unable to fetch SiteDB records", resp.Error)
+		return out
+	}
+	var rec map[string]interface{}
+	err := json.Unmarshal(resp.Data, &rec)
+	if err != nil {
+		logs.WithFields(logs.Fields{
+			"Error": err,
+		}).Error("Unable to unmarshal response", err)
+		return out
+	}
+	desc := rec["desc"].(map[string]interface{})
+	headers := desc["columns"].([]interface{})
+	var idx int
+	for i, h := range headers {
+		if h.(string) == "dn" {
+			idx = i
+			break
+		}
+	}
+	values := rec["result"].([]interface{})
+	for _, item := range values {
+		val := item.([]interface{})
+		v := val[idx]
+		if v != nil {
+			out = append(out, v.(string))
+		}
+	}
+	return out
+}
 
 // UserDN function parses user Distinguished Name (DN) from client's HTTP request
 func UserDN(r *http.Request) string {
@@ -127,7 +164,14 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	api := ""
 	if len(arr) == 3 {
 		api = arr[2]
+	} else if len(arr) == 2 {
+		api = arr[1]
 	}
+	// TMP for frontend redirect
+	if api == "" {
+		api = "datasets"
+	}
+
 	params["api"] = api
 	for k, v := range r.Form {
 		params[k] = v
@@ -191,7 +235,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 // func Server(afile, dbfile, base, port string) {
 
 // Server provides HTTPs server for our application
-func Server(dbfile, base, port string) {
+func Server(dbfile, base, port string, https bool) {
 	log.Printf("Start server localhost:%s/%s", port, base)
 	_tdir = fmt.Sprintf("%s/templates", utils.STATICDIR) // template area
 
@@ -239,18 +283,26 @@ func Server(dbfile, base, port string) {
 	//     _cmsAuth.Init(afile)
 
 	// start server
-	// http server on certain port should be used behind frontend, cmsweb way
-	//     err := http.ListenAndServe(":"+port, nil)
-
-	// we will use https server and use AuthHandler to allow access to it
-	http.HandleFunc("/", AuthHandler)
-	server := &http.Server{
-		Addr: ":" + port,
-		TLSConfig: &tls.Config{
-			ClientAuth: tls.RequestClientCert,
-		},
+	var err error
+	if https {
+		// init userDNs
+		_userDNs = userDNs()
+		// https server and use AuthHandler to allow access to it
+		fmt.Println("HTTPs server")
+		http.HandleFunc("/", AuthHandler)
+		server := &http.Server{
+			Addr: ":" + port,
+			TLSConfig: &tls.Config{
+				ClientAuth: tls.RequestClientCert,
+			},
+		}
+		err = server.ListenAndServeTLS("server.crt", "server.key")
+	} else {
+		// http server on certain port should be used behind frontend, cmsweb way
+		fmt.Println("HTTP server")
+		http.HandleFunc("/", RequestHandler)
+		err = http.ListenAndServe(":"+port, nil)
 	}
-	err := server.ListenAndServeTLS("server.crt", "server.key")
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
