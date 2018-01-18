@@ -28,8 +28,10 @@ func main() {
 	flag.StringVar(&sdir, "sdir", "static", "location of static area")
 	var verbose int
 	flag.IntVar(&verbose, "verbose", 0, "Verbose level, support 0,1,2")
+	var https bool
+	flag.BoolVar(&https, "https", false, "Start https server")
 	var version bool
-	flag.BoolVar(&version, "version", false, "Show version [SERVER|CLIENT]")
+	flag.BoolVar(&version, "version", false, "Show version")
 	flag.Parse()
 	if version {
 		fmt.Println(info())
@@ -38,8 +40,7 @@ func main() {
 	}
 	utils.VERBOSE = verbose
 	utils.STATICDIR = sdir
-	//     web.Server(afile, dbfile, base, port)
-	web.Server(dbfile, base, port)
+	web.Server(dbfile, base, port, https)
 }
 
 // helper function to return current version
