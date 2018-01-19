@@ -146,7 +146,14 @@ func executeAll(stm string, args ...interface{}) []Record {
 	if utils.VERBOSE > 1 {
 		fmt.Println(stm, args)
 	}
-	rows, err := DB.Query(stm, args...)
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("ERROR: %s", err)
+		errorRecord(msg)
+	}
+	defer tx.Rollback()
+	//     rows, err := DB.Query(stm, args...)
+	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return errorRecord(msg)
@@ -203,7 +210,8 @@ func executeAll(stm string, args ...interface{}) []Record {
 					rec[cols[i]] = v
 				}
 			default:
-				fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
+				//                 fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
+				rec[cols[i]] = val
 			}
 			//             rec[cols[i]] = values[i]
 		}
@@ -222,7 +230,14 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	if utils.VERBOSE > 1 {
 		fmt.Println(stm, args)
 	}
-	rows, err := DB.Query(stm, args...)
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("ERROR: %s", err)
+		errorRecord(msg)
+	}
+	defer tx.Rollback()
+	//     rows, err := DB.Query(stm, args...)
+	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return errorRecord(msg)
@@ -261,7 +276,8 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 					rec[cols[i]] = v
 				}
 			default:
-				fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
+				//                 fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
+				rec[cols[i]] = val
 			}
 			//             rec[cols[i]] = vals[i]
 		}
