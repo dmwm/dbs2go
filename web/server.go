@@ -31,6 +31,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/vkuznet/dbs2go/config"
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
 	_ "gopkg.in/rana/ora.v4"
@@ -232,16 +233,20 @@ func RequestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // use this signature if we need to use afile
-// func Server(afile, dbfile, base, port string) {
-
 // Server provides HTTPs server for our application
-func Server(dbfile, base, port string, https bool) {
-	log.Printf("Start server localhost:%s/%s", port, base)
+func Server(configFile string) {
+	err := config.ParseConfig(configFile)
+	if err != nil {
+		panic(err)
+	}
+	utils.VERBOSE = config.Config.Verbose
+	utils.STATICDIR = config.Config.StaticDir
+	logs.Info(config.Config.String())
 	_tdir = fmt.Sprintf("%s/templates", utils.STATICDIR) // template area
 
 	// static content for js/css/images requests
 	for _, dir := range []string{"js", "css", "images"} {
-		m := fmt.Sprintf("/%s/%s/", base, dir)
+		m := fmt.Sprintf("/%s/%s/", config.Config.Base, dir)
 		d := fmt.Sprintf("%s/%s", utils.STATICDIR, dir)
 		http.Handle(m, http.StripPrefix(m, http.FileServer(http.Dir(d))))
 	}
@@ -250,16 +255,16 @@ func Server(dbfile, base, port string, https bool) {
 	apiMap := dbs.LoadApiMap()
 	dbs.APIMAP = apiMap
 	for api, endpoint := range apiMap {
-		callMethod := fmt.Sprintf("/%s/%s", base, endpoint)
+		callMethod := fmt.Sprintf("/%s/%s", config.Config.Base, endpoint)
 		if utils.VERBOSE > 0 {
 			fmt.Printf("map %s API to %v endpoint\n", api, endpoint)
 		}
 		http.HandleFunc(callMethod, RequestHandler)
 	}
-	http.HandleFunc(fmt.Sprintf("/%s/", base), RequestHandler)
+	http.HandleFunc(fmt.Sprintf("/%s/", config.Config.Base), RequestHandler)
 
 	// set database connection once
-	dbtype, dburi, dbowner := dbs.ParseDBFile(dbfile)
+	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
 	db, dberr := sql.Open(dbtype, dburi)
 	defer db.Close()
 	if dberr != nil {
@@ -283,25 +288,25 @@ func Server(dbfile, base, port string, https bool) {
 	//     _cmsAuth.Init(afile)
 
 	// start server
-	var err error
-	if https {
+	addr := fmt.Sprintf(":%d", config.Config.Port)
+	if config.Config.ServerCrt != "" && config.Config.ServerKey != "" {
 		// init userDNs
 		_userDNs = userDNs()
 		// https server and use AuthHandler to allow access to it
-		fmt.Println("HTTPs server")
 		http.HandleFunc("/", AuthHandler)
 		server := &http.Server{
-			Addr: ":" + port,
+			Addr: addr,
 			TLSConfig: &tls.Config{
 				ClientAuth: tls.RequestClientCert,
 			},
 		}
-		err = server.ListenAndServeTLS("server.crt", "server.key")
+		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTPs server")
+		err = server.ListenAndServeTLS(config.Config.ServerCrt, config.Config.ServerKey)
 	} else {
 		// http server on certain port should be used behind frontend, cmsweb way
-		fmt.Println("HTTP server")
+		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTP server")
 		http.HandleFunc("/", RequestHandler)
-		err = http.ListenAndServe(":"+port, nil)
+		err = http.ListenAndServe(addr, nil)
 	}
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
