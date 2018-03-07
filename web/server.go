@@ -99,6 +99,9 @@ func UserDN(r *http.Request) string {
 			}
 		}
 	}
+	if len(names) == 0 {
+		return "not-found"
+	}
 	parts := names[:7]
 	return fmt.Sprintf("/DC=%s/DC=%s/OU=%s/OU=%s/CN=%s/CN=%s/CN=%s", parts...)
 }
