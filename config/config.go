@@ -24,6 +24,7 @@ type Configuration struct {
 	Verbose   int      `json:"verbose"`   // verbosity level
 	ServerKey string   `json:"serverkey"` // server key for https
 	ServerCrt string   `json:"servercrt"` // server certificate for https
+	UpdateDNs int      `json:"updateDNs"` // interval in minutes to update user DNs
 }
 
 // global variables
@@ -31,7 +32,7 @@ var Config Configuration
 
 // String returns string representation of dbs Config
 func (c *Configuration) String() string {
-	return fmt.Sprintf("<Config port=%d staticdir=%s hkey=%s base=%s dbfile=%s views=%v crt=%s key=%s>", c.Port, c.StaticDir, c.Hkey, c.Base, c.DBFile, c.Views, c.ServerCrt, c.ServerKey)
+	return fmt.Sprintf("<Config port=%d staticdir=%s hkey=%s base=%s dbfile=%s views=%v updateDNs=%d crt=%s key=%s>", c.Port, c.StaticDir, c.Hkey, c.Base, c.DBFile, c.Views, c.UpdateDNs, c.ServerCrt, c.ServerKey)
 }
 
 func ParseConfig(configFile string) error {

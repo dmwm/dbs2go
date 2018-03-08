@@ -27,6 +27,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-oci8"
@@ -43,8 +44,14 @@ import (
 
 // profiler, see https://golang.org/pkg/net/http/pprof/
 
+// UserDNs structure holds information about user DNs
+type UserDNs struct {
+	DNs  []string
+	Time time.Time
+}
+
 // global variable which we initialize once
-var _userDNs []string
+var _userDNs UserDNs
 
 // global variables used in this module
 var _tdir string
@@ -110,7 +117,7 @@ func UserDN(r *http.Request) string {
 func auth(r *http.Request) bool {
 
 	userDN := UserDN(r)
-	match := utils.InList(userDN, _userDNs)
+	match := utils.InList(userDN, _userDNs.DNs)
 	if !match {
 		logs.WithFields(logs.Fields{
 			"User DN": userDN,
@@ -294,7 +301,15 @@ func Server(configFile string) {
 	addr := fmt.Sprintf(":%d", config.Config.Port)
 	if config.Config.ServerCrt != "" && config.Config.ServerKey != "" {
 		// init userDNs
-		_userDNs = userDNs()
+		_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
+		go func() {
+			for {
+				d := time.Duration(config.Config.UpdateDNs) * time.Minute
+				logs.WithFields(logs.Fields{"Time": time.Now(), "Duration": d}).Info("userDNs are updated")
+				time.Sleep(d) // sleep for next iteration
+				_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
+			}
+		}()
 		// https server and use AuthHandler to allow access to it
 		http.HandleFunc("/", AuthHandler)
 		server := &http.Server{
