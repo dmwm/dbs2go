@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -299,7 +300,9 @@ func Server(configFile string) {
 
 	// start server
 	addr := fmt.Sprintf(":%d", config.Config.Port)
-	if config.Config.ServerCrt != "" && config.Config.ServerKey != "" {
+	_, e1 := os.Stat(config.Config.ServerCrt)
+	_, e2 := os.Stat(config.Config.ServerKey)
+	if e1 == nil && e2 == nil {
 		// init userDNs
 		_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
 		go func() {
