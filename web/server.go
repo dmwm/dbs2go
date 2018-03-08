@@ -57,6 +57,8 @@ var _userDNs UserDNs
 // global variables used in this module
 var _tdir string
 
+var _auth bool
+
 // var _cmsAuth cmsauth.CMSAuth
 func userDNs() []string {
 	var out []string
@@ -116,6 +118,10 @@ func UserDN(r *http.Request) string {
 
 // custom logic for CMS authentication, users may implement their own logic here
 func auth(r *http.Request) bool {
+	// do not perform authentication when it's set to be false
+	if _auth == false {
+		return true
+	}
 
 	userDN := UserDN(r)
 	match := utils.InList(userDN, _userDNs.DNs)
@@ -303,6 +309,7 @@ func Server(configFile string) {
 	_, e1 := os.Stat(config.Config.ServerCrt)
 	_, e2 := os.Stat(config.Config.ServerKey)
 	if e1 == nil && e2 == nil {
+		_auth = true
 		// init userDNs
 		_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
 		go func() {
@@ -325,11 +332,12 @@ func Server(configFile string) {
 				ClientAuth: tls.RequestClientCert,
 			},
 		}
-		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTPs server")
+		logs.WithFields(logs.Fields{"Addr": addr, "Auth": _auth}).Info("Starting HTTPs server")
 		err = server.ListenAndServeTLS(config.Config.ServerCrt, config.Config.ServerKey)
 	} else {
 		// http server on certain port should be used behind frontend, cmsweb way
-		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTP server")
+		_auth = false
+		logs.WithFields(logs.Fields{"Addr": addr, "Auth": _auth}).Info("Starting HTTP server")
 		http.HandleFunc("/", RequestHandler)
 		err = http.ListenAndServe(addr, nil)
 	}
