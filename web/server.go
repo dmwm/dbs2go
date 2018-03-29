@@ -291,7 +291,7 @@ func Server(configFile string) {
 	}
 	dberr = db.Ping()
 	if dberr != nil {
-		log.Fatal(dberr)
+		logs.WithFields(logs.Fields{"Error": dberr}).Warn("DB ping")
 	}
 	db.SetMaxOpenConns(100)
 	db.SetMaxIdleConns(100)
@@ -312,8 +312,10 @@ func Server(configFile string) {
 	_, e2 := os.Stat(config.Config.ServerKey)
 	if e1 == nil && e2 == nil {
 		_auth = true
+		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTPs server")
 		// init userDNs
 		_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
+		logs.WithFields(logs.Fields{"UserDNs": len(_userDNs.DNs)}).Info("SiteDB")
 		go func() {
 			interval := config.Config.UpdateDNs
 			if interval == 0 {
@@ -334,7 +336,6 @@ func Server(configFile string) {
 				ClientAuth: tls.RequestClientCert,
 			},
 		}
-		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTPs server")
 		err = server.ListenAndServeTLS(config.Config.ServerCrt, config.Config.ServerKey)
 	} else {
 		// http server on certain port should be used behind frontend, cmsweb way
