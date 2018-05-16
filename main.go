@@ -32,5 +32,5 @@ func main() {
 func info() string {
 	goVersion := runtime.Version()
 	tstamp := time.Now()
-	return fmt.Sprintf("Build: git={{VERSION}} go=%s date=%s", goVersion, tstamp)
+	return fmt.Sprintf("Build: git=v00.00.11 go=%s date=%s", goVersion, tstamp)
 }
