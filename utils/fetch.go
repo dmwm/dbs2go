@@ -8,13 +8,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/user"
 
 	"github.com/vkuznet/x509proxy"
-
-	logs "github.com/sirupsen/logrus"
 )
 
 // global HTTP client
@@ -42,7 +41,7 @@ func tlsCerts() ([]tls.Certificate, error) {
 	}
 
 	if uproxy == "" && uckey == "" { // user doesn't have neither proxy or user certs
-		logs.Warn("Neither proxy or user certs are found, to proceed use auth=false option otherwise setup X509 environment")
+		log.Println("Neither proxy or user certs are found, to proceed use auth=false option otherwise setup X509 environment")
 		return nil, nil
 	}
 	if uproxy != "" {
@@ -104,17 +103,13 @@ func FetchResponse(rurl string, args []byte) ResponseType {
 	} else {
 		req, e = http.NewRequest("GET", rurl, nil)
 		if e != nil {
-			logs.WithFields(logs.Fields{
-				"Error": e,
-			}).Error("Unable to make GET request")
+			log.Println("Unable to make GET request", e)
 		}
 		req.Header.Add("Accept", "*/*")
 	}
 	resp, err := _client.Do(req)
 	if err != nil {
-		logs.WithFields(logs.Fields{
-			"Error": err,
-		}).Error("HTTP", err)
+		log.Println("HTTP Error", err)
 		response.Error = err
 		return response
 	}

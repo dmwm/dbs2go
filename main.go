@@ -14,6 +14,9 @@ import (
 	"github.com/vkuznet/dbs2go/web"
 )
 
+// version of the code
+var version string
+
 func main() {
 	var config string
 	flag.StringVar(&config, "config", "config.json", "dbs2go config file")
@@ -28,9 +31,9 @@ func main() {
 	web.Server(config)
 }
 
-// helper function to return current version
+// helper function to return version string of the server
 func info() string {
 	goVersion := runtime.Version()
-	tstamp := time.Now()
-	return fmt.Sprintf("Build: git={{VERSION}} go=%s date=%s", goVersion, tstamp)
+	tstamp := time.Now().Format("2006-02-01")
+	return fmt.Sprintf("auth-proxy-server git=%s go=%s date=%s", version, goVersion, tstamp)
 }

@@ -21,9 +21,11 @@ package web
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -31,14 +33,14 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/csrf"
+	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/config"
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
 	_ "gopkg.in/rana/ora.v4"
-
-	logs "github.com/sirupsen/logrus"
 
 	_ "net/http/pprof"
 )
@@ -65,17 +67,13 @@ func userDNs() []string {
 	rurl := "https://cmsweb.cern.ch/sitedb/data/prod/people"
 	resp := utils.FetchResponse(rurl, []byte{})
 	if resp.Error != nil {
-		logs.WithFields(logs.Fields{
-			"Error": resp.Error,
-		}).Error("Unable to fetch SiteDB records", resp.Error)
+		log.Println("Unable to fetch SiteDB records", resp.Error)
 		return out
 	}
 	var rec map[string]interface{}
 	err := json.Unmarshal(resp.Data, &rec)
 	if err != nil {
-		logs.WithFields(logs.Fields{
-			"Error": err,
-		}).Error("Unable to unmarshal response", err)
+		log.Println("Unable to unmarshal response", err)
 		return out
 	}
 	desc := rec["desc"].(map[string]interface{})
@@ -128,9 +126,7 @@ func auth(r *http.Request) bool {
 	userDN := UserDN(r)
 	match := utils.InList(userDN, _userDNs.DNs)
 	if !match {
-		logs.WithFields(logs.Fields{
-			"User DN": userDN,
-		}).Error("Auth userDN not found in SiteDB")
+		log.Println("userDN not found in SiteDB")
 	}
 	return match
 }
@@ -260,7 +256,7 @@ func Server(configFile string) {
 	}
 	utils.VERBOSE = config.Config.Verbose
 	utils.STATICDIR = config.Config.StaticDir
-	logs.Info(config.Config.String())
+	log.Println(config.Config.String())
 	_tdir = fmt.Sprintf("%s/templates", utils.STATICDIR) // template area
 
 	// static content for js/css/images requests
@@ -291,7 +287,7 @@ func Server(configFile string) {
 	}
 	dberr = db.Ping()
 	if dberr != nil {
-		logs.WithFields(logs.Fields{"Error": dberr}).Warn("DB ping")
+		log.Println("DB ping error", dberr)
 	}
 	db.SetMaxOpenConns(100)
 	db.SetMaxIdleConns(100)
@@ -312,10 +308,10 @@ func Server(configFile string) {
 	_, e2 := os.Stat(config.Config.ServerKey)
 	if e1 == nil && e2 == nil {
 		_auth = true
-		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTPs server")
+		log.Println("Starting HTTPs server")
 		// init userDNs
 		_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
-		logs.WithFields(logs.Fields{"UserDNs": len(_userDNs.DNs)}).Info("SiteDB")
+		log.Println("UserDNs", len(_userDNs.DNs))
 		go func() {
 			interval := config.Config.UpdateDNs
 			if interval == 0 {
@@ -323,7 +319,6 @@ func Server(configFile string) {
 			}
 			for {
 				d := time.Duration(interval) * time.Minute
-				logs.WithFields(logs.Fields{"Time": time.Now(), "Duration": d}).Info("userDNs are updated")
 				time.Sleep(d) // sleep for next iteration
 				_userDNs = UserDNs{DNs: userDNs(), Time: time.Now()}
 			}
@@ -340,11 +335,107 @@ func Server(configFile string) {
 	} else {
 		// http server on certain port should be used behind frontend, cmsweb way
 		_auth = false
-		logs.WithFields(logs.Fields{"Addr": addr}).Info("Starting HTTP server")
+		log.Println("Starting HTTP server")
 		http.HandleFunc("/", RequestHandler)
 		err = http.ListenAndServe(addr, nil)
 	}
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
+	}
+}
+
+// global variables
+var _top, _bottom, _search string
+
+// Time0 represents initial time when we started the server
+var Time0 time.Time
+
+func indexPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
+
+func handlers() *mux.Router {
+	router := mux.NewRouter()
+
+	// visible routes
+	router.HandleFunc("/datatiers", LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
+	router.HandleFunc("/datasets", LoggingHandler(DatasetsHandler)).Methods("GET", "POST")
+	router.HandleFunc("/blocks", LoggingHandler(BlocksHandler)).Methods("GET", "POST")
+	router.HandleFunc("/files", LoggingHandler(FilesHandler)).Methods("GET", "POST")
+
+	return router
+}
+
+// Server code
+func NewServer(configFile string) {
+	Time0 = time.Now()
+	err := config.ParseConfig(configFile)
+	// log time, filename, and line number
+	if config.Config.Verbose > 0 {
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+	} else {
+		log.SetFlags(log.LstdFlags)
+	}
+	if err != nil {
+		log.Printf("Unable to parse, time: %v, config: %v\n", time.Now(), configFile)
+	}
+	fmt.Println("Configuration:", config.Config.String())
+
+	// initialize templates
+	var templates ServerTemplates
+	tmplData := make(map[string]interface{})
+	tmplData["Time"] = time.Now()
+	_top = templates.Tmpl(config.Config.Templates, "top.tmpl", tmplData)
+	_bottom = templates.Tmpl(config.Config.Templates, "bottom.tmpl", tmplData)
+
+	// static handlers
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(config.Config.Styles))))
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir(config.Config.Jscripts))))
+
+	// dynamic handlers
+	if config.Config.CSRFKey != "" {
+		CSRF := csrf.Protect(
+			[]byte(config.Config.CSRFKey),
+			csrf.RequestHeader("Authenticity-Token"),
+			csrf.FieldName("authenticity_token"),
+			csrf.Secure(config.Config.Production),
+			csrf.ErrorHandler(http.HandlerFunc(
+				func(w http.ResponseWriter, r *http.Request) {
+					log.Printf("### CSRF error handler: %+v\n", r)
+					w.WriteHeader(http.StatusForbidden)
+				},
+			)),
+		)
+
+		http.Handle("/", CSRF(handlers()))
+	} else {
+		http.Handle("/", handlers())
+	}
+
+	// Start server
+	addr := fmt.Sprintf(":%d", config.Config.Port)
+	_, e1 := os.Stat(config.Config.ServerCrt)
+	_, e2 := os.Stat(config.Config.ServerKey)
+	if e1 == nil && e2 == nil {
+		//start HTTPS server which require user certificates
+		rootCA := x509.NewCertPool()
+		caCert, _ := ioutil.ReadFile(config.Config.RootCA)
+		rootCA.AppendCertsFromPEM(caCert)
+		server := &http.Server{
+			Addr: addr,
+			TLSConfig: &tls.Config{
+				//                 ClientAuth: tls.RequestClientCert,
+				RootCAs: rootCA,
+			},
+		}
+		log.Println("Starting HTTPs server", addr)
+		err = server.ListenAndServeTLS(config.Config.ServerCrt, config.Config.ServerKey)
+	} else {
+		// Start server without user certificates
+		log.Println("Starting HTTP server", addr)
+		err = http.ListenAndServe(addr, nil)
+	}
+	if err != nil {
+		log.Printf("Fail to start server %v", err)
 	}
 }

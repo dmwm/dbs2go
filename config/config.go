@@ -9,8 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	logs "github.com/sirupsen/logrus"
+	"log"
 )
 
 // Configuration stores dbs configuration parameters
@@ -25,6 +24,21 @@ type Configuration struct {
 	ServerKey string   `json:"serverkey"` // server key for https
 	ServerCrt string   `json:"servercrt"` // server certificate for https
 	UpdateDNs int      `json:"updateDNs"` // interval in minutes to update user DNs
+
+	// server parts
+	Templates string `json:"templates"` // location of server templates
+	Jscripts  string `json:"jscripts"`  // location of server JavaScript files
+	Images    string `json:"images"`    // location of server images
+	Styles    string `json:"styles"`    // location of server CSS styles
+
+	// server HTTPs parts
+	//     ServerKey  string `json:"ckey"`       // tls.key file
+	//     ServerCrt  string `json:"cert"`       // tls.cert file
+	RootCA           string `json:"rootCA"`             // RootCA file
+	CSRFKey          string `json:"csrfKey"`            // CSRF 32-byte-long-auth-key
+	Production       bool   `json:"production"`         // production server or not
+	UTC              bool   `json:"utc"`                // report logger time in UTC
+	PrintMonitRecord bool   `json:"print_monit_record"` // print monit record on stdout
 }
 
 // global variables
@@ -38,12 +52,12 @@ func (c *Configuration) String() string {
 func ParseConfig(configFile string) error {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		logs.WithFields(logs.Fields{"configFile": configFile}).Fatal("Unable to read", err)
+		log.Println("unable to read config file", configFile, err)
 		return err
 	}
 	err = json.Unmarshal(data, &Config)
 	if err != nil {
-		logs.WithFields(logs.Fields{"configFile": configFile}).Fatal("Unable to parse", err)
+		log.Println("unable to parse config file", configFile, err)
 		return err
 	}
 	return nil
