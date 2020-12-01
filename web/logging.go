@@ -11,7 +11,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -26,23 +25,16 @@ type LogRecord struct {
 	API            string  `json:"api"`              // http service API being used
 	System         string  `json:"system"`           // cmsweb service name
 	ClientIP       string  `json:"clientip"`         // client IP address
-	BytesSend      int64   `json:"bytes_send"`       // number of bytes send with HTTP request
-	BytesReceived  int64   `json:"bytes_received"`   // number of bytes received with HTTP request
+	BytesIn        int64   `json:"bytes_in"`         // number of bytes send with HTTP request
+	BytesOut       int64   `json:"bytes_out"`        // number of bytes received with HTTP request
 	Proto          string  `json:"proto"`            // http.Request protocol
 	Status         int64   `json:"status"`           // http.Request status code
 	ContentLength  int64   `json:"content_length"`   // http.Request content-length
-	AuthProto      string  `json:"auth_proto"`       // authentication protocol
-	Cipher         string  `json:"cipher"`           // TLS cipher name
-	CmsAuthCert    string  `json:"cms_auth_cert"`    // cms auth certificate, user DN
-	CmsLoginName   string  `json:"cms_login_name"`   // cms login name, user DN
-	CmsAuth        string  `json:"cms_auth"`         // cms auth method
 	Referer        string  `json:"referer"`          // http referer
 	UserAgent      string  `json:"user_agent"`       // http user-agent field
 	XForwardedHost string  `json:"x_forwarded_host"` // http.Request X-Forwarded-Host
 	XForwardedFor  string  `json:"x_forwarded_for"`  // http.Request X-Forwarded-For
 	RemoteAddr     string  `json:"remote_addr"`      // http.Request remote address
-	ResponseStatus string  `json:"response_status"`  // http.Response status
-	ResponseTime   float64 `json:"response_time"`    // http response time
 	RequestTime    float64 `json:"request_time"`     // http request time
 	Timestamp      int64   `json:"timestamp"`        // record timestamp
 }
@@ -87,35 +79,30 @@ func (writer logWriter) Write(data []byte) (int, error) {
 
 // helper function to log every single user request, here we pass pointer to status code
 // as it may change through the handler while we use defer logRequest
-func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status int, tstamp int64) {
-	respHeader := w.Header()
-	dataMsg := fmt.Sprintf("[data: %v in %v out]", r.ContentLength, respHeader.Get("Content-Length"))
+func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status int, tstamp int64, bytesOut int64) {
+	dataMsg := fmt.Sprintf("[data: %v in %v out]", r.ContentLength, bytesOut)
 	referer := r.Referer()
 	if referer == "" {
 		referer = "-"
 	}
-	xff := r.Header.Get("X-Forwarded-For")
 	var clientip string
+	xff := r.Header.Get("X-Forwarded-For")
 	if xff != "" {
 		clientip = strings.Split(xff, ":")[0]
 	} else if r.RemoteAddr != "" {
 		clientip = strings.Split(r.RemoteAddr, ":")[0]
 	}
-	addr := fmt.Sprintf("[X-Forwarded-For: %v] [X-Forwarded-Host: %v] [remoteAddr: %v]", xff, r.Header.Get("X-Forwarded-Host"), r.RemoteAddr)
+	addr := r.RemoteAddr
 	refMsg := fmt.Sprintf("[ref: \"%s\" \"%v\"]", referer, r.Header.Get("User-Agent"))
-	respMsg := fmt.Sprintf("[req: %v resp: %v]", time.Since(start), respHeader.Get("Response-Time"))
-	log.Printf("%s %s %s %d %s %s %s %s\n", addr, r.Method, r.RequestURI, r.Proto, status, dataMsg, refMsg, respMsg)
-	rTime, _ := strconv.ParseFloat(respHeader.Get("Response-Time-Seconds"), 10)
-	var bytesSend, bytesRecv int64
-	bytesSend = r.ContentLength
-	bytesRecv, _ = strconv.ParseInt(respHeader.Get("Content-Length"), 10, 64)
+	respMsg := fmt.Sprintf("[req: %v]", time.Since(start))
+	log.Printf("%s %s %s %s %d %s %s %s\n", addr, r.Method, r.RequestURI, r.Proto, status, dataMsg, refMsg, respMsg)
 	rec := LogRecord{
 		Method:         r.Method,
 		URI:            r.RequestURI,
 		API:            getAPI(r.RequestURI),
 		System:         getSystem(r.RequestURI),
-		BytesSend:      bytesSend,
-		BytesReceived:  bytesRecv,
+		BytesIn:        r.ContentLength,
+		BytesOut:       bytesOut,
 		Proto:          r.Proto,
 		Status:         int64(status),
 		ContentLength:  r.ContentLength,
@@ -125,8 +112,6 @@ func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status 
 		XForwardedFor:  xff,
 		ClientIP:       clientip,
 		RemoteAddr:     r.RemoteAddr,
-		ResponseStatus: respHeader.Get("Response-Status"),
-		ResponseTime:   rTime,
 		RequestTime:    time.Since(start).Seconds(),
 		Timestamp:      tstamp,
 	}

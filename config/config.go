@@ -21,9 +21,8 @@ type Configuration struct {
 	DBFile    string   `json:"dbfile"`    // dbs db file with secrets
 	Views     []string `json:"views"`     // list of supported views
 	Verbose   int      `json:"verbose"`   // verbosity level
-	ServerKey string   `json:"serverkey"` // server key for https
-	ServerCrt string   `json:"servercrt"` // server certificate for https
 	UpdateDNs int      `json:"updateDNs"` // interval in minutes to update user DNs
+	LogFile   string   `json:"log_file"`  // server log file
 
 	// server parts
 	Templates string `json:"templates"` // location of server templates
@@ -32,8 +31,8 @@ type Configuration struct {
 	Styles    string `json:"styles"`    // location of server CSS styles
 
 	// server HTTPs parts
-	//     ServerKey  string `json:"ckey"`       // tls.key file
-	//     ServerCrt  string `json:"cert"`       // tls.cert file
+	ServerKey        string `json:"serverkey"`          // server key for https
+	ServerCrt        string `json:"servercrt"`          // server certificate for https
 	RootCA           string `json:"rootCA"`             // RootCA file
 	CSRFKey          string `json:"csrfKey"`            // CSRF 32-byte-long-auth-key
 	Production       bool   `json:"production"`         // production server or not

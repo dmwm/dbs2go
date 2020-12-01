@@ -35,6 +35,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/config"
@@ -362,6 +363,13 @@ func handlers() *mux.Router {
 	router.HandleFunc("/datasets", LoggingHandler(DatasetsHandler)).Methods("GET", "POST")
 	router.HandleFunc("/blocks", LoggingHandler(BlocksHandler)).Methods("GET", "POST")
 	router.HandleFunc("/files", LoggingHandler(FilesHandler)).Methods("GET", "POST")
+	// more complex example
+	// https://github.com/gorilla/mux
+	//     router.Path("/dummy").
+	//         Queries("bla", "{bla}").
+	//         HandlerFunc(LoggingHandler(DummyHandler)).
+	//         Methods("GET")
+	router.HandleFunc("/dummy", LoggingHandler(DummyHandler)).Methods("GET", "POST")
 
 	return router
 }
@@ -370,11 +378,17 @@ func handlers() *mux.Router {
 func NewServer(configFile string) {
 	Time0 = time.Now()
 	err := config.ParseConfig(configFile)
-	// log time, filename, and line number
+	log.SetFlags(0)
 	if config.Config.Verbose > 0 {
-		log.SetFlags(log.LstdFlags | log.Lshortfile)
-	} else {
-		log.SetFlags(log.LstdFlags)
+		log.SetFlags(log.Lshortfile)
+	}
+	log.SetOutput(new(logWriter))
+	if config.Config.LogFile != "" {
+		rl, err := rotatelogs.New(config.Config.LogFile + "-%Y%m%d")
+		if err == nil {
+			rotlogs := rotateLogWriter{RotateLogs: rl}
+			log.SetOutput(rotlogs)
+		}
 	}
 	if err != nil {
 		log.Printf("Unable to parse, time: %v, config: %v\n", time.Now(), configFile)
@@ -382,11 +396,11 @@ func NewServer(configFile string) {
 	fmt.Println("Configuration:", config.Config.String())
 
 	// initialize templates
-	var templates ServerTemplates
 	tmplData := make(map[string]interface{})
 	tmplData["Time"] = time.Now()
-	_top = templates.Tmpl(config.Config.Templates, "top.tmpl", tmplData)
-	_bottom = templates.Tmpl(config.Config.Templates, "bottom.tmpl", tmplData)
+	//     var templates ServerTemplates
+	//     _top = templates.Tmpl(config.Config.Templates, "top.tmpl", tmplData)
+	//     _bottom = templates.Tmpl(config.Config.Templates, "bottom.tmpl", tmplData)
 
 	// static handlers
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(config.Config.Styles))))
