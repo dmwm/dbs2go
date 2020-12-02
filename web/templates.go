@@ -10,7 +10,7 @@ import (
 	"html/template"
 	"path/filepath"
 
-	"github.com/dmwm/das2go/config"
+	"github.com/vkuznet/dbs2go/config"
 )
 
 // consume list of templates and release their full path counterparts

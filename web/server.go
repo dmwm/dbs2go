@@ -32,7 +32,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	//     _ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"

@@ -31,6 +31,8 @@ jobs:
         go get github.com/shirou/gopsutil
         go get github.com/divan/expvarmon
         go get github.com/lestrrat-go/file-rotatelogs
+        go get github.com/gorilla/csrf
+        go get github.com/gorilla/mux
 
     - name: Build
       run: |
