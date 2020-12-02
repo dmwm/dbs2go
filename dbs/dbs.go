@@ -6,11 +6,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/vkuznet/dbs2go/utils"
 	"io/ioutil"
 	"log"
 	"reflect"
 	"strings"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // use API struct for reflection
@@ -50,6 +51,7 @@ func LoadSQL(owner string) Record {
 	tmplData := make(Record)
 	tmplData["Owner"] = owner
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
+	log.Println("sql area", sdir)
 	for _, f := range utils.Listfiles(sdir) {
 		k := strings.Split(f, ".")[0]
 		dbsql[k] = utils.ParseTmpl(sdir, f, tmplData)

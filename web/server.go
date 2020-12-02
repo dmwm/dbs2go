@@ -378,6 +378,8 @@ func handlers() *mux.Router {
 func NewServer(configFile string) {
 	Time0 = time.Now()
 	err := config.ParseConfig(configFile)
+	utils.VERBOSE = config.Config.Verbose
+	utils.STATICDIR = config.Config.StaticDir
 	log.SetFlags(0)
 	if config.Config.Verbose > 0 {
 		log.SetFlags(log.Lshortfile)
@@ -405,6 +407,27 @@ func NewServer(configFile string) {
 	// static handlers
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(config.Config.Styles))))
 	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir(config.Config.Jscripts))))
+
+	// set database connection once
+	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
+	db, dberr := sql.Open(dbtype, dburi)
+	defer db.Close()
+	if dberr != nil {
+		log.Fatal(dberr)
+	}
+	dberr = db.Ping()
+	if dberr != nil {
+		log.Println("DB ping error", dberr)
+	}
+	db.SetMaxOpenConns(100)
+	db.SetMaxIdleConns(100)
+	dbs.DB = db
+	dbs.DBTYPE = dbtype
+
+	// load DBS SQL statements
+	dbsql := dbs.LoadSQL(dbowner)
+	dbs.DBSQL = dbsql
+	dbs.DBOWNER = dbowner
 
 	// dynamic handlers
 	if config.Config.CSRFKey != "" {
