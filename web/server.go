@@ -395,7 +395,7 @@ func NewServer(configFile string) {
 	if err != nil {
 		log.Printf("Unable to parse, time: %v, config: %v\n", time.Now(), configFile)
 	}
-	fmt.Println("Configuration:", config.Config.String())
+	log.Println("Configuration:", config.Config.String())
 
 	// initialize templates
 	tmplData := make(map[string]interface{})
