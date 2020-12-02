@@ -40,7 +40,7 @@ jobs:
         sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" web/server.go
         sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",,g" web/server.go
         mkdir -p $GOPATH/src/github.com/vkuznet
-        cp ../dbs2go $GOPATH/src/github.com/vkuznet
+        cp -r ../dbs2go $GOPATH/src/github.com/vkuznet
         make
 
     - name: Create Release
