@@ -4,11 +4,9 @@ package dbs
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"reflect"
 	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -24,25 +22,7 @@ type Record map[string]interface{}
 var DB *sql.DB
 var DBTYPE string
 var DBSQL Record
-var APIMAP Record
 var DBOWNER string
-
-// helper function to load DBS Api map
-func LoadApiMap() Record {
-	var apimap Record
-	mfile := fmt.Sprintf("%s/apis.json", utils.STATICDIR)
-	log.Println("read", mfile)
-	file, err := ioutil.ReadFile(mfile)
-	if err != nil {
-		msg := fmt.Sprintf("Unable to read DBS api map, error: %v\n", err)
-		panic(msg)
-	}
-	err = json.Unmarshal(file, &apimap)
-	if err != nil {
-		log.Println("error:", err)
-	}
-	return apimap
-}
 
 // helper function to load DBS SQL statements
 func LoadSQL(owner string) Record {
@@ -68,25 +48,6 @@ func getSQL(key string) string {
 		log.Fatal(msg)
 	}
 	return stm.(string)
-}
-
-// Function to access internal back-end and return records for provided
-// api and params
-func GetData(api string, params Record) []Record {
-	var data []Record
-	for apiname, endpoint := range APIMAP {
-		if api == endpoint {
-			// Use reflection to get proper API from apiname
-			// http://stackoverflow.com/questions/12127585/go-lookup-function-by-name
-			t := reflect.ValueOf(API{})                   // type of API struct
-			m := t.MethodByName(apiname)                  // associative function name for given api
-			p := []reflect.Value{reflect.ValueOf(params)} // list of function arguments
-			r := m.Call(p)[0]                             // return value
-			data = r.Interface().([]Record)               // cast reflect value to its type
-			break
-		}
-	}
-	return data
 }
 
 // helper function to get value from record

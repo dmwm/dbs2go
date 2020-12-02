@@ -28,8 +28,7 @@ func main() {
 		os.Exit(0)
 
 	}
-	//     web.Server(config)
-	web.NewServer(config)
+	web.Server(config)
 }
 
 // helper function to return version string of the server
