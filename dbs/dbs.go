@@ -150,14 +150,14 @@ func executeAll(stm string, args ...interface{}) []Record {
 	}
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("ERROR: %s", err)
-		errorRecord(msg)
+		msg := fmt.Sprintf("fail to obtain transaction, %s", err)
+		return errorRecord(msg)
 	}
 	defer tx.Rollback()
 	//     rows, err := DB.Query(stm, args...)
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return errorRecord(msg)
 	}
 	defer rows.Close()
@@ -179,7 +179,7 @@ func executeAll(stm string, args ...interface{}) []Record {
 		}
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
-			msg := fmt.Sprintf("ERROR: rows.Scan, dest='%v', error=%v", valuePtrs, err)
+			msg := fmt.Sprintf("rows.Scan, dest='%v', error=%v", valuePtrs, err)
 			return errorRecord(msg)
 		}
 		rowCount += 1
@@ -220,7 +220,7 @@ func executeAll(stm string, args ...interface{}) []Record {
 		out = append(out, rec)
 	}
 	if err = rows.Err(); err != nil {
-		return errorRecord(fmt.Sprintf("Error: %v", err))
+		return errorRecord(fmt.Sprintf("unable to scan rows %v", err))
 	}
 	return out
 }
@@ -234,14 +234,14 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	}
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("ERROR: %s", err)
+		msg := fmt.Sprintf("unable to obtain transaction %v", err)
 		errorRecord(msg)
 	}
 	defer tx.Rollback()
 	//     rows, err := DB.Query(stm, args...)
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		msg := fmt.Sprintf("ERROR: DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return errorRecord(msg)
 	}
 	defer rows.Close()
@@ -250,7 +250,7 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	for rows.Next() {
 		err := rows.Scan(vals...)
 		if err != nil {
-			msg := fmt.Sprintf("ERROR: rows.Scan, vals='%v', error=%v", vals, err)
+			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
 			return errorRecord(msg)
 		}
 		rec := make(Record)
@@ -286,7 +286,7 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 		out = append(out, rec)
 	}
 	if err = rows.Err(); err != nil {
-		return errorRecord(fmt.Sprintf("Error: %v", err))
+		return errorRecord(fmt.Sprintf("unable to scan rows: %v", err))
 	}
 	return out
 }
