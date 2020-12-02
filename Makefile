@@ -36,4 +36,4 @@ clean:
 test : test1
 
 test1:
-	cd test; go test
+	cd test; go test -v .
