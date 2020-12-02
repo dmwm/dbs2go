@@ -31,7 +31,7 @@ var DBOWNER string
 func LoadApiMap() Record {
 	var apimap Record
 	mfile := fmt.Sprintf("%s/apis.json", utils.STATICDIR)
-	fmt.Println("read", mfile)
+	log.Println("read", mfile)
 	file, err := ioutil.ReadFile(mfile)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to read DBS api map, error: %v\n", err)
@@ -39,7 +39,7 @@ func LoadApiMap() Record {
 	}
 	err = json.Unmarshal(file, &apimap)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Println("error:", err)
 	}
 	return apimap
 }
@@ -146,7 +146,7 @@ func executeAll(stm string, args ...interface{}) []Record {
 	var out []Record
 
 	if utils.VERBOSE > 1 {
-		fmt.Println(stm, args)
+		log.Println(stm, args)
 	}
 	tx, err := DB.Begin()
 	if err != nil {
@@ -230,7 +230,7 @@ func execute(stm string, cols []string, vals []interface{}, args ...interface{})
 	var out []Record
 
 	if utils.VERBOSE > 1 {
-		fmt.Println(stm, args)
+		log.Println(stm, args)
 	}
 	tx, err := DB.Begin()
 	if err != nil {
