@@ -1,7 +1,7 @@
 VERSION=`git rev-parse --short HEAD`
 flags=-ldflags="-s -w -X main.version=${VERSION}"
 
-all: vet build
+all: build
 
 vet:
 	go vet .
