@@ -31,6 +31,7 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 	}
 }
 
+// DummyHandler provides example how to write GET/POST handler
 func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	// example of handling POST request
 	if r.Method == "POST" {
@@ -61,6 +62,20 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	w.Write(data)
 	size := int64(binary.Size(data))
 	return status, size, nil
+}
+
+// StatusHandler provides basic functionality of status response
+func StatusHandler(w http.ResponseWriter, r *http.Request) {
+	var records []dbs.Record
+	rec := make(dbs.Record)
+	rec["status"] = http.StatusOK
+	records = append(records, rec)
+	data, err := json.Marshal(records)
+	if err != nil {
+		log.Fatalf("Fail to marshal records, %v", err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 // DatatiersHandler
