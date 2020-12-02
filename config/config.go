@@ -45,7 +45,7 @@ var Config Configuration
 
 // String returns string representation of dbs Config
 func (c *Configuration) String() string {
-	return fmt.Sprintf("<Config port=%d staticdir=%s hkey=%s base=%s dbfile=%s views=%v updateDNs=%d crt=%s key=%s>", c.Port, c.StaticDir, c.Hkey, c.Base, c.DBFile, c.Views, c.UpdateDNs, c.ServerCrt, c.ServerKey)
+	return fmt.Sprintf("<Config port=%d staticdir=%s hkey=%s base=%s dbfile=%s views=%v updateDNs=%d crt=%s key=%s verbose=%d>", c.Port, c.StaticDir, c.Hkey, c.Base, c.DBFile, c.Views, c.UpdateDNs, c.ServerCrt, c.ServerKey, c.Verbose)
 }
 
 func ParseConfig(configFile string) error {
