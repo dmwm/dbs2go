@@ -405,8 +405,14 @@ func NewServer(configFile string) {
 	//     _bottom = templates.Tmpl(config.Config.Templates, "bottom.tmpl", tmplData)
 
 	// static handlers
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(config.Config.Styles))))
-	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir(config.Config.Jscripts))))
+	//     http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(config.Config.Styles))))
+	//     http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir(config.Config.Jscripts))))
+	// static content for js/css/images requests
+	for _, dir := range []string{"js", "css", "images"} {
+		m := fmt.Sprintf("/%s/%s/", config.Config.Base, dir)
+		d := fmt.Sprintf("%s/%s", utils.STATICDIR, dir)
+		http.Handle(m, http.StripPrefix(m, http.FileServer(http.Dir(d))))
+	}
 
 	// set database connection once
 	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
