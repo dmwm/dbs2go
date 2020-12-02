@@ -23,7 +23,6 @@ jobs:
     - name: Get dependencies
       run: |
         go get github.com/dmwm/cmsauth
-        go get github.com/vkuznet/dbs2go
         go get github.com/mattn/go-sqlite3
         go get github.com/vkuznet/x509proxy
         go get github.com/pkg/profile
