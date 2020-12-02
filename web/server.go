@@ -95,6 +95,7 @@ func handlers() *mux.Router {
 	//         HandlerFunc(LoggingHandler(DummyHandler)).
 	//         Methods("GET")
 	router.HandleFunc("/dummy", LoggingHandler(DummyHandler)).Methods("GET", "POST")
+	router.HandleFunc("/status", StatusHandler).Methods("GET")
 
 	return router
 }
