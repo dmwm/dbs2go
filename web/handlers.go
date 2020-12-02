@@ -66,8 +66,20 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 // DatatiersHandler
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	status := http.StatusOK
+	var params dbs.Record
+	for k, v := range r.Form {
+		params[k] = v
+	}
+	var api dbs.API
+	records := api.DataTiers(params)
+	data, err := json.Marshal(records)
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
 	w.WriteHeader(status)
-	return status, 0, nil
+	w.Write(data)
+	size := int64(binary.Size(data))
+	return status, size, nil
 }
 
 // DatasetsHandler
