@@ -5,6 +5,7 @@ package web
 import (
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -95,15 +96,28 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// DatatiersHandler
-func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+// DBSGetHandler
+func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
 	var params dbs.Record
 	for k, v := range r.Form {
 		params[k] = v
 	}
+	var records []dbs.Record
 	var api dbs.API
-	records := api.DataTiers(params)
+	if a == "datatiers" {
+		records = api.DataTiers(params)
+	} else if a == "datasets" {
+		records = api.Datasets(params)
+	} else if a == "blocks" {
+		records = api.Blocks(params)
+	} else if a == "files" {
+		records = api.Files(params)
+	} else {
+		rec := make(dbs.Record)
+		rec["error"] = fmt.Sprintf("not implemented API %s", api)
+		records = append(records, rec)
+	}
 	data, err := json.Marshal(records)
 	if err != nil {
 		return http.StatusInternalServerError, 0, err
@@ -114,23 +128,22 @@ func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 	return status, size, nil
 }
 
+// DatatiersHandler
+func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "datatiers")
+}
+
 // DatasetsHandler
 func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	status := http.StatusOK
-	w.WriteHeader(status)
-	return status, 0, nil
+	return DBSGetHandler(w, r, "datasets")
 }
 
 // BlocksHandler
 func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	status := http.StatusOK
-	w.WriteHeader(status)
-	return status, 0, nil
+	return DBSGetHandler(w, r, "blocks")
 }
 
 // FilesHandler
 func FilesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	status := http.StatusOK
-	w.WriteHeader(status)
-	return status, 0, nil
+	return DBSGetHandler(w, r, "files")
 }
