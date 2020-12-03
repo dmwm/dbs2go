@@ -57,30 +57,6 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
 
-// helper function to initialize DB access
-func initDBAccess() {
-	// set database connection once
-	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
-	db, dberr := sql.Open(dbtype, dburi)
-	defer db.Close()
-	if dberr != nil {
-		log.Fatal(dberr)
-	}
-	dberr = db.Ping()
-	if dberr != nil {
-		log.Println("DB ping error", dberr)
-	}
-	db.SetMaxOpenConns(config.Config.MaxDBConnections)
-	db.SetMaxIdleConns(config.Config.MaxIdleConnections)
-	dbs.DB = db
-	dbs.DBTYPE = dbtype
-
-	// load DBS SQL statements
-	dbsql := dbs.LoadSQL(dbowner)
-	dbs.DBSQL = dbsql
-	dbs.DBOWNER = dbowner
-}
-
 // helper function to provide end-point path
 func basePath(s string) string {
 	if config.Config.Base != "" {
@@ -153,10 +129,26 @@ func Server(configFile string) {
 		http.Handle(m, http.StripPrefix(m, http.FileServer(http.Dir(d))))
 	}
 
-	// initialize DB access
-	if config.Config.Production {
-		initDBAccess()
+	// set database connection once
+	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
+	db, dberr := sql.Open(dbtype, dburi)
+	defer db.Close()
+	if dberr != nil {
+		log.Fatal(dberr)
 	}
+	dberr = db.Ping()
+	if dberr != nil {
+		log.Println("DB ping error", dberr)
+	}
+	db.SetMaxOpenConns(config.Config.MaxDBConnections)
+	db.SetMaxIdleConns(config.Config.MaxIdleConnections)
+	dbs.DB = db
+	dbs.DBTYPE = dbtype
+
+	// load DBS SQL statements
+	dbsql := dbs.LoadSQL(dbowner)
+	dbs.DBSQL = dbsql
+	dbs.DBOWNER = dbowner
 
 	// dynamic handlers
 	if config.Config.CSRFKey != "" {
