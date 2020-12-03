@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/vkuznet/dbs2go/dbs"
@@ -21,6 +22,11 @@ type LoggingHandlerFunc func(w http.ResponseWriter, r *http.Request) (int, int64
 // to common logger
 func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			atomic.AddUint64(&TotalPostRequests, 1)
+		} else if r.Method == "GET" {
+			atomic.AddUint64(&TotalGetRequests, 1)
+		}
 		start := time.Now()
 		status, dataSize, err := h(w, r)
 		if err != nil {
@@ -29,6 +35,17 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		logRequest(w, r, start, status, tstamp, dataSize)
 	}
+}
+
+// MetricsHandler provides metrics
+func MetricsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(promMetrics()))
+	return
 }
 
 // DummyHandler provides example how to write GET/POST handler

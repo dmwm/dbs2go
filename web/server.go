@@ -28,6 +28,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	//     _ "github.com/go-sql-driver/mysql"
@@ -49,8 +50,8 @@ import (
 // global variables
 var _top, _bottom, _search string
 
-// Time0 represents initial time when we started the server
-var Time0 time.Time
+// StartTime represents initial time when we started the server
+var StartTime time.Time
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
@@ -80,29 +81,44 @@ func initDBAccess() {
 	dbs.DBOWNER = dbowner
 }
 
+// helper function to provide end-point path
+func basePath(s string) string {
+	if config.Config.Base != "" {
+		if strings.HasPrefix(s, "/") {
+			s = strings.Replace(s, "/", "", 1)
+		}
+		if strings.HasPrefix(config.Config.Base, "/") {
+			return fmt.Sprintf("%s/%s", config.Config.Base, s)
+		}
+		return fmt.Sprintf("/%s/%s", config.Config.Base, s)
+	}
+	return s
+}
+
 func handlers() *mux.Router {
 	router := mux.NewRouter()
 
 	// visible routes
-	router.HandleFunc("/datatiers", LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
-	router.HandleFunc("/datasets", LoggingHandler(DatasetsHandler)).Methods("GET", "POST")
-	router.HandleFunc("/blocks", LoggingHandler(BlocksHandler)).Methods("GET", "POST")
-	router.HandleFunc("/files", LoggingHandler(FilesHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/datatiers"), LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/datasets"), LoggingHandler(DatasetsHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/blocks"), LoggingHandler(BlocksHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST")
 	// more complex example
 	// https://github.com/gorilla/mux
-	//     router.Path("/dummy").
+	//     router.Path(basePath("/dummy")).
 	//         Queries("bla", "{bla}").
 	//         HandlerFunc(LoggingHandler(DummyHandler)).
 	//         Methods("GET")
-	router.HandleFunc("/dummy", LoggingHandler(DummyHandler)).Methods("GET", "POST")
-	router.HandleFunc("/status", StatusHandler).Methods("GET")
+	router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 
 	return router
 }
 
 // Server represents main web server for DBS service
 func Server(configFile string) {
-	Time0 = time.Now()
+	StartTime = time.Now()
 	err := config.ParseConfig(configFile)
 	utils.VERBOSE = config.Config.Verbose
 	utils.STATICDIR = config.Config.StaticDir
@@ -138,7 +154,9 @@ func Server(configFile string) {
 	}
 
 	// initialize DB access
-	initDBAccess()
+	if config.Config.Production {
+		initDBAccess()
+	}
 
 	// dynamic handlers
 	if config.Config.CSRFKey != "" {
