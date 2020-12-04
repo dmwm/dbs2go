@@ -118,13 +118,23 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		rec["error"] = fmt.Sprintf("not implemented API %s", api)
 		records = append(records, rec)
 	}
-	data, err := json.Marshal(records)
-	if err != nil {
-		return http.StatusInternalServerError, 0, err
+	var size int64
+	enc := json.NewEncoder(w)
+	for _, rec := range records {
+		err := enc.Encode(rec)
+		size += int64(binary.Size(rec))
+		if err != nil {
+			return http.StatusInternalServerError, 0, err
+		}
+
 	}
+	//     data, err := json.Marshal(records)
+	//     if err != nil {
+	//         return http.StatusInternalServerError, 0, err
+	//     }
 	w.WriteHeader(status)
-	w.Write(data)
-	size := int64(binary.Size(data))
+	//     w.Write(data)
+	//     size := int64(binary.Size(data))
 	return status, size, nil
 }
 
