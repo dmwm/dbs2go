@@ -21,7 +21,13 @@ func (API) Datasets(params Record) []Record {
 	if isValid == "" {
 		isValid = "1"
 	}
+	// parse dataset_id argument
+	dataset_access_type := getSingleValue(params, "dataset_access_type")
+	if dataset_access_type == "" {
+		dataset_access_type = "VALID"
+	}
 	where += fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
+	where += fmt.Sprintf("AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
 	args = append(args, isValid)
 
 	// parse dataset argument
