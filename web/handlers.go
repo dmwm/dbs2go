@@ -132,7 +132,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	//     if err != nil {
 	//         return http.StatusInternalServerError, 0, err
 	//     }
-	w.WriteHeader(status)
+	//     w.WriteHeader(status)
 	//     w.Write(data)
 	//     size := int64(binary.Size(data))
 	return status, size, nil
@@ -140,7 +140,18 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 
 // DatatiersHandler
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "datatiers")
+	//     return DBSGetHandler(w, r, "datatiers")
+	status := http.StatusOK
+	var params dbs.Record
+	for k, v := range r.Form {
+		params[k] = v
+	}
+	var api dbs.API
+	err := api.DataTiersNew(params, w)
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
+	return status, 0, nil
 }
 
 // DatasetsHandler

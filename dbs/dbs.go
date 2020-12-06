@@ -4,9 +4,11 @@ package dbs
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -98,6 +100,86 @@ func placeholder(pholder string) string {
 	} else {
 		return "?"
 	}
+}
+
+func executeAllNew(w http.ResponseWriter, stm string, args ...interface{}) error {
+	enc := json.NewEncoder(w)
+
+	if utils.VERBOSE > 1 {
+		log.Println(stm, args)
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	rows, err := tx.Query(stm, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	// extract columns from Rows object and create values & valuesPtrs to retrieve results
+	columns, _ := rows.Columns()
+	var cols []string
+	count := len(columns)
+	values := make([]interface{}, count)
+	valuePtrs := make([]interface{}, count)
+	rowCount := 0
+
+	for rows.Next() {
+		if rowCount == 0 {
+			// initialize value pointers
+			for i, _ := range columns {
+				valuePtrs[i] = &values[i]
+			}
+		}
+		err := rows.Scan(valuePtrs...)
+		if err != nil {
+			return err
+		}
+		rowCount += 1
+		// store results into generic record (a dict)
+		rec := make(Record)
+		for i, col := range columns {
+			if len(cols) != len(columns) {
+				cols = append(cols, strings.ToLower(col))
+			}
+			vvv := values[i]
+			switch val := vvv.(type) {
+			case *sql.NullString:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullInt64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullFloat64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullBool:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			default:
+				rec[cols[i]] = val
+			}
+		}
+		err = enc.Encode(rec)
+		if err != nil {
+			return err
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // generic API to execute given statement
