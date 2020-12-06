@@ -157,11 +157,20 @@ func (API) DatasetsNew(params Record, w http.ResponseWriter) error {
 	where += fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
 	args = append(args, isValid)
 
+	// parse dataset_id argument
+	dataset_access_type := getSingleValue(params, "dataset_access_type")
+	if dataset_access_type == "" {
+		dataset_access_type = "VALID"
+	}
+	where += fmt.Sprintf(" AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
+	args = append(args, dataset_access_type)
+
 	// parse dataset argument
 	datasets := getValues(params, "dataset")
 	genSQL := ""
 	if len(datasets) > 1 {
 		where += fmt.Sprintf(" AND D.DATASET in (SELECT TOKEN FROM TOKEN_GENERATOR)")
+		where += fmt.Sprintf(" AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
 		var vals []string
 		genSQL, vals = tokens(datasets)
 		for _, d := range vals {
@@ -170,6 +179,7 @@ func (API) DatasetsNew(params Record, w http.ResponseWriter) error {
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		where += fmt.Sprintf(" AND D.DATASET %s %s", op, placeholder("dataset"))
+		where += fmt.Sprintf(" AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
 		args = append(args, val)
 	}
 
