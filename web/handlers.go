@@ -156,7 +156,18 @@ func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 
 // DatasetsHandler
 func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "datasets")
+	//     return DBSGetHandler(w, r, "datasets")
+	status := http.StatusOK
+	var params dbs.Record
+	for k, v := range r.Form {
+		params[k] = v
+	}
+	var api dbs.API
+	err := api.DatasetsNew(params, w)
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
+	return status, 0, nil
 }
 
 // BlocksHandler

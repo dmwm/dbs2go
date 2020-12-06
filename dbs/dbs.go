@@ -5,6 +5,7 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -341,4 +342,71 @@ func errorRecord(msg string) []Record {
 	erec["error"] = msg
 	out = append(out, erec)
 	return out
+}
+
+// similar to executeAll function but it takes explicit set of columns and values
+func executeNew(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) error {
+	enc := json.NewEncoder(w)
+
+	if utils.VERBOSE > 1 {
+		log.Println(stm, args)
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to obtain transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	//     rows, err := DB.Query(stm, args...)
+	rows, err := tx.Query(stm, args...)
+	if err != nil {
+		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return errors.New(msg)
+	}
+	defer rows.Close()
+
+	// loop over rows
+	for rows.Next() {
+		err := rows.Scan(vals...)
+		if err != nil {
+			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
+			return errors.New(msg)
+		}
+		rec := make(Record)
+		for i, _ := range cols {
+			vvv := vals[i]
+			switch val := vvv.(type) {
+			case *sql.NullString:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullInt64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullFloat64:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			case *sql.NullBool:
+				v, e := val.Value()
+				if e == nil {
+					rec[cols[i]] = v
+				}
+			default:
+				rec[cols[i]] = val
+			}
+		}
+		err = enc.Encode(rec)
+		if err != nil {
+			return err
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return err
+	}
+	return nil
 }
