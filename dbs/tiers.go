@@ -7,7 +7,7 @@ import (
 )
 
 // DataTiers API
-func (API) DataTiers(params Record, w http.ResponseWriter) error {
+func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -16,7 +16,7 @@ func (API) DataTiers(params Record, w http.ResponseWriter) error {
 	tiers := getValues(params, "data_tier_name")
 	if len(tiers) > 1 {
 		msg := "The datatiers API does not support list of tiers"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(tiers) == 1 {
 		op, val := opVal(tiers[0])
 		cond := fmt.Sprintf(" DT.DATA_TIER_NAME %s %s", op, placeholder("data_tier_name"))

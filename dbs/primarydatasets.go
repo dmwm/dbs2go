@@ -7,7 +7,7 @@ import (
 )
 
 // primarydatasets API
-func (API) PrimaryDatasets(params Record, w http.ResponseWriter) error {
+func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -16,7 +16,7 @@ func (API) PrimaryDatasets(params Record, w http.ResponseWriter) error {
 	primarydatasets := getValues(params, "primary_ds_name")
 	if len(primarydatasets) > 1 {
 		msg := "The primarydatasets API does not support list of primarydatasets"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(primarydatasets) == 1 {
 		op, val := opVal(primarydatasets[0])
 		cond := fmt.Sprintf(" P.PRIMARY_DS_NAME %s %s", op, placeholder("primary_ds_name"))

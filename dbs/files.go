@@ -8,7 +8,7 @@ import (
 )
 
 // files API
-func (API) Files(params Record, w http.ResponseWriter) error {
+func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -17,7 +17,7 @@ func (API) Files(params Record, w http.ResponseWriter) error {
 	files := getValues(params, "logical_file_name")
 	if len(files) > 1 {
 		msg := "The files API does not support list of files"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(files) == 1 {
 		op, val := opVal(files[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
@@ -27,7 +27,7 @@ func (API) Files(params Record, w http.ResponseWriter) error {
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
 		msg := "The files API does not support list of datasets"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
@@ -37,7 +37,7 @@ func (API) Files(params Record, w http.ResponseWriter) error {
 	block_names := getValues(params, "block_name")
 	if len(block_names) > 1 {
 		msg := "The files API does not support list of block_names"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(block_names) == 1 {
 		op, val := opVal(block_names[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -51,7 +51,7 @@ func (API) Files(params Record, w http.ResponseWriter) error {
 }
 
 // filechildren API
-func (API) FileChildren(params Record, w http.ResponseWriter) error {
+func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -60,7 +60,7 @@ func (API) FileChildren(params Record, w http.ResponseWriter) error {
 	filechildren := getValues(params, "logical_file_name")
 	if len(filechildren) > 1 {
 		msg := "The filechildren API does not support list of filechildren"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(filechildren) == 1 {
 		op, val := opVal(filechildren[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
@@ -74,7 +74,7 @@ func (API) FileChildren(params Record, w http.ResponseWriter) error {
 }
 
 // fileparent API
-func (API) FileParent(params Record, w http.ResponseWriter) error {
+func (API) FileParent(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -83,7 +83,7 @@ func (API) FileParent(params Record, w http.ResponseWriter) error {
 	fileparent := getValues(params, "logical_file_name")
 	if len(fileparent) > 1 {
 		msg := "The fileparent API does not support list of fileparent"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(fileparent) == 1 {
 		op, val := opVal(fileparent[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
@@ -97,7 +97,7 @@ func (API) FileParent(params Record, w http.ResponseWriter) error {
 }
 
 // filesummaries API
-func (API) FileSummaries(params Record, w http.ResponseWriter) error {
+func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	var stm, whererun, wheresql_run_list, wheresql_run_range, wheresql_isFileValid string
@@ -166,7 +166,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) error {
 }
 
 // filelumis API
-func (API) FileLumis(params Record, w http.ResponseWriter) error {
+func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	var wheresql, wheresql_run_list, wheresql_run_range string

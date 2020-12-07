@@ -7,7 +7,7 @@ import (
 )
 
 // primarydstypes API
-func (API) Primarydstypes(params Record, w http.ResponseWriter) error {
+func (API) Primarydstypes(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -16,7 +16,7 @@ func (API) Primarydstypes(params Record, w http.ResponseWriter) error {
 	primarydstypes := getValues(params, "primary_ds_type")
 	if len(primarydstypes) > 1 {
 		msg := "The primarydstypes API does not support list of primarydstypes"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(primarydstypes) == 1 {
 		op, val := opVal(primarydstypes[0])
 		cond := fmt.Sprintf(" PDT.PRIMARY_DS_TYPE %s %s", op, placeholder("primary_ds_type"))

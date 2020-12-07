@@ -8,7 +8,7 @@ import (
 )
 
 // blocks API
-func (API) Blocks(params Record, w http.ResponseWriter) error {
+func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -17,7 +17,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) error {
 	blocks := getValues(params, "block_name")
 	if len(blocks) > 1 {
 		msg := "Unsupported list of blocks"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(blocks) == 1 {
 		op, val := opVal(blocks[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -27,7 +27,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) error {
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
 		msg := "The files API does not support list of datasets"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
@@ -41,7 +41,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) error {
 }
 
 // blockparent API
-func (API) BlockParent(params Record, w http.ResponseWriter) error {
+func (API) BlockParent(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -50,7 +50,7 @@ func (API) BlockParent(params Record, w http.ResponseWriter) error {
 	blockparent := getValues(params, "block_name")
 	if len(blockparent) > 1 {
 		msg := "Unsupported list of blockparent"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(blockparent) == 1 {
 		op, val := opVal(blockparent[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -64,7 +64,7 @@ func (API) BlockParent(params Record, w http.ResponseWriter) error {
 }
 
 // blockchildren API
-func (API) BlockChildren(params Record, w http.ResponseWriter) error {
+func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -73,7 +73,7 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) error {
 	blockchildren := getValues(params, "block_name")
 	if len(blockchildren) > 1 {
 		msg := "Unsupported list of blockchildren"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(blockchildren) == 1 {
 		op, val := opVal(blockchildren[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -87,7 +87,7 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) error {
 }
 
 // blocksummaries API
-func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
+func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var stm, where_clause string
 	var args []interface{}
@@ -115,7 +115,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(dataset) == 1 {
 		_, val := opVal(dataset[0])
 		args = append(args, val)
@@ -130,7 +130,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 }
 
 // blockorigin API
-func (API) BlockOrigin(params Record, w http.ResponseWriter) error {
+func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -139,7 +139,7 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) error {
 	block := getValues(params, "block_name")
 	if len(block) > 1 {
 		msg := "Unsupported list of block"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(block) == 1 {
 		op, val := opVal(block[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -149,7 +149,7 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) error {
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(dataset) == 1 {
 		op, val := opVal(dataset[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))

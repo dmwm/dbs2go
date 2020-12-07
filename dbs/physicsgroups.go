@@ -7,7 +7,7 @@ import (
 )
 
 // physicsgroups API
-func (API) PhysicsGroups(params Record, w http.ResponseWriter) error {
+func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -16,7 +16,7 @@ func (API) PhysicsGroups(params Record, w http.ResponseWriter) error {
 	physicsgroups := getValues(params, "physics_group_name")
 	if len(physicsgroups) > 1 {
 		msg := "The physicsgroups API does not support list of physicsgroups"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(physicsgroups) == 1 {
 		op, val := opVal(physicsgroups[0])
 		cond := fmt.Sprintf(" pg.PHYSICS_GROUP_NAME %s %s", op, placeholder("physics_group_name"))

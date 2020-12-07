@@ -107,21 +107,21 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	}
 	var api dbs.API
 	var err error
+	var size int64
 	if a == "datatiers" {
-		err = api.DataTiers(params, w)
+		size, err = api.DataTiers(params, w)
 	} else if a == "datasets" {
-		err = api.Datasets(params, w)
+		size, err = api.Datasets(params, w)
 	} else if a == "blocks" {
-		err = api.Blocks(params, w)
+		size, err = api.Blocks(params, w)
 	} else if a == "files" {
-		err = api.Files(params, w)
+		size, err = api.Files(params, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
 	if err != nil {
 		return http.StatusInternalServerError, 0, err
 	}
-	var size int64
 	return status, size, nil
 }
 

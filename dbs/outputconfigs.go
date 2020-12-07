@@ -7,7 +7,7 @@ import (
 )
 
 // outputconfigs API
-func (API) OutputConfigs(params Record, w http.ResponseWriter) error {
+func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var sql1, sql2, stm string
 	var args []interface{}
@@ -19,7 +19,7 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) error {
 	block_id := getValues(params, "block_id")
 	if len(block_id) > 1 {
 		msg := "The outputconfigs API does not support list of block_id"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(block_id) == 1 {
 		_, bid = opVal(block_id[0])
 	}

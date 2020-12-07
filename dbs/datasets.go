@@ -9,7 +9,7 @@ import (
 )
 
 // Datasets API
-func (API) Datasets(params Record, w http.ResponseWriter) error {
+func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -65,7 +65,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) error {
 }
 
 // datasetparent API
-func (API) DatasetParent(params Record, w http.ResponseWriter) error {
+func (API) DatasetParent(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -74,7 +74,7 @@ func (API) DatasetParent(params Record, w http.ResponseWriter) error {
 	datasetparent := getValues(params, "dataset")
 	if len(datasetparent) > 1 {
 		msg := "The datasetparent API does not support list of datasetparent"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(datasetparent) == 1 {
 		op, val := opVal(datasetparent[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
@@ -82,7 +82,7 @@ func (API) DatasetParent(params Record, w http.ResponseWriter) error {
 		args = append(args, val)
 	} else {
 		msg := fmt.Sprintf("No arguments for datasetparent API")
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	}
 	// get SQL statement from static area
 	stm := getSQL("datasetparent")
@@ -91,7 +91,7 @@ func (API) DatasetParent(params Record, w http.ResponseWriter) error {
 }
 
 // datasetchildren API
-func (API) DatasetChildren(params Record, w http.ResponseWriter) error {
+func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -100,7 +100,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) error {
 	datasetchildren := getValues(params, "dataset")
 	if len(datasetchildren) > 1 {
 		msg := "The datasetchildren API does not support list of datasetchildren"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(datasetchildren) == 1 {
 		op, val := opVal(datasetchildren[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
@@ -108,7 +108,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) error {
 		args = append(args, val)
 	} else {
 		msg := fmt.Sprintf("No arguments for datasetchildren API")
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	}
 	// get SQL statement from static area
 	stm := getSQL("datasetchildren")
@@ -117,7 +117,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) error {
 }
 
 // datasetaccesstypes API
-func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) error {
+func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := " WHERE "
@@ -126,7 +126,7 @@ func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) error {
 	datasetaccesstypes := getValues(params, "dataset_access_type")
 	if len(datasetaccesstypes) > 1 {
 		msg := "The datasetaccesstypes API does not support list of datasetaccesstypes"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(datasetaccesstypes) == 1 {
 		op, val := opVal(datasetaccesstypes[0])
 		cond := fmt.Sprintf(" DT.DATASET_ACCESS_TYPE %s %s", op, placeholder("dataset_access_type"))

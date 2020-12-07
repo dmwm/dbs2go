@@ -7,7 +7,7 @@ import (
 )
 
 // datatypes API
-func (API) DataTypes(params Record, w http.ResponseWriter) error {
+func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -16,7 +16,7 @@ func (API) DataTypes(params Record, w http.ResponseWriter) error {
 	datatypes := getValues(params, "datatype")
 	if len(datatypes) > 1 {
 		msg := "The datatypes API does not support list of datatypes"
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	} else if len(datatypes) == 1 {
 		op, val := opVal(datatypes[0])
 		cond := fmt.Sprintf(" DT.datatype %s %s", op, placeholder("datatype"))
