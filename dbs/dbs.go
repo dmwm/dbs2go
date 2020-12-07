@@ -200,7 +200,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 			return 0, err
 		}
 		s, e := utils.RecordSize(rec)
-		if e != nil {
+		if e == nil {
 			size += s
 		}
 	}
@@ -279,7 +279,7 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 			return 0, err
 		}
 		s, e := utils.RecordSize(rec)
-		if e != nil {
+		if e == nil {
 			size += s
 		}
 	}
