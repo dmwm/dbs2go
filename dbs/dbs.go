@@ -120,11 +120,11 @@ func errorRecord(msg string) []Record {
 // to writer)
 func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 	enc := json.NewEncoder(w)
-	enc.Encode("[")
-	defer enc.Encode("]")
+	w.Write([]byte("[\n"))
+	defer w.Write([]byte("]\n"))
 
 	if utils.VERBOSE > 1 {
-		log.Println(stm, args)
+		log.Printf(stm, args...)
 	}
 	tx, err := DB.Begin()
 	if err != nil {
@@ -159,7 +159,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 			return errors.New(msg)
 		}
 		if rowCount != 0 {
-			enc.Encode(",")
+			w.Write([]byte(",\n"))
 		}
 		rowCount += 1
 		// store results into generic record (a dict)
@@ -209,8 +209,8 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 // similar to executeAll function but it takes explicit set of columns and values
 func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) error {
 	enc := json.NewEncoder(w)
-	enc.Encode("[")
-	defer enc.Encode("]")
+	w.Write([]byte("[\n"))
+	defer w.Write([]byte("]\n"))
 
 	if utils.VERBOSE > 1 {
 		log.Println(stm, args)
@@ -238,7 +238,7 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 			return errors.New(msg)
 		}
 		if rowCount != 0 {
-			enc.Encode(",")
+			w.Write([]byte(",\n"))
 		}
 		rowCount += 1
 		rec := make(Record)
