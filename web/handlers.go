@@ -67,8 +67,9 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 
 	// example of handling GET request
 	status := http.StatusOK
-	var params dbs.Record
-	for k, v := range r.Form {
+	params := make(dbs.Record)
+	log.Printf("http request %+v", r)
+	for k, v := range r.URL.Query() {
 		params[k] = v
 	}
 	var api dbs.API
@@ -100,8 +101,8 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 // DBSGetHandler
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
-	var params dbs.Record
-	for k, v := range r.Form {
+	params := make(dbs.Record)
+	for k, v := range r.URL.Query() {
 		params[k] = v
 	}
 	var api dbs.API
