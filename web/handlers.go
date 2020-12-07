@@ -98,6 +98,12 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// DBSPostHandler
+func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+	status := http.StatusOK
+	return status, 0, nil
+}
+
 // DBSGetHandler
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
@@ -140,7 +146,111 @@ func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "blocks")
 }
 
+// BlockChildrenHandler
+func BlockChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "blockchildren")
+}
+
+// BlockSummariesHandler
+func BlockSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "blocksummaries")
+}
+
+// BlockOriginHandler
+func BlockOriginHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "blockorigin")
+}
+
 // FilesHandler
 func FilesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "files")
+}
+
+// FileChildrenHandler
+func FileChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "filechildren")
+}
+
+// FilePArentHandler
+func FileParentHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "fileparent")
+}
+
+// FileSummariesHandler
+func FileSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "filesummaries")
+}
+
+// RunsHandler
+func RunsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "runs")
+}
+
+// RunSummariesHandler
+func RunSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "runsummaries")
+}
+
+//ProcessingErasHandler
+func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "processingeras")
+}
+
+// PrimarydstypesHandler
+func PrimarydstypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "primarydstypes")
+}
+
+// DataTypesHandler
+func DataTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "datatypes")
+}
+
+// ReleaseVersionsHandler
+func ReleaseVersionsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "releaseversions")
+}
+
+// AcquisitionErasHandler
+func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "acquisitioneras")
+}
+
+// PrimaryDatasetHandler
+func PrimaryDatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "primarydatasets")
+}
+
+// DatasetParentHandler
+func DatasetParentHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "dataasetparent")
+}
+
+// DatasetChildrenHandler
+func DatasetChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "datasetchildren")
+}
+
+// DatasetAccessTypesHandler
+func DatasetAccessTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "datasetaccesstypes")
+}
+
+// PhysicsGroupsHandler
+func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "physicsgroups")
+}
+
+// OutputConfigsHandler
+func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "outputconfigs")
+}
+
+// POST APIs
+
+func BlockParentHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "blockparent")
+}
+func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "filelumis")
 }
