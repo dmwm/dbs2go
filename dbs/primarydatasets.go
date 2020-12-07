@@ -1,11 +1,13 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 // primarydatasets API
-func (API) PrimaryDatasets(params Record) []Record {
+func (API) PrimaryDatasets(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -14,7 +16,7 @@ func (API) PrimaryDatasets(params Record) []Record {
 	primarydatasets := getValues(params, "primary_ds_name")
 	if len(primarydatasets) > 1 {
 		msg := "The primarydatasets API does not support list of primarydatasets"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(primarydatasets) == 1 {
 		op, val := opVal(primarydatasets[0])
 		cond := fmt.Sprintf(" P.PRIMARY_DS_NAME %s %s", op, placeholder("primary_ds_name"))
@@ -26,5 +28,5 @@ func (API) PrimaryDatasets(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("primarydatasets")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }

@@ -1,11 +1,13 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 // datatypes API
-func (API) DataTypes(params Record) []Record {
+func (API) DataTypes(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -14,7 +16,7 @@ func (API) DataTypes(params Record) []Record {
 	datatypes := getValues(params, "datatype")
 	if len(datatypes) > 1 {
 		msg := "The datatypes API does not support list of datatypes"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(datatypes) == 1 {
 		op, val := opVal(datatypes[0])
 		cond := fmt.Sprintf(" DT.datatype %s %s", op, placeholder("datatype"))
@@ -26,5 +28,5 @@ func (API) DataTypes(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("datatypes")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }

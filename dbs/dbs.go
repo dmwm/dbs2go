@@ -103,20 +103,39 @@ func placeholder(pholder string) string {
 	}
 }
 
-func executeAllNew(w http.ResponseWriter, stm string, args ...interface{}) error {
+// helper function to generate error record
+func errorRecord(msg string) []Record {
+	var out []Record
+	erec := make(Record)
+	erec["error"] = msg
+	out = append(out, erec)
+	return out
+}
+
+// generic API to execute given statement
+// ideas are taken from
+// http://stackoverflow.com/questions/17845619/how-to-call-the-scan-variadic-function-in-golang-using-reflection
+// here we use http response writer in order to make encoder
+// then we literally stream data with our encoder (i.e. write records
+// to writer)
+func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 	enc := json.NewEncoder(w)
+	enc.Encode("[")
+	defer enc.Encode("]")
 
 	if utils.VERBOSE > 1 {
 		log.Println(stm, args)
 	}
 	tx, err := DB.Begin()
 	if err != nil {
-		return err
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		return err
+		msg := fmt.Sprintf("unable to query statement=%v error=%v", stm, err)
+		return errors.New(msg)
 	}
 	defer rows.Close()
 
@@ -127,7 +146,6 @@ func executeAllNew(w http.ResponseWriter, stm string, args ...interface{}) error
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
 	rowCount := 0
-
 	for rows.Next() {
 		if rowCount == 0 {
 			// initialize value pointers
@@ -137,7 +155,11 @@ func executeAllNew(w http.ResponseWriter, stm string, args ...interface{}) error
 		}
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
-			return err
+			msg := fmt.Sprintf("unabelt to scan DB results %s", err)
+			return errors.New(msg)
+		}
+		if rowCount != 0 {
+			enc.Encode(",")
 		}
 		rowCount += 1
 		// store results into generic record (a dict)
@@ -178,175 +200,17 @@ func executeAllNew(w http.ResponseWriter, stm string, args ...interface{}) error
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return err
+		msg := fmt.Sprintf("rows error %v", err)
+		return errors.New(msg)
 	}
 	return nil
 }
 
-// generic API to execute given statement
-// ideas are taken from
-// http://stackoverflow.com/questions/17845619/how-to-call-the-scan-variadic-function-in-golang-using-reflection
-func executeAll(stm string, args ...interface{}) []Record {
-	var out []Record
-
-	if utils.VERBOSE > 1 {
-		log.Println(stm, args)
-	}
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("fail to obtain transaction, %s", err)
-		return errorRecord(msg)
-	}
-	defer tx.Rollback()
-	//     rows, err := DB.Query(stm, args...)
-	rows, err := tx.Query(stm, args...)
-	if err != nil {
-		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return errorRecord(msg)
-	}
-	defer rows.Close()
-
-	// extract columns from Rows object and create values & valuesPtrs to retrieve results
-	columns, _ := rows.Columns()
-	var cols []string
-	count := len(columns)
-	values := make([]interface{}, count)
-	valuePtrs := make([]interface{}, count)
-	rowCount := 0
-
-	for rows.Next() {
-		if rowCount == 0 {
-			// initialize value pointers
-			for i, _ := range columns {
-				valuePtrs[i] = &values[i]
-			}
-		}
-		err := rows.Scan(valuePtrs...)
-		if err != nil {
-			msg := fmt.Sprintf("rows.Scan, dest='%v', error=%v", valuePtrs, err)
-			return errorRecord(msg)
-		}
-		rowCount += 1
-		// store results into generic record (a dict)
-		rec := make(Record)
-		for i, col := range columns {
-			if len(cols) != len(columns) {
-				cols = append(cols, strings.ToLower(col))
-			}
-			vvv := values[i]
-			switch val := vvv.(type) {
-			case *sql.NullString:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			case *sql.NullInt64:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			case *sql.NullFloat64:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			case *sql.NullBool:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			default:
-				//                 fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
-				rec[cols[i]] = val
-			}
-			//             rec[cols[i]] = values[i]
-		}
-		out = append(out, rec)
-	}
-	if err = rows.Err(); err != nil {
-		return errorRecord(fmt.Sprintf("unable to scan rows %v", err))
-	}
-	return out
-}
-
 // similar to executeAll function but it takes explicit set of columns and values
-func execute(stm string, cols []string, vals []interface{}, args ...interface{}) []Record {
-	var out []Record
-
-	if utils.VERBOSE > 1 {
-		log.Println(stm, args)
-	}
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to obtain transaction %v", err)
-		errorRecord(msg)
-	}
-	defer tx.Rollback()
-	//     rows, err := DB.Query(stm, args...)
-	rows, err := tx.Query(stm, args...)
-	if err != nil {
-		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return errorRecord(msg)
-	}
-	defer rows.Close()
-
-	// loop over rows
-	for rows.Next() {
-		err := rows.Scan(vals...)
-		if err != nil {
-			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
-			return errorRecord(msg)
-		}
-		rec := make(Record)
-		for i, _ := range cols {
-			vvv := vals[i]
-			switch val := vvv.(type) {
-			case *sql.NullString:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			case *sql.NullInt64:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			case *sql.NullFloat64:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			case *sql.NullBool:
-				v, e := val.Value()
-				if e == nil {
-					rec[cols[i]] = v
-				}
-			default:
-				//                 fmt.Printf("SQL result: %v (%T) %v (%T)\n", vvv, vvv, val, val)
-				rec[cols[i]] = val
-			}
-			//             rec[cols[i]] = vals[i]
-		}
-		out = append(out, rec)
-	}
-	if err = rows.Err(); err != nil {
-		return errorRecord(fmt.Sprintf("unable to scan rows: %v", err))
-	}
-	return out
-}
-
-// helper function to generate error record
-func errorRecord(msg string) []Record {
-	var out []Record
-	erec := make(Record)
-	erec["error"] = msg
-	out = append(out, erec)
-	return out
-}
-
-// similar to executeAll function but it takes explicit set of columns and values
-func executeNew(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) error {
+func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) error {
 	enc := json.NewEncoder(w)
+	enc.Encode("[")
+	defer enc.Encode("]")
 
 	if utils.VERBOSE > 1 {
 		log.Println(stm, args)
@@ -366,12 +230,17 @@ func executeNew(w http.ResponseWriter, stm string, cols []string, vals []interfa
 	defer rows.Close()
 
 	// loop over rows
+	rowCount := 0
 	for rows.Next() {
 		err := rows.Scan(vals...)
 		if err != nil {
 			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
 			return errors.New(msg)
 		}
+		if rowCount != 0 {
+			enc.Encode(",")
+		}
+		rowCount += 1
 		rec := make(Record)
 		for i, _ := range cols {
 			vvv := vals[i]

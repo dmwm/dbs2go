@@ -1,11 +1,13 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 // physicsgroups API
-func (API) PhysicsGroups(params Record) []Record {
+func (API) PhysicsGroups(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -14,7 +16,7 @@ func (API) PhysicsGroups(params Record) []Record {
 	physicsgroups := getValues(params, "physics_group_name")
 	if len(physicsgroups) > 1 {
 		msg := "The physicsgroups API does not support list of physicsgroups"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(physicsgroups) == 1 {
 		op, val := opVal(physicsgroups[0])
 		cond := fmt.Sprintf(" pg.PHYSICS_GROUP_NAME %s %s", op, placeholder("physics_group_name"))
@@ -26,5 +28,5 @@ func (API) PhysicsGroups(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("physicsgroups")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }

@@ -5,6 +5,7 @@ package web
 import (
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -103,71 +104,34 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	for k, v := range r.Form {
 		params[k] = v
 	}
-	var records []dbs.Record
 	var api dbs.API
+	var err error
 	if a == "datatiers" {
-		records = api.DataTiers(params)
+		err = api.DataTiers(params, w)
 	} else if a == "datasets" {
-		records = api.Datasets(params)
+		err = api.Datasets(params, w)
 	} else if a == "blocks" {
-		records = api.Blocks(params)
+		err = api.Blocks(params, w)
 	} else if a == "files" {
-		records = api.Files(params)
+		err = api.Files(params, w)
 	} else {
-		rec := make(dbs.Record)
-		rec["error"] = fmt.Sprintf("not implemented API %s", api)
-		records = append(records, rec)
+		err = errors.New(fmt.Sprintf("not implemented API %s", api))
+	}
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
 	}
 	var size int64
-	enc := json.NewEncoder(w)
-	for _, rec := range records {
-		err := enc.Encode(rec)
-		size += int64(binary.Size(rec))
-		if err != nil {
-			return http.StatusInternalServerError, 0, err
-		}
-
-	}
-	//     data, err := json.Marshal(records)
-	//     if err != nil {
-	//         return http.StatusInternalServerError, 0, err
-	//     }
-	//     w.WriteHeader(status)
-	//     w.Write(data)
-	//     size := int64(binary.Size(data))
 	return status, size, nil
 }
 
 // DatatiersHandler
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	//     return DBSGetHandler(w, r, "datatiers")
-	status := http.StatusOK
-	var params dbs.Record
-	for k, v := range r.Form {
-		params[k] = v
-	}
-	var api dbs.API
-	err := api.DataTiersNew(params, w)
-	if err != nil {
-		return http.StatusInternalServerError, 0, err
-	}
-	return status, 0, nil
+	return DBSGetHandler(w, r, "datatiers")
 }
 
 // DatasetsHandler
 func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	//     return DBSGetHandler(w, r, "datasets")
-	status := http.StatusOK
-	var params dbs.Record
-	for k, v := range r.Form {
-		params[k] = v
-	}
-	var api dbs.API
-	err := api.DatasetsNew(params, w)
-	if err != nil {
-		return http.StatusInternalServerError, 0, err
-	}
-	return status, 0, nil
+	return DBSGetHandler(w, r, "datasets")
 }
 
 // BlocksHandler

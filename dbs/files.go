@@ -1,12 +1,14 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
 // files API
-func (API) Files(params Record) []Record {
+func (API) Files(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -15,7 +17,7 @@ func (API) Files(params Record) []Record {
 	files := getValues(params, "logical_file_name")
 	if len(files) > 1 {
 		msg := "The files API does not support list of files"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(files) == 1 {
 		op, val := opVal(files[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
@@ -25,7 +27,7 @@ func (API) Files(params Record) []Record {
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
 		msg := "The files API does not support list of datasets"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
@@ -35,7 +37,7 @@ func (API) Files(params Record) []Record {
 	block_names := getValues(params, "block_name")
 	if len(block_names) > 1 {
 		msg := "The files API does not support list of block_names"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(block_names) == 1 {
 		op, val := opVal(block_names[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -45,11 +47,11 @@ func (API) Files(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("files")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // filechildren API
-func (API) FileChildren(params Record) []Record {
+func (API) FileChildren(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -58,7 +60,7 @@ func (API) FileChildren(params Record) []Record {
 	filechildren := getValues(params, "logical_file_name")
 	if len(filechildren) > 1 {
 		msg := "The filechildren API does not support list of filechildren"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(filechildren) == 1 {
 		op, val := opVal(filechildren[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
@@ -68,11 +70,11 @@ func (API) FileChildren(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("filechildren")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // fileparent API
-func (API) FileParent(params Record) []Record {
+func (API) FileParent(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -81,7 +83,7 @@ func (API) FileParent(params Record) []Record {
 	fileparent := getValues(params, "logical_file_name")
 	if len(fileparent) > 1 {
 		msg := "The fileparent API does not support list of fileparent"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(fileparent) == 1 {
 		op, val := opVal(fileparent[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
@@ -91,11 +93,11 @@ func (API) FileParent(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("fileparent")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // filesummaries API
-func (API) FileSummaries(params Record) []Record {
+func (API) FileSummaries(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var stm, whererun, wheresql_run_list, wheresql_run_range, wheresql_isFileValid string
@@ -160,11 +162,11 @@ func (API) FileSummaries(params Record) []Record {
 	stm = strings.Replace(stm, "join_valid_ds2", join_valid_ds2, -1)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(stm, args...)
+	return executeAll(w, stm, args...)
 }
 
 // filelumis API
-func (API) FileLumis(params Record) []Record {
+func (API) FileLumis(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var wheresql, wheresql_run_list, wheresql_run_range string
@@ -237,5 +239,5 @@ func (API) FileLumis(params Record) []Record {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(stm, args...)
+	return executeAll(w, stm, args...)
 }

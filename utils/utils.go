@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,6 +15,15 @@ import (
 var VERBOSE int
 var STATICDIR string
 var PROFILE bool
+
+// RecordSize
+func RecordSize(v interface{}) (int64, error) {
+	data, err := json.Marshal(v)
+	if err == nil {
+		return int64(binary.Size(data)), nil
+	}
+	return 0, err
+}
 
 // helper function to return Stack
 func Stack() string {

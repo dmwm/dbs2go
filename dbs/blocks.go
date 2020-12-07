@@ -1,12 +1,14 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
 // blocks API
-func (API) Blocks(params Record) []Record {
+func (API) Blocks(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -15,7 +17,7 @@ func (API) Blocks(params Record) []Record {
 	blocks := getValues(params, "block_name")
 	if len(blocks) > 1 {
 		msg := "Unsupported list of blocks"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(blocks) == 1 {
 		op, val := opVal(blocks[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -25,7 +27,7 @@ func (API) Blocks(params Record) []Record {
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
 		msg := "The files API does not support list of datasets"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
@@ -35,11 +37,11 @@ func (API) Blocks(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("blocks")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // blockparent API
-func (API) BlockParent(params Record) []Record {
+func (API) BlockParent(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -48,7 +50,7 @@ func (API) BlockParent(params Record) []Record {
 	blockparent := getValues(params, "block_name")
 	if len(blockparent) > 1 {
 		msg := "Unsupported list of blockparent"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(blockparent) == 1 {
 		op, val := opVal(blockparent[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -58,11 +60,11 @@ func (API) BlockParent(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("blockparent")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // blockchildren API
-func (API) BlockChildren(params Record) []Record {
+func (API) BlockChildren(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -71,7 +73,7 @@ func (API) BlockChildren(params Record) []Record {
 	blockchildren := getValues(params, "block_name")
 	if len(blockchildren) > 1 {
 		msg := "Unsupported list of blockchildren"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(blockchildren) == 1 {
 		op, val := opVal(blockchildren[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -81,11 +83,11 @@ func (API) BlockChildren(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("blockchildren")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // blocksummaries API
-func (API) BlockSummaries(params Record) []Record {
+func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var stm, where_clause string
 	var args []interface{}
@@ -113,7 +115,7 @@ func (API) BlockSummaries(params Record) []Record {
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(dataset) == 1 {
 		_, val := opVal(dataset[0])
 		args = append(args, val)
@@ -124,11 +126,11 @@ func (API) BlockSummaries(params Record) []Record {
 		stm = strings.Replace(stm, "where_clause", where_clause, -1)
 	}
 	// use generic query API to fetch the results from DB
-	return executeAll(genSQL+stm, args...)
+	return executeAll(w, genSQL+stm, args...)
 }
 
 // blockorigin API
-func (API) BlockOrigin(params Record) []Record {
+func (API) BlockOrigin(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -137,7 +139,7 @@ func (API) BlockOrigin(params Record) []Record {
 	block := getValues(params, "block_name")
 	if len(block) > 1 {
 		msg := "Unsupported list of block"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(block) == 1 {
 		op, val := opVal(block[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
@@ -147,7 +149,7 @@ func (API) BlockOrigin(params Record) []Record {
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(dataset) == 1 {
 		op, val := opVal(dataset[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
@@ -157,5 +159,5 @@ func (API) BlockOrigin(params Record) []Record {
 	// get SQL statement from static area
 	stm := getSQL("blockorigin")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }

@@ -1,11 +1,13 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 // runs API
-func (API) Runs(params Record) []Record {
+func (API) Runs(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := ""
@@ -17,7 +19,7 @@ func (API) Runs(params Record) []Record {
 	dataset := getValues(params, "dataset")
 	if len(runs) > 1 {
 		msg := "The runs API does not support list of runs"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(runs) == 1 {
 		op, val := opVal(runs[0])
 		cond := fmt.Sprintf(" FL.run_num %s %s", op, placeholder("run_num"))
@@ -40,16 +42,16 @@ func (API) Runs(params Record) []Record {
 		args = append(args, val)
 	} else {
 		msg := fmt.Sprintf("No arguments for runs API")
-		return errorRecord(msg)
+		return errors.New(msg)
 	}
 	// get SQL statement from static area
 	stm := getSQL("runs")
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
 
 // runs API
-func (API) RunSummaries(params Record) []Record {
+func (API) RunSummaries(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := " WHERE "
@@ -60,7 +62,7 @@ func (API) RunSummaries(params Record) []Record {
 	runs := getValues(params, "run_num")
 	if len(runs) > 1 {
 		msg := "The runs API does not support list of runs"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(runs) == 1 {
 		_, val := opVal(runs[0])
 		cond := fmt.Sprintf(" RUN_NUM = %s", placeholder("run_num"))
@@ -68,7 +70,7 @@ func (API) RunSummaries(params Record) []Record {
 		where += addCond(where, cond)
 	} else {
 		msg := fmt.Sprintf("No arguments for runsummaries API")
-		return errorRecord(msg)
+		return errors.New(msg)
 	}
 	dataset := getValues(params, "dataset")
 	if len(dataset) == 1 {
@@ -80,5 +82,5 @@ func (API) RunSummaries(params Record) []Record {
 		where += addCond(where, cond)
 	}
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }

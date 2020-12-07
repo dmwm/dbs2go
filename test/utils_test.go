@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -16,5 +17,27 @@ func TestInList(t *testing.T) {
 	res = utils.InList("5", vals)
 	if res == true {
 		t.Error("Fail TestInList")
+	}
+}
+
+// TestRecordSize
+func TestRecordSize(t *testing.T) {
+	rec := make(map[string]int)
+	rec["a"] = 1
+	rec["b"] = 2
+	size, err := utils.RecordSize(rec)
+	if err != nil {
+		t.Error("Fail in RecordSize", err)
+	}
+	fmt.Println("record", rec, "size", size)
+}
+
+// BenchmarkRecordSize
+func BenchmarkRecordSize(b *testing.B) {
+	rec := make(map[string]int)
+	rec["a"] = 1
+	rec["b"] = 2
+	for i := 0; i < b.N; i++ {
+		utils.RecordSize(rec)
 	}
 }

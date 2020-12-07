@@ -33,7 +33,9 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test : test1
+test : test1 bench
 
 test1:
 	cd test; go test -v .
+bench:
+	cd test; go test -bench=.

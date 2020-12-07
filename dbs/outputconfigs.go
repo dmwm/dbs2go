@@ -1,11 +1,13 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 // outputconfigs API
-func (API) OutputConfigs(params Record) []Record {
+func (API) OutputConfigs(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var sql1, sql2, stm string
 	var args []interface{}
@@ -17,7 +19,7 @@ func (API) OutputConfigs(params Record) []Record {
 	block_id := getValues(params, "block_id")
 	if len(block_id) > 1 {
 		msg := "The outputconfigs API does not support list of block_id"
-		return errorRecord(msg)
+		return errors.New(msg)
 	} else if len(block_id) == 1 {
 		_, bid = opVal(block_id[0])
 	}
@@ -81,5 +83,5 @@ func (API) OutputConfigs(params Record) []Record {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(stm+where, args...)
+	return executeAll(w, stm+where, args...)
 }
