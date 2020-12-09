@@ -38,7 +38,6 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	genSQL := ""
 	if len(datasets) > 1 {
 		where += fmt.Sprintf(" AND D.DATASET in (SELECT TOKEN FROM TOKEN_GENERATOR)")
-		where += fmt.Sprintf(" AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
 		var vals []string
 		genSQL, vals = tokens(datasets)
 		for _, d := range vals {
@@ -47,7 +46,6 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(datasets) == 1 {
 		op, val := opVal(datasets[0])
 		where += fmt.Sprintf(" AND D.DATASET %s %s", op, placeholder("dataset"))
-		where += fmt.Sprintf(" AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
 		args = append(args, val)
 	}
 

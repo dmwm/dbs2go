@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -101,6 +102,23 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 // DBSPostHandler
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
+	params := make(dbs.Record)
+	defer r.Body.Close()
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
+	err = json.Unmarshal(data, &params)
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
+	var api dbs.API
+	if a == "datatiers" {
+		err = api.InsertDataTiers(params)
+	}
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
 	return status, 0, nil
 }
 
@@ -133,6 +151,9 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 
 // DatatiersHandler
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "datatiers")
+	}
 	return DBSGetHandler(w, r, "datatiers")
 }
 

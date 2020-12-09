@@ -37,7 +37,12 @@ func LoadSQL(owner string) Record {
 	log.Println("sql area", sdir)
 	for _, f := range utils.Listfiles(sdir) {
 		k := strings.Split(f, ".")[0]
-		dbsql[k] = utils.ParseTmpl(sdir, f, tmplData)
+		stm := utils.ParseTmpl(sdir, f, tmplData)
+		if owner == "sqlite" {
+			stm = strings.Replace(stm, "sqlite.", "", -1)
+		}
+		dbsql[k] = stm
+		//         dbsql[k] = utils.ParseTmpl(sdir, f, tmplData)
 	}
 	return dbsql
 }
@@ -287,4 +292,25 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 		return 0, err
 	}
 	return size, nil
+}
+
+// insert api to insert data into DB
+func insert(stm string, vals []interface{}) error {
+	if utils.VERBOSE > 1 {
+		log.Printf("%s %+v\n", stm, vals)
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to obtain transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	_, err = tx.Exec(stm, vals...)
+	err = tx.Commit()
+	if err != nil {
+		log.Println("DB error", stm, err)
+		tx.Rollback()
+		return err
+	}
+	return nil
 }
