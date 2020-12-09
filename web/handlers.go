@@ -99,7 +99,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// DBSPostHandler
+// DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
 	params := make(dbs.Record)
@@ -122,7 +122,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	return status, 0, nil
 }
 
-// DBSGetHandler
+// DBSGetHandler is a generic Get handler to call DBS Get APIs.
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
 	params := make(dbs.Record)
@@ -149,7 +149,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	return status, size, nil
 }
 
-// DatatiersHandler
+// DatatiersHandler provides access to DataTiers DBS API.
+// Takes the following arguments: data_tier_name
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	if r.Method == "POST" {
 		return DBSPostHandler(w, r, "datatiers")
@@ -157,121 +158,150 @@ func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 	return DBSGetHandler(w, r, "datatiers")
 }
 
-// DatasetsHandler
+// DatasetsHandler provides access to Datasets DBS API.
+// Takes the following arguments: dataset, parent_dataset, release_version, pset_hash, app_name, output_module_label, global_tag, processing_version, acquisition_era_name, run_num, physics_group_name, logical_file_name, primary_ds_name, primary_ds_type, processed_ds_name, data_tier_name, dataset_access_type, prep_id, create_by, last_modified_by, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, detail, dataset_id
 func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "datasets")
 }
 
-// BlocksHandler
+// BlocksHandler provides access to Blocks DBS API.
+// Takes the following arguments: dataset, block_name, data_tier_name, origin_site_name, logical_file_name, run_num, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, open_for_writing, detail
 func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "blocks")
 }
 
-// BlockChildrenHandler
+// BlockChildrenHandler provides access to BlockChildren DBS API.
+// Takes the following arguments: block_name
 func BlockChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "blockchildren")
 }
 
-// BlockSummariesHandler
+// BlockSummariesHandler provides access to BlockSummaries DBS API.
+// Takes the following arguments: block_name, dataset, detail
 func BlockSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "blocksummaries")
 }
 
-// BlockOriginHandler
+// BlockOriginHandler provides access to BlockOrigin DBS API.
+// Takes the following arguments: origin_site_name, dataset, block_name
 func BlockOriginHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "blockorigin")
 }
 
-// FilesHandler
+// FilesHandler provides access to Files DBS API.
+// Takes the following arguments: dataset, block_name, logical_file_name, release_version, pset_hash, app_name, output_module_label, run_num, origin_site_name, lumi_list, detail, validFileOnly, sumOverLumi
 func FilesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "files")
 }
 
-// FileChildrenHandler
+// FileChildrenHandler provides access to FileChildren DBS API.
+// Takes the following arguments: logical_file_name, block_name, block_id
 func FileChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "filechildren")
 }
 
-// FilePArentHandler
-func FileParentHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "fileparent")
+// FileParentsHandler provides access to FileParent DBS API.
+// Takes the following arguments: logical_file_name, block_id, block_name
+func FileParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "fileparents")
 }
 
-// FileSummariesHandler
+// FileSummariesHandler provides access to FileSummaries DBS API.
+// Takes the following arguments: block_name, dataset, run_num, validFileOnly, sumOverLumi
 func FileSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "filesummaries")
 }
 
-// RunsHandler
+// RunsHandler provides access to Runs DBS API.
+// Takes the following arguments: run_num, logical_file_name, block_name, dataset
 func RunsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "runs")
 }
 
-// RunSummariesHandler
+// RunSummariesHandler provides access to RunSummaries DBS API.
+// Takes the following arguments: dataset, run_num
 func RunSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "runsummaries")
 }
 
-//ProcessingErasHandler
+//ProcessingErasHandler provices access to ProcessingEras DBS API.
+// Takes the following arguments: processing_version
 func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "processingeras")
 }
 
-// PrimarydstypesHandler
+// PrimarydstypesHandler provides access to Primarydstypes DBS API.
+// Takes the following arguments: primary_ds_type, dataset
 func PrimarydstypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "primarydstypes")
 }
 
-// DataTypesHandler
+// DataTypesHandler provides access to DataTypes DBS API.
+// Takes the following arguments: datatype, dataset
 func DataTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "datatypes")
 }
 
-// ReleaseVersionsHandler
+// ReleaseVersionsHandler provides access to ReleaseVersions DBS API.
+// Takes the following arguments: release_version, dataset, logical_file_name
 func ReleaseVersionsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "releaseversions")
 }
 
-// AcquisitionErasHandler
+// AcquisitionErasHandler provides access to AcquisitionEras DBS API.
+// Takes the following arguments: acquisition_era_name
 func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "acquisitioneras")
 }
 
-// PrimaryDatasetHandler
+// PrimaryDatasetsHandler provides access to PrimaryDatasets DBS API.
+// Takes the following arguments: primary_ds_name, primary_ds_type
 func PrimaryDatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "primarydatasets")
 }
 
-// DatasetParentHandler
-func DatasetParentHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "dataasetparent")
+// DatasetParentsHandler provides access to DatasetParents DBS API.
+// Takes the following arguments: dataset
+func DatasetParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "dataasetparents")
 }
 
-// DatasetChildrenHandler
+// DatasetChildrenHandler provides access to DatasetChildren DBS API.
+// Takes the following arguments: dataset
 func DatasetChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "datasetchildren")
 }
 
-// DatasetAccessTypesHandler
+// DatasetAccessTypesHandler provides access to DatasetAccessTypes DBS API.
+// Takes the following arguments: dataset_access_type
 func DatasetAccessTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "datasetaccesstypes")
 }
 
-// PhysicsGroupsHandler
+// PhysicsGroupsHandler provides access to PhysicsGroups DBS API
+// Takes the following arguments: physics_group_name
 func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "physicsgroups")
 }
 
-// OutputConfigsHandler
+// OutputConfigsHandler provides access to OutputConfigs DBS API.
+// Takes the following arguments: dataset, logical_file_name, release_version, pset_hash, app_name, output_module_label, block_id, global_tag
 func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "outputconfigs")
 }
 
-// POST APIs
-
-func BlockParentHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "blockparent")
+// BlockParentsHandler provides access to BlockParents DBS API.
+// Takes the following arguments: block_name
+func BlockParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGettHandler(w, r, "blockparent")
 }
+
+// FileLumisHandler provides access to FileLumis DBS API
+// GET API takes the following arguments: logical_file_name, block_name, run_num, validFileOnly
+// POST API takes no argument, the payload should be supplied as JSON
 func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "filelumis")
+	}
 	return DBSPostHandler(w, r, "filelumis")
 }
