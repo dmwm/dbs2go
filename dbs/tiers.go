@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/dmwm/das2go/utils"
 )
 
 // DataTiers API
@@ -48,7 +50,9 @@ func (API) InsertDataTiers(values Record) error {
 		args = append(args, "?")
 	}
 	stm = fmt.Sprintf("%s VALUES (%s)", stm, strings.Join(args, ","))
-	log.Println("InsertDataTiers", stm, vals, values)
+	if utils.VERBOSE > 0 {
+		log.Println("InsertDataTiers", stm, vals, values)
+	}
 	// use generic query API to fetch the results from DB
 	return insert(stm, vals)
 }

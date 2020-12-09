@@ -1,9 +1,11 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"testing"
 
+	"github.com/dmwm/das2go/utils"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
 )
@@ -24,6 +26,7 @@ func TestDataTiers(t *testing.T) {
 
 	// insert new record
 	var api dbs.API
+	utils.VERBOSE = 1
 	err := api.InsertDataTiers(rec)
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
@@ -33,7 +36,8 @@ func TestDataTiers(t *testing.T) {
 	// or use StdoutWriter instance (defined in test/main.go)
 	params := make(dbs.Record)
 	var w http.ResponseWriter
-	w = StdoutWriter("stdout writer")
+	w = StdoutWriter("")
+	log.Println("Fetch data from DataTiers API")
 	_, err = api.DataTiers(params, w)
 	if err != nil {
 		t.Errorf("Fail to look-up data tiers %v\n", err)
