@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/dmwm/das2go/utils"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // TestDataTiers API

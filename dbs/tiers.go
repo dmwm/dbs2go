@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dmwm/das2go/utils"
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // DataTiers API
