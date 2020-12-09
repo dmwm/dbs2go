@@ -293,7 +293,7 @@ func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, e
 // BlockParentsHandler provides access to BlockParents DBS API.
 // Takes the following arguments: block_name
 func BlockParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGettHandler(w, r, "blockparent")
+	return DBSGetHandler(w, r, "blockparent")
 }
 
 // FileLumisHandler provides access to FileLumis DBS API

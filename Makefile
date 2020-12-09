@@ -33,9 +33,9 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test : test1 bench
+test : test1
 
 test1:
-	cd test; go test -v .
+	cd test && rm -f dbs.db && sqlite3 dbs.db < ../static/schema/sqlite-schema.sql && go test -v .
 bench:
 	cd test; go test -bench=.

@@ -125,9 +125,12 @@ func errorRecord(msg string) []Record {
 // to writer)
 func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, error) {
 	var size int64
-	enc := json.NewEncoder(w)
-	w.Write([]byte("[\n"))
-	defer w.Write([]byte("]\n"))
+	var enc *json.Encoder
+	if w != nil {
+		enc = json.NewEncoder(w)
+		w.Write([]byte("[\n"))
+		defer w.Write([]byte("]\n"))
+	}
 
 	if utils.VERBOSE > 1 {
 		log.Printf(stm, args...)
@@ -164,7 +167,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 			msg := fmt.Sprintf("unabelt to scan DB results %s", err)
 			return 0, errors.New(msg)
 		}
-		if rowCount != 0 {
+		if rowCount != 0 && w != nil {
 			w.Write([]byte(",\n"))
 		}
 		rowCount += 1
@@ -200,9 +203,11 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 				rec[cols[i]] = val
 			}
 		}
-		err = enc.Encode(rec)
-		if err != nil {
-			return 0, err
+		if w != nil {
+			err = enc.Encode(rec)
+			if err != nil {
+				return 0, err
+			}
 		}
 		s, e := utils.RecordSize(rec)
 		if e == nil {
@@ -219,9 +224,12 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 // similar to executeAll function but it takes explicit set of columns and values
 func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) (int64, error) {
 	var size int64
-	enc := json.NewEncoder(w)
-	w.Write([]byte("[\n"))
-	defer w.Write([]byte("]\n"))
+	var enc *json.Encoder
+	if w != nil {
+		enc = json.NewEncoder(w)
+		w.Write([]byte("[\n"))
+		defer w.Write([]byte("]\n"))
+	}
 
 	if utils.VERBOSE > 1 {
 		log.Println(stm, args)
@@ -247,7 +255,7 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
 			return 0, errors.New(msg)
 		}
-		if rowCount != 0 {
+		if rowCount != 0 && w != nil {
 			w.Write([]byte(",\n"))
 		}
 		rowCount += 1
@@ -279,9 +287,11 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 				rec[cols[i]] = val
 			}
 		}
-		err = enc.Encode(rec)
-		if err != nil {
-			return 0, err
+		if w != nil {
+			err = enc.Encode(rec)
+			if err != nil {
+				return 0, err
+			}
 		}
 		s, e := utils.RecordSize(rec)
 		if e == nil {
