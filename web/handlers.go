@@ -305,3 +305,17 @@ func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 	}
 	return DBSPostHandler(w, r, "filelumis")
 }
+
+// BulkBlocksHandler provides access to BulkBlocks DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body)
+	var api dbs.API
+	err := api.BulkBlocks(decoder)
+	if err != nil {
+		log.Println("BulkBlocksHandler error", err)
+		return http.StatusInternalServerError, 0, err
+	}
+	return http.StatusOK, 0, nil
+}

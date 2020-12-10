@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// blocks API
+// Blocks DBS API
 func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
