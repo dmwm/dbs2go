@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// releaseversions API
+// ReleaseVersions DBS API
 func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 	stm := getSQL("releaseversions")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertReleaseVersions DBS API
+func (API) InsertReleaseVersions(values Record) error {
+	return InsertData("insert_release_versions", values)
 }

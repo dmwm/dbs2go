@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// files API
+// Files DBS API
 func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -240,4 +240,9 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
+}
+
+// InsertFiles DBS API
+func (API) InsertFiles(values Record) error {
+	return InsertData("insert_files", values)
 }

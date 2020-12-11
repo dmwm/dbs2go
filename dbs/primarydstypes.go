@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// primarydstypes API
+// PrimaryDSTypes DBS API
 func (API) Primarydstypes(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) Primarydstypes(params Record, w http.ResponseWriter) (int64, error) {
 	stm := getSQL("primarydstypes")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertPrimaryDSTypes DBS API
+func (API) InsertPrimaryDSTypes(values Record) error {
+	return InsertData("insert_primary_dataset_types", values)
 }

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// physicsgroups API
+// PhysicsGroups DBS API
 func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
 	stm := getSQL("physicsgroups")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertPhysicsGroups DBS API
+func (API) InsertPhysicsGroups(values Record) error {
+	return InsertData("insert_physics_groups", values)
 }

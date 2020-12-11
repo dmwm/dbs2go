@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// outputconfigs API
+// OutputConfigs DBS API
 func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var sql1, sql2, stm string
@@ -84,4 +84,9 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertOutputConfigs DBS API
+func (API) InsertOutputConfigs(values Record) error {
+	return InsertData("insert_output_configs", values)
 }

@@ -3,14 +3,10 @@ package dbs
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
-	"strings"
-
-	"github.com/vkuznet/dbs2go/utils"
 )
 
-// DataTiers API
+// DataTiers DBS API
 func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -35,24 +31,7 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm+where, args...)
 }
 
-// InsertDataTiers API
+// InsertDataTiers DBS API
 func (API) InsertDataTiers(values Record) error {
-	// get SQL statement from static area
-	stm := getSQL("insert_tiers")
-	var vals []interface{}
-	var args []string
-	for k, v := range values {
-		if !strings.Contains(strings.ToLower(stm), k) {
-			msg := fmt.Sprintf("unable to find column '%s' in %s", k, stm)
-			return errors.New(msg)
-		}
-		vals = append(vals, v)
-		args = append(args, "?")
-	}
-	stm = fmt.Sprintf("%s VALUES (%s)", stm, strings.Join(args, ","))
-	if utils.VERBOSE > 0 {
-		log.Println("InsertDataTiers", stm, vals, values)
-	}
-	// use generic query API to fetch the results from DB
-	return insert(stm, vals)
+	return InsertData("insert_tiers", values)
 }

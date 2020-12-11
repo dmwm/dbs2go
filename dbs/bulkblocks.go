@@ -2,6 +2,8 @@ package dbs
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 )
 
@@ -116,9 +118,38 @@ func (API) BulkBlocks(decoder *json.Decoder) error {
 		log.Println("BulkBlocks decoder error", err)
 		return err
 	}
+	// API logic
+	// validate input record
+	if err := validateBulkBlockData(rec); err != nil {
+		log.Println("ERROR: invalid BulkBlock record", err)
+		return err
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	// insert configuration and get back config list
+	// insert dataset with config list and get back dataset_id
+	// insert block with dataset_id
+	// insert files
+	// insert file parent list
+	// insert file lumi list
+	// insert file config object
+	// insert dataset parent list
 	data, err := json.MarshalIndent(rec, "", "    ")
 	if err == nil {
 		log.Printf("BulkBlocks record: %+v\n", string(data))
 	}
 	return nil
+}
+
+// helper function to validate bulk block data
+func validateBulkBlockData(rec BulkBlocks) error {
+	return nil
+}
+
+// helper function to insert configuration
+func insertConfiguration(rec BulkBlocks) {
 }

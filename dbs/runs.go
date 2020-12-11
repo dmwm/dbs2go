@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// runs API
+// Runs DBS API
 func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -50,7 +50,7 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm+where, args...)
 }
 
-// runs API
+// RunSummaries DBS API
 func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -83,4 +83,9 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertRuns DBS API
+func (API) InsertRuns(values Record) error {
+	return InsertData("insert_runs", values)
 }

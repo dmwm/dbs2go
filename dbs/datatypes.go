@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// datatypes API
+// DataTypes DBS API
 func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
 	stm := getSQL("datatypes")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertDataTypes DBS API
+func (API) InsertDataTypes(values Record) error {
+	return InsertData("insert_data_types", values)
 }

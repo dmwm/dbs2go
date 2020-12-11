@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// acquisitioneras API
+// AcquisitionEras DBS API
 func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 	stm := getSQL("acquisitioneras")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertAcquisitionEras DBS API
+func (API) InsertAcquisitionEras(values Record) error {
+	return InsertData("insert_acquisition_eras", values)
 }

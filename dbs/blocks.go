@@ -40,7 +40,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm+where, args...)
 }
 
-// blockparent API
+// BlockParent DBS API
 func (API) BlockParent(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -63,7 +63,7 @@ func (API) BlockParent(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm+where, args...)
 }
 
-// blockchildren API
+// BlockChildren DBS API
 func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -86,7 +86,7 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm+where, args...)
 }
 
-// blocksummaries API
+// BlockSummaries DBS API
 func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var stm, where_clause string
@@ -129,7 +129,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, genSQL+stm, args...)
 }
 
-// blockorigin API
+// BlockOrigin DBS API
 func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -160,4 +160,9 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	stm := getSQL("blockorigin")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertBlocks DBS API
+func (API) InsertBlocks(values Record) error {
+	return InsertData("insert_blocks", values)
 }

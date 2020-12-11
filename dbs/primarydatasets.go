@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// primarydatasets API
+// PrimaryDatasets DBS API
 func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) 
 	stm := getSQL("primarydatasets")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertPrimaryDatasets DBS API
+func (API) InsertPrimaryDatasets(values Record) error {
+	return InsertData("insert_primary_datasets", values)
 }

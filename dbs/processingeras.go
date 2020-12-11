@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// processingeras API
+// ProcessingEras DBS API
 func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -29,4 +29,9 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 	stm := getSQL("processingeras")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// InsertProcessingEras DBS API
+func (API) InsertProcessingEras(values Record) error {
+	return InsertData("insert_processing_eras", values)
 }
