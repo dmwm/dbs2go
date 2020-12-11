@@ -7,7 +7,7 @@ import (
 )
 
 // PrimaryDSTypes DBS API
-func (API) Primarydstypes(params Record, w http.ResponseWriter) (int64, error) {
+func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
@@ -33,5 +33,5 @@ func (API) Primarydstypes(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertPrimaryDSTypes DBS API
 func (API) InsertPrimaryDSTypes(values Record) error {
-	return InsertData("insert_primary_dataset_types", values)
+	return InsertData("insert_primary_ds_types", values)
 }

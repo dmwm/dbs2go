@@ -1,0 +1,43 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"testing"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
+)
+
+// TestReleaseVersions API
+func TestReleaseVersions(t *testing.T) {
+
+	// initialize DB for testing
+	db := initDB()
+	defer db.Close()
+
+	// prepare record for insertion
+	rec := make(dbs.Record)
+	rec["release_version_id"] = 0
+	rec["release_version"] = "123"
+
+	// insert new record
+	var api dbs.API
+	utils.VERBOSE = 1
+	err := api.InsertReleaseVersions(rec)
+	if err != nil {
+		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
+	}
+
+	// fetch this record from DB, here we can either use nil writer
+	// or use StdoutWriter instance (defined in test/main.go)
+	params := make(dbs.Record)
+	var w http.ResponseWriter
+	w = StdoutWriter("")
+	log.Println("Fetch data from ReleaseVersions API")
+	_, err = api.ReleaseVersions(params, w)
+	if err != nil {
+		t.Errorf("Fail to look-up data tiers %v\n", err)
+	}
+}
