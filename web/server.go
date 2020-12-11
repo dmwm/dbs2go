@@ -80,6 +80,8 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/blocks"), LoggingHandler(BlocksHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/bulkblocks"), LoggingHandler(BulkBlocksHandler)).Methods("POST")
 	router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/primarydatasets"), LoggingHandler(PrimaryDatasetsHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/primdstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET", "POST")
 	// more complex example
 	// https://github.com/gorilla/mux
 	//     router.Path(basePath("/dummy")).

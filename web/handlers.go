@@ -140,6 +140,10 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.Blocks(params, w)
 	} else if a == "files" {
 		size, err = api.Files(params, w)
+	} else if a == "primarydatasets" {
+		size, err = api.PrimaryDatasets(params, w)
+	} else if a == "primarydstypes" {
+		size, err = api.PrimaryDSTypes(params, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
@@ -230,9 +234,9 @@ func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, 
 	return DBSGetHandler(w, r, "processingeras")
 }
 
-// PrimarydstypesHandler provides access to Primarydstypes DBS API.
+// PrimaryDSTypesHandler provides access to PrimaryDSTypes DBS API.
 // Takes the following arguments: primary_ds_type, dataset
-func PrimarydstypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func PrimaryDSTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "primarydstypes")
 }
 
