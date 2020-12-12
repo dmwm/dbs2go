@@ -88,7 +88,7 @@ func (API) DatasetParent(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm+where, args...)
 }
 
-// datasetchildren API
+// DatasetChildren API
 func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
@@ -108,6 +108,18 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 		msg := fmt.Sprintf("No arguments for datasetchildren API")
 		return 0, errors.New(msg)
 	}
+	// get SQL statement from static area
+	stm := getSQL("datasetchildren")
+	// use generic query API to fetch the results from DB
+	return executeAll(w, stm+where, args...)
+}
+
+// ParentDSTrio API
+func (API) ParentDSTrio(params Record, w http.ResponseWriter) (int64, error) {
+	// variables we'll use in where clause
+	var args []interface{}
+	where := ""
+
 	// get SQL statement from static area
 	stm := getSQL("datasetchildren")
 	// use generic query API to fetch the results from DB

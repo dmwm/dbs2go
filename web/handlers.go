@@ -153,6 +153,12 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	return status, size, nil
 }
 
+// NotImplementedHandler returns server status error
+func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) (int, int64, error) {
+	log.Println("NotImplementedAPI", api)
+	return http.StatusInternalServerError, 0, nil
+}
+
 // DatatiersHandler provides access to DataTiers DBS API.
 // Takes the following arguments: data_tier_name
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
@@ -256,6 +262,18 @@ func ReleaseVersionsHandler(w http.ResponseWriter, r *http.Request) (int, int64,
 // Takes the following arguments: acquisition_era_name
 func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "acquisitioneras")
+}
+
+// AcquisitionErasCiHandler provides access to AcquisitionErasCi DBS API.
+// Takes the following arguments: acquisition_era_name
+func AcquisitionErasCiHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return NotImplemnetedHandler(w, r, "acquisitionerasci")
+}
+
+// ParentDSTrioHandler provides access to ParentDSTrio DBS API.
+// Takes the following arguments: acquisition_era_name
+func ParentDSTrioHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return NotImplemnetedHandler(w, r, "parentdstrio")
 }
 
 // PrimaryDatasetsHandler provides access to PrimaryDatasets DBS API.

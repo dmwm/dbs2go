@@ -82,15 +82,46 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/primarydatasets"), LoggingHandler(PrimaryDatasetsHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/primdstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET", "POST")
+
+	// Not implemented APIs
+	router.HandleFunc(basePath("/acquisitioneras"), LoggingHandler(AcquisitionErasHandler)).Methods("GET")
+	router.HandleFunc(basePath("/releaseversions"), LoggingHandler(ReleaseVersionsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/physicsgroups"), LoggingHandler(PhysicsGroupsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/primarydstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET")
+	router.HandleFunc(basePath("/datatypes"), LoggingHandler(DataTypesHandler)).Methods("GET")
+	router.HandleFunc(basePath("/processingeras"), LoggingHandler(ProcessingErasHandler)).Methods("GET")
+	router.HandleFunc(basePath("/outputconfigs"), LoggingHandler(OutputConfigsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/datasetaccesstypes"), LoggingHandler(DatasetAccessTypesHandler)).Methods("GET")
+
+	router.HandleFunc(basePath("/runs"), LoggingHandler(RunsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/runsummaries"), LoggingHandler(RunSummariesHandler)).Methods("GET")
+
+	router.HandleFunc(basePath("/blockorigin"), LoggingHandler(BlockOriginHandler)).Methods("GET")
+	router.HandleFunc(basePath("/blockTrio"), LoggingHandler(DummyHandler)).Methods("GET")
+	router.HandleFunc(basePath("/blockdump"), LoggingHandler(DummyHandler)).Methods("GET")
+	router.HandleFunc(basePath("/blockchildren"), LoggingHandler(BlockChildrenHandler)).Methods("GET")
+	router.HandleFunc(basePath("/blockparents"), LoggingHandler(BlockParentsHandler)).Methods("GET")
+
+	router.HandleFunc(basePath("/filechildren"), LoggingHandler(FileChildrenHandler)).Methods("GET")
+	router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/filesummaries"), LoggingHandler(FileSummariesHandler)).Methods("GET")
+	router.HandleFunc(basePath("/filelumis"), LoggingHandler(FileLumisHandler)).Methods("GET")
+	router.HandleFunc(basePath("/datasetchildren"), LoggingHandler(DatasetChildrenHandler)).Methods("GET")
+	router.HandleFunc(basePath("/datasetparents"), LoggingHandler(DatasetParentsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/parentDSTrio"), LoggingHandler(ParentDSTrioHandler)).Methods("GET")
+	router.HandleFunc(basePath("/acquisitioneras_ci"), LoggingHandler(AcquisitionErasCiHandler)).Methods("GET")
+
+	// aux APIs
+	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
+	router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
+
 	// more complex example
 	// https://github.com/gorilla/mux
 	//     router.Path(basePath("/dummy")).
 	//         Queries("bla", "{bla}").
 	//         HandlerFunc(LoggingHandler(DummyHandler)).
 	//         Methods("GET")
-	router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
-	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 
 	return router
 }
