@@ -20,6 +20,7 @@ type Configuration struct {
 	LogFile          string `json:"log_file"`           // server log file
 	UTC              bool   `json:"utc"`                // report logger time in UTC
 	PrintMonitRecord bool   `json:"print_monit_record"` // print monit record on stdout
+	Hmac             string `json:"hmac"`               // cmsweb hmac file location
 
 	// db related configuration
 	DBFile             string `json:"dbfile"`               // dbs db file with secrets

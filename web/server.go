@@ -34,6 +34,7 @@ import (
 	//     _ "github.com/go-sql-driver/mysql"
 	_ "net/http/pprof"
 
+	"github.com/dmwm/cmsauth"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -53,6 +54,10 @@ var _top, _bottom, _search string
 // StartTime represents initial time when we started the server
 var StartTime time.Time
 
+// CMSAuth structure to create CMS Auth headers
+var CMSAuth cmsauth.CMSAuth
+
+// helper function to serve index.html web page
 func indexPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
@@ -123,6 +128,9 @@ func handlers() *mux.Router {
 	//         HandlerFunc(LoggingHandler(DummyHandler)).
 	//         Methods("GET")
 
+	// for all requests perform first auth/authz action
+	router.Use(authMiddleware)
+
 	return router
 }
 
@@ -148,6 +156,9 @@ func Server(configFile string) {
 		log.Printf("Unable to parse, time: %v, config: %v\n", time.Now(), configFile)
 	}
 	log.Println("Configuration:", config.Config.String())
+
+	// initialize cmsauth layer
+	CMSAuth.Init(config.Config.Hmac)
 
 	// initialize templates
 	tmplData := make(map[string]interface{})

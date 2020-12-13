@@ -13,8 +13,27 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/vkuznet/dbs2go/config"
 	"github.com/vkuznet/dbs2go/dbs"
 )
+
+// helper to auth/authz incoming requests to the server
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// perform authentication
+		status := CMSAuth.CheckAuthnAuthz(r.Header)
+		if !status {
+			log.Printf("ERROR: fail to authenticate, HTTP headers %+v\n", r.Header)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		if config.Config.Verbose > 0 {
+			log.Printf("Auth layer status: %v headers: %+v\n", status, r.Header)
+		}
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
+}
 
 // LoggingHandlerFunc declares new handler function type which
 // should return status (int) and error
