@@ -65,13 +65,12 @@ jobs:
         asset_path: ./dbs2go
         asset_name: dbs2go
         asset_content_type: application/octet-stream
-
-	- name: Get the tag
-		  id: get-ref
-		  uses: ankitvgupta/ref-to-tag-action@master
-		  with:
-			ref: ${{ github.ref }}
-			head_ref: ${{ github.head_ref }}
+    - name: Get the tag
+      id: get-ref
+      uses: ankitvgupta/ref-to-tag-action@master
+      with:
+        ref: ${{ github.ref }}
+        head_ref: ${{ github.head_ref }}
 
     - name: Build image
       run: |
