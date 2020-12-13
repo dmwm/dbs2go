@@ -113,8 +113,18 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		return http.StatusInternalServerError, 0, err
 	}
 	var api dbs.API
-	if a == "datatiers" {
+	if a == "datatiers" { // This is so far for testing only
 		err = api.InsertDataTiers(params)
+	} else if a == "fileparentsbylumis" {
+		err = api.InsertFileParentByLumis(params)
+	} else if a == "datasetlist" {
+		err = api.InsertDatasetList(params)
+	} else if a == "fileArray" {
+		err = api.InsertFileArray(params)
+	} else if a == "filelumis" {
+		err = api.InsertFileLumis(params)
+	} else if a == "blockparents" {
+		err = api.InsertBlockParents(params)
 	}
 	if err != nil {
 		return http.StatusInternalServerError, 0, err
@@ -154,8 +164,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.Runs(params, w)
 	} else if a == "filechildren" {
 		size, err = api.FileChildren(params, w)
-		//     } else if a == "fileparents" {
-		//         size, err = api.FileParents(params, w)
+	} else if a == "fileparents" {
+		size, err = api.FileParents(params, w)
 	} else if a == "outputconfigs" {
 		size, err = api.OutputConfigs(params, w)
 	} else if a == "datasetchildren" {
@@ -166,20 +176,20 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.PhysicsGroups(params, w)
 	} else if a == "filesummaries" {
 		size, err = api.FileSummaries(params, w)
-		//     } else if a == "filelumis" {
-		//         size, err = api.filelumis(params, w)
+	} else if a == "filelumis" {
+		size, err = api.FileLumis(params, w)
 	} else if a == "primarydstypes" {
 		size, err = api.PrimaryDSTypes(params, w)
-		//     } else if a == "datasetparents" {
-		//         size, err = api.DatasetParents(params, w)
+	} else if a == "datasetparents" {
+		size, err = api.DatasetParents(params, w)
 	} else if a == "datatypes" {
 		size, err = api.DataTypes(params, w)
 	} else if a == "processingeras" {
 		size, err = api.ProcessingEras(params, w)
 	} else if a == "blockchildren" {
 		size, err = api.BlockChildren(params, w)
-		//     } else if a == "blockparents" {
-		//         size, err = api.BlockParents(params, w)
+	} else if a == "blockparents" {
+		size, err = api.BlockParents(params, w)
 	} else if a == "datasetaccesstypes" {
 		size, err = api.DatasetAccessTypes(params, w)
 	} else {
