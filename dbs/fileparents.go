@@ -18,7 +18,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The fileparent API does not support list of fileparent"
 		return 0, errors.New(msg)
 	} else if len(fileparent) == 1 {
-		op, val := opVal(fileparent[0])
+		op, val := OperatorValue(fileparent[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
 		where += addCond(where, cond)
 		args = append(args, val)

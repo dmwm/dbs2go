@@ -38,7 +38,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Unsupported list of dataset"
 		return 0, errors.New(msg)
 	} else if len(dataset) == 1 {
-		_, val := opVal(dataset[0])
+		_, val := OperatorValue(dataset[0])
 		args = append(args, val)
 		where_clause = fmt.Sprintf("WHERE DS.dataset=%s", placeholder("dataset"))
 		stm = getSQL("blocksummaries4dataset")

@@ -21,22 +21,22 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The runs API does not support list of runs"
 		return 0, errors.New(msg)
 	} else if len(runs) == 1 {
-		op, val := opVal(runs[0])
+		op, val := OperatorValue(runs[0])
 		cond := fmt.Sprintf(" FL.run_num %s %s", op, placeholder("run_num"))
 		where += addCond(where, cond)
 		args = append(args, val)
 	} else if len(lfn) == 1 {
-		_, val := opVal(lfn[0])
+		_, val := OperatorValue(lfn[0])
 		cond := fmt.Sprintf(" inner join %s.FILES FILES on FILES.FILE_ID = FL.FILE_ID WHERE FILES.LOGICAL_FILE_NAME = %s", DBOWNER, placeholder("logical_file_name"))
 		where += cond
 		args = append(args, val)
 	} else if len(block) == 1 {
-		_, val := opVal(block[0])
+		_, val := OperatorValue(block[0])
 		cond := fmt.Sprintf(" inner join %s.FILES FILES on FILES.FILE_ID = FL.FILE_ID inner join %s.BLOCKS BLOCKS on BLOCKS.BLOCK_ID = FILES.BLOCK_ID WHERE BLOCKS.BLOCK_NAME = %s", DBOWNER, DBOWNER, placeholder("block_name"))
 		where += cond
 		args = append(args, val)
 	} else if len(dataset) == 1 {
-		_, val := opVal(dataset[0])
+		_, val := OperatorValue(dataset[0])
 		cond := fmt.Sprintf(" inner join %s.FILES FILES on FILES.FILE_ID = FL.FILE_ID inner join %s.DATASETS DATASETS on DATASETS.DATASET_ID = FILES.DATASET_ID WHERE DATASETS.DATASET = %s", DBOWNER, DBOWNER, placeholder("dataset"))
 		where += cond
 		args = append(args, val)

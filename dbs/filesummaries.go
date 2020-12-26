@@ -47,7 +47,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 	block_name := getValues(params, "block_name")
 	if len(block_name) == 1 {
-		_, b := opVal(block_name[0])
+		_, b := OperatorValue(block_name[0])
 		args = append(args, b, b, b, b, b) // pass 5 block values
 		if runs {
 			stm = getSQL("filesummaries4block_run")
@@ -58,7 +58,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 	dataset := getValues(params, "dataset")
 	if len(dataset) == 1 {
-		_, d := opVal(dataset[0])
+		_, d := OperatorValue(dataset[0])
 		args = append(args, d, d, d, d, d) // pass 5 dataset values
 		if runs {
 			stm = getSQL("filesummaries4dataset_run")

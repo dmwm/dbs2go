@@ -18,7 +18,7 @@ func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The datatypes API does not support list of datatypes"
 		return 0, errors.New(msg)
 	} else if len(datatypes) == 1 {
-		op, val := opVal(datatypes[0])
+		op, val := OperatorValue(datatypes[0])
 		cond := fmt.Sprintf(" DT.datatype %s %s", op, placeholder("datatype"))
 		where += addCond(where, cond)
 		args = append(args, val)

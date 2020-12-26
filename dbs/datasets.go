@@ -43,7 +43,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, d, d, d) // append three values since tokens generates placeholders for them
 		}
 	} else if len(datasets) == 1 {
-		op, val := opVal(datasets[0])
+		op, val := OperatorValue(datasets[0])
 		where += fmt.Sprintf(" AND D.DATASET %s %s", op, placeholder("dataset"))
 		args = append(args, val)
 	}

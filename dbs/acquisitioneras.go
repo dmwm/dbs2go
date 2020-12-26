@@ -13,12 +13,12 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 	where := "WHERE "
 
 	// parse dataset argument
-	acquisitioneras := getValues(params, "data_tier_name")
+	acquisitioneras := getValues(params, "acquisitionEra")
 	if len(acquisitioneras) > 1 {
 		msg := "The acquisitioneras API does not support list of acquisitioneras"
 		return 0, errors.New(msg)
 	} else if len(acquisitioneras) == 1 {
-		op, val := opVal(acquisitioneras[0])
+		op, val := OperatorValue(acquisitioneras[0])
 		cond := fmt.Sprintf(" AE.ACQUISITION_ERA_NAME %s %s", op, placeholder("acquisition_era_name"))
 		where += addCond(where, cond)
 		args = append(args, val)

@@ -18,7 +18,7 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 		msg := "The releaseversions API does not support list of releaseversions"
 		return 0, errors.New(msg)
 	} else if len(releaseversions) == 1 {
-		op, val := opVal(releaseversions[0])
+		op, val := OperatorValue(releaseversions[0])
 		cond := fmt.Sprintf(" RV.release_version %s %s", op, placeholder("release_version"))
 		where += addCond(where, cond)
 		args = append(args, val)

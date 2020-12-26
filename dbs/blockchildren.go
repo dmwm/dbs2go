@@ -18,7 +18,7 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Unsupported list of blockchildren"
 		return 0, errors.New(msg)
 	} else if len(blockchildren) == 1 {
-		op, val := opVal(blockchildren[0])
+		op, val := OperatorValue(blockchildren[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
 		where += addCond(where, cond)
 		args = append(args, val)

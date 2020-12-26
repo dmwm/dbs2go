@@ -40,7 +40,7 @@ func tokens(inputList []string) (string, []string) {
 }
 
 // helper function to generate operator, value pair for given argument
-func opVal(arg string) (string, string) {
+func OperatorValue(arg string) (string, string) {
 	op := "="
 	val := arg
 	if strings.Contains(arg, "*") {

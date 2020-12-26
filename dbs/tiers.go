@@ -18,7 +18,7 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The datatiers API does not support list of tiers"
 		return 0, errors.New(msg)
 	} else if len(tiers) == 1 {
-		op, val := opVal(tiers[0])
+		op, val := OperatorValue(tiers[0])
 		cond := fmt.Sprintf(" DT.DATA_TIER_NAME %s %s", op, placeholder("data_tier_name"))
 		where += addCond(where, cond)
 		args = append(args, val)

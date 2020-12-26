@@ -18,7 +18,7 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Unsupported list of block"
 		return 0, errors.New(msg)
 	} else if len(block) == 1 {
-		op, val := opVal(block[0])
+		op, val := OperatorValue(block[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
 		where += addCond(where, cond)
 		args = append(args, val)
@@ -28,7 +28,7 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Unsupported list of dataset"
 		return 0, errors.New(msg)
 	} else if len(dataset) == 1 {
-		op, val := opVal(dataset[0])
+		op, val := OperatorValue(dataset[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
 		where += addCond(where, cond)
 		args = append(args, val)

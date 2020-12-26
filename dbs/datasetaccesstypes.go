@@ -18,7 +18,7 @@ func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) (int64, erro
 		msg := "The datasetaccesstypes API does not support list of datasetaccesstypes"
 		return 0, errors.New(msg)
 	} else if len(datasetaccesstypes) == 1 {
-		op, val := opVal(datasetaccesstypes[0])
+		op, val := OperatorValue(datasetaccesstypes[0])
 		cond := fmt.Sprintf(" DT.DATASET_ACCESS_TYPE %s %s", op, placeholder("dataset_access_type"))
 		where += addCond(where, cond)
 		args = append(args, val)

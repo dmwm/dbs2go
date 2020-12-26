@@ -17,13 +17,13 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	validOnly := "0"
 	validFileOnly := getValues(params, "validFileOnly")
 	if len(validFileOnly) == 1 {
-		_, v := opVal(validFileOnly[0])
+		_, v := OperatorValue(validFileOnly[0])
 		validOnly = v
 	}
 
 	lfn := getValues(params, "logical_file_name")
 	if len(lfn) == 1 {
-		_, b := opVal(lfn[0])
+		_, b := OperatorValue(lfn[0])
 		args = append(args, b)
 		if validOnly == "0" {
 			stm += fmt.Sprintf(" , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID WHERE F.LOGICAL_FILE_NAME = :logical_file_name ", DBOWNER, DBOWNER)
@@ -47,7 +47,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	block_name := getValues(params, "block_name")
 	if len(block_name) == 1 {
-		_, b := opVal(block_name[0])
+		_, b := OperatorValue(block_name[0])
 		args = append(args, b)
 		if validOnly == "0" {
 			stm += fmt.Sprintf(" , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID JOIN %s.BLOCKS B ON B.BLOCK_ID = F.BLOCK_ID WHERE B.BLOCK_NAME = :block_name", DBOWNER, DBOWNER)

@@ -18,7 +18,7 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The processingeras API does not support list of processingeras"
 		return 0, errors.New(msg)
 	} else if len(processingeras) == 1 {
-		op, val := opVal(processingeras[0])
+		op, val := OperatorValue(processingeras[0])
 		cond := fmt.Sprintf(" PE.PROCESSING_VERSION %s %s", op, placeholder("processing_version"))
 		where += addCond(where, cond)
 		args = append(args, val)

@@ -18,7 +18,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The files API does not support list of files"
 		return 0, errors.New(msg)
 	} else if len(files) == 1 {
-		op, val := opVal(files[0])
+		op, val := OperatorValue(files[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
 		where += addCond(where, cond)
 		args = append(args, val)
@@ -28,7 +28,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The files API does not support list of datasets"
 		return 0, errors.New(msg)
 	} else if len(datasets) == 1 {
-		op, val := opVal(datasets[0])
+		op, val := OperatorValue(datasets[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
 		where += addCond(where, cond)
 		args = append(args, val)
@@ -38,7 +38,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The files API does not support list of block_names"
 		return 0, errors.New(msg)
 	} else if len(block_names) == 1 {
-		op, val := opVal(block_names[0])
+		op, val := OperatorValue(block_names[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
 		where += addCond(where, cond)
 		args = append(args, val)

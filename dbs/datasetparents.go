@@ -18,7 +18,7 @@ func (API) DatasetParents(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The datasetparent API does not support list of datasetparent"
 		return 0, errors.New(msg)
 	} else if len(datasetparent) == 1 {
-		op, val := opVal(datasetparent[0])
+		op, val := OperatorValue(datasetparent[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
 		where += addCond(where, cond)
 		args = append(args, val)
