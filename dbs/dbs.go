@@ -304,6 +304,18 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 	return size, nil
 }
 
+// helper function to execute sessions
+func executeSessions(tx *sql.Tx, sessions []string) error {
+	for _, s := range sessions {
+		_, err := tx.Exec(s)
+		if err != nil {
+			log.Println("DB error", s, err)
+			return err
+		}
+	}
+	return nil
+}
+
 // insert api to insert data into DB
 func insert(stm string, vals []interface{}) error {
 	if utils.VERBOSE > 1 {
