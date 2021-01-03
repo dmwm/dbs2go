@@ -47,8 +47,3 @@ func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) (int64, error
 	}
 	return r, e
 }
-
-// InsertAcquisitionErasCi DBS API
-func (API) InsertAcquisitionErasCi(values Record) error {
-	return InsertData("insert_acquisitioneras_ci", values)
-}
