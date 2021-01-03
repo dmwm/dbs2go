@@ -41,5 +41,5 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertBlockOrigin DBS API
 func (API) InsertBlockOrigin(values Record) error {
-	return InsertData("insert_block_origin", values)
+	return InsertValues("insert_block_origin", values)
 }

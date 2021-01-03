@@ -34,5 +34,5 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 
 // InsertDatasetChildren DBS API
 func (API) InsertDatasetChildren(values Record) error {
-	return InsertData("insert_dataset_children", values)
+	return InsertValues("insert_dataset_children", values)
 }

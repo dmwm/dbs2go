@@ -27,24 +27,31 @@ var DBTYPE string
 var DBSQL Record
 var DBOWNER string
 
-// helper function to load DBS SQL statements
-func LoadSQL(owner string) Record {
-	dbsql := make(Record)
-	// query statement
+// helper function to load DBS SQL templated statements
+func LoadTemplateSQL(params Record) Record {
 	tmplData := make(Record)
-	tmplData["Owner"] = owner
+	for key, val := range params {
+		tmplData[key] = val
+	}
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
 	log.Println("sql area", sdir)
+	dbsql := make(Record)
 	for _, f := range utils.Listfiles(sdir) {
 		k := strings.Split(f, ".")[0]
 		stm := utils.ParseTmpl(sdir, f, tmplData)
-		if owner == "sqlite" {
+		if owner, ok := tmplData["Owner"]; ok && owner == "sqlite" {
 			stm = strings.Replace(stm, "sqlite.", "", -1)
 		}
 		dbsql[k] = stm
-		//         dbsql[k] = utils.ParseTmpl(sdir, f, tmplData)
 	}
 	return dbsql
+}
+
+// helper function to load DBS SQL statements with Owner
+func LoadSQL(owner string) Record {
+	tmplData := make(Record)
+	tmplData["Owner"] = owner
+	return LoadTemplateSQL(tmplData)
 }
 
 // helper function to get SQL statement from DBSQL dict for a given key

@@ -31,5 +31,8 @@ func (API) BlockParents(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertBlockParents DBS API
 func (API) InsertBlockParents(values Record) error {
-	return InsertData("insert_block_parents", values)
+	if _, ok := values["Owner"]; !ok {
+		values["Owner"] = DBOWNER
+	}
+	return InsertTemplateValues("insert_block_parents", values)
 }

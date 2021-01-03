@@ -33,5 +33,5 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 
 // InsertReleaseVersions DBS API
 func (API) InsertReleaseVersions(values Record) error {
-	return InsertData("insert_release_versions", values)
+	return InsertValues("insert_release_versions", values)
 }

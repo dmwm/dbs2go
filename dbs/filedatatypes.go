@@ -18,5 +18,5 @@ func (API) FileDataTypes(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertFileDataTypes DBS API
 func (API) InsertFileDataTypes(values Record) error {
-	return InsertData("insert_file_data_types", values)
+	return InsertValues("insert_file_data_types", values)
 }

@@ -77,5 +77,5 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertFileSummaries DBS API
 func (API) InsertFileSummaries(values Record) error {
-	return InsertData("insert_file_summaries", values)
+	return InsertValues("insert_file_summaries", values)
 }

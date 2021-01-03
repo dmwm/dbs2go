@@ -33,5 +33,5 @@ func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) 
 
 // InsertPrimaryDatasets DBS API
 func (API) InsertPrimaryDatasets(values Record) error {
-	return InsertData("insert_primary_datasets", values)
+	return InsertValues("insert_primary_datasets", values)
 }

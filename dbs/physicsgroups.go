@@ -33,5 +33,5 @@ func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertPhysicsGroups DBS API
 func (API) InsertPhysicsGroups(values Record) error {
-	return InsertData("insert_physics_groups", values)
+	return InsertValues("insert_physics_groups", values)
 }

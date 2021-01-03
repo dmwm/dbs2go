@@ -33,5 +33,5 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 
 // InsertAcquisitionEras DBS API
 func (API) InsertAcquisitionEras(values Record) error {
-	return InsertData("insert_acquisition_eras", values)
+	return InsertValues("insert_acquisition_eras", values)
 }

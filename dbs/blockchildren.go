@@ -28,8 +28,3 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
 }
-
-// InsertBlockChildren DBS API
-func (API) InsertBlockChildren(values Record) error {
-	return InsertData("insert_block_children", values)
-}

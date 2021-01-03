@@ -18,5 +18,5 @@ func (API) ProcessedDatasets(params Record, w http.ResponseWriter) (int64, error
 
 // InsertProcessedDatasets DBS API
 func (API) InsertProcessedDatasets(values Record) error {
-	return InsertData("insert_processed_datasets", values)
+	return InsertValues("insert_processed_datasets", values)
 }

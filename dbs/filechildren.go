@@ -31,5 +31,5 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertFileChildren DBS API
 func (API) InsertFileChildren(values Record) error {
-	return InsertData("insert_file_children", values)
+	return InsertValues("insert_file_children", values)
 }

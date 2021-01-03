@@ -1,0 +1,1 @@
+INSERT INTO {{.Owner}}.TEST (ID, NAME)

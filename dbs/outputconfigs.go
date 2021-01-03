@@ -88,5 +88,5 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertOutputConfigs DBS API
 func (API) InsertOutputConfigs(values Record) error {
-	return InsertData("insert_output_configs", values)
+	return InsertValues("insert_output_configs", values)
 }

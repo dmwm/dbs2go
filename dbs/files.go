@@ -51,5 +51,5 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertFiles DBS API
 func (API) InsertFiles(values Record) error {
-	return InsertData("insert_files", values)
+	return InsertValues("insert_files", values)
 }

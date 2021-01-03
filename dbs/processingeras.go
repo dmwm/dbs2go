@@ -33,5 +33,5 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertProcessingEras DBS API
 func (API) InsertProcessingEras(values Record) error {
-	return InsertData("insert_processing_eras", values)
+	return InsertValues("insert_processing_eras", values)
 }

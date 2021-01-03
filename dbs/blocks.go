@@ -41,5 +41,5 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertBlocks DBS API
 func (API) InsertBlocks(values Record) error {
-	return InsertData("insert_blocks", values)
+	return InsertValues("insert_blocks", values)
 }

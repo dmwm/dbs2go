@@ -33,5 +33,5 @@ func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertPrimaryDSTypes DBS API
 func (API) InsertPrimaryDSTypes(values Record) error {
-	return InsertData("insert_primary_ds_types", values)
+	return InsertValues("insert_primary_ds_types", values)
 }

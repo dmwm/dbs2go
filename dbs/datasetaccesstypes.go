@@ -33,5 +33,5 @@ func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) (int64, erro
 
 // InsertDatasetAccessTypes DBS API
 func (API) InsertDatasetAccessTypes(values Record) error {
-	return InsertData("insert_dataset_access_types", values)
+	return InsertValues("insert_dataset_access_types", values)
 }

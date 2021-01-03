@@ -33,5 +33,5 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertDataTiers DBS API
 func (API) InsertDataTiers(values Record) error {
-	return InsertData("insert_tiers", values)
+	return InsertValues("insert_tiers", values)
 }
