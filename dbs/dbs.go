@@ -306,6 +306,10 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 
 // helper function to execute sessions
 func executeSessions(tx *sql.Tx, sessions []string) error {
+	// sessions should be executed only for ORACLE backend
+	if !utils.ORACLE {
+		return nil
+	}
 	for _, s := range sessions {
 		_, err := tx.Exec(s)
 		if err != nil {

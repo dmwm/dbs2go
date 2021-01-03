@@ -176,6 +176,10 @@ func Server(configFile string) {
 
 	// set database connection once
 	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
+	// for oci driver we know it is oracle backend
+	if strings.HasPrefix(dbtype, "oci") {
+		utils.ORACLE = true
+	}
 	db, dberr := sql.Open(dbtype, dburi)
 	defer db.Close()
 	if dberr != nil {

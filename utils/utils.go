@@ -15,6 +15,7 @@ import (
 var VERBOSE int
 var STATICDIR string
 var PROFILE bool
+var ORACLE bool
 
 // RecordSize
 func RecordSize(v interface{}) (int64, error) {
