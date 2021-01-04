@@ -40,9 +40,9 @@ func InsertValues(tmpl string, values Record) error {
 }
 
 // helper function to prepare insert statement with templated values
-func StatementTemplateValues(tmpl string, values Record) (string, []interface{}, error) {
+func StatementTemplateValues(tmpl string, args, values Record) (string, []interface{}, error) {
 	// get SQL statement from static area
-	stm := getSQL(tmpl)
+	stm := LoadTemplateSQL(tmpl, args)
 	var vals []interface{}
 	for k, v := range values {
 		if !strings.Contains(strings.ToLower(stm), k) {
@@ -59,8 +59,8 @@ func StatementTemplateValues(tmpl string, values Record) (string, []interface{},
 }
 
 // InsertTemplateValues API
-func InsertTemplateValues(tmpl string, values Record) error {
-	stm, vals, err := StatementTemplateValues(tmpl, values)
+func InsertTemplateValues(tmpl string, args, values Record) error {
+	stm, vals, err := StatementTemplateValues(tmpl, args, values)
 	if err != nil {
 		return err
 	}

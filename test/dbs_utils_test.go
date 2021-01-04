@@ -31,10 +31,12 @@ func TestOperatorValue(t *testing.T) {
 
 // TestStatementTemplateValues
 func TestStatementTemplateValues(t *testing.T) {
+	args := make(dbs.Record)
+	args["Owner"] = "sqlite"
 	values := make(dbs.Record)
 	values["id"] = 123
 	values["name"] = "name"
-	stm, vals, err := dbs.StatementTemplateValues("insert_test_tmpl_values", values)
+	stm, vals, err := dbs.StatementTemplateValues("insert_test_tmpl_values", args, values)
 	if err != nil {
 		t.Error("Fail TestStatementTemplateValues", err)
 	}
