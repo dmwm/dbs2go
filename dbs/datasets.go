@@ -14,10 +14,10 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	where := "WHERE "
 
 	// parse detail arugment
-	detail := getSingleValue(params, "detail")
+	detail, _ := getSingleValue(params, "detail")
 
 	// parse is_dataset_valid argument
-	isValid := getSingleValue(params, "is_dataset_valid")
+	isValid, _ := getSingleValue(params, "is_dataset_valid")
 	if isValid == "" {
 		isValid = "1"
 	}
@@ -25,7 +25,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	args = append(args, isValid)
 
 	// parse dataset_id argument
-	dataset_access_type := getSingleValue(params, "dataset_access_type")
+	dataset_access_type, _ := getSingleValue(params, "dataset_access_type")
 	if dataset_access_type == "" {
 		dataset_access_type = "VALID"
 	}

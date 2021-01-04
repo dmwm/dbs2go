@@ -27,6 +27,9 @@ var DBTYPE string
 var DBSQL Record
 var DBOWNER string
 
+// DRYRUN allows to skip query execution and printout DB statements along with passed parameters
+var DRYRUN bool
+
 // helper function to load DBS SQL templated statements
 func LoadTemplateSQL(tmpl string, params Record) string {
 	tmplData := make(Record)
@@ -85,12 +88,12 @@ func getValues(params Record, key string) []string {
 }
 
 // helper function to get single value from a record
-func getSingleValue(params Record, key string) string {
+func getSingleValue(params Record, key string) (string, error) {
 	values := getValues(params, key)
 	if len(values) > 0 {
-		return values[0]
+		return values[0], nil
 	}
-	return ""
+	return "", errors.New(fmt.Sprintf("no list is allowed for provided key: %s", key))
 }
 
 // helper function to add condition to where clause
@@ -139,6 +142,10 @@ func errorRecord(msg string) []Record {
 // then we literally stream data with our encoder (i.e. write records
 // to writer)
 func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, error) {
+	if DRYRUN {
+		log.Printf("%s %+v", stm, args)
+		return 0, nil
+	}
 	var size int64
 	var enc *json.Encoder
 	if w != nil {
