@@ -4,39 +4,173 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // Blocks DBS API
 func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
+	// get SQL statement from static area
+	stm := getSQL("blocks")
 	// variables we'll use in where clause
 	var args []interface{}
 	where := "WHERE "
+	owner := ""
+	if DBOWNER != "sqlite" {
+		owner = fmt.Sprintf("%s.", DBOWNER)
+	}
 
-	// parse dataset argument
+	// parse arguments
+	lfns := getValues(params, "logical_file_name")
+	if len(lfns) == 1 {
+		op, val := OperatorValue(lfns[0])
+		stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
+		cond := fmt.Sprintf(" LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		return 0, errors.New("wrong logical_file_name paramter")
+	}
+
 	blocks := getValues(params, "block_name")
-	if len(blocks) > 1 {
-		msg := "Unsupported list of blocks"
-		return 0, errors.New(msg)
-	} else if len(blocks) == 1 {
+	if len(blocks) == 1 {
 		op, val := OperatorValue(blocks[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
 		where += addCond(where, cond)
 		args = append(args, val)
+	} else {
+		return 0, errors.New("wrong block_name parameter")
 	}
+
 	datasets := getValues(params, "dataset")
-	if len(datasets) > 1 {
-		msg := "The files API does not support list of datasets"
-		return 0, errors.New(msg)
-	} else if len(datasets) == 1 {
+	if len(datasets) == 1 {
 		op, val := OperatorValue(datasets[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
 		where += addCond(where, cond)
 		args = append(args, val)
+	} else {
+		return 0, errors.New("wrong dataset parameter")
 	}
-	// get SQL statement from static area
-	stm := getSQL("blocks")
+
+	sites := getValues(params, "origin_site_name")
+	if len(sites) == 1 {
+		op, val := OperatorValue(sites[0])
+		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("origin_site_name"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		return 0, errors.New("wrong origin_site_name parameter")
+	}
+
+	cdate := getValues(params, "cdate")
+	if len(cdate) == 1 {
+		op, val := OperatorValue(cdate[0])
+		cond := fmt.Sprintf(" B.CREATION_DATE %s %s", op, placeholder("cdate"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		return 0, errors.New("wrong cdate parameter")
+	}
+
+	minDate := getValues(params, "min_cdate")
+	maxDate := getValues(params, "max_cdate")
+	if len(minDate) == 1 && len(maxDate) == 1 {
+		_, minval := OperatorValue(minDate[0])
+		_, maxval := OperatorValue(maxDate[0])
+		if minval != "0" && maxval != "0" {
+			cond := fmt.Sprintf(" B.CREATION_DATE BETWEEN %s and %s", placeholder("min_cdate"), placeholder("max_cdate"))
+			where += addCond(where, cond)
+			args = append(args, minval)
+			args = append(args, maxval)
+		} else if minval != "0" && maxval == "0" {
+			cond := fmt.Sprintf(" B.CREATION_DATE > %s", placeholder("min_cdate"))
+			where += addCond(where, cond)
+			args = append(args, minval)
+		} else if minval == "0" && maxval != "0" {
+			cond := fmt.Sprintf(" B.CREATION_DATE < %s", placeholder("max_cdate"))
+			where += addCond(where, cond)
+			args = append(args, maxval)
+		}
+	} else {
+		return 0, errors.New("wrong min_cdate/max_cdate parameter")
+	}
+
+	ldate := getValues(params, "ldate")
+	if len(ldate) == 1 {
+		op, val := OperatorValue(ldate[0])
+		cond := fmt.Sprintf(" B.LAST_MODIFICATION_DATE %s %s", op, placeholder("ldate"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	} else {
+		return 0, errors.New("wrong ldate parameter")
+	}
+
+	minDate = getValues(params, "min_ldate")
+	maxDate = getValues(params, "max_ldate")
+	if len(minDate) == 1 && len(maxDate) == 1 {
+		_, minval := OperatorValue(minDate[0])
+		_, maxval := OperatorValue(maxDate[0])
+		if minval != "0" && maxval != "0" {
+			cond := fmt.Sprintf(" B.CREATION_DATE BETWEEN %s and %s", placeholder("min_ldate"), placeholder("max_ldate"))
+			where += addCond(where, cond)
+			args = append(args, minval)
+			args = append(args, maxval)
+		} else if minval != "0" && maxval == "0" {
+			cond := fmt.Sprintf(" B.CREATION_DATE > %s", placeholder("min_ldate"))
+			where += addCond(where, cond)
+			args = append(args, minval)
+		} else if minval == "0" && maxval != "0" {
+			cond := fmt.Sprintf(" B.CREATION_DATE < %s", placeholder("max_ldate"))
+			where += addCond(where, cond)
+			args = append(args, maxval)
+		}
+	} else {
+		return 0, errors.New("wrong min_ldate/max_ldate parameter")
+	}
+
+	runs := getValues(params, "run_num")
+	if len(runs) > 0 {
+		stm = strings.Replace(stm, "SELECT ", "SELECT DISTINCT ", 1)
+		if len(lfns) == 1 { // lfn is present in a query
+			stm += fmt.Sprintf("\nJOIN %sFILE_LUMIS FLM on FLM.FILE_ID = FL.FILE_ID\n", owner)
+		} else {
+			stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
+		}
+		if len(runs) == 1 { // single run number
+			op, val := OperatorValue(runs[0])
+			cond := fmt.Sprintf(" B.LAST_MODIFICATION_DATE %s %s", op, placeholder("run_num"))
+			where += addCond(where, cond)
+			args = append(args, val)
+		} else if isRunRange(runs) {
+			cond := fmt.Sprintf(" FLM.RUN_NUM between %s and %s ", placeholder("minrun"), placeholder("maxrun"))
+			where += addCond(where, cond)
+			rr := runsRange(runs)
+			args = append(args, rr[0])
+			args = append(args, rr[1])
+		} else if isRunList(runs) {
+			// TODO: need Yuyi's input how run_num is passed to DBS
+			// see DBS/Server/Python/src/dbs/dao/Oracle/Block/List.py
+		}
+	} else {
+		return 0, errors.New("wrong run_num parameter")
+	}
+
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
+}
+
+// helper function
+func isRunRange(runs []string) bool {
+	return false
+}
+
+// helper function
+func isRunList(runs []string) bool {
+	return false
+}
+
+// helper function
+func runsRange(runs []string) []string {
+	return []string{}
 }
 
 // InsertBlocks DBS API
