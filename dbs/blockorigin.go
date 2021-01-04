@@ -12,7 +12,17 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	where := "WHERE "
 
-	// parse dataset argument
+	// parse given parameters
+	site := getValues(params, "origin_site_name")
+	if len(site) > 1 {
+		msg := "Unsupported list of sites"
+		return 0, errors.New(msg)
+	} else if len(site) == 1 {
+		op, val := OperatorValue(site[0])
+		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("original_site_name"))
+		where += addCond(where, cond)
+		args = append(args, val)
+	}
 	block := getValues(params, "block_name")
 	if len(block) > 1 {
 		msg := "Unsupported list of block"
@@ -33,13 +43,12 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 		where += addCond(where, cond)
 		args = append(args, val)
 	}
+	// reset where clause if no conditions are provided
+	if where == "WHERE " {
+		where = ""
+	}
 	// get SQL statement from static area
 	stm := getSQL("blockorigin")
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
-}
-
-// InsertBlockOrigin DBS API
-func (API) InsertBlockOrigin(values Record) error {
-	return InsertValues("insert_block_origin", values)
 }
