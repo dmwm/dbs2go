@@ -33,9 +33,16 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test : test1
+test : test-all
 
-test1:
+test-all:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v .
+test-datasets:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Datasets
+test-blocks:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Blocks
+test-ae:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run AcquisitionEras
+
 bench:
 	cd test; go test -bench=.

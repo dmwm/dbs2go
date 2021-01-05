@@ -14,7 +14,7 @@ import (
 func TestAcquisitionEras(t *testing.T) {
 
 	// initialize DB for testing
-	db := initDB()
+	db := initDB(false)
 	defer db.Close()
 
 	// prepare record for insertion
@@ -45,4 +45,17 @@ func TestAcquisitionEras(t *testing.T) {
 	if err != nil {
 		t.Errorf("Fail to look-up data tiers %v\n", err)
 	}
+}
+
+// TestAcquisitionErasStatement API
+func TestAcquisitionErasStatement(t *testing.T) {
+	// initialize DB for testing
+	db := initDB(true) // init DB with dryRun mode
+	defer db.Close()
+	var api dbs.API
+	params := make(dbs.Record)
+	var w http.ResponseWriter
+	w = StdoutWriter("")
+	log.Println("Test AcquisitionEras API statement")
+	api.AcquisitionEras(params, w)
 }

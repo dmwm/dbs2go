@@ -14,7 +14,7 @@ import (
 func TestBulkBlocks(t *testing.T) {
 
 	// initialize DB for testing
-	db := initDB()
+	db := initDB(false)
 	defer db.Close()
 
 	// read bulkblocks.json from test area and process it

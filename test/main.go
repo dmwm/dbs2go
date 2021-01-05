@@ -34,7 +34,7 @@ func (s StdoutWriter) WriteHeader(statusCode int) {
 }
 
 // helper function to initialize DB for tests
-func initDB() *sql.DB {
+func initDB(dryRun bool) *sql.DB {
 	// current directory is a <pwd>/test
 	dir, err := os.Getwd()
 	if err != nil {
@@ -55,5 +55,8 @@ func initDB() *sql.DB {
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
 	dbs.DBOWNER = dbowner
+	if dryRun {
+		dbs.DRYRUN = true
+	}
 	return db
 }

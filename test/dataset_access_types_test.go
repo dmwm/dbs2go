@@ -14,7 +14,7 @@ import (
 func TestDatasetAccessTypes(t *testing.T) {
 
 	// initialize DB for testing
-	db := initDB()
+	db := initDB(false)
 	defer db.Close()
 
 	// prepare record for insertion

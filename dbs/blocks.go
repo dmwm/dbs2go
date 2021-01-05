@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -27,8 +26,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		cond := fmt.Sprintf(" LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
 		where += addCond(where, cond)
 		args = append(args, val)
-	} else {
-		return 0, errors.New("wrong logical_file_name paramter")
+		//     } else {
+		//         return 0, errors.New("wrong logical_file_name parameter")
 	}
 
 	blocks := getValues(params, "block_name")
@@ -37,8 +36,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
 		where += addCond(where, cond)
 		args = append(args, val)
-	} else {
-		return 0, errors.New("wrong block_name parameter")
+		//     } else {
+		//         return 0, errors.New("wrong block_name parameter")
 	}
 
 	datasets := getValues(params, "dataset")
@@ -47,8 +46,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
 		where += addCond(where, cond)
 		args = append(args, val)
-	} else {
-		return 0, errors.New("wrong dataset parameter")
+		//     } else {
+		//         return 0, errors.New("wrong dataset parameter")
 	}
 
 	sites := getValues(params, "origin_site_name")
@@ -57,8 +56,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("origin_site_name"))
 		where += addCond(where, cond)
 		args = append(args, val)
-	} else {
-		return 0, errors.New("wrong origin_site_name parameter")
+		//     } else {
+		//         return 0, errors.New("wrong origin_site_name parameter")
 	}
 
 	cdate := getValues(params, "cdate")
@@ -67,8 +66,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		cond := fmt.Sprintf(" B.CREATION_DATE %s %s", op, placeholder("cdate"))
 		where += addCond(where, cond)
 		args = append(args, val)
-	} else {
-		return 0, errors.New("wrong cdate parameter")
+		//     } else {
+		//         return 0, errors.New("wrong cdate parameter")
 	}
 
 	minDate := getValues(params, "min_cdate")
@@ -90,8 +89,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 			where += addCond(where, cond)
 			args = append(args, maxval)
 		}
-	} else {
-		return 0, errors.New("wrong min_cdate/max_cdate parameter")
+		//     } else {
+		//         return 0, errors.New("wrong min_cdate/max_cdate parameter")
 	}
 
 	ldate := getValues(params, "ldate")
@@ -100,8 +99,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		cond := fmt.Sprintf(" B.LAST_MODIFICATION_DATE %s %s", op, placeholder("ldate"))
 		where += addCond(where, cond)
 		args = append(args, val)
-	} else {
-		return 0, errors.New("wrong ldate parameter")
+		//     } else {
+		//         return 0, errors.New("wrong ldate parameter")
 	}
 
 	minDate = getValues(params, "min_ldate")
@@ -123,8 +122,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 			where += addCond(where, cond)
 			args = append(args, maxval)
 		}
-	} else {
-		return 0, errors.New("wrong min_ldate/max_ldate parameter")
+		//     } else {
+		//         return 0, errors.New("wrong min_ldate/max_ldate parameter")
 	}
 
 	runs := getValues(params, "run_num")
@@ -150,8 +149,8 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 			// TODO: need Yuyi's input how run_num is passed to DBS
 			// see DBS/Server/Python/src/dbs/dao/Oracle/Block/List.py
 		}
-	} else {
-		return 0, errors.New("wrong run_num parameter")
+		//     } else {
+		//         return 0, errors.New("wrong run_num parameter")
 	}
 
 	// use generic query API to fetch the results from DB
