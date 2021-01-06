@@ -15,6 +15,7 @@ install:
   - go get golang.org/x/sys/unix
   - go get github.com/shirou/gopsutil
   - go get github.com/dmwm/cmsauth
+  - go get golang.org/x/exp/errors
 #   - go get github.com/go-sql-driver/mysql
     #  - go get github.com/mattn/go-oci8
     #  - go get gopkg.in/rana/ora.v4"
