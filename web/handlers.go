@@ -35,6 +35,21 @@ func authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// helper to validate incoming requests' parameters
+func validateMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// perform validation of input parameters
+		err := dbs.Validate(r)
+		if err != nil {
+			log.Printf("ERROR: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// Call the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
 // LoggingHandlerFunc declares new handler function type which
 // should return status (int) and error
 type LoggingHandlerFunc func(w http.ResponseWriter, r *http.Request) (int, int64, error)

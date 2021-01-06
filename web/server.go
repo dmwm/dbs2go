@@ -130,6 +130,8 @@ func handlers() *mux.Router {
 
 	// for all requests perform first auth/authz action
 	router.Use(authMiddleware)
+	// validate all input parameters
+	router.Use(validateMiddleware)
 
 	return router
 }
