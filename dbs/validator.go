@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/dmwm/das2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 	"golang.org/x/exp/errors"
 )
 
