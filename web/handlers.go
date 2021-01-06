@@ -43,6 +43,11 @@ func validateMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			log.Printf("ERROR: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
+			rec := make(dbs.Record)
+			rec["error"] = fmt.Sprintf("Validation error %v", err)
+			if r, e := json.Marshal(rec); e == nil {
+				w.Write(r)
+			}
 			return
 		}
 		// Call the next handler
