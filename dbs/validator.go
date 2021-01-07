@@ -12,7 +12,13 @@ import (
 )
 
 var datasetPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}$`)
-var cdatePattern = regexp.MustCompile(`\d`)
+var primDSPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]*$`)
+var procDSPattern = regexp.MustCompile(`[a-zA-Z0-9\.\-_]+`)
+var tierPattern = regexp.MustCompile(`[A-Z\-_]+`)
+var eraPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var lfnPattern = regexp.MustCompile(`/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`)
+
+var unixTimePattern = regexp.MustCompile(`^[1-9][0-9]{9}$`)
 
 // helper function to validate string parameters
 func strType(key string, val interface{}) error {
