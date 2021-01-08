@@ -60,3 +60,10 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	// use generic query API to fetch the results from DB
 	return execute(w, genSQL+stm+where, cols, vals, args...)
 }
+
+// InsertDatasets DBS API
+func (API) InsertDatasets(values Record) error {
+	args := make(Record)
+	args["Owner"] = DBOWNER
+	return InsertTemplateValues("insert_datasets", args, values)
+}
