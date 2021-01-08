@@ -27,11 +27,11 @@ values ( {{.DatasetId}}, {{.Dataset}}, {{.PrimaryDSId}},
   nvl((select dataset_access_type_id
         from {{.Owner}}.dataset_access_types where dataset_access_type=access_t),
     {{.Owner}}.seq_dtp.nextval),
-  {{.AcquisitionEraId}}, {{.ProcessingEraId}}, {{.PhysicsGroupId}},
-  {{.Xtcrosssection}}, {{.PrepId}}, cdate, cby,
-  {{.LastModificationDate}}, {{.LastModifiedBy}}
+  ?:acquisition_era_id, ?:processing_era_id, ?:physics_group_id,
+  ?:xtcrosssection, ?:prep_id, cdate, cby,
+  ?:last_modification_date, ?:last_modified_by
    )
-   select  {{.ProcessedDSName}} processed_n,
-           {{.DataTierName}} tier,  {{.DatasetAccessType}} access_t,
-           {{.CreationDate}} cdate, {{.CreateBy}} cby
+   select  ?:processed_ds_name processed_n,
+           ?:data_tier_name tier,  ?:dataset_access_type access_t,
+           ?:creation_date cdate, ?:create_by cby
    from dual
