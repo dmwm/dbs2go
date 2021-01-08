@@ -67,3 +67,38 @@ func TestStatementInsertValues(t *testing.T) {
 		t.Error("wrong values", vals)
 	}
 }
+
+// TestUtilParseRuns
+func TestUtilParseRuns(t *testing.T) {
+	input := []string{"1", "11-22", "3", "4"}
+	runs, err := dbs.ParseRuns(input)
+	if len(runs) != 4 {
+		t.Error("fail to parse runs input", input, runs)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("runs input %+v, parsed runs %+v\n", input, runs)
+	input = []string{"1a", "11-22", "3", "4"}
+	runs, err = dbs.ParseRuns(input)
+	if err == nil {
+		t.Error("invalid run number should be detected for input", input)
+	} else {
+		fmt.Printf("runs input %+v, parsed runs %+v, error %v\n", input, runs, err)
+	}
+}
+
+// TestUtilGetChunks
+func TestUtilGetChunks(t *testing.T) {
+	input := []string{"1", "2", "3", "4", "5"}
+	chunks := dbs.GetChunks(input, 20)
+	if len(chunks) != 1 {
+		t.Error("fail to parse chunks input", input, chunks)
+	}
+	fmt.Printf("input %+v, chunks %+v\n", input, chunks)
+	chunks = dbs.GetChunks(input, 2)
+	if len(chunks) != 3 {
+		t.Error("fail to parse chunks input", input, chunks)
+	}
+	fmt.Printf("input %+v, chunks %+v\n", input, chunks)
+}
