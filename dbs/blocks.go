@@ -126,7 +126,10 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		//         return 0, errors.New("wrong min_ldate/max_ldate parameter")
 	}
 
-	runs := getValues(params, "run_num")
+	runs, err := ParseRuns(getValues(params, "run_num"))
+	if err != nil {
+		return 0, err
+	}
 	if len(runs) > 0 {
 		stm = strings.Replace(stm, "SELECT ", "SELECT DISTINCT ", 1)
 		if len(lfns) == 1 { // lfn is present in a query
@@ -134,42 +137,29 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		} else {
 			stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
 		}
-		if len(runs) == 1 { // single run number
-			op, val := OperatorValue(runs[0])
-			cond := fmt.Sprintf(" B.LAST_MODIFICATION_DATE %s %s", op, placeholder("run_num"))
-			where += addCond(where, cond)
-			args = append(args, val)
-		} else if isRunRange(runs) {
-			cond := fmt.Sprintf(" FLM.RUN_NUM between %s and %s ", placeholder("minrun"), placeholder("maxrun"))
-			where += addCond(where, cond)
-			rr := runsRange(runs)
-			args = append(args, rr[0])
-			args = append(args, rr[1])
-		} else if isRunList(runs) {
-			// TODO: need Yuyi's input how run_num is passed to DBS
-			// see DBS/Server/Python/src/dbs/dao/Oracle/Block/List.py
+		var runList []string
+		for _, r := range runs {
+			if strings.Contains(r, "-") { // run-range argument
+				cond := fmt.Sprintf(" FLM.RUN_NUM between %s and %s ", placeholder("minrun"), placeholder("maxrun"))
+				where += addCond(where, cond)
+				rr := strings.Split(r, "-")
+				args = append(args, rr[0])
+				args = append(args, rr[1])
+			} else {
+				runList = append(runList, r)
+			}
 		}
-		//     } else {
-		//         return 0, errors.New("wrong run_num parameter")
+		cond := "FLM.RUN_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+		where += addCond(where, cond)
+		token, binds := CreateTokenGenerator(runList)
+		where += addCond(where, token)
+		for _, v := range binds {
+			args = append(args, v)
+		}
 	}
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm+where, args...)
-}
-
-// helper function
-func isRunRange(runs []string) bool {
-	return false
-}
-
-// helper function
-func isRunList(runs []string) bool {
-	return false
-}
-
-// helper function
-func runsRange(runs []string) []string {
-	return []string{}
 }
 
 // InsertBlocks DBS API
