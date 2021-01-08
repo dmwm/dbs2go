@@ -12,13 +12,18 @@ import (
 )
 
 var datasetPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}$`)
+var blockPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}#[a-zA-Z0-9\.\-_]+`)
 var primDSPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]*$`)
 var procDSPattern = regexp.MustCompile(`[a-zA-Z0-9\.\-_]+`)
 var tierPattern = regexp.MustCompile(`[A-Z\-_]+`)
 var eraPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
-var lfnPattern = regexp.MustCompile(`/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`)
+var releasePattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var appPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var filePattern = regexp.MustCompile(`/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`)
 
 var unixTimePattern = regexp.MustCompile(`^[1-9][0-9]{9}$`)
+var intPattern = regexp.MustCompile(`^\d+$`)
+var runRangePattern = regexp.MustCompile(`^\d+-\d+$`)
 
 // helper function to validate string parameters
 func strType(key string, val interface{}) error {
@@ -29,10 +34,40 @@ func strType(key string, val interface{}) error {
 	default:
 		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v'", key, val))
 	}
-	// to be implemented
+	errMsg := fmt.Sprintf("unable to match '%s' value '%+v'", key, val)
 	if key == "dataset" {
 		if matched := datasetPattern.MatchString(v); !matched {
-			return errors.New(fmt.Sprintf("unable to match '%s' value '%+v'", key, val))
+			return errors.New(errMsg)
+		}
+	}
+	if key == "block_name" {
+		if matched := blockPattern.MatchString(v); !matched {
+			return errors.New(errMsg)
+		}
+	}
+	if key == "logical_file_name" {
+		if matched := filePattern.MatchString(v); !matched {
+			return errors.New(errMsg)
+		}
+	}
+	if key == "primary_ds_name" {
+		if matched := primDSPattern.MatchString(v); !matched {
+			return errors.New(errMsg)
+		}
+	}
+	if key == "processed_ds_name" {
+		if matched := procDSPattern.MatchString(v); !matched {
+			return errors.New(errMsg)
+		}
+	}
+	if key == "app_name" {
+		if matched := appPattern.MatchString(v); !matched {
+			return errors.New(errMsg)
+		}
+	}
+	if key == "release_version" {
+		if matched := releasePattern.MatchString(v); !matched {
+			return errors.New(errMsg)
 		}
 	}
 	return nil
