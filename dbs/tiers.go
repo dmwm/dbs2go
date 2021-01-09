@@ -8,9 +8,8 @@ import (
 
 // DataTiers DBS API
 func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	tiers := getValues(params, "data_tier_name")
@@ -20,15 +19,16 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(tiers) == 1 {
 		op, val := OperatorValue(tiers[0])
 		cond := fmt.Sprintf(" DT.DATA_TIER_NAME %s %s", op, placeholder("data_tier_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
-	} else {
-		where = "" // no arguments
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("tiers")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertDataTiers DBS API

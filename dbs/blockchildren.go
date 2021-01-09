@@ -10,7 +10,7 @@ import (
 func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	blockchildren := getValues(params, "block_name")
@@ -20,11 +20,13 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(blockchildren) == 1 {
 		op, val := OperatorValue(blockchildren[0])
 		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
 	// get SQL statement from static area
 	stm := getSQL("blockchildren")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }

@@ -23,11 +23,10 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	if len(block) > 0 {
 		block_clause := "BS.BLOCK_NAME IN (SELECT TOKEN FROM TOKEN_GENERATOR) "
 		where_clause = "WHERE block_clause"
-		var vals []string
-		genSQL, vals = tokens(block)
-		fmt.Println("tokens", block, genSQL, vals)
-		for _, d := range vals {
-			args = append(args, d, d, d) // append three values since tokens generates placeholders for them
+		var binds []string
+		genSQL, binds = TokenGenerator(block, 100) // 100 is max for # of allowed datasets
+		for _, v := range binds {
+			args = append(args, v)
 		}
 		if detailErr == nil { // no details are required
 			stm = getSQL("blocksummaries4block")

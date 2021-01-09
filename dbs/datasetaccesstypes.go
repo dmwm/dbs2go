@@ -8,9 +8,8 @@ import (
 
 // DatasetAccessTypes DBS API
 func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := " WHERE "
+	var conds []string
 
 	// parse dataset argument
 	datasetaccesstypes := getValues(params, "dataset_access_type")
@@ -20,15 +19,15 @@ func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) (int64, erro
 	} else if len(datasetaccesstypes) == 1 {
 		op, val := OperatorValue(datasetaccesstypes[0])
 		cond := fmt.Sprintf(" DT.DATASET_ACCESS_TYPE %s %s", op, placeholder("dataset_access_type"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
-	} else {
-		where = ""
 	}
 	// get SQL statement from static area
 	stm := getSQL("datasetaccesstypes")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertDatasetAccessTypes DBS API

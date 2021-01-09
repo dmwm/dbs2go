@@ -8,9 +8,8 @@ import (
 
 // PrimaryDSTypes DBS API
 func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	primarydstypes := getValues(params, "primary_ds_type")
@@ -20,15 +19,16 @@ func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(primarydstypes) == 1 {
 		op, val := OperatorValue(primarydstypes[0])
 		cond := fmt.Sprintf(" PDT.PRIMARY_DS_TYPE %s %s", op, placeholder("primary_ds_type"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
-	} else {
-		where = "" // no arguments
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("primarydstypes")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertPrimaryDSTypes DBS API

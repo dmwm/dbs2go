@@ -8,9 +8,8 @@ import (
 
 // Files DBS API
 func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	files := getValues(params, "logical_file_name")
@@ -20,7 +19,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(files) == 1 {
 		op, val := OperatorValue(files[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
 	datasets := getValues(params, "dataset")
@@ -30,7 +29,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(datasets) == 1 {
 		op, val := OperatorValue(datasets[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
 	block_names := getValues(params, "block_name")
@@ -40,13 +39,16 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(block_names) == 1 {
 		op, val := OperatorValue(block_names[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("files")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertFiles DBS API

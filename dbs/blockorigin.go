@@ -10,7 +10,7 @@ import (
 func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse given parameters
 	site := getValues(params, "origin_site_name")
@@ -20,7 +20,7 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(site) == 1 {
 		op, val := OperatorValue(site[0])
 		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("original_site_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
 	block := getValues(params, "block_name")
@@ -30,7 +30,7 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(block) == 1 {
 		op, val := OperatorValue(block[0])
 		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
 	dataset := getValues(params, "dataset")
@@ -40,15 +40,14 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(dataset) == 1 {
 		op, val := OperatorValue(dataset[0])
 		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
-	// reset where clause if no conditions are provided
-	if where == "WHERE " {
-		where = ""
-	}
+
 	// get SQL statement from static area
 	stm := getSQL("blockorigin")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }

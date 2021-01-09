@@ -8,9 +8,8 @@ import (
 
 // PrimaryDatasets DBS API
 func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	primarydatasets := getValues(params, "primary_ds_name")
@@ -20,15 +19,16 @@ func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) 
 	} else if len(primarydatasets) == 1 {
 		op, val := OperatorValue(primarydatasets[0])
 		cond := fmt.Sprintf(" P.PRIMARY_DS_NAME %s %s", op, placeholder("primary_ds_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
-	} else {
-		where = "" // no arguments
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("primarydatasets")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertPrimaryDatasets DBS API

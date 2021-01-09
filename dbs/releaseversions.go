@@ -8,9 +8,8 @@ import (
 
 // ReleaseVersions DBS API
 func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	releaseversions := getValues(params, "release_version")
@@ -20,15 +19,16 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 	} else if len(releaseversions) == 1 {
 		op, val := OperatorValue(releaseversions[0])
 		cond := fmt.Sprintf(" RV.release_version %s %s", op, placeholder("release_version"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
-	} else {
-		where = "" // no arguments
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("releaseversions")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertReleaseVersions DBS API

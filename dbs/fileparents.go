@@ -8,9 +8,8 @@ import (
 
 // FileParents API
 func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	fileparent := getValues(params, "logical_file_name")
@@ -20,13 +19,16 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(fileparent) == 1 {
 		op, val := OperatorValue(fileparent[0])
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("fileparent")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertFileParents DBS API

@@ -9,9 +9,8 @@ import (
 
 // Datasets API
 func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse detail arugment
 	detail, _ := getSingleValue(params, "detail")
@@ -21,7 +20,8 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	if isValid == "" {
 		isValid = "1"
 	}
-	where += fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
+	cond := fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
+	conds = append(conds, cond)
 	args = append(args, isValid)
 
 	// parse dataset_id argument
@@ -29,22 +29,23 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	if dataset_access_type == "" {
 		dataset_access_type = "VALID"
 	}
-	where += fmt.Sprintf(" AND DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
+	cond = fmt.Sprintf("DP.DATASET_ACCESS_TYPE = %s", placeholder("dataset_access_type"))
+	conds = append(conds, cond)
 	args = append(args, dataset_access_type)
 
 	// parse dataset argument
 	datasets := getValues(params, "dataset")
-	genSQL := ""
 	if len(datasets) > 1 {
-		where += fmt.Sprintf(" AND D.DATASET in (SELECT TOKEN FROM TOKEN_GENERATOR)")
-		var vals []string
-		genSQL, vals = tokens(datasets)
-		for _, d := range vals {
-			args = append(args, d, d, d) // append three values since tokens generates placeholders for them
+		cond = fmt.Sprintf("D.DATASET in (SELECT TOKEN FROM TOKEN_GENERATOR)")
+		token, binds := TokenGenerator(datasets, 100) // 100 is max for # of allowed datasets
+		conds = append(conds, cond+token)
+		for _, v := range binds {
+			args = append(args, v)
 		}
 	} else if len(datasets) == 1 {
 		op, val := OperatorValue(datasets[0])
-		where += fmt.Sprintf(" AND D.DATASET %s %s", op, placeholder("dataset"))
+		cond = fmt.Sprintf("D.DATASET %s %s", op, placeholder("dataset"))
+		conds = append(conds, cond)
 		args = append(args, val)
 	}
 
@@ -57,8 +58,10 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 		cols = []string{"dataset"}
 		vals = []interface{}{new(sql.NullString)}
 	}
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return execute(w, genSQL+stm+where, cols, vals, args...)
+	return execute(w, stm, cols, vals, args...)
 }
 
 // InsertDatasets DBS API

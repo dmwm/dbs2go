@@ -8,9 +8,8 @@ import (
 
 // DatasetChildren API
 func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
 	var args []interface{}
-	where := "WHERE "
+	var conds []string
 
 	// parse dataset argument
 	datasetchildren := getValues(params, "dataset")
@@ -20,16 +19,19 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 	} else if len(datasetchildren) == 1 {
 		op, val := OperatorValue(datasetchildren[0])
 		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
-		where += addCond(where, cond)
+		conds = append(conds, cond)
 		args = append(args, val)
 	} else {
 		msg := fmt.Sprintf("No arguments for datasetchildren API")
 		return 0, errors.New(msg)
 	}
+
 	// get SQL statement from static area
 	stm := getSQL("datasetchildren")
+	stm += WhereClause(conds)
+
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm+where, args...)
+	return executeAll(w, stm, args...)
 }
 
 // InsertDatasetChildren DBS API
