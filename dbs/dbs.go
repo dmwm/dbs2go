@@ -31,11 +31,7 @@ var DBOWNER string
 var DRYRUN bool
 
 // helper function to load DBS SQL templated statements
-func LoadTemplateSQL(tmpl string, params Record) string {
-	tmplData := make(Record)
-	for key, val := range params {
-		tmplData[key] = val
-	}
+func LoadTemplateSQL(tmpl string, tmplData Record) string {
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
 	if !strings.HasSuffix(tmpl, ".sql") {
 		tmpl += ".sql"
@@ -468,4 +464,38 @@ func runsClause(table string, runs []string) (string, []string) {
 	}
 	where = fmt.Sprintf("( %s )", strings.Join(conds, " OR "))
 	return where, args
+}
+
+// helper function to get attribute ID from a given table
+func GetID(table, id, attr, value string) (int64, error) {
+	stm := fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = ?", id, DBOWNER, table, attr)
+	if DBOWNER == "sqlite" {
+		stm = strings.Replace(stm, "sqlite.", "", -1)
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return 0, errors.New(msg)
+	}
+	defer tx.Rollback()
+	var args []interface{}
+	args = append(args, value)
+	rows, err := tx.Query(stm, args...)
+	if err != nil {
+		msg := fmt.Sprintf("unable to query statement=%v error=%v", stm, err)
+		return 0, errors.New(msg)
+	}
+	defer rows.Close()
+	var rid int64
+	for rows.Next() {
+		if err := rows.Scan(&rid); err != nil {
+			return 0, errors.New(fmt.Sprintf("rows.Scan, error=%v", err))
+		}
+		break
+	}
+	// Check for errors from iterating over rows.
+	if err := rows.Err(); err != nil {
+		return 0, errors.New(fmt.Sprintf("rows.Err, error=%v", err))
+	}
+	return rid, nil
 }
