@@ -76,6 +76,9 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileLumis DBS API
-func (API) InsertFileLumis(values Record) error {
-	return InsertValues("insert_file_lumis", values)
+func (API) InsertFileLumis(params Record) error {
+	if _, ok := params["event_count"]; ok {
+		return InsertValues("insert_filelumi", params)
+	}
+	return InsertValues("insert_filelumi2", params)
 }
