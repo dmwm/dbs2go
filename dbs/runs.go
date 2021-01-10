@@ -22,28 +22,16 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The runs API does not support list of runs"
 		return 0, errors.New(msg)
 	} else if len(runs) == 1 {
-		op, val := OperatorValue(runs[0])
-		cond := fmt.Sprintf(" FL.run_num %s %s", op, placeholder("run_num"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
 	} else if len(lfn) == 1 {
-		op, val := OperatorValue(lfn[0])
 		stm += fmt.Sprintf(" inner join %s.FILES FILES on FILES.FILE_ID = FL.FILE_ID", DBOWNER)
-		cond := fmt.Sprintf("FILES.LOGICAL_FILE_NAME = %s", op, placeholder("logical_file_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("logical_file_name", "FILES.LOGICAL_FILE_NAME", params, conds, args)
 	} else if len(block) == 1 {
-		op, val := OperatorValue(block[0])
 		stm += fmt.Sprintf(" inner join %s.FILES FILES on FILES.FILE_ID = FL.FILE_ID inner join %s.BLOCKS BLOCKS on BLOCKS.BLOCK_ID = FILES.BLOCK_ID", DBOWNER, DBOWNER)
-		cond := fmt.Sprintf("BLOCKS.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("block_name", "BLOCKS.BLOCK_NAME", params, conds, args)
 	} else if len(dataset) == 1 {
-		op, val := OperatorValue(dataset[0])
 		stm += fmt.Sprintf(" inner join %s.FILES FILES on FILES.FILE_ID = FL.FILE_ID inner join %s.DATASETS DATASETS on DATASETS.DATASET_ID = FILES.DATASET_ID", DBOWNER, DBOWNER)
-		cond := fmt.Sprintf("DATASETS.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("dataset", "DATASETS.DATASET", params, conds, args)
 	} else {
 		msg := fmt.Sprintf("No arguments for runs API")
 		return 0, errors.New(msg)

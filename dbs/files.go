@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -55,66 +54,15 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	} else if len(lfns) == 1 {
-		op, val := OperatorValue(lfns[0])
-		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
 	}
-	datasets := getValues(params, "dataset")
-	if len(datasets) > 1 {
-		msg := "The files API does not support list of datasets"
-		return 0, errors.New(msg)
-	} else if len(datasets) == 1 {
-		op, val := OperatorValue(datasets[0])
-		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-	block_names := getValues(params, "block_name")
-	if len(block_names) > 1 {
-		msg := "The files API does not support list of block_names"
-		return 0, errors.New(msg)
-	} else if len(block_names) == 1 {
-		op, val := OperatorValue(block_names[0])
-		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-	relVersions := getValues(params, "release_version")
-	if len(relVersions) == 1 {
-		op, val := OperatorValue(relVersions[0])
-		cond := fmt.Sprintf(" RV.RELEASE_VERSION %s %s", op, placeholder("release_version"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-	psetHash := getValues(params, "pset_hash")
-	if len(psetHash) == 1 {
-		op, val := OperatorValue(psetHash[0])
-		cond := fmt.Sprintf(" PSH.PSET_HASH %s %s", op, placeholder("pset_hash"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-	appName := getValues(params, "app_name")
-	if len(appName) == 1 {
-		op, val := OperatorValue(appName[0])
-		cond := fmt.Sprintf(" AEX.APP_NAME %s %s", op, placeholder("app_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-	outModLabel := getValues(params, "output_module_label")
-	if len(outModLabel) == 1 {
-		op, val := OperatorValue(outModLabel[0])
-		cond := fmt.Sprintf(" OMC.OUTPUT_MODULE_LABEL %s %s", op, placeholder("output_module_label"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-	origSiteName := getValues(params, "origin_site_name")
-	if len(origSiteName) == 1 {
-		op, val := OperatorValue(origSiteName[0])
-		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("origin_site_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
+	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
+	conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
+	conds, args = AddParam("release_version", "RV.RELEASE_VERSION", params, conds, args)
+	conds, args = AddParam("pset_hash", "PSH.PSET_HASH", params, conds, args)
+	conds, args = AddParam("app_name", "AEX.APP_NAME", params, conds, args)
+	conds, args = AddParam("output_module_label", "OMC.OUTPUT_MODULE_LABEL", params, conds, args)
+	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
 
 	if len(runs) > 0 {
 		token, whereRuns, bindsRuns := runsClause("FL", runs)

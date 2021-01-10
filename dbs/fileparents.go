@@ -14,10 +14,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 	blocks := getValues(params, "block_name")
 	if len(blocks) == 1 {
 		tmpl["BlockName"] = true
-		op, val := OperatorValue(blocks[0])
-		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
 	}
 
 	stm := LoadTemplateSQL("fileparent", tmpl)
@@ -32,10 +29,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	} else if len(lfns) == 1 {
-		op, val := OperatorValue(lfns[0])
-		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
 	}
 
 	stm = WhereClause(stm, conds)

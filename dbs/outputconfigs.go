@@ -28,55 +28,19 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 		if len(dataset) == 1 {
 			stm += fmt.Sprintf(" JOIN %s.DATASET_OUTPUT_MOD_CONFIGS DC ON DC.OUTPUT_MOD_CONFIG_ID=O.OUTPUT_MOD_CONFIG_ID", DBOWNER)
 			stm += fmt.Sprintf(" JOIN %s.DATASETS DS ON DS.DATASET_ID=DC.DATASET_ID", DBOWNER)
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
-			conds = append(conds, cond)
-			args = append(args, val)
+			conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
 		}
 		lfn := getValues(params, "logical_file_name")
 		if len(lfn) == 1 {
 			stm += fmt.Sprintf(" JOIN %s.FILE_OUTPUT_MOD_CONFIGS FC ON FC.OUTPUT_MOD_CONFIG_ID=O.OUTPUT_MOD_CONFIG_ID", DBOWNER)
 			stm += fmt.Sprintf(" JOIN %s.FILES FS ON FS.FILE_ID=FC.FILE_ID", DBOWNER)
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" FS.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-			conds = append(conds, cond)
-			args = append(args, val)
+			conds, args = AddParam("logical_file_name", "FS.LOGICAL_FILE_NAME", params, conds, args)
 		}
-		app_name := getValues(params, "app_name")
-		if len(app_name) == 1 {
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" A.APP_NAME %s %s", op, placeholder("app_name"))
-			conds = append(conds, cond)
-			args = append(args, val)
-		}
-		release_version := getValues(params, "release_version")
-		if len(release_version) == 1 {
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" R.RELEASE_VERSION %s %s", op, placeholder("release_version"))
-			conds = append(conds, cond)
-			args = append(args, val)
-		}
-		pset_hash := getValues(params, "pset_hash")
-		if len(pset_hash) == 1 {
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" P.PSET_HASH %s %s", op, placeholder("pset_hash"))
-			conds = append(conds, cond)
-			args = append(args, val)
-		}
-		output_module_label := getValues(params, "output_module_label")
-		if len(output_module_label) == 1 {
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" P.OUTPUT_MODULE_LABEL %s %s", op, placeholder("output_module_label"))
-			conds = append(conds, cond)
-			args = append(args, val)
-		}
-		global_tag := getValues(params, "global_tag")
-		if len(global_tag) == 1 {
-			op, val := OperatorValue(dataset[0])
-			cond := fmt.Sprintf(" P.GLOBAL_TAG %s %s", op, placeholder("global_tag"))
-			conds = append(conds, cond)
-			args = append(args, val)
-		}
+		conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
+		conds, args = AddParam("release_version", "R.RELEASE_VERSION", params, conds, args)
+		conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
+		conds, args = AddParam("output_module_label", "P.OUTPUT_MODULE_LABEL", params, conds, args)
+		conds, args = AddParam("global_tag", "P.GLOBAL_TAG", params, conds, args)
 	} else {
 		stm = sql1 + " , FS.LOGICAL_FILE_NAME LFN " + sql2 + fmt.Sprint(" JOIN %s.FILE_OUTPUT_MOD_CONFIGS FC ON FC.OUTPUT_MOD_CONFIG_ID=O.OUTPUT_MOD_CONFIG_ID", DBOWNER) + fmt.Sprintf(" JOIN %s.FILES FS ON FS.FILE_ID=FC.FILE_ID", DBOWNER)
 	}

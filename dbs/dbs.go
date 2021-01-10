@@ -506,7 +506,7 @@ func GetID(table, id, attr, value string) (int64, error) {
 }
 
 // AddParam adds single parameter to SQL statement
-func AddParam(name, sqlName string, params Record, conds, args []string) ([]string, []string) {
+func AddParam(name, sqlName string, params Record, conds []string, args []interface{}) ([]string, []interface{}) {
 	vals := getValues(params, name)
 	if len(vals) == 1 {
 		op, val := OperatorValue(vals[0])

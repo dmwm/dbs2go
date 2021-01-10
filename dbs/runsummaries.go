@@ -19,10 +19,7 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The runs API does not support list of runs"
 		return 0, errors.New(msg)
 	} else if len(runs) == 1 {
-		op, val := OperatorValue(runs[0])
-		cond := fmt.Sprintf(" RUN_NUM %s %s", op, placeholder("run_num"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("run_num", "R.RUN_NUM", params, conds, args)
 	} else {
 		msg := fmt.Sprintf("No arguments for runsummaries API")
 		return 0, errors.New(msg)
@@ -32,10 +29,7 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	if len(dataset) == 1 {
 		joins := fmt.Sprintf("JOIN %s.FILES FS ON FS.FILE_ID=FL.FILE_ID JOIN %s.DATASETS DS ON FS.DATASET_ID=DS.DATASET_ID", DBOWNER, DBOWNER)
 		stm += joins
-		op, val := OperatorValue(dataset[0])
-		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
 	}
 	stm = WhereClause(stm, conds)
 

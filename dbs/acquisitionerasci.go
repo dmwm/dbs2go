@@ -14,14 +14,8 @@ func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) (int64, error
 
 	// parse dataset argument
 	acquisitioneras := getValues(params, "acquisitionEra")
-	if len(acquisitioneras) > 1 {
-		msg := "The acquisitioneras API does not support list of acquisitioneras"
-		return 0, errors.New(msg)
-	} else if len(acquisitioneras) == 1 {
-		op, val := OperatorValue(acquisitioneras[0])
-		cond := fmt.Sprintf(" AE.ACQUISITION_ERA_NAME %s %s", op, placeholder("acquisition_era_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+	if len(acquisitioneras) == 1 {
+		conds, args = AddParam("acquisitionEra", "AE.ACQUISITION_ERA_NAME", params, conds, args)
 		preSession = append(preSession, "alter session set NLS_COMP=LINGUISTIC")
 		preSession = append(preSession, "alter session set NLS_SORT=BINARY_CI")
 		postSession = append(postSession, "alter session set NLS_COMP=BINARY")

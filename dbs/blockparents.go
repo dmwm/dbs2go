@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -17,10 +16,7 @@ func (API) BlockParents(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Unsupported list of blockparent"
 		return 0, errors.New(msg)
 	} else if len(blockparent) == 1 {
-		op, val := OperatorValue(blockparent[0])
-		cond := fmt.Sprintf(" BP.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("block_name", "BP.BLOCK_NAME", params, conds, args)
 	}
 	// get SQL statement from static area
 	stm := getSQL("blockparent")

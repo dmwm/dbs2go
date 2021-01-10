@@ -17,10 +17,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 		msg := "The datasetchildren API does not support list of datasetchildren"
 		return 0, errors.New(msg)
 	} else if len(datasetchildren) == 1 {
-		op, val := OperatorValue(datasetchildren[0])
-		cond := fmt.Sprintf(" D.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
 	} else {
 		msg := fmt.Sprintf("No arguments for datasetchildren API")
 		return 0, errors.New(msg)

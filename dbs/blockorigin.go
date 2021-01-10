@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -18,30 +17,21 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Unsupported list of sites"
 		return 0, errors.New(msg)
 	} else if len(site) == 1 {
-		op, val := OperatorValue(site[0])
-		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("original_site_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
 	}
 	block := getValues(params, "block_name")
 	if len(block) > 1 {
 		msg := "Unsupported list of block"
 		return 0, errors.New(msg)
 	} else if len(block) == 1 {
-		op, val := OperatorValue(block[0])
-		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
 	}
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
 		return 0, errors.New(msg)
 	} else if len(dataset) == 1 {
-		op, val := OperatorValue(dataset[0])
-		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
 	}
 
 	// get SQL statement from static area

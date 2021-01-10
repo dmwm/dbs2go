@@ -1,8 +1,6 @@
 package dbs
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -11,17 +9,7 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 
-	// parse dataset argument
-	tiers := getValues(params, "data_tier_name")
-	if len(tiers) > 1 {
-		msg := "The datatiers API does not support list of tiers"
-		return 0, errors.New(msg)
-	} else if len(tiers) == 1 {
-		op, val := OperatorValue(tiers[0])
-		cond := fmt.Sprintf(" DT.DATA_TIER_NAME %s %s", op, placeholder("data_tier_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
+	conds, args = AddParam("data_tier_name", "DT.DATA_TIER_NAME", params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("tiers")

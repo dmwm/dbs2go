@@ -161,7 +161,7 @@ func TestUtilAddParam(t *testing.T) {
 	params := make(dbs.Record)
 	params["name"] = []string{"1"} // must be list of strings due to how HTTP params are passed in request
 	var conds []string
-	var args []string
+	var args []interface{}
 	conds, args = dbs.AddParam("name", "Table.Name", params, conds, args)
 	if strings.Trim(conds[0], " ") != "Table.Name = ?" {
 		t.Error("fail to add condition")

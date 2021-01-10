@@ -37,11 +37,8 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	blocks := getValues(params, "block_name")
 	if len(blocks) == 1 {
-		op, val := OperatorValue(blocks[0])
 		tmpl["BlockName"] = true
-		cond := fmt.Sprintf("B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
 	}
 
 	stm := LoadTemplateSQL("filelumis", tmpl)

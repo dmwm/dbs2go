@@ -43,10 +43,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	} else if len(datasets) == 1 {
-		op, val := OperatorValue(datasets[0])
-		cond = fmt.Sprintf("D.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
 	}
 
 	// get SQL statement from static area

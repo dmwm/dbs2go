@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -17,10 +16,7 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 		msg := "The releaseversions API does not support list of releaseversions"
 		return 0, errors.New(msg)
 	} else if len(releaseversions) == 1 {
-		op, val := OperatorValue(releaseversions[0])
-		cond := fmt.Sprintf(" RV.release_version %s %s", op, placeholder("release_version"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", params, conds, args)
 	}
 
 	// get SQL statement from static area

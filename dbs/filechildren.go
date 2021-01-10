@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -17,10 +16,7 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "The filechildren API does not support list of filechildren"
 		return 0, errors.New(msg)
 	} else if len(filechildren) == 1 {
-		op, val := OperatorValue(filechildren[0])
-		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
 	}
 
 	// get SQL statement from static area

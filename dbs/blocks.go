@@ -20,44 +20,14 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	// parse arguments
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) == 1 {
-		op, val := OperatorValue(lfns[0])
 		stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
-		cond := fmt.Sprintf(" LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
+		conds, args = AddParam("logical_file_name", "FL.LOGICAL_FILE_NAME", params, conds, args)
 	}
 
-	blocks := getValues(params, "block_name")
-	if len(blocks) == 1 {
-		op, val := OperatorValue(blocks[0])
-		cond := fmt.Sprintf(" B.BLOCK_NAME %s %s", op, placeholder("block_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-
-	datasets := getValues(params, "dataset")
-	if len(datasets) == 1 {
-		op, val := OperatorValue(datasets[0])
-		cond := fmt.Sprintf(" DS.DATASET %s %s", op, placeholder("dataset"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-
-	sites := getValues(params, "origin_site_name")
-	if len(sites) == 1 {
-		op, val := OperatorValue(sites[0])
-		cond := fmt.Sprintf(" B.ORIGIN_SITE_NAME %s %s", op, placeholder("origin_site_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
-
-	cdate := getValues(params, "cdate")
-	if len(cdate) == 1 {
-		op, val := OperatorValue(cdate[0])
-		cond := fmt.Sprintf(" B.CREATION_DATE %s %s", op, placeholder("cdate"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
+	conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
+	conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
+	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
+	conds, args = AddParam("cdate", "B.CREATION_DATE", params, conds, args)
 
 	minDate := getValues(params, "min_cdate")
 	maxDate := getValues(params, "max_cdate")
@@ -80,13 +50,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 		}
 	}
 
-	ldate := getValues(params, "ldate")
-	if len(ldate) == 1 {
-		op, val := OperatorValue(ldate[0])
-		cond := fmt.Sprintf(" B.LAST_MODIFICATION_DATE %s %s", op, placeholder("ldate"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	}
+	conds, args = AddParam("ldate", "B.LAST_MODIFICATION_DATE", params, conds, args)
 
 	minDate = getValues(params, "min_ldate")
 	maxDate = getValues(params, "max_ldate")
