@@ -49,7 +49,8 @@ func StatementTemplateValues(tmpl string, args, values Record) (string, []interf
 			msg := fmt.Sprintf("unable to find column '%s' in %s", k, stm)
 			return "", vals, errors.New(msg)
 		}
-		stm = strings.Replace(stm, fmt.Sprintf("?:%s", k), "?", -1)
+		// replace all bind names with ?
+		stm = strings.Replace(stm, fmt.Sprintf(":%s", k), "?", -1)
 		vals = append(vals, v)
 	}
 	if utils.VERBOSE > 0 {

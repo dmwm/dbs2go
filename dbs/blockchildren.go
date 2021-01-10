@@ -25,7 +25,7 @@ func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	// get SQL statement from static area
 	stm := getSQL("blockchildren")
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)

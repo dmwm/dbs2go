@@ -136,14 +136,21 @@ func TestUtilGetChunks(t *testing.T) {
 
 // TestUtilWhereClause
 func TestUtilWhereClause(t *testing.T) {
+	stm := "SELECT A FROM B"
 	input := []string{"1", "2", "3"}
-	where := dbs.WhereClause(input)
-	if where != " WHERE 1 AND 2 AND 3" {
-		t.Error("fail to create where clause for input", input, "whereClause", where)
+	newStm := dbs.WhereClause(stm, input)
+	if newStm != "SELECT A FROM B WHERE 1 AND 2 AND 3" {
+		t.Error("fail to create where clause for input", input, "whereClause", newStm)
 	}
 	input = []string{}
-	where = dbs.WhereClause(input)
-	if where != "" {
+	newStm = dbs.WhereClause(stm, input)
+	if newStm != "SELECT A FROM B" {
 		t.Error("fail to create where clause for input", input, "whereClause is empty")
+	}
+	stm = "SELECT A FROM B WHERE"
+	input = []string{"1", "2", "3"}
+	newStm = dbs.WhereClause(stm, input)
+	if newStm != "SELECT A FROM B WHERE 1 AND 2 AND 3" {
+		t.Error("fail to create where clause for input", input, "whereClause", newStm)
 	}
 }

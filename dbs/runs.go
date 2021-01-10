@@ -49,7 +49,7 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, errors.New(msg)
 	}
 
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)

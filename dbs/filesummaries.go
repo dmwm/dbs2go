@@ -25,7 +25,8 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, err
 	}
 	if len(runs) > 0 {
-		runsCond, runsBinds := runsClause("fl", runs)
+		token, runsCond, runsBinds := runsClause("fl", runs)
+		stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, runsCond)
 		for _, v := range runsBinds {
 			args = append(args, v)
@@ -55,7 +56,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	stm = strings.Replace(stm, "join_valid_ds1", join_valid_ds1, -1)
 	stm = strings.Replace(stm, "join_valid_ds2", join_valid_ds2, -1)
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)

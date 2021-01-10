@@ -92,12 +92,17 @@ func getSingleValue(params Record, key string) (string, error) {
 	return "", errors.New(fmt.Sprintf("no list is allowed for provided key: %s", key))
 }
 
-// helper function to build WHERE clause
-func WhereClause(conds []string) string {
+// WhereClause function construct proper SQL statement from given statement and list of conditions
+func WhereClause(stm string, conds []string) string {
 	if len(conds) == 0 {
-		return ""
+		return strings.Trim(stm, " ")
 	}
-	return fmt.Sprintf(" WHERE %s", strings.Join(conds, " AND "))
+	if strings.Contains(stm, " WHERE") {
+		stm = fmt.Sprintf(" %s %s", stm, strings.Join(conds, " AND "))
+	} else {
+		stm = fmt.Sprintf("%s WHERE %s", stm, strings.Join(conds, " AND "))
+	}
+	return strings.Trim(stm, " ")
 }
 
 // function to parse given file name and extract from it dbtype and dburi
@@ -438,7 +443,8 @@ func GetChunks(vals []string, limit int) []string {
 
 // helper function to create runs where clause
 // given list of runs values should be converted into OR clauses
-func runsClause(table string, runs []string) (string, []string) {
+// it return token generator, where clause and where caluse parameters
+func runsClause(table string, runs []string) (string, string, []string) {
 	var args []string    // output bind arguments
 	var where string     // output where clause
 	var runList []string // list of run numbers
@@ -457,13 +463,12 @@ func runsClause(table string, runs []string) (string, []string) {
 	// take run list and generate token statement
 	stm := fmt.Sprintf("%s.RUN_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)", table)
 	token, binds := TokenGenerator(runList, 4000) // 4000 is hard ORACLE limit
-	stm += token
 	conds = append(conds, stm)
 	for _, v := range binds {
 		args = append(args, v)
 	}
 	where = fmt.Sprintf("( %s )", strings.Join(conds, " OR "))
-	return where, args
+	return token, where, args
 }
 
 // helper function to get attribute ID from a given table

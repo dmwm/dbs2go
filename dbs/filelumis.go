@@ -3,6 +3,7 @@ package dbs
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // FileLumis API
@@ -10,77 +11,65 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 
-	stm := "SELECT DISTINCT FL.RUN_NUM as RUN_NUM, FL.LUMI_SECTION_NUM as LUMI_SECTION_NUM"
+	tmpl := make(Record)
 
-	validOnly := "0"
-	validFileOnly := getValues(params, "validFileOnly")
-	if len(validFileOnly) == 1 {
-		_, v := OperatorValue(validFileOnly[0])
-		validOnly = v
-	}
-
-	lfn := getValues(params, "logical_file_name")
-	if len(lfn) == 1 {
-		op, val := OperatorValue(lfn[0])
-		if validOnly == "0" {
-			stm += fmt.Sprintf(" , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID", DBOWNER, DBOWNER)
-		} else {
-			stm += fmt.Sprintf("  , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID JOIN %s.DATASETS D ON  D.DATASET_ID = F.DATASET_ID JOIN %s.DATASET_ACCESS_TYPES DT ON  DT.DATASET_ACCESS_TYPE_ID = D.DATASET_ACCESS_TYPE_ID", DBOWNER, DBOWNER, DBOWNER)
-			cond := fmt.Sprintf("F.IS_FILE_VALID = 1")
-			conds = append(conds, cond)
-			cond = fmt.Sprintf("DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION')")
-			conds = append(conds, cond)
-		}
-		cond := fmt.Sprintf("F.LOGICAL_FILE_NAME %s %s", op, placeholder("logical_file_name"))
-		conds = append(conds, cond)
-		args = append(args, val)
-	} else if len(lfn) > 1 {
-		stm += fmt.Sprintf(" , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID ", DBOWNER, DBOWNER)
-		if validOnly != "0" {
-			stm += fmt.Sprintf(" JOIN %s.DATASETS D ON  D.DATASET_ID = F.DATASET_ID JOIN %s.DATASET_ACCESS_TYPES DT ON  DT.DATASET_ACCESS_TYPE_ID = D.DATASET_ACCESS_TYPE_ID", DBOWNER, DBOWNER)
-			cond := fmt.Sprintf("F.IS_FILE_VALID = 1")
-			conds = append(conds, cond)
-			cond = fmt.Sprintf("DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION')")
-			conds = append(conds, cond)
-		}
-		cond := fmt.Sprintf("F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR) ")
-		token, binds := TokenGenerator(lfn, 100) // 100 is max for # of allowed lfns
-		conds = append(conds, cond+token)
+	lfns := getValues(params, "logical_file_name")
+	if len(lfns) > 1 {
+		token, binds := TokenGenerator(lfns, 100) // 100 is max for # of allowed datasets
+		tmpl["LfnGenerator"] = token
+		tmpl["Lfn"] = true
+		tmpl["LfnList"] = true
+		conds = append(conds, token)
 		for _, v := range binds {
 			args = append(args, v)
 		}
+	} else if len(lfns) == 1 {
+		tmpl["Lfn"] = true
+		tmpl["LfnList"] = false
+		args = append(args, lfns[0])
 	}
 
-	block_name := getValues(params, "block_name")
-	if len(block_name) == 1 {
-		op, val := OperatorValue(block_name[0])
-		if validOnly == "0" {
-			stm += fmt.Sprintf(" , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID JOIN %s.BLOCKS B ON B.BLOCK_ID = F.BLOCK_ID", DBOWNER, DBOWNER)
-		} else {
-			stm += fmt.Sprintf(" , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM %s.FILE_LUMIS FL JOIN %s.FILES F ON F.FILE_ID = FL.FILE_ID JOIN %s.DATASETS D ON  D.DATASET_ID = F.DATASET_ID JOIN %s.DATASET_ACCESS_TYPES DT ON  DT.DATASET_ACCESS_TYPE_ID = D.DATASET_ACCESS_TYPE_ID JOIN %s.BLOCKS B ON B.BLOCK_ID = F.BLOCK_ID", DBOWNER, DBOWNER, DBOWNER)
-			cond := fmt.Sprintf("F.IS_FILE_VALID = 1")
-			conds = append(conds, cond)
-			cond = fmt.Sprintf("DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
-			conds = append(conds, cond)
-		}
+	tmpl["ValidFileOnly"] = 0
+	validFileOnly := getValues(params, "validFileOnly")
+	if len(validFileOnly) == 1 {
+		tmpl["ValidFileOnly"] = 1
+	}
+
+	blocks := getValues(params, "block_name")
+	if len(blocks) == 1 {
+		op, val := OperatorValue(blocks[0])
+		tmpl["BlockName"] = true
 		cond := fmt.Sprintf("B.BLOCK_NAME %s %s", op, placeholder("block_name"))
 		conds = append(conds, cond)
 		args = append(args, val)
 	}
 
+	stm := LoadTemplateSQL("filelumis", tmpl)
+
+	// generate run_num token
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
 		return 0, err
 	}
 	if len(runs) > 0 {
-		condRuns, bindsRuns := runsClause("FL", runs)
+		token, condRuns, bindsRuns := runsClause("FL", runs)
+		stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, condRuns)
 		for _, v := range bindsRuns {
 			args = append(args, v)
 		}
 	}
 
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
+
+	// fix binding variables
+	for k, v := range params {
+		key := fmt.Sprintf(":%s", strings.ToLower(k))
+		if strings.Contains(stm, key) {
+			stm = strings.Replace(stm, key, "?", -1)
+			args = append(args, v)
+		}
+	}
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)

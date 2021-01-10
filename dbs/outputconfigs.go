@@ -80,7 +80,7 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	} else {
 		stm = sql1 + " , FS.LOGICAL_FILE_NAME LFN " + sql2 + fmt.Sprint(" JOIN %s.FILE_OUTPUT_MOD_CONFIGS FC ON FC.OUTPUT_MOD_CONFIG_ID=O.OUTPUT_MOD_CONFIG_ID", DBOWNER) + fmt.Sprintf(" JOIN %s.FILES FS ON FS.FILE_ID=FC.FILE_ID", DBOWNER)
 	}
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)

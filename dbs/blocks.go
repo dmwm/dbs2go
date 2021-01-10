@@ -121,13 +121,14 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 			stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
 		}
 		// handle runs where clause
-		whereRuns, bindsRuns := runsClause("FLM", runs)
+		token, whereRuns, bindsRuns := runsClause("FLM", runs)
+		stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, whereRuns)
 		for _, v := range bindsRuns {
 			args = append(args, v)
 		}
 	}
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)

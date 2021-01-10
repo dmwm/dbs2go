@@ -58,7 +58,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 		cols = []string{"dataset"}
 		vals = []interface{}{new(sql.NullString)}
 	}
-	stm += WhereClause(conds)
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return execute(w, stm, cols, vals, args...)
