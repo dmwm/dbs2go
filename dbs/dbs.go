@@ -504,3 +504,15 @@ func GetID(table, id, attr, value string) (int64, error) {
 	}
 	return rid, nil
 }
+
+// AddParam adds single parameter to SQL statement
+func AddParam(name, sqlName string, params Record, conds, args []string) ([]string, []string) {
+	vals := getValues(params, name)
+	if len(vals) == 1 {
+		op, val := OperatorValue(vals[0])
+		cond := fmt.Sprintf(" %s %s %s", sqlName, op, placeholder(name))
+		conds = append(conds, cond)
+		args = append(args, val)
+	}
+	return conds, args
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -153,4 +154,21 @@ func TestUtilWhereClause(t *testing.T) {
 	if newStm != "SELECT A FROM B WHERE 1 AND 2 AND 3" {
 		t.Error("fail to create where clause for input", input, "whereClause", newStm)
 	}
+}
+
+// TestUtilAddParam
+func TestUtilAddParam(t *testing.T) {
+	params := make(dbs.Record)
+	params["name"] = []string{"1"} // must be list of strings due to how HTTP params are passed in request
+	var conds []string
+	var args []string
+	conds, args = dbs.AddParam("name", "Table.Name", params, conds, args)
+	if strings.Trim(conds[0], " ") != "Table.Name = ?" {
+		t.Error("fail to add condition")
+	}
+	if args[0] != "1" {
+		t.Error("fail to add argument")
+	}
+	log.Println("conds", conds)
+	log.Println("args", args)
 }
