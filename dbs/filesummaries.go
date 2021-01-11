@@ -11,6 +11,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	var stm string
 	var conds []string
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
 	tmpl["Valid"] = false
 
 	validFileOnly := getValues(params, "validFileOnly")

@@ -158,7 +158,7 @@ func CleanStatement(stm string) string {
 func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, error) {
 	stm = CleanStatement(stm)
 	if DRYRUN {
-		log.Printf("SQL statement\n%s\nSQL arguments\n%+v", stm, args)
+		log.Printf("\n### SQL statement ###\n%s\n### SQL arguments ###\n%+v", stm, args)
 		return 0, nil
 	}
 	var size int64

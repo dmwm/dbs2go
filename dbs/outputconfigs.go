@@ -10,6 +10,7 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
 
 	bid := "0"
 	block_id := getValues(params, "block_id")

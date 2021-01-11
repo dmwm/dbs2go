@@ -12,6 +12,8 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+
 	runs := getValues(params, "run_num")
 	lfn := getValues(params, "logical_file_name")
 	block := getValues(params, "block_name")

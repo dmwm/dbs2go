@@ -13,6 +13,7 @@ func (API) FileParentByLumis(params Record, w http.ResponseWriter) (int64, error
 	var conds []string
 
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
 	tmpl["ChildLfnList"] = false
 
 	childBlockName := getValues(params, "child_block_name")

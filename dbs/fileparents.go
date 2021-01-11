@@ -11,6 +11,8 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+
 	blocks := getValues(params, "block_name")
 	if len(blocks) == 1 {
 		tmpl["BlockName"] = true

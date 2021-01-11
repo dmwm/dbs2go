@@ -12,6 +12,8 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var stm string
 
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+
 	lumis := getValues(params, "lumi_list")
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
