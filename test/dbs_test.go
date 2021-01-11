@@ -46,8 +46,10 @@ func TestStatementTemplateValues(t *testing.T) {
 	if stm != "INSERT INTO TEST (ID, NAME) VALUES (?, ?)\n" {
 		t.Error("wrong statement", stm)
 	}
-	if vals[0] != 123 || vals[1] != "name" {
-		t.Error("wrong values", vals)
+	if vals[0] != 123 && vals[1] != "name" {
+		if vals[0] != "name" && vals[1] != 123 {
+			t.Error("wrong values", vals)
+		}
 	}
 }
 
@@ -99,7 +101,7 @@ func TestGetID(t *testing.T) {
 	// prepare record for insertion
 	rec := make(dbs.Record)
 	rec["data_tier_id"] = 1
-	rec["data_tier_name"] = "RAW-TEST"
+	rec["data_tier_name"] = "RAW-TEST-1"
 	rec["creation_date"] = 1607536535
 	rec["create_by"] = "Valentin"
 
@@ -111,7 +113,7 @@ func TestGetID(t *testing.T) {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}
 	// GetID(table, id, attribute, value)
-	rid, err := dbs.GetID("data_tiers", "data_tier_id", "data_tier_name", "RAW-TEST")
+	rid, err := dbs.GetID("data_tiers", "data_tier_id", "data_tier_name", "RAW-TEST-1")
 	if err != nil {
 		t.Error("fail to execute GetID", err)
 	}
