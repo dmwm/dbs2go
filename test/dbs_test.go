@@ -10,6 +10,22 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
+// TestCleanStatement
+func TestCleanStatement(t *testing.T) {
+	stm := `SELECT A
+
+	FROM B
+
+	WHERE C=1`
+	clean := `SELECT A
+	FROM B
+	WHERE C=1`
+	stm = dbs.CleanStatement(stm)
+	if stm != clean {
+		t.Error("unable to clean the statement")
+	}
+}
+
 // TestOperatorValue
 func TestOperatorValue(t *testing.T) {
 	arg := "*val"
