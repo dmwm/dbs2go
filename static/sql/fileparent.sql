@@ -5,4 +5,4 @@ SELECT F.LOGICAL_FILE_NAME this_logical_file_name, PF.LOGICAL_FILE_NAME parent_l
         JOIN {{.Owner}}.FILES F ON  F.FILE_ID = FP.THIS_FILE_ID
 {{if .BlockName}}
         JOIN {{.Owner}}.BLOCKS B on B.BLOCK_ID = F.BLOCK_ID
-{{end if}}
+{{end}}

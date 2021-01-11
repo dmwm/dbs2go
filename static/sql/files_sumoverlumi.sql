@@ -18,7 +18,7 @@ with myfiles as (
                             from {{.Owner}}.file_lumis fl
                             join myfiles mf on mf.file_id=fl.file_id and mf.run_num=fl.run_num
                             group by fl.file_id, fl.run_num) mc
-{{end if}}
+{{end}}
           (
             select distinct fl.file_id, fl.run_num, null as bid
             from {{.Owner}}.file_lumis fl

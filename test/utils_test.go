@@ -31,13 +31,3 @@ func TestRecordSize(t *testing.T) {
 	}
 	fmt.Println("record", rec, "size", size)
 }
-
-// BenchmarkRecordSize
-func BenchmarkRecordSize(b *testing.B) {
-	rec := make(map[string]int)
-	rec["a"] = 1
-	rec["b"] = 2
-	for i := 0; i < b.N; i++ {
-		utils.RecordSize(rec)
-	}
-}
