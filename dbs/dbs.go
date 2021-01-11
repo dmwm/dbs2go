@@ -135,6 +135,20 @@ func errorRecord(msg string) []Record {
 	return out
 }
 
+// CleanStatement cleans the given SQL statement to remove empty strings, etc.
+func CleanStatement(stm string) string {
+	var out []string
+	for _, s := range strings.Split(stm, "\n") {
+		//         s = strings.Trim(s, " ")
+		if s == "" || s == " " {
+			continue
+		}
+		out = append(out, s)
+	}
+	stm = strings.Join(out, "\n")
+	return stm
+}
+
 // generic API to execute given statement
 // ideas are taken from
 // http://stackoverflow.com/questions/17845619/how-to-call-the-scan-variadic-function-in-golang-using-reflection
@@ -142,8 +156,9 @@ func errorRecord(msg string) []Record {
 // then we literally stream data with our encoder (i.e. write records
 // to writer)
 func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, error) {
+	stm = CleanStatement(stm)
 	if DRYRUN {
-		log.Printf("%s %+v", stm, args)
+		log.Printf("SQL statement\n%s\nSQL arguments\n%+v", stm, args)
 		return 0, nil
 	}
 	var size int64
@@ -401,19 +416,19 @@ func ParseRuns(runs []string) ([]string, error) {
 // TokenGenerator creates a SQL token generator statement
 // https://betteratoracle.com/posts/20-how-do-i-bind-a-variable-in-list
 func TokenGenerator(runs []string, limit int) (string, []string) {
-	stm := "WITH TOKEN_GENERATOR AS ( "
+	stm := "WITH TOKEN_GENERATOR AS (\n"
 	var tstm []string
 	var vals []string
 	for idx, chunk := range GetChunks(runs, limit) {
 		t := fmt.Sprintf("token_%d", idx)
-		s := fmt.Sprintf("SELECT REGEXP_SUBSTR(:%s, '[^,]+', 1, LEVEL) token ", t)
-		s += "FROM DUAL"
-		s += fmt.Sprintf("CONNECT BY LEVEL <= length(:%s) - length(REPLACE(:%s, ',', '')) + 1", t, t)
+		s := fmt.Sprintf("\tSELECT REGEXP_SUBSTR(:%s, '[^,]+', 1, LEVEL) token ", t)
+		s += "\n\tFROM DUAL\n"
+		s += fmt.Sprintf("\tCONNECT BY LEVEL <= length(:%s) - length(REPLACE(:%s, ',', '')) + 1", t, t)
 		tstm = append(tstm, s)
 		vals = append(vals, chunk)
 	}
 	stm += strings.Join(tstm, " UNION ALL ")
-	stm += " ) "
+	stm += "\n)"
 	return stm, vals
 }
 

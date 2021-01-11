@@ -9,13 +9,14 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
-// TestBlocksStatement API
-func TestBlocksStatement(t *testing.T) {
+// TestBlocksSQL API
+func TestBlocksSQL(t *testing.T) {
 	// initialize DB for testing
 	db := initDB(true) // init DB with dryRun mode
 	defer db.Close()
 	var api dbs.API
-	params := make(dbs.Record)                                // the Record is map[string]interface{}
+	params := make(dbs.Record) // the Record is map[string]interface{}
+	params["Owner"] = "sqlite"
 	params["logical_file_name"] = []string{"/path/file.root"} // pass params as list as in HTTP
 	var w http.ResponseWriter
 	w = StdoutWriter("")
@@ -26,7 +27,9 @@ func TestBlocksStatement(t *testing.T) {
 	}
 
 	params = make(dbs.Record)
+	params["Owner"] = "sqlite"
 	params["dataset"] = []string{"/a/b/c"}
+	params["run_num"] = []string{"1", "2", "3"}
 	log.Println("Test Blocks API statement with dataset parameter")
 	_, err = api.Blocks(params, w)
 	if err != nil {

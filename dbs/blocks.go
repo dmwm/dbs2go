@@ -10,6 +10,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
 
 	// parse arguments
 	lfns := getValues(params, "logical_file_name")
