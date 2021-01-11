@@ -38,6 +38,6 @@ func TestFileDataTypes(t *testing.T) {
 	log.Println("Fetch data from FileDataTypes API")
 	_, err = api.FileDataTypes(params, w)
 	if err != nil {
-		t.Errorf("Fail to look-up data tiers %v\n", err)
+		t.Errorf("Fail to look-up data %v\n", err)
 	}
 }

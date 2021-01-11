@@ -25,6 +25,6 @@ func TestDatasetParentsSQL(t *testing.T) {
 	var api dbs.API
 	_, err := api.DatasetParents(params, w)
 	if err != nil {
-		t.Errorf("Fail to look-up data tiers %v\n", err)
+		t.Errorf("Fail to look-up data %v\n", err)
 	}
 }

@@ -9,8 +9,8 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
-// TestDatasetsSQL API
-func TestDatasetsSQL(t *testing.T) {
+// TestFileParentByLumisSQL API
+func TestFileParentByLumisSQL(t *testing.T) {
 
 	// initialize DB for testing
 	db := initDB(false)
@@ -21,9 +21,9 @@ func TestDatasetsSQL(t *testing.T) {
 	params := make(dbs.Record)
 	var w http.ResponseWriter
 	w = StdoutWriter("")
-	log.Println("Test Datasets API")
+	log.Println("Test FileParentByLumis API")
 	var api dbs.API
-	_, err := api.Datasets(params, w)
+	_, err := api.FileParentByLumis(params, w)
 	if err != nil {
 		t.Errorf("Fail to look-up data %v\n", err)
 	}

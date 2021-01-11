@@ -38,6 +38,6 @@ func TestProcessedDatasets(t *testing.T) {
 	log.Println("Fetch data from ProcessedDatasets API")
 	_, err = api.ProcessedDatasets(params, w)
 	if err != nil {
-		t.Errorf("Fail to look-up data tiers %v\n", err)
+		t.Errorf("Fail to look-up data %v\n", err)
 	}
 }
