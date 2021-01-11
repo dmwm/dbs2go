@@ -3,24 +3,18 @@ package dbs
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // Blocks DBS API
 func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
-	// get SQL statement from static area
-	stm := getSQL("blocks")
 	var args []interface{}
 	var conds []string
-	owner := ""
-	if DBOWNER != "sqlite" {
-		owner = fmt.Sprintf("%s.", DBOWNER)
-	}
+	tmpl := make(Record)
 
 	// parse arguments
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) == 1 {
-		stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
+		tmpl["Lfns"] = true
 		conds, args = AddParam("logical_file_name", "FL.LOGICAL_FILE_NAME", params, conds, args)
 	}
 
@@ -72,26 +66,22 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, maxval)
 		}
 	}
+	tmpl["TokenGenerator"] = ""
 
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
 		return 0, err
 	}
 	if len(runs) > 0 {
-		stm = strings.Replace(stm, "SELECT ", "SELECT DISTINCT ", 1)
-		if len(lfns) == 1 { // lfn is present in a query
-			stm += fmt.Sprintf("\nJOIN %sFILE_LUMIS FLM on FLM.FILE_ID = FL.FILE_ID\n", owner)
-		} else {
-			stm += fmt.Sprintf("\nJOIN %sFILES FL ON FL.BLOCK_ID = B.BLOCK_ID\n", owner)
-		}
-		// handle runs where clause
+		tmpl["Runs"] = true
 		token, whereRuns, bindsRuns := runsClause("FLM", runs)
-		stm = fmt.Sprintf("%s %s", token, stm)
+		tmpl["TokenGenerator"] = token
 		conds = append(conds, whereRuns)
 		for _, v := range bindsRuns {
 			args = append(args, v)
 		}
 	}
+	stm := LoadTemplateSQL("blocks", tmpl)
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
