@@ -41,3 +41,23 @@ func TestProcessedDatasets(t *testing.T) {
 		t.Errorf("Fail to look-up data %v\n", err)
 	}
 }
+
+// TestProcessedDatasetsSQL API
+func TestProcessedDatasetsSQL(t *testing.T) {
+
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+
+	// fetch this record from DB, here we can either use nil writer
+	// or use StdoutWriter instance (defined in test/main.go)
+	params := make(dbs.Record)
+	var w http.ResponseWriter
+	w = StdoutWriter("")
+	log.Println("Test ProcessedDatasets API")
+	var api dbs.API
+	_, err := api.ProcessedDatasets(params, w)
+	if err != nil {
+		t.Errorf("Fail to look-up data %v\n", err)
+	}
+}

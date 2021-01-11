@@ -41,3 +41,23 @@ func TestPrimaryDSTypes(t *testing.T) {
 		t.Errorf("Fail to look-up data %v\n", err)
 	}
 }
+
+// TestPrimaryDSTypesSQL API
+func TestPrimaryDSTypesSQL(t *testing.T) {
+
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+
+	// fetch this record from DB, here we can either use nil writer
+	// or use StdoutWriter instance (defined in test/main.go)
+	params := make(dbs.Record)
+	var w http.ResponseWriter
+	w = StdoutWriter("")
+	log.Println("Test PrimaryDSTypes API")
+	var api dbs.API
+	_, err := api.PrimaryDSTypes(params, w)
+	if err != nil {
+		t.Errorf("Fail to look-up data %v\n", err)
+	}
+}

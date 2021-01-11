@@ -9,8 +9,8 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
-// TestFileParentByLumisSQL API
-func TestFileParentByLumisSQL(t *testing.T) {
+// TestOutputConfigsSQL API
+func TestOutputConfigsSQL(t *testing.T) {
 
 	// initialize DB for testing
 	db := initDB(false)
@@ -19,12 +19,11 @@ func TestFileParentByLumisSQL(t *testing.T) {
 	// fetch this record from DB, here we can either use nil writer
 	// or use StdoutWriter instance (defined in test/main.go)
 	params := make(dbs.Record)
-	params["child_block_name"] = []string{"/a/g/c#123"}
 	var w http.ResponseWriter
 	w = StdoutWriter("")
-	log.Println("Test FileParentByLumis API")
+	log.Println("Test OutputConfigs API")
 	var api dbs.API
-	_, err := api.FileParentByLumis(params, w)
+	_, err := api.OutputConfigs(params, w)
 	if err != nil {
 		t.Errorf("Fail to look-up data %v\n", err)
 	}
