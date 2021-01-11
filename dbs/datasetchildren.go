@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -18,9 +17,6 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 		return 0, errors.New(msg)
 	} else if len(datasetchildren) == 1 {
 		conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
-	} else {
-		msg := fmt.Sprintf("No arguments for datasetchildren API")
-		return 0, errors.New(msg)
 	}
 
 	// get SQL statement from static area
