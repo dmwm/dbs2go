@@ -2,8 +2,8 @@ package utils
 
 import (
 	"bytes"
-	"html/template"
 	"path/filepath"
+	"text/template"
 )
 
 // consume list of templates and release their full path counterparts
