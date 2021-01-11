@@ -2,27 +2,19 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
-	"strings"
 )
 
 // BlockSummaries DBS API
 func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
-	// variables we'll use in where clause
-	var stm, where_clause string
+	var stm string
 	var args []interface{}
-
-	block_join := fmt.Sprintf("JOIN %s.BLOCKS BS ON BS.BLOCK_ID=FS.BLOCK_ID", DBOWNER)
-	dataset_join := fmt.Sprintf("JOIN %s.DATASETS DS ON BS.DATASET_ID=DS.DATASET_ID", DBOWNER)
 
 	// parse arguments
 	_, detailErr := getSingleValue(params, "detail")
 	block := getValues(params, "block_name")
 	genSQL := ""
 	if len(block) > 0 {
-		block_clause := "BS.BLOCK_NAME IN (SELECT TOKEN FROM TOKEN_GENERATOR) "
-		where_clause = "WHERE block_clause"
 		var binds []string
 		genSQL, binds = TokenGenerator(block, 100) // 100 is max for # of allowed datasets
 		for _, v := range binds {
@@ -30,9 +22,6 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		}
 		if detailErr == nil { // no details are required
 			stm = getSQL("blocksummaries4block")
-			stm = strings.Replace(stm, "block_join", block_join, -1)
-			stm = strings.Replace(stm, "where_clause", where_clause, -1)
-			stm = strings.Replace(stm, "block_clause", block_clause, -1)
 		} else {
 			stm = getSQL("blocksummaries4block_detail")
 		}
@@ -43,13 +32,12 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, errors.New(msg)
 	} else if len(dataset) == 1 {
 		_, val := OperatorValue(dataset[0])
-		args = append(args, val)
-		where_clause = fmt.Sprintf("WHERE DS.dataset=%s", placeholder("dataset"))
 		if detailErr == nil {
 			stm = getSQL("blocksummaries4dataset")
-			stm = strings.Replace(stm, "block_join", block_join, -1)
-			stm = strings.Replace(stm, "dataset_join", dataset_join, -1)
-			stm = strings.Replace(stm, "where_clause", where_clause, -1)
+			// blocksummaries4dataset contains three dataset bindings
+			args = append(args, val)
+			args = append(args, val)
+			args = append(args, val)
 		} else {
 			stm = getSQL("blocksummaries4dataset_detail")
 		}

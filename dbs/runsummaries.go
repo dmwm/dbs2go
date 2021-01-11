@@ -10,8 +10,7 @@ import (
 func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
-	// get SQL statement from static area
-	stm := getSQL("runsummaries")
+	tmpl := make(Record)
 
 	// parse arguments
 	runs := getValues(params, "run_num")
@@ -27,10 +26,10 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 	dataset := getValues(params, "dataset")
 	if len(dataset) == 1 {
-		joins := fmt.Sprintf("JOIN %s.FILES FS ON FS.FILE_ID=FL.FILE_ID JOIN %s.DATASETS DS ON FS.DATASET_ID=DS.DATASET_ID", DBOWNER, DBOWNER)
-		stm += joins
+		tmpl["Dataset"] = true
 		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
 	}
+	stm := LoadTemplateSQL("runsummaries", tmpl)
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
