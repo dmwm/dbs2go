@@ -55,6 +55,7 @@ test-rel:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Release
 test-util:
 	cd test && go test -v -run Util
-
+test-sql:
+	cd test && go test -v -run SQL
 bench:
 	cd test; go test -bench=.
