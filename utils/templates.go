@@ -16,13 +16,13 @@ func fileNames(tdir string, filenames ...string) []string {
 }
 
 // parse template with given data
-func ParseTmpl(tdir, tmpl string, data interface{}) string {
+func ParseTmpl(tdir, tmpl string, data interface{}) (string, error) {
 	buf := new(bytes.Buffer)
 	filenames := fileNames(tdir, tmpl)
 	t := template.Must(template.ParseFiles(filenames...))
 	err := t.Execute(buf, data)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return buf.String()
+	return buf.String(), err
 }

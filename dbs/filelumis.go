@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -13,6 +14,13 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
+	tmpl["Lfn"] = false
+	tmpl["LfnGenerator"] = ""
+	tmpl["TokenGenerator"] = ""
+	tmpl["LfnList"] = false
+	tmpl["ValidFileOnly"] = 0
+	tmpl["BlockName"] = false
+	tmpl["Migration"] = false
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
@@ -30,7 +38,6 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 		args = append(args, lfns[0])
 	}
 
-	tmpl["ValidFileOnly"] = 0
 	validFileOnly := getValues(params, "validFileOnly")
 	if len(validFileOnly) == 1 {
 		tmpl["ValidFileOnly"] = 1
@@ -42,7 +49,11 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
 	}
 
-	stm := LoadTemplateSQL("filelumis", tmpl)
+	stm, err := LoadTemplateSQL("filelumis", tmpl)
+	log.Println("### stm", stm)
+	if err != nil {
+		return 0, err
+	}
 
 	// generate run_num token
 	runs, err := ParseRuns(getValues(params, "run_num"))
@@ -51,6 +62,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	if len(runs) > 0 {
 		token, condRuns, bindsRuns := runsClause("FL", runs)
+		log.Println("### FileLumis", token, condRuns, bindsRuns)
 		stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, condRuns)
 		for _, v := range bindsRuns {

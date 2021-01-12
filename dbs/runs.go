@@ -38,7 +38,10 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, errors.New(msg)
 	}
 
-	stm := LoadTemplateSQL("runs", tmpl)
+	stm, err := LoadTemplateSQL("runs", tmpl)
+	if err != nil {
+		return 0, err
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB

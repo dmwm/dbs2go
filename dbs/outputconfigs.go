@@ -40,7 +40,10 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	} else {
 		tmpl["Main"] = false
 	}
-	stm := LoadTemplateSQL("outputconfigs", tmpl)
+	stm, err := LoadTemplateSQL("outputconfigs", tmpl)
+	if err != nil {
+		return 0, err
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB

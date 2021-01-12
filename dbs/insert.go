@@ -39,9 +39,11 @@ func InsertValues(tmpl string, values Record) error {
 
 // helper function to prepare insert statement with templated values
 func StatementTemplateValues(tmpl string, args, values Record) (string, []interface{}, error) {
-	// get SQL statement from static area
-	stm := LoadTemplateSQL(tmpl, args)
 	var vals []interface{}
+	stm, err := LoadTemplateSQL(tmpl, args)
+	if err != nil {
+		return "", vals, err
+	}
 	for k, v := range values {
 		if !strings.Contains(strings.ToLower(stm), k) {
 			msg := fmt.Sprintf("unable to find column '%s' in %s", k, stm)

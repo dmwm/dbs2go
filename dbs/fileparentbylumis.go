@@ -32,7 +32,10 @@ func (API) FileParentByLumis(params Record, w http.ResponseWriter) (int64, error
 	}
 
 	// get SQL statement from static area
-	stm := LoadTemplateSQL("fileparentbylumis", tmpl)
+	stm, err := LoadTemplateSQL("fileparentbylumis", tmpl)
+	if err != nil {
+		return 0, err
+	}
 	stm = WhereClause(stm, conds)
 
 	// fix binding variables

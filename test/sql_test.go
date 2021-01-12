@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/utils"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -83,7 +82,7 @@ func TestInsertSQL(t *testing.T) {
 		t.Errorf("Unable to parse file %s, error %v\n", fname, err)
 	}
 
-	utils.VERBOSE = 2 // be verbose
+	//     utils.VERBOSE = 2 // be verbose
 
 	// run insert APIs
 	for _, rec := range records {
@@ -106,7 +105,7 @@ func TestInsertSQL(t *testing.T) {
 		m := r.MethodByName(rec.InsertApi)
 		args := []reflect.Value{reflect.ValueOf(params)}
 		output := m.Call(args)
-		log.Println("output of insert", output[0].Interface())
+		//         log.Println("output of insert", output[0].Interface())
 		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {
 			t.Fatalf("Fail to look-up data %v\n", output[0].Interface())
 		}
@@ -130,7 +129,7 @@ func TestInsertSQL(t *testing.T) {
 		m = r.MethodByName(rec.Api)
 		args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(w)}
 		output = m.Call(args)
-		log.Println("output of lookup", output[0].Interface(), output[1].Interface())
+		//         log.Println("output of lookup", output[0].Interface(), output[1].Interface())
 		if fmt.Sprintf("%v", output[1].Interface()) != "<nil>" {
 			t.Fatalf("Fail to look-up data %v\n", output[1].Interface())
 		}

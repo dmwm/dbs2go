@@ -24,7 +24,10 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	if len(lumis) > 0 {
 		tmpl["LumiList"] = true
-		stm = LoadTemplateSQL("files_sumoverlumi", tmpl)
+		stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
+		if err != nil {
+			return 0, err
+		}
 		token, binds := TokenGenerator(lumis, 4000)
 		stm = fmt.Sprintf("%s %s", token, stm)
 		for _, v := range binds {

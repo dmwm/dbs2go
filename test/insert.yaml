@@ -1,6 +1,9 @@
 # this file contains list of insert DBS APIs and associated parameter sets
 # each block contains two mandatory parameters, api and params
 # and may contain lookup parameter used to look-up back the information
+# NOTE: the params values should be represented as list parameters since
+# HTTP allows to pass multiple parameters. And, values of those parameters
+# should be string data-type as we pass them through HTTP handler
 -
   insertApi: InsertAcquisitionEras
   insertParams:
@@ -19,17 +22,17 @@
   insertParams:
   - dataset_access_type_id: 0
   - dataset_access_type: "atype"
-#   api: AccessTypes
-#   params:
-#   - dataset_access_type: ["atype"]
+  api: DatasetAccessTypes
+  params:
+  - dataset_access_type: ["atype"]
 -
   insertApi: InsertFileDataTypes
   insertParams:
   - file_type_id: 0
   - file_type: "file-type"
-#   api: FileDataTypes
-#   params:
-#   - file_type: ["file-type"]
+  api: FileDataTypes
+  params:
+  - file_type: ["file-type"]
 -
   insertApi: InsertFileLumis
   insertParams:
@@ -37,9 +40,9 @@
   - lumi_section_num: 1
   - file_id: 0
   - event_count: 1
-#   api: FileLumis
-#   params:
-#   - run_num: 1
+  api: FileLumis
+  params:
+  - run_num: ["1"]
 -
   insertApi: InsertFileParents
   insertParams:
@@ -87,3 +90,13 @@
   insertParams:
   - release_version_id: 1
   - release_version: "rel_version"
+-
+  insertApi: InsertDataTiers
+  insertParams:
+  - data_tier_id: 1
+  - data_tier_name: "tier"
+  - creation_date: 123
+  - create_by: "test"
+  api: DataTiers
+  params:
+  - data_tier_name: ["tier"]

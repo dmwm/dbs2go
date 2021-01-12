@@ -31,16 +31,19 @@ var DBOWNER string
 var DRYRUN bool
 
 // helper function to load DBS SQL templated statements
-func LoadTemplateSQL(tmpl string, tmplData Record) string {
+func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
 	if !strings.HasSuffix(tmpl, ".sql") {
 		tmpl += ".sql"
 	}
-	stm := utils.ParseTmpl(sdir, tmpl, tmplData)
+	stm, err := utils.ParseTmpl(sdir, tmpl, tmplData)
+	if err != nil {
+		return "", err
+	}
 	if owner, ok := tmplData["Owner"]; ok && owner == "sqlite" {
 		stm = strings.Replace(stm, "sqlite.", "", -1)
 	}
-	return stm
+	return stm, nil
 }
 
 // helper function to load DBS SQL statements with Owner
@@ -52,7 +55,10 @@ func LoadSQL(owner string) Record {
 	dbsql := make(Record)
 	for _, f := range utils.Listfiles(sdir) {
 		k := strings.Split(f, ".")[0]
-		stm := utils.ParseTmpl(sdir, f, tmplData)
+		stm, err := utils.ParseTmpl(sdir, f, tmplData)
+		if err != nil {
+			log.Fatal("unable to parse tempalte", err)
+		}
 		if owner, ok := tmplData["Owner"]; ok && owner == "sqlite" {
 			stm = strings.Replace(stm, "sqlite.", "", -1)
 		}

@@ -30,7 +30,10 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		tmpl["Dataset"] = true
 		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
 	}
-	stm := LoadTemplateSQL("runsummaries", tmpl)
+	stm, err := LoadTemplateSQL("runsummaries", tmpl)
+	if err != nil {
+		return 0, err
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB

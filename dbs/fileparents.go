@@ -19,7 +19,10 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
 	}
 
-	stm := LoadTemplateSQL("fileparent", tmpl)
+	stm, err := LoadTemplateSQL("fileparent", tmpl)
+	if err != nil {
+		return 0, err
+	}
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
