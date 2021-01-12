@@ -1,0 +1,16 @@
+# this file contains DBS GET APIs and associated parameter sets
+# each block contains two mandatory parameters, api and params
+-
+  api: Datasets
+  params:
+  - dataset: ["/a/b/c"]
+  - logical_file_name: ["/a/file.root"]
+  - cdate: ["123"]
+-
+  api: Blocks
+  params:
+  - dataset: ["/a/b/c"]
+-
+  api: Blocks
+  params:
+  - logical_file_name: ["/a/file.root"]

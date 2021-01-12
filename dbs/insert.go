@@ -15,17 +15,15 @@ func StatementValues(tmpl string, values Record) (string, []interface{}, error) 
 	stm := getSQL(tmpl)
 	var vals []interface{}
 	var args []string
+	var params []string
 	for k, v := range values {
-		if !strings.Contains(strings.ToLower(stm), k) {
-			msg := fmt.Sprintf("unable to find column '%s' in %s", k, stm)
-			return "", vals, errors.New(msg)
-		}
+		params = append(params, strings.ToUpper(k))
 		vals = append(vals, v)
 		args = append(args, "?")
 	}
-	stm = fmt.Sprintf("%s VALUES (%s)", stm, strings.Join(args, ","))
+	stm = fmt.Sprintf("%s (%s) VALUES (%s)", stm, strings.Join(params, ","), strings.Join(args, ","))
 	if utils.VERBOSE > 0 {
-		log.Println("InsertValues", stm, vals, values)
+		log.Println("InsertValues", stm, vals)
 	}
 	return stm, vals, nil
 }

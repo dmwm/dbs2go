@@ -46,29 +46,3 @@ func TestAcquisitionEras(t *testing.T) {
 		t.Errorf("Fail to look-up data %v\n", err)
 	}
 }
-
-// TestAcquisitionErasSQL API
-func TestAcquisitionErasSQL(t *testing.T) {
-	// initialize DB for testing
-	db := initDB(true) // init DB with dryRun mode
-	defer db.Close()
-	var api dbs.API
-	params := make(dbs.Record)
-	var w http.ResponseWriter
-	w = StdoutWriter("")
-	log.Println("Test AcquisitionEras API statement")
-	api.AcquisitionEras(params, w)
-}
-
-// TestAcquisitionErasCiSQL API
-func TestAcquisitionErasCiSQL(t *testing.T) {
-	// initialize DB for testing
-	db := initDB(true) // init DB with dryRun mode
-	defer db.Close()
-	var api dbs.API
-	params := make(dbs.Record)
-	var w http.ResponseWriter
-	w = StdoutWriter("")
-	log.Println("Test AcquisitionErasCi API statement")
-	api.AcquisitionErasCi(params, w)
-}

@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"log"
 	"net/http"
 )
 
@@ -21,6 +22,7 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 }
 
 // InsertAcquisitionEras DBS API
-func (API) InsertAcquisitionEras(values Record) error {
-	return InsertValues("insert_acquisition_eras", values)
+func (API) InsertAcquisitionEras(params Record) error {
+	log.Println("InsertAE", params)
+	return InsertValues("insert_acquisition_eras", params)
 }

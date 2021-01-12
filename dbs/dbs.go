@@ -260,6 +260,11 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 
 // similar to executeAll function but it takes explicit set of columns and values
 func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) (int64, error) {
+	stm = CleanStatement(stm)
+	if DRYRUN {
+		log.Printf("\n### SQL statement ###\n%s\n### SQL arguments ###\n%+v", stm, args)
+		return 0, nil
+	}
 	var size int64
 	var enc *json.Encoder
 	if w != nil {
@@ -369,6 +374,11 @@ func insert(stm string, vals []interface{}) error {
 	}
 	defer tx.Rollback()
 	_, err = tx.Exec(stm, vals...)
+	if err != nil {
+		log.Println("DB error", stm, err)
+		tx.Rollback()
+		return err
+	}
 	err = tx.Commit()
 	if err != nil {
 		log.Println("DB error", stm, err)

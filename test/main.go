@@ -35,6 +35,8 @@ func (s StdoutWriter) WriteHeader(statusCode int) {
 
 // helper function to initialize DB for tests
 func initDB(dryRun bool) *sql.DB {
+	log.SetFlags(0)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	// current directory is a <pwd>/test
 	dir, err := os.Getwd()
 	if err != nil {
