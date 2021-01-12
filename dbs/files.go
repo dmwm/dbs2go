@@ -13,6 +13,9 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
+	tmpl["Addition"] = false
+	tmpl["RunNumber"] = false
+	tmpl["LumiList"] = false
 
 	lumis := getValues(params, "lumi_list")
 	runs, err := ParseRuns(getValues(params, "run_num"))

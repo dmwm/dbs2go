@@ -167,6 +167,9 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 		log.Printf("\n### SQL statement ###\n%s\n### SQL arguments ###\n%+v", stm, args)
 		return 0, nil
 	}
+	if utils.VERBOSE > 1 {
+		log.Println("execute\n### SQL statment ###\n", stm, "\n### SQL arguments ###\n", args)
+	}
 	var size int64
 	var enc *json.Encoder
 	if w != nil {
@@ -175,9 +178,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 		defer w.Write([]byte("]\n"))
 	}
 
-	if utils.VERBOSE > 1 {
-		log.Printf(stm, args...)
-	}
+	// execute transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
@@ -271,6 +272,9 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 		log.Printf("\n### SQL statement ###\n%s\n### SQL arguments ###\n%+v", stm, args)
 		return 0, nil
 	}
+	if utils.VERBOSE > 1 {
+		log.Println("execute\n### SQL statement ###\n", stm, "\n### SQL arguments ###\n", args)
+	}
 	var size int64
 	var enc *json.Encoder
 	if w != nil {
@@ -279,9 +283,7 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 		defer w.Write([]byte("]\n"))
 	}
 
-	if utils.VERBOSE > 1 {
-		log.Println(stm, args)
-	}
+	// execute transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to obtain transaction %v", err)
@@ -371,7 +373,7 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 // insert api to insert data into DB
 func insert(stm string, vals []interface{}) error {
 	if utils.VERBOSE > 1 {
-		log.Printf("%s %+v\n", stm, vals)
+		log.Println("insert data\n### SQL query\n", stm, "\n### SQL values\n", vals)
 	}
 	tx, err := DB.Begin()
 	if err != nil {

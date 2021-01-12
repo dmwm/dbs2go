@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -82,7 +83,7 @@ func TestInsertSQL(t *testing.T) {
 		t.Errorf("Unable to parse file %s, error %v\n", fname, err)
 	}
 
-	//     utils.VERBOSE = 2 // be verbose
+	utils.VERBOSE = 2 // be verbose
 
 	// run insert APIs
 	for _, rec := range records {
