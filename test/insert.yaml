@@ -40,14 +40,16 @@
   - lumi_section_num: 1
   - file_id: 0
   - event_count: 1
-  api: FileLumis
-  params:
-  - run_num: ["1"]
+#   api: FileLumis
+#   params:
+#   - run_num: ["1"]
 -
   insertApi: InsertFileParents
   insertParams:
   - this_file_id: 1
   - parent_file_id: 1
+  api: FileParents
+  params:
 -
   insertApi: InsertFiles
   insertParams:
@@ -65,31 +67,49 @@
   - auto_cross_section: 123
   - last_modification_date: 123
   - last_modified_by: "tester"
+  api: Files
+  params:
+  - logical_file_name: ["/a/file.root"]
 -
   insertApi: InsertPhysicsGroups
   insertParams:
   - physics_group_id: 1
   - physics_group_name: "phys-name"
+  api: PhysicsGroups
+  params:
+  - physics_group_name: ["phys-name"]
 -
   insertApi: InsertPrimaryDatasets
   insertParams:
   - primary_ds_id: 1
   - primary_ds_name: "primds"
+  api: PrimaryDatasets
+  params:
+  - primary_ds_name: ["primds"]
 -
   insertApi: InsertPrimaryDSTypes
   insertParams:
   - primary_ds_type_id: 1
   - primary_ds_type: "prim_ds_type"
+  api: PrimaryDSTypes
+  params:
+  - primary_ds_type: ["prim_ds_name"]
 -
   insertApi: InsertProcessedDatasets
   insertParams:
   - processed_ds_id: 1
   - processed_ds_name: "ps_ds_name"
+  api: ProcessedDatasets
+  params:
+  - processed_ds_name: ["ps_ds_name"]
 -
   insertApi: InsertReleaseVersions
   insertParams:
   - release_version_id: 1
   - release_version: "rel_version"
+  api: ReleaseVersions
+  params:
+  - release_version: ["rel_version"]
 -
   insertApi: InsertDataTiers
   insertParams:
