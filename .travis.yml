@@ -6,7 +6,6 @@ before_install:
   - sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" web/server.go
   - sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",,g" web/server.go
 install:
-  - go get github.com/vkuznet/cmsauth
   - go get github.com/vkuznet/x509proxy
   - go get github.com/lestrrat-go/file-rotatelogs
   - go get github.com/mattn/go-sqlite3
