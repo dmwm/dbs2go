@@ -33,6 +33,7 @@ jobs:
         go get github.com/lestrrat-go/file-rotatelogs
         go get github.com/gorilla/csrf
         go get github.com/gorilla/mux
+        go get golang.org/x/exp/errors
 
     - name: Build
       env:
