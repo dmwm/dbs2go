@@ -12,7 +12,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
-	tmpl["TokenGenerator"] = false
+	tmpl["TokenGenerator"] = ""
 	tmpl["Runs"] = false
 	tmpl["Lfns"] = false
 	tmpl["Version"] = false
