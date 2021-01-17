@@ -3,7 +3,7 @@
 SELECT DISTINCT
 {{else}}
 SELECT
-{{end if}}
+{{end}}
         D.DATASET_ID, D.DATASET, D.PREP_ID, 
         D.XTCROSSSECTION, 
         D.CREATION_DATE, D.CREATE_BY, 
@@ -18,14 +18,14 @@ SELECT
         PH.PHYSICS_GROUP_NAME 
 {{if .ParentDataset}}
         ,PDS.DATASET PARENT_DATASET
-{{end if}}
+{{end}}
 {{if .Version}}
         ,OMC.OUTPUT_MODULE_LABEL
         ,OMC.GLOBAL_TAG
         ,RV.RELEASE_VERSION,
         ,PSH.PSET_HASH,
         ,AEX.APP_NAME
-{{end if}}
+{{end}}
        
 	FROM {{.Owner}}.DATASETS D
 	JOIN {{.Owner}}.PRIMARY_DATASETS P ON P.PRIMARY_DS_ID = D.PRIMARY_DS_ID
@@ -40,7 +40,7 @@ SELECT
 {{if .ParentDataset}}
     LEFT OUTER JOIN {{.Owner}}.DATASET_PARENTS DSP ON DSP.THIS_DATASET_ID = D.DATASET_ID
     LEFT OUTER JOIN {{.Owner}}.DATASETS PDS ON PDS.DATASET_ID = DSP.PARENT_DATASET_ID
-{{end if}}
+{{end}}
 
 {{if .Version}}
     LEFT OUTER JOIN {{.Owner}}.DATASET_OUTPUT_MOD_CONFIGS DOMC ON DOMC.DATASET_ID = D.DATASET_ID
@@ -48,13 +48,13 @@ SELECT
     LEFT OUTER JOIN {{.Owner}}.RELEASE_VERSIONS RV ON RV.RELEASE_VERSION_ID = OMC.RELEASE_VERSION_ID
     LEFT OUTER JOIN {{.Owner}}.PARAMETER_SET_HASHES PSH ON PSH.PARAMETER_SET_HASH_ID = OMC.PARAMETER_SET_HASH_ID
     LEFT OUTER JOIN {{.Owner}}.APPLICATION_EXECUTABLES AEX ON AEX.APP_EXEC_ID = OMC.APP_EXEC_ID
-{{end if}}
+{{end}}
 
 {{if .Runs}}
 {{if .Lfns}}
     JOIN {{.Owner}}.FILES FL on FL.DATASET_ID = D.DATASET_ID
 {{else}}
     JOIN {{.Owner}}.FILES FL on FL.DATASET_ID = D.DATASET_ID
-{{end if}}
+{{end}}
     JOIN {{.Owner}}.FILE_LUMIS FLLU on FLLU.FILE_ID=FL.FILE_ID
-{{end if}}
+{{end}}
