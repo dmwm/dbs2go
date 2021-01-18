@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
 	"golang.org/x/exp/errors"
@@ -34,6 +35,8 @@ func strType(key string, val interface{}) error {
 	default:
 		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v'", key, val))
 	}
+	// for validation we strip off asterisk in passed values
+	v = strings.Replace(v, "*", "", -1)
 	errMsg := fmt.Sprintf("unable to match '%s' value '%+v'", key, val)
 	if key == "dataset" {
 		if matched := datasetPattern.MatchString(v); !matched {
