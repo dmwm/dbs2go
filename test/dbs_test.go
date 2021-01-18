@@ -125,8 +125,8 @@ func TestGetID(t *testing.T) {
 
 	// prepare record for insertion
 	rec := make(dbs.Record)
-	rec["data_tier_id"] = 1
-	rec["data_tier_name"] = "RAW-TEST-1"
+	rec["data_tier_id"] = 0
+	rec["data_tier_name"] = "RAW-TEST-0"
 	rec["creation_date"] = 1607536535
 	rec["create_by"] = "Valentin"
 
@@ -142,7 +142,7 @@ func TestGetID(t *testing.T) {
 	if err != nil {
 		t.Error("fail to execute GetID", err)
 	}
-	if rid != 1 {
+	if rid != 0 {
 		t.Errorf("fail to execute GetID, found rid=%v need rid=1", rid)
 	}
 }

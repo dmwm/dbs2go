@@ -108,7 +108,7 @@ func TestInsertSQL(t *testing.T) {
 		output := m.Call(args)
 		//         log.Println("output of insert", output[0].Interface())
 		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {
-			t.Fatalf("Fail to look-up data %v\n", output[0].Interface())
+			t.Fatalf("Fail to insert data %v\n", output[0].Interface())
 		}
 
 		// skip look-up test

@@ -5,6 +5,16 @@
 # HTTP allows to pass multiple parameters. And, values of those parameters
 # should be string data-type as we pass them through HTTP handler
 -
+  insertApi: InsertDataTiers
+  insertParams:
+  - data_tier_id: 1
+  - data_tier_name: "tier"
+  - creation_date: 123
+  - create_by: "test"
+  api: DataTiers
+  params:
+  - data_tier_name: ["tier"]
+-
   insertApi: InsertAcquisitionEras
   insertParams:
   - acquisition_era_id: 1
@@ -76,16 +86,6 @@
   api: ReleaseVersions
   params:
   - release_version: ["rel_version"]
--
-  insertApi: InsertDataTiers
-  insertParams:
-  - data_tier_id: 1
-  - data_tier_name: "tier"
-  - creation_date: 123
-  - create_by: "test"
-  api: DataTiers
-  params:
-  - data_tier_name: ["tier"]
 -
   insertApi: InsertFileParents
   insertParams:
