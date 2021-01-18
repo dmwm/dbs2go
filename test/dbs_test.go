@@ -49,6 +49,10 @@ func TestOperatorValue(t *testing.T) {
 
 // TestStatementTemplateValues
 func TestStatementTemplateValues(t *testing.T) {
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+
 	args := make(dbs.Record)
 	args["Owner"] = "sqlite"
 	values := make(dbs.Record)
@@ -71,6 +75,10 @@ func TestStatementTemplateValues(t *testing.T) {
 
 // TestStatementInsertValues
 func TestStatementInsertValues(t *testing.T) {
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+
 	values := make(dbs.Record)
 	values["id"] = 123
 	values["name"] = "name"
@@ -78,10 +86,11 @@ func TestStatementInsertValues(t *testing.T) {
 	if err != nil {
 		t.Error("Fail TestStatementInsertValues", err)
 	}
-	stm = strings.Replace(stm, "\n", "", 0)
+	stm = strings.Replace(stm, "\n", "", -1)
 	fmt.Printf("### stm='%s' vals=%+v, err=%v\n", stm, vals, err)
-	if stm != "INSERT INTO TEST (ID, NAME)\n VALUES (?,?)" {
-		t.Error("wrong statement", stm)
+	expect := "INSERT INTO TEST (ID,NAME) VALUES (?,?)"
+	if stm != expect {
+		t.Errorf("wrong statement\n'%s'\n'%s'", stm, expect)
 	}
 	if vals[0] != 123 || vals[1] != "name" {
 		t.Error("wrong values", vals)

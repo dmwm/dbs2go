@@ -1,1 +1,1 @@
-INSERT INTO {{.Owner}}.TEST (ID, NAME)
+INSERT INTO {{.Owner}}.TEST
