@@ -32,7 +32,10 @@ func (API) OutputModules(params Record, w http.ResponseWriter) (int64, error) {
 	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", params, conds, args)
 
 	// get SQL statement from static area
-	stm := LoadTemplateSQL("outputmodule", tmpl)
+	stm, err := LoadTemplateSQL("outputmodule", tmpl)
+	if err != nil {
+		return 0, err
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
