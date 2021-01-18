@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
 	"golang.org/x/exp/errors"
@@ -14,7 +13,7 @@ import (
 
 var datasetPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}$`)
 var blockPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}#[a-zA-Z0-9\.\-_]+`)
-var primDSPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]*$`)
+var primDSPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]+[*]?$|^[*]$`)
 var procDSPattern = regexp.MustCompile(`[a-zA-Z0-9\.\-_]+`)
 var tierPattern = regexp.MustCompile(`[A-Z\-_]+`)
 var eraPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
@@ -35,9 +34,6 @@ func strType(key string, val interface{}) error {
 	default:
 		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
 	}
-	// for validation we strip off asterisk in passed values
-	v = strings.Replace(v, "*", "", -1)
-	log.Printf("### key %s, value %s, v='%s'", key, val, v)
 	errMsg := fmt.Sprintf("unable to match '%s' value '%+v'", key, val)
 	if key == "dataset" {
 		if matched := datasetPattern.MatchString(v); !matched {
