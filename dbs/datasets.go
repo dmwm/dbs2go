@@ -22,7 +22,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 
 	// parse detail arugment
 	detail, _ := getSingleValue(params, "detail")
-	if strings.ToLower(detail) != "true" {
+	if strings.ToLower(detail) == "true" {
 		tmpl["Detail"] = true
 	}
 

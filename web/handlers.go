@@ -27,7 +27,7 @@ func authMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		if config.Config.Verbose > 0 {
+		if config.Config.Verbose > 1 {
 			log.Printf("Auth layer status: %v headers: %+v\n", status, r.Header)
 		}
 		// Call the next handler
