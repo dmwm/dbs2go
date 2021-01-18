@@ -33,10 +33,11 @@ func strType(key string, val interface{}) error {
 	case string:
 		v = vvv
 	default:
-		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v'", key, val))
+		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
 	}
 	// for validation we strip off asterisk in passed values
 	v = strings.Replace(v, "*", "", -1)
+	log.Printf("### key %s, value %s, v='%s'", key, val, v)
 	errMsg := fmt.Sprintf("unable to match '%s' value '%+v'", key, val)
 	if key == "dataset" {
 		if matched := datasetPattern.MatchString(v); !matched {
@@ -54,21 +55,33 @@ func strType(key string, val interface{}) error {
 		}
 	}
 	if key == "primary_ds_name" {
+		if v == "" && val == "*" { // when someone passed wildcard
+			return nil
+		}
 		if matched := primDSPattern.MatchString(v); !matched {
 			return errors.New(errMsg)
 		}
 	}
 	if key == "processed_ds_name" {
+		if v == "" && val == "*" { // when someone passed wildcard
+			return nil
+		}
 		if matched := procDSPattern.MatchString(v); !matched {
 			return errors.New(errMsg)
 		}
 	}
 	if key == "app_name" {
+		if v == "" && val == "*" { // when someone passed wildcard
+			return nil
+		}
 		if matched := appPattern.MatchString(v); !matched {
 			return errors.New(errMsg)
 		}
 	}
 	if key == "release_version" {
+		if v == "" && val == "*" { // when someone passed wildcard
+			return nil
+		}
 		if matched := releasePattern.MatchString(v); !matched {
 			return errors.New(errMsg)
 		}
