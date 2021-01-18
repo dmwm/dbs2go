@@ -4,6 +4,7 @@ SELECT DISTINCT
 {{else}}
 SELECT
 {{end}}
+{{if .Detail}}
         D.DATASET_ID, D.DATASET, D.PREP_ID, 
         D.XTCROSSSECTION, 
         D.CREATION_DATE, D.CREATE_BY, 
@@ -25,6 +26,9 @@ SELECT
         ,RV.RELEASE_VERSION,
         ,PSH.PSET_HASH,
         ,AEX.APP_NAME
+{{end}}
+{{else}}
+        D.DATASET
 {{end}}
        
 	FROM {{.Owner}}.DATASETS D

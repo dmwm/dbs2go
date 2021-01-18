@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // Datasets API
@@ -17,9 +18,13 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl["Lfns"] = false
 	tmpl["Version"] = false
 	tmpl["ParentDataset"] = false
+	tmpl["Detail"] = false
 
 	// parse detail arugment
-	//     detail, _ := getSingleValue(params, "detail")
+	detail, _ := getSingleValue(params, "detail")
+	if strings.ToLower(detail) != "true" {
+		tmpl["Detail"] = true
+	}
 
 	// parse dataset argument
 	datasets := getValues(params, "dataset")
@@ -154,11 +159,11 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	cols := []string{"dataset_id", "dataset", "prep_id", "xtcrosssection", "creation_date", "create_by", "last_modification_date", "last_modified_by", "primary_ds_name", "primary_ds_type", "processed_ds_name", "data_tier_name", "dataset_access_type", "acquisition_era_name", "processing_version", "physics_group_name"}
 	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}
-	//     if strings.ToLower(detail) != "true" {
-	//         stm = getSQL("datasets_short")
-	//         cols = []string{"dataset"}
-	//         vals = []interface{}{new(sql.NullString)}
-	//     }
+	if strings.ToLower(detail) != "true" {
+		//         stm = getSQL("datasets_short")
+		cols = []string{"dataset"}
+		vals = []interface{}{new(sql.NullString)}
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
