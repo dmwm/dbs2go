@@ -35,7 +35,7 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 		conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
 		conds, args = AddParam("release_version", "R.RELEASE_VERSION", params, conds, args)
 		conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
-		conds, args = AddParam("output_module_label", "P.OUTPUT_MODULE_LABEL", params, conds, args)
+		conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", params, conds, args)
 		conds, args = AddParam("global_tag", "P.GLOBAL_TAG", params, conds, args)
 	} else {
 		tmpl["Main"] = false

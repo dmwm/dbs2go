@@ -433,12 +433,12 @@ func ParseRuns(runs []string) ([]string, error) {
 
 // TokenGenerator creates a SQL token generator statement
 // https://betteratoracle.com/posts/20-how-do-i-bind-a-variable-in-list
-func TokenGenerator(runs []string, limit int) (string, []string) {
+func TokenGenerator(runs []string, limit int, name string) (string, []string) {
 	stm := "WITH TOKEN_GENERATOR AS (\n"
 	var tstm []string
 	var vals []string
 	for idx, chunk := range GetChunks(runs, limit) {
-		t := fmt.Sprintf("token_%d", idx)
+		t := fmt.Sprintf("%s_%d", name, idx)
 		s := fmt.Sprintf("\tSELECT REGEXP_SUBSTR(:%s, '[^,]+', 1, LEVEL) token ", t)
 		s += "\n\tFROM DUAL\n"
 		s += fmt.Sprintf("\tCONNECT BY LEVEL <= length(:%s) - length(REPLACE(:%s, ',', '')) + 1", t, t)
@@ -495,7 +495,7 @@ func runsClause(table string, runs []string) (string, string, []string) {
 	}
 	// take run list and generate token statement
 	stm := fmt.Sprintf("%s.RUN_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)", table)
-	token, binds := TokenGenerator(runList, 4000) // 4000 is hard ORACLE limit
+	token, binds := TokenGenerator(runList, 4000, "run_num_token") // 4000 is hard ORACLE limit
 	conds = append(conds, stm)
 	for _, v := range binds {
 		args = append(args, v)

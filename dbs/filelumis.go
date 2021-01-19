@@ -24,7 +24,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
-		token, binds := TokenGenerator(lfns, 100) // 100 is max for # of allowed entries
+		token, binds := TokenGenerator(lfns, 100, "lfns_token") // 100 is max for # of allowed entries
 		tmpl["LfnGenerator"] = token
 		tmpl["Lfn"] = true
 		tmpl["LfnList"] = true

@@ -11,7 +11,23 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
+	tmpl["TokenGenerator"] = ""
 
+	// use run_num first since it may produce TokenGenerator
+	// which should contain bind variables
+	runs, err := ParseRuns(getValues(params, "run_num"))
+	if err != nil {
+		return 0, err
+	}
+	if len(runs) > 0 {
+		tmpl["Runs"] = true
+		token, whereRuns, bindsRuns := runsClause("FLM", runs)
+		tmpl["TokenGenerator"] = token
+		conds = append(conds, whereRuns)
+		for _, v := range bindsRuns {
+			args = append(args, v)
+		}
+	}
 	// parse arguments
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) == 1 {
@@ -65,21 +81,6 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 			cond := fmt.Sprintf(" B.CREATION_DATE < %s", placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, maxval)
-		}
-	}
-	tmpl["TokenGenerator"] = ""
-
-	runs, err := ParseRuns(getValues(params, "run_num"))
-	if err != nil {
-		return 0, err
-	}
-	if len(runs) > 0 {
-		tmpl["Runs"] = true
-		token, whereRuns, bindsRuns := runsClause("FLM", runs)
-		tmpl["TokenGenerator"] = token
-		conds = append(conds, whereRuns)
-		for _, v := range bindsRuns {
-			args = append(args, v)
 		}
 	}
 	stm, err := LoadTemplateSQL("blocks", tmpl)

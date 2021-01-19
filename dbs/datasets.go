@@ -3,12 +3,14 @@ package dbs
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
 
 // Datasets API
 func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
+	log.Println("datasets params %+v", params)
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -19,6 +21,22 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl["Version"] = false
 	tmpl["ParentDataset"] = false
 	tmpl["Detail"] = false
+
+	// run_num shouhld come first since it may produce TokenGenerator
+	// whose bind parameters should appear first
+	runs, err := ParseRuns(getValues(params, "run_num"))
+	if err != nil {
+		return 0, err
+	}
+	if len(runs) > 0 {
+		tmpl["Runs"] = true
+		token, whereRuns, bindsRuns := runsClause("FLM", runs)
+		tmpl["TokenGenerator"] = token
+		conds = append(conds, whereRuns)
+		for _, v := range bindsRuns {
+			args = append(args, v)
+		}
+	}
 
 	// parse detail arugment
 	detail, _ := getSingleValue(params, "detail")
@@ -33,7 +51,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
 		cond := fmt.Sprintf("D.DATASET in (SELECT TOKEN FROM TOKEN_GENERATOR)")
-		token, binds := TokenGenerator(datasets, 100) // 100 is max for # of allowed datasets
+		token, binds := TokenGenerator(datasets, 100, "dataset_token") // 100 is max for # of allowed datasets
 		conds = append(conds, cond+token)
 		for _, v := range binds {
 			args = append(args, v)
@@ -71,7 +89,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	if _, e := getSingleValue(params, "pset_hash"); e == nil {
 		tmpl["Version"] = true
-		conds, args = AddParam("pset_hash", "PSH_PSET_HASH", params, conds, args)
+		conds, args = AddParam("pset_hash", "PSH.PSET_HASH", params, conds, args)
 	}
 	if _, e := getSingleValue(params, "app_name"); e == nil {
 		tmpl["Version"] = true
@@ -139,21 +157,6 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	conds, args = AddParam("last_modified_by", "D.LAST_MODIFIED_BY", params, conds, args)
 	conds, args = AddParam("prep_id", "D.PREP_ID", params, conds, args)
 	conds, args = AddParam("dataset_id", "D.DATASET_ID", params, conds, args)
-
-	// run_num
-	runs, err := ParseRuns(getValues(params, "run_num"))
-	if err != nil {
-		return 0, err
-	}
-	if len(runs) > 0 {
-		tmpl["Runs"] = true
-		token, whereRuns, bindsRuns := runsClause("FLM", runs)
-		tmpl["TokenGenerator"] = token
-		conds = append(conds, whereRuns)
-		for _, v := range bindsRuns {
-			args = append(args, v)
-		}
-	}
 
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("datasets", tmpl)

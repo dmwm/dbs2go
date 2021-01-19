@@ -16,7 +16,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	genSQL := ""
 	if len(block) > 0 {
 		var binds []string
-		genSQL, binds = TokenGenerator(block, 100) // 100 is max for # of allowed datasets
+		genSQL, binds = TokenGenerator(block, 100, "block_token") // 100 is max for # of allowed datasets
 		for _, v := range binds {
 			args = append(args, v)
 		}

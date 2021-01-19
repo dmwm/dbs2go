@@ -25,13 +25,22 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if len(runs) > 0 {
 		tmpl["RunNumber"] = true
 	}
+	if len(runs) > 0 {
+		token, whereRuns, bindsRuns := runsClause("FL", runs)
+		stm = fmt.Sprintf("%s %s", token, stm)
+		conds = append(conds, whereRuns)
+		for _, v := range bindsRuns {
+			args = append(args, v)
+		}
+	}
+
 	if len(lumis) > 0 {
 		tmpl["LumiList"] = true
 		stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
 		if err != nil {
 			return 0, err
 		}
-		token, binds := TokenGenerator(lumis, 4000)
+		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		for _, v := range binds {
 			args = append(args, v)
@@ -56,7 +65,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
-		token, binds := TokenGenerator(lfns, 100)
+		token, binds := TokenGenerator(lfns, 100, "lfns_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		for _, v := range binds {
 			args = append(args, v)
@@ -71,15 +80,6 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	conds, args = AddParam("app_name", "AEX.APP_NAME", params, conds, args)
 	conds, args = AddParam("output_module_label", "OMC.OUTPUT_MODULE_LABEL", params, conds, args)
 	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
-
-	if len(runs) > 0 {
-		token, whereRuns, bindsRuns := runsClause("FL", runs)
-		stm = fmt.Sprintf("%s %s", token, stm)
-		conds = append(conds, whereRuns)
-		for _, v := range bindsRuns {
-			args = append(args, v)
-		}
-	}
 
 	stm = WhereClause(stm, conds)
 
