@@ -152,23 +152,22 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		return http.StatusInternalServerError, 0, err
 	}
 	var api dbs.API
-	if a == "datatiers" { // This is so far for testing only
-		err = api.InsertDataTiers(params)
-	} else if a == "fileparentsbylumis" {
-		err = api.InsertFileParentByLumis(params)
+	var size int64
+	if a == "fileparentsbylumis" {
+		size, err = api.FileParentByLumis(params, w)
 	} else if a == "datasetlist" {
-		err = api.InsertDatasetList(params)
+		size, err = api.DatasetList(params, w)
 	} else if a == "fileArray" {
-		err = api.InsertFileArray(params)
+		size, err = api.FileArray(params, w)
 	} else if a == "filelumis" {
-		err = api.InsertFileLumis(params)
+		size, err = api.FileLumis(params, w)
 	} else if a == "blockparents" {
-		err = api.InsertBlockParents(params)
+		size, err = api.BlockParents(params, w)
 	}
 	if err != nil {
 		return http.StatusInternalServerError, 0, err
 	}
-	return status, 0, nil
+	return status, size, nil
 }
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
