@@ -95,7 +95,7 @@ func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status 
 	addr := r.RemoteAddr
 	refMsg := fmt.Sprintf("[ref: \"%s\" \"%v\"]", referer, r.Header.Get("User-Agent"))
 	respMsg := fmt.Sprintf("[req: %v]", time.Since(start))
-	log.Printf("%s %s %s %s %d %s %s %s\n", addr, r.Method, r.RequestURI, r.Proto, status, dataMsg, refMsg, respMsg)
+	log.Printf("%s %s %+v %s %d %s %s %s\n", addr, r.Method, r.RequestURI, r.Proto, status, dataMsg, refMsg, respMsg)
 	rec := LogRecord{
 		Method:         r.Method,
 		URI:            r.RequestURI,
