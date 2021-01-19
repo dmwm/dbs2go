@@ -231,6 +231,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.BlockParents(params, w)
 	} else if a == "datasetaccesstypes" {
 		size, err = api.DatasetAccessTypes(params, w)
+	} else if a == "datasetparents" {
+		size, err = api.DatasetParents(params, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}

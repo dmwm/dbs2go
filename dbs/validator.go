@@ -20,6 +20,7 @@ var eraPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
 var releasePattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
 var appPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
 var filePattern = regexp.MustCompile(`/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`)
+var lfnPattern = regexp.MustCompile(`/[a-zA-Z0-9_-]+.*/([a-zA-Z0-9\-_]+).root$`)
 
 var unixTimePattern = regexp.MustCompile(`^[1-9][0-9]{9}$`)
 var intPattern = regexp.MustCompile(`^\d+$`)
@@ -47,7 +48,9 @@ func strType(key string, val interface{}) error {
 	}
 	if key == "logical_file_name" {
 		if matched := filePattern.MatchString(v); !matched {
-			return errors.New(errMsg)
+			if matched := lfnPattern.MatchString(v); !matched {
+				return errors.New(errMsg)
+			}
 		}
 	}
 	if key == "primary_ds_name" {
