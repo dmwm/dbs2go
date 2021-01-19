@@ -27,7 +27,7 @@ func authMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		if config.Config.Verbose > 1 {
+		if config.Config.Verbose > 2 {
 			log.Printf("Auth layer status: %v headers: %+v\n", status, r.Header)
 		}
 		// Call the next handler
@@ -231,8 +231,6 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.BlockParents(params, w)
 	} else if a == "datasetaccesstypes" {
 		size, err = api.DatasetAccessTypes(params, w)
-	} else if a == "datasetparents" {
-		size, err = api.DatasetParents(params, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
@@ -374,7 +372,7 @@ func PrimaryDatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64,
 // DatasetParentsHandler provides access to DatasetParents DBS API.
 // Takes the following arguments: dataset
 func DatasetParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "dataasetparents")
+	return DBSGetHandler(w, r, "datasetparents")
 }
 
 // DatasetChildrenHandler provides access to DatasetChildren DBS API.
@@ -415,6 +413,24 @@ func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 		return DBSPostHandler(w, r, "filelumis")
 	}
 	return DBSPostHandler(w, r, "filelumis")
+}
+
+// FileArrayHandler provides access to FileArray DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "filelumis")
+}
+
+// DatasteListHandler provides access to DatasetList DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func DatasetListHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "datasetlist")
+}
+
+// FileParentsByLumiHandler provides access to FileParentsByLumi DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "fileparentsbylumi")
 }
 
 // BulkBlocksHandler provides access to BulkBlocks DBS API

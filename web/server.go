@@ -105,16 +105,21 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/blockTrio"), LoggingHandler(DummyHandler)).Methods("GET")
 	router.HandleFunc(basePath("/blockdump"), LoggingHandler(DummyHandler)).Methods("GET")
 	router.HandleFunc(basePath("/blockchildren"), LoggingHandler(BlockChildrenHandler)).Methods("GET")
-	router.HandleFunc(basePath("/blockparents"), LoggingHandler(BlockParentsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/blockparents"), LoggingHandler(BlockParentsHandler)).Methods("GET", "POST")
 
 	router.HandleFunc(basePath("/filechildren"), LoggingHandler(FileChildrenHandler)).Methods("GET")
 	router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET")
 	router.HandleFunc(basePath("/filesummaries"), LoggingHandler(FileSummariesHandler)).Methods("GET")
-	router.HandleFunc(basePath("/filelumis"), LoggingHandler(FileLumisHandler)).Methods("GET")
+	router.HandleFunc(basePath("/filelumis"), LoggingHandler(FileLumisHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/datasetchildren"), LoggingHandler(DatasetChildrenHandler)).Methods("GET")
 	router.HandleFunc(basePath("/datasetparents"), LoggingHandler(DatasetParentsHandler)).Methods("GET")
 	router.HandleFunc(basePath("/parentDSTrio"), LoggingHandler(ParentDSTrioHandler)).Methods("GET")
 	router.HandleFunc(basePath("/acquisitioneras_ci"), LoggingHandler(AcquisitionErasCiHandler)).Methods("GET")
+
+	// POST routes
+	router.HandleFunc(basePath("/fileArray"), LoggingHandler(FileArrayHandler)).Methods("POST")
+	router.HandleFunc(basePath("/datasetlist"), LoggingHandler(DatasetListHandler)).Methods("POST")
+	router.HandleFunc(basePath("/fileparentsbylumi"), LoggingHandler(FileParentsByLumiHandler)).Methods("POST")
 
 	// aux APIs
 	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
