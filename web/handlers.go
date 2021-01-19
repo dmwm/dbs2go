@@ -417,8 +417,8 @@ func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 
 // FileArrayHandler provides access to FileArray DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "filelumis")
+func FileArrayHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "fileArray")
 }
 
 // DatasteListHandler provides access to DatasetList DBS API
