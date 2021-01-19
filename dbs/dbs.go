@@ -443,6 +443,9 @@ func TokenGenerator(runs []string, limit int, name string) (string, []string) {
 		s += "\n\tFROM DUAL\n"
 		s += fmt.Sprintf("\tCONNECT BY LEVEL <= length(:%s) - length(REPLACE(:%s, ',', '')) + 1", t, t)
 		tstm = append(tstm, s)
+		// since we have three bind values in token statemnt, we'll need to add them all
+		vals = append(vals, chunk)
+		vals = append(vals, chunk)
 		vals = append(vals, chunk)
 	}
 	stm += strings.Join(tstm, " UNION ALL ")

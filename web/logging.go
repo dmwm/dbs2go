@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -95,7 +96,12 @@ func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status 
 	addr := r.RemoteAddr
 	refMsg := fmt.Sprintf("[ref: \"%s\" \"%v\"]", referer, r.Header.Get("User-Agent"))
 	respMsg := fmt.Sprintf("[req: %v]", time.Since(start))
-	log.Printf("%s %s %+v %s %d %s %s %s\n", addr, r.Method, r.RequestURI, r.Proto, status, dataMsg, refMsg, respMsg)
+	uri, err := url.QueryUnescape(r.RequestURI)
+	if err != nil {
+		log.Println("unable to unescape request uri", err)
+		uri = r.RequestURI
+	}
+	log.Printf("%s %s %s %s %d %s %s %s\n", addr, r.Method, uri, r.Proto, status, dataMsg, refMsg, respMsg)
 	rec := LogRecord{
 		Method:         r.Method,
 		URI:            r.RequestURI,

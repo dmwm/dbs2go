@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -38,6 +37,10 @@ func authMiddleware(next http.Handler) http.Handler {
 // helper to validate incoming requests' parameters
 func validateMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		// perform validation of input parameters
 		err := dbs.Validate(r)
 		if err != nil {
@@ -72,7 +75,8 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		start := time.Now()
 		status, dataSize, err := h(w, r)
 		if err != nil {
-			log.Println("ERROR", err)
+			log.Println("ERROR", err, h, r)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		logRequest(w, r, start, status, tstamp, dataSize)
@@ -140,15 +144,33 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+	headerContentType := r.Header.Get("Content-Type")
+	if headerContentType != "application/json" {
+		log.Println("Content-Type is not application/json")
+		return http.StatusUnsupportedMediaType, 0, errors.New("unsupported Content-Type")
+	}
 	status := http.StatusOK
-	params := make(dbs.Record)
-	defer r.Body.Close()
-	data, err := ioutil.ReadAll(r.Body)
+	args := make(dbs.Record)
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&args)
 	if err != nil {
+		log.Println("DBSPostHandler json Unmarshal error", err)
 		return http.StatusInternalServerError, 0, err
 	}
-	err = json.Unmarshal(data, &params)
+	params := make(dbs.Record)
+	for k, v := range args {
+		switch val := v.(type) {
+		case string:
+			params[k] = []string{val}
+		case []string:
+			params[k] = val
+		case int:
+			params[k] = []string{fmt.Sprintf("%d", val)}
+		}
+	}
+	err = dbs.ValidatePostPayload(params)
 	if err != nil {
+		log.Println("DBSPostHandler invalid POST payload, error", err)
 		return http.StatusInternalServerError, 0, err
 	}
 	var api dbs.API
@@ -419,6 +441,27 @@ func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 func FileArrayHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSPostHandler(w, r, "fileArray")
 }
+
+// func FileArrayHandler(w http.ResponseWriter, r *http.Request) {
+//     log.Println("request", r)
+//     defer r.Body.Close()
+//     decoder := json.NewDecoder(r.Body)
+//     params := make(dbs.Record)
+//     err := decoder.Decode(&params)
+//     if err != nil {
+//         log.Println("FileArrayHandler error", err)
+//         w.WriteHeader(http.StatusInternalServerError)
+//         return
+//     }
+//     var api dbs.API
+//     size, err := api.FileArray(params, w)
+//     if err != nil {
+//         log.Println("FileArrayHandler error", err)
+//         w.WriteHeader(http.StatusInternalServerError)
+//         return
+//     }
+//     log.Println("size", size)
+// }
 
 // DatasteListHandler provides access to DatasetList DBS API
 // POST API takes no argument, the payload should be supplied as JSON

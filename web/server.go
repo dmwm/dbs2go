@@ -118,6 +118,7 @@ func handlers() *mux.Router {
 
 	// POST routes
 	router.HandleFunc(basePath("/fileArray"), LoggingHandler(FileArrayHandler)).Methods("POST")
+	//     router.HandleFunc(basePath("/fileArray"), FileArrayHandler).Methods("POST")
 	router.HandleFunc(basePath("/datasetlist"), LoggingHandler(DatasetListHandler)).Methods("POST")
 	router.HandleFunc(basePath("/fileparentsbylumi"), LoggingHandler(FileParentsByLumiHandler)).Methods("POST")
 
