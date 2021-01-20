@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -10,6 +11,11 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 	var stm string
+
+	if len(params) == 0 {
+		log.Println("WARNING: Files API with empty parameter map")
+		return 0, nil
+	}
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER

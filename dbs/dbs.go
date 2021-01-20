@@ -168,7 +168,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 		return 0, nil
 	}
 	if utils.VERBOSE > 1 {
-		log.Println("execute\n### SQL statment ###\n", stm, "\n### SQL arguments ###\n", args)
+		log.Println("execute\n### SQL statement ###\n", stm, "\n### SQL arguments ###\n", args)
 	}
 	var size int64
 	var enc *json.Encoder

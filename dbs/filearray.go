@@ -20,6 +20,9 @@ func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 	if lumis, ok := params["lumi_list"]; ok {
 		params["lumi_list"] = flatLumis(lumis)
 	}
+	if len(params) == 0 {
+		return 0, nil
+	}
 	return api.Files(params, w)
 }
 
