@@ -76,7 +76,6 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		status, dataSize, err := h(w, r)
 		if err != nil {
 			log.Println("ERROR", err, h, r)
-			w.WriteHeader(http.StatusInternalServerError)
 		}
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		logRequest(w, r, start, status, tstamp, dataSize)
@@ -135,6 +134,17 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	rec["status"] = http.StatusOK
 	records = append(records, rec)
 	data, err := json.Marshal(records)
+	if err != nil {
+		log.Fatalf("Fail to marshal records, %v", err)
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+// HelpHandler provides basic functionality of status response
+func HelpHandler(w http.ResponseWriter, r *http.Request) {
+	apis := []string{"blocksummaries", "help", "runsummaries", "parentDSTrio", "datatiers", "blockorigin", "blockTrio", "blockdump", "acquisitioneras", "filechildren", "fileparents", "serverinfo", "outputconfigs", "datasetchildren", "releaseversions", "files", "blocks", "physicsgroups", "filesummaries", "filelumis", "primarydstypes", "datasetparents", "datatypes", "processingeras", "runs", "datasets", "blockchildren", "primarydatasets", "acquisitioneras_ci", "blockparents", "datasetaccesstypes"}
+	data, err := json.Marshal(apis)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)
 	}

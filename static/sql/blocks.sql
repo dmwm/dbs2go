@@ -15,6 +15,10 @@ SELECT
 FROM {{.Owner}}.BLOCKS B JOIN {{.Owner}}.DATASETS DS ON DS.DATASET_ID = B.DATASET_ID 
 {{if .Lfns}}
 JOIN {{.Owner}}.FILES FL ON FL.BLOCK_ID = B.BLOCK_ID
+{{else}}
+{{if .Runs}}
+JOIN {{.Owner}}.FILES FL ON FL.BLOCK_ID = B.BLOCK_ID
+{{end}}
 {{end}}
 {{if .Runs}}
 JOIN {{.Owner}}.FILE_LUMIS FLM on FLM.FILE_ID = FL.FILE_ID

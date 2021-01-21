@@ -30,7 +30,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	if len(runs) > 0 {
 		tmpl["Runs"] = true
-		token, whereRuns, bindsRuns := runsClause("FLM", runs)
+		token, whereRuns, bindsRuns := runsClause("FLLU", runs)
 		tmpl["TokenGenerator"] = token
 		conds = append(conds, whereRuns)
 		for _, v := range bindsRuns {
