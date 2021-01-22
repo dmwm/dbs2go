@@ -10,7 +10,6 @@ import (
 func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
-	stm := getSQL("files")
 
 	if len(params) == 0 {
 		log.Println("WARNING: Files API with empty parameter map")
@@ -31,25 +30,10 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	if len(runs) > 0 {
 		tmpl["RunNumber"] = true
-		token, whereRuns, bindsRuns := runsClause("FL", runs)
-		stm = fmt.Sprintf("%s %s", token, stm)
-		conds = append(conds, whereRuns)
-		for _, v := range bindsRuns {
-			args = append(args, v)
-		}
 	}
 
 	if len(lumis) > 0 {
 		tmpl["LumiList"] = true
-		//         stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
-		//         if err != nil {
-		//             return 0, err
-		//         }
-		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
-		stm = fmt.Sprintf("%s %s", token, stm)
-		for _, v := range binds {
-			args = append(args, v)
-		}
 	}
 
 	validFileOnly := getValues(params, "validFileOnly")
@@ -66,16 +50,6 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		}
 	}
 
-	lfns := getValues(params, "logical_file_name")
-	if len(lfns) > 1 {
-		token, binds := TokenGenerator(lfns, 100, "lfns_token")
-		stm = fmt.Sprintf("%s %s", token, stm)
-		for _, v := range binds {
-			args = append(args, v)
-		}
-	} else if len(lfns) == 1 {
-		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
-	}
 	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
 	conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
 	if _, e := getSingleValue(params, "release_version"); e == nil {
@@ -95,6 +69,46 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		tmpl["Addition"] = true
 	}
 	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
+
+	// load our SQL statement
+	stm, err := LoadTemplateSQL("files", tmpl)
+	if err != nil {
+		return 0, err
+	}
+
+	// add lfns conditions
+	lfns := getValues(params, "logical_file_name")
+	if len(lfns) > 1 {
+		token, binds := TokenGenerator(lfns, 100, "lfns_token")
+		stm = fmt.Sprintf("%s %s", token, stm)
+		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+		conds = append(conds, cond)
+		for _, v := range binds {
+			args = append(args, v)
+		}
+	} else if len(lfns) == 1 {
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
+	}
+	// add run conditions
+	if len(runs) > 0 {
+		token, whereRuns, bindsRuns := runsClause("FL", runs)
+		stm = fmt.Sprintf("%s %s", token, stm)
+		conds = append(conds, whereRuns)
+		for _, v := range bindsRuns {
+			args = append(args, v)
+		}
+	}
+
+	// add lumis conditions
+	if len(lumis) > 0 {
+		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
+		stm = fmt.Sprintf("%s %s", token, stm)
+		cond := " FL.LUMI_SECTION_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+		conds = append(conds, cond)
+		for _, v := range binds {
+			args = append(args, v)
+		}
+	}
 
 	stm = WhereClause(stm, conds)
 
