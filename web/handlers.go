@@ -167,6 +167,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		log.Println("DBSPostHandler json Unmarshal error", err)
 		return http.StatusInternalServerError, 0, err
 	}
+	log.Println("DBSPostHandler args:", args)
 	params := make(dbs.Record)
 	for k, v := range args {
 		switch val := v.(type) {
@@ -174,10 +175,21 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 			params[k] = []string{val}
 		case []string:
 			params[k] = val
+		case []interface{}:
+			var out []string
+			for _, w := range val {
+				out = append(out, fmt.Sprintf("%v", w))
+			}
+			params[k] = out
 		case int:
 			params[k] = []string{fmt.Sprintf("%d", val)}
+		case float64:
+			params[k] = []string{fmt.Sprintf("%v", val)}
+		default:
+			log.Printf("param %s, %+v %T", k, v, v)
 		}
 	}
+	log.Println("DBSPostHandler params:", params)
 	err = dbs.ValidatePostPayload(params)
 	if err != nil {
 		log.Println("DBSPostHandler invalid POST payload, error", err)
@@ -433,7 +445,10 @@ func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, e
 // BlockParentsHandler provides access to BlockParents DBS API.
 // Takes the following arguments: block_name
 func BlockParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "blockparent")
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "blockparents")
+	}
+	return DBSGetHandler(w, r, "blockparents")
 }
 
 // FileLumisHandler provides access to FileLumis DBS API
@@ -443,7 +458,7 @@ func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 	if r.Method == "POST" {
 		return DBSPostHandler(w, r, "filelumis")
 	}
-	return DBSPostHandler(w, r, "filelumis")
+	return DBSGetHandler(w, r, "filelumis")
 }
 
 // FileArrayHandler provides access to FileArray DBS API
