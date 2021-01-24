@@ -18,7 +18,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl["LfnGenerator"] = ""
 	tmpl["TokenGenerator"] = ""
 	tmpl["LfnList"] = false
-	tmpl["ValidFileOnly"] = 0
+	tmpl["ValidFileOnly"] = false
 	tmpl["BlockName"] = false
 	tmpl["Migration"] = false
 
@@ -40,7 +40,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	validFileOnly := getValues(params, "validFileOnly")
 	if len(validFileOnly) == 1 {
-		tmpl["ValidFileOnly"] = 1
+		tmpl["ValidFileOnly"] = true
 	}
 
 	blocks := getValues(params, "block_name")
