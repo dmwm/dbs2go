@@ -10,6 +10,10 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 
+	if len(params) == 0 {
+		return 0, errors.New("logical_file_name, block_id or block_name is required for fileparents api")
+	}
+
 	// parse dataset argument
 	filechildren := getValues(params, "logical_file_name")
 	if len(filechildren) > 1 {

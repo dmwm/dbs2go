@@ -1,5 +1,5 @@
 VERSION=`git rev-parse --short HEAD`
-flags=-ldflags="-s -w -X main.version=${VERSION}"
+flags=-ldflags="-s -w -X web.version=${VERSION}"
 
 all: build
 

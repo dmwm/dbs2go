@@ -76,6 +76,8 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		status, dataSize, err := h(w, r)
 		if err != nil {
 			log.Println("ERROR", err, h, r)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		logRequest(w, r, start, status, tstamp, dataSize)
@@ -141,6 +143,12 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// ServerInfoHandler provides basic functionality of status response
+func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(Info()))
+}
+
 // HelpHandler provides basic functionality of status response
 func HelpHandler(w http.ResponseWriter, r *http.Request) {
 	apis := []string{"blocksummaries", "help", "runsummaries", "parentDSTrio", "datatiers", "blockorigin", "blockTrio", "blockdump", "acquisitioneras", "filechildren", "fileparents", "serverinfo", "outputconfigs", "datasetchildren", "releaseversions", "files", "blocks", "physicsgroups", "filesummaries", "filelumis", "primarydstypes", "datasetparents", "datatypes", "processingeras", "runs", "datasets", "blockchildren", "primarydatasets", "acquisitioneras_ci", "blockparents", "datasetaccesstypes"}
@@ -189,7 +197,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 			log.Printf("param %s, %+v %T", k, v, v)
 		}
 	}
-	log.Println("DBSPostHandler params:", params)
+	log.Printf("DBSPostHandler API: %s params: %s", a, params)
 	err = dbs.ValidatePostPayload(params)
 	if err != nil {
 		log.Println("DBSPostHandler invalid POST payload, error", err)
@@ -197,8 +205,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	}
 	var api dbs.API
 	var size int64
-	if a == "fileparentsbylumis" {
-		size, err = api.FileParentByLumis(params, w)
+	if a == "fileparentsbylumi" {
+		size, err = api.FileParentsByLumi(params, w)
 	} else if a == "datasetlist" {
 		size, err = api.DatasetList(params, w)
 	} else if a == "fileArray" {
@@ -272,6 +280,10 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.BlockChildren(params, w)
 	} else if a == "blockparents" {
 		size, err = api.BlockParents(params, w)
+	} else if a == "blocksummaries" {
+		size, err = api.BlockSummaries(params, w)
+	} else if a == "blockorigin" {
+		size, err = api.BlockOrigin(params, w)
 	} else if a == "datasetaccesstypes" {
 		size, err = api.DatasetAccessTypes(params, w)
 	} else {

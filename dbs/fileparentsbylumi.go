@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// FileParentByLumis DBS API
-func (API) FileParentByLumis(params Record, w http.ResponseWriter) (int64, error) {
+// FileParentsByLumi DBS API
+func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
 
@@ -16,15 +16,15 @@ func (API) FileParentByLumis(params Record, w http.ResponseWriter) (int64, error
 	tmpl["Owner"] = DBOWNER
 	tmpl["ChildLfnList"] = false
 
-	childBlockName := getValues(params, "child_block_name")
-	if len(childBlockName) == 0 {
-		return 0, errors.New("Missing child block_name for listFileParentsByLumi")
+	blockName := getValues(params, "block_name")
+	if len(blockName) == 0 {
+		return 0, errors.New("Missing block_name for listFileParentssByLumi")
 	}
 
-	childLfnList := getValues(params, "child_lfn_list")
-	if len(childLfnList) > 1 {
+	lfns := getValues(params, "logical_file_name")
+	if len(lfns) > 1 {
 		tmpl["ChildLfnList"] = true
-		token, binds := TokenGenerator(childLfnList, 100, "lfn_token") // 100 is max for # of allowed entries
+		token, binds := TokenGenerator(lfns, 100, "lfn_token") // 100 is max for # of allowed entries
 		tmpl["LfnTokenGenerator"] = token
 		for _, v := range binds {
 			args = append(args, v)
@@ -32,7 +32,7 @@ func (API) FileParentByLumis(params Record, w http.ResponseWriter) (int64, error
 	}
 
 	// get SQL statement from static area
-	stm, err := LoadTemplateSQL("fileparentbylumis", tmpl)
+	stm, err := LoadTemplateSQL("fileparentsbylumi", tmpl)
 	if err != nil {
 		return 0, err
 	}
@@ -51,7 +51,7 @@ func (API) FileParentByLumis(params Record, w http.ResponseWriter) (int64, error
 	return executeAll(w, stm, args...)
 }
 
-// InsertFileParentByLumis DBS API
-func (API) InsertFileParentByLumis(values Record) error {
+// InsertFileParentsByLumi DBS API
+func (API) InsertFileParentsByLumi(values Record) error {
 	return InsertValues("insert_file_parent_by_lumis", values)
 }

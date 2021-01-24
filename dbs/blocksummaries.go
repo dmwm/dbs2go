@@ -10,6 +10,10 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	var stm string
 	var args []interface{}
 
+	if len(params) == 0 {
+		return 0, errors.New("block_name or dataset is required for blocksummaries api")
+	}
+
 	// parse arguments
 	_, detailErr := getSingleValue(params, "detail")
 	block := getValues(params, "block_name")

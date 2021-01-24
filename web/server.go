@@ -28,6 +28,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -106,6 +107,7 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/blockdump"), LoggingHandler(DummyHandler)).Methods("GET")
 	router.HandleFunc(basePath("/blockchildren"), LoggingHandler(BlockChildrenHandler)).Methods("GET")
 	router.HandleFunc(basePath("/blockparents"), LoggingHandler(BlockParentsHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/blocksummaries"), LoggingHandler(BlockSummariesHandler)).Methods("GET")
 
 	router.HandleFunc(basePath("/filechildren"), LoggingHandler(FileChildrenHandler)).Methods("GET")
 	router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET")
@@ -123,6 +125,7 @@ func handlers() *mux.Router {
 
 	// aux APIs
 	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/help"), HelpHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 	router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
@@ -253,4 +256,14 @@ func Server(configFile string) {
 	if err != nil {
 		log.Printf("Fail to start server %v", err)
 	}
+}
+
+// version of the code
+var version string
+
+// Info function returns version string of the server
+func Info() string {
+	goVersion := runtime.Version()
+	tstamp := time.Now().Format("2006-02-01")
+	return fmt.Sprintf("dbs2go git=%s go=%s date=%s", version, goVersion, tstamp)
 }
