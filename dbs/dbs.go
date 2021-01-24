@@ -546,6 +546,11 @@ func AddParam(name, sqlName string, params Record, conds []string, args []interf
 	vals := getValues(params, name)
 	if len(vals) == 1 {
 		op, val := OperatorValue(vals[0])
+		if strings.Contains(val, "[") {
+			val = strings.Replace(val, "[", "", -1)
+			val = strings.Replace(val, "]", "", -1)
+			val = strings.Trim(val, " ")
+		}
 		cond := fmt.Sprintf(" %s %s %s", sqlName, op, placeholder(name))
 		conds = append(conds, cond)
 		args = append(args, val)
