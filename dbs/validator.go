@@ -1,10 +1,12 @@
 package dbs
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
 	"golang.org/x/exp/errors"
@@ -46,6 +48,20 @@ func strType(key string, val interface{}) error {
 		}
 	}
 	if key == "logical_file_name" {
+		if strings.Contains(v, "[") {
+			var records []string
+			err := json.Unmarshal([]byte(v), &records)
+			if err != nil {
+				return err
+			}
+			for _, r := range records {
+				if matched := filePattern.MatchString(r); !matched {
+					if matched := lfnPattern.MatchString(r); !matched {
+						return errors.New(errMsg)
+					}
+				}
+			}
+		}
 		if matched := filePattern.MatchString(v); !matched {
 			if matched := lfnPattern.MatchString(v); !matched {
 				return errors.New(errMsg)
