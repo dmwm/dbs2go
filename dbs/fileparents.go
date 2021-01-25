@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -12,7 +11,8 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 
 	if len(params) == 0 {
-		return 0, errors.New("logical_file_name, block_id or block_name is required for fileparents api")
+		msg := "logical_file_name, block_id or block_name is required for fileparents api"
+		return dbsError(w, msg)
 	}
 
 	tmpl := make(Record)
@@ -31,7 +31,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
-		token, binds := TokenGenerator(lfns, 100, "lfn_token")
+		token, binds := TokenGenerator(lfns, 200, "lfn_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
 		conds = append(conds, cond)

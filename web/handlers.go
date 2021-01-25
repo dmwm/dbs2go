@@ -76,8 +76,6 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		status, dataSize, err := h(w, r)
 		if err != nil {
 			log.Println("ERROR", err, h, r)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
 		}
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		logRequest(w, r, start, status, tstamp, dataSize)
@@ -145,8 +143,16 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 // ServerInfoHandler provides basic functionality of status response
 func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	var records []dbs.Record
+	rec := make(dbs.Record)
+	rec["server"] = Info()
+	records = append(records, rec)
+	data, err := json.Marshal(records)
+	if err != nil {
+		log.Fatalf("Fail to marshal records, %v", err)
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(Info()))
+	w.Write(data)
 }
 
 // HelpHandler provides basic functionality of status response

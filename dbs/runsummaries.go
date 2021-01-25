@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // RunSummaries DBS API
@@ -27,6 +28,10 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 	dataset := getValues(params, "dataset")
 	if len(dataset) == 1 {
+		if strings.Contains(dataset[0], "*") {
+			msg := "wild-card dataset value is not allowed"
+			return dbsError(w, msg)
+		}
 		tmpl["Dataset"] = true
 		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
 	}

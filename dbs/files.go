@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -12,8 +11,8 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 
 	if len(params) == 0 {
-		log.Println("WARNING: Files API with empty parameter map")
-		return 0, nil
+		msg := "Files API with empty parameter map"
+		return dbsError(w, msg)
 	}
 
 	tmpl := make(Record)

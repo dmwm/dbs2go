@@ -52,7 +52,8 @@ func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 		params["lumi_list"] = lumiList
 	}
 	if len(params) == 0 {
-		return 0, nil
+		msg := "filearray api requires input parameers"
+		return dbsError(w, msg)
 	}
 	return api.Files(params, w)
 }
