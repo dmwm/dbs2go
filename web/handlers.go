@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"sync/atomic"
 	"time"
 
@@ -44,7 +45,8 @@ func validateMiddleware(next http.Handler) http.Handler {
 		// perform validation of input parameters
 		err := dbs.Validate(r)
 		if err != nil {
-			log.Printf("ERROR: %v\n", err)
+			uri, _ := url.QueryUnescape(r.RequestURI)
+			log.Printf("HTTP %s %s validation error %v\n", r.Method, uri, err)
 			w.WriteHeader(http.StatusBadRequest)
 			rec := make(dbs.Record)
 			rec["error"] = fmt.Sprintf("Validation error %v", err)
@@ -73,11 +75,11 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 			atomic.AddUint64(&TotalGetRequests, 1)
 		}
 		start := time.Now()
+		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		status, dataSize, err := h(w, r)
 		if err != nil {
 			log.Println("ERROR", err, h, r)
 		}
-		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		logRequest(w, r, start, status, tstamp, dataSize)
 	}
 }

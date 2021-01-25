@@ -49,6 +49,9 @@ func strType(key string, val interface{}) error {
 	}
 	if key == "logical_file_name" {
 		if strings.Contains(v, "[") {
+			if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
+				v = strings.Replace(v, "'", "\"", -1)
+			}
 			var records []string
 			err := json.Unmarshal([]byte(v), &records)
 			if err != nil {
@@ -61,6 +64,7 @@ func strType(key string, val interface{}) error {
 					}
 				}
 			}
+			return nil
 		}
 		if matched := filePattern.MatchString(v); !matched {
 			if matched := lfnPattern.MatchString(v); !matched {
