@@ -3,6 +3,7 @@ package dbs
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // Files DBS API
@@ -16,13 +17,18 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	// When sumOverLumi=1, no lfn list or run_num list allowed
 	if _, ok := params["sumOverLumi"]; ok {
-		if _, ok := params["run_num"]; ok {
-			msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
-			return dbsError(w, msg)
-		}
-		if _, ok := params["logical_file_name"]; ok {
-			msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
-			return dbsError(w, msg)
+		if vals, ok := params["run_num"]; ok {
+			runs := fmt.Sprintf("%v", vals)
+			if strings.Contains(runs, "[") {
+				msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
+				return dbsError(w, msg)
+			}
+		} else if vals, ok := params["logical_file_name"]; ok {
+			lfns := fmt.Sprintf("%v", vals)
+			if strings.Contains(lfns, "[") {
+				msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
+				return dbsError(w, msg)
+			}
 		}
 	}
 
