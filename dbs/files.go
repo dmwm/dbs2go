@@ -14,6 +14,17 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Files API with empty parameter map"
 		return dbsError(w, msg)
 	}
+	// When sumOverLumi=1, no lfn list or run_num list allowed
+	if _, ok := params["sumOverLumi"]; ok {
+		if _, ok := params["run_num"]; ok {
+			msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
+			return dbsError(w, msg)
+		}
+		if _, ok := params["logical_file_name"]; ok {
+			msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
+			return dbsError(w, msg)
+		}
+	}
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
@@ -33,6 +44,11 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(lumis) > 0 {
 		tmpl["LumiList"] = true
+	}
+	// files API does not supprt run_num=1 when no lumi
+	if len(runs) == 1 && len(lumis) == 0 && runs[0] == "1" {
+		msg := "files API does not supprt run_num=1 when no lumi"
+		return dbsError(w, msg)
 	}
 
 	validFileOnly := getValues(params, "validFileOnly")
