@@ -19,13 +19,13 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if _, ok := params["sumOverLumi"]; ok {
 		if vals, ok := params["run_num"]; ok {
 			runs := fmt.Sprintf("%v", vals)
-			if strings.Contains(runs, "[") {
-				msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
+			if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
+				msg := "When sumOverLumi=1, no run_num list allowed"
 				return dbsError(w, msg)
 			}
 		} else if vals, ok := params["logical_file_name"]; ok {
 			lfns := fmt.Sprintf("%v", vals)
-			if strings.Contains(lfns, "[") {
+			if strings.Contains(lfns, ",") {
 				msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
 				return dbsError(w, msg)
 			}
