@@ -78,7 +78,12 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		status, dataSize, err := h(w, r)
 		if err != nil {
-			log.Println("ERROR", err, h, r)
+			uri, e := url.QueryUnescape(r.RequestURI)
+			if e != nil {
+				log.Println("ERROR", err, r)
+			} else {
+				log.Println("ERROR", err, uri)
+			}
 		}
 		logRequest(w, r, start, status, tstamp, dataSize)
 	}
