@@ -10,13 +10,16 @@ import (
 func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var conds []string
+	var lumigen, rungen, lfngen bool
+	var sumOverLumi string
 
 	if len(params) == 0 {
 		msg := "Files API with empty parameter map"
 		return dbsError(w, msg)
 	}
 	// When sumOverLumi=1, no lfn list or run_num list allowed
-	if _, ok := params["sumOverLumi"]; ok {
+	if v, ok := params["sumOverLumi"]; ok {
+		sumOverLumi = v.(string)
 		if vals, ok := params["run_num"]; ok {
 			runs := fmt.Sprintf("%v", vals)
 			if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
@@ -100,6 +103,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// add lfns conditions
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
+		lfngen = true
 		token, binds := TokenGenerator(lfns, 100, "lfns_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
@@ -112,6 +116,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	// add run conditions
 	if len(runs) > 1 {
+		rungen = true
 		token, whereRuns, bindsRuns := runsClause("FL", runs)
 		stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, whereRuns)
@@ -124,6 +129,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	// add lumis conditions
 	if len(lumis) > 1 {
+		lumigen = true
 		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		cond := " FL.LUMI_SECTION_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)"
@@ -131,8 +137,24 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		for _, v := range binds {
 			args = append(args, v)
 		}
+		tmpl["LumiGenerator"] = token
 	} else if len(lumis) == 1 {
 		conds, args = AddParam("lumi_list", "FL.LUMI_SECTION_NUM", params, conds, args)
+	}
+
+	if (rungen && lfngen) || (lumigen && lfngen) || (rungen && lumigen) {
+		msg := "cannot supply more than one list (lfn, run_num or lumi) at one query"
+		return dbsError(w, msg)
+	}
+
+	// check sumOverLumi
+	if sumOverLumi == "1" {
+		stm = strings.Replace(stm, "F.EVENT_COUNT,", "", -1)
+		tmpl["Statement"] = stm
+		stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	stm = WhereClause(stm, conds)
