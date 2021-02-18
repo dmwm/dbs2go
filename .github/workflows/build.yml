@@ -66,3 +66,59 @@ jobs:
         asset_path: ./dbs2go
         asset_name: dbs2go
         asset_content_type: application/octet-stream
+
+    - name: Get the Ref
+      id: get-ref
+      uses: ankitvgupta/ref-to-tag-action@master
+      with:
+        ref: ${{ github.ref }}
+        head_ref: ${{ github.head_ref }}
+
+    - name: Build image
+      run: |
+        curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile
+        curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc
+        curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json
+        curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh
+        curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh
+        sed -i -e "s,ENV TAG=.*,ENV TAG=${{steps.get-ref.outputs.tag}},g" Dockerfile
+        docker build . --tag docker.pkg.github.com/vkuznet/dbs2go/dbs2go
+
+    - name: Login to docker github registry
+      uses: docker/login-action@v1.6.0
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish image
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: vkuznet/dbs2go/dbs2go
+        tag_with_ref: true
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        load: true
+        tags: cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
+    - run: docker push cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
+
+    - name: Push new image to k8s
+      run: |
+        curl -ksLO https://raw.githubusercontent.com/vkuznet/imagebot/main/imagebot.sh
+        sed -i -e "s,COMMIT,${{github.sha}},g" -e "s,REPOSITORY,${{github.repository}},g" -e "s,NAMESPACE,das,g" -e "s,TAG,${{steps.get-ref.outputs.tag}},g" -e "s,IMAGE,cmssw/dbs2go,g" -e "s,SERVICE,dbs2go,g" -e "s,HOST,${{secrets.IMAGEBOT_URL}},g" imagebot.sh
+        chmod +x imagebot.sh
+        cat imagebot.sh
+        sh ./imagebot.sh
