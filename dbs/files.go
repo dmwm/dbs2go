@@ -18,8 +18,12 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		return dbsError(w, msg)
 	}
 	// When sumOverLumi=1, no lfn list or run_num list allowed
-	if v, ok := params["sumOverLumi"]; ok {
-		sumOverLumi = v.(string)
+	if _, ok := params["sumOverLumi"]; ok {
+		arr := getValues(params, "sumOverLumi")
+		if len(arr) != 1 {
+			return dbsError(w, "sumOverLumi has more than one value")
+		}
+		sumOverLumi = arr[0]
 		if vals, ok := params["run_num"]; ok {
 			runs := fmt.Sprintf("%v", vals)
 			if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
