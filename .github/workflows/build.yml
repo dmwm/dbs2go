@@ -81,6 +81,7 @@ jobs:
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh
         curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh
+        chmod +x run.sh
         sed -i -e "s,ENV TAG=.*,ENV TAG=${{steps.get-ref.outputs.tag}},g" Dockerfile
         docker build . --tag docker.pkg.github.com/vkuznet/dbs2go/dbs2go
 
