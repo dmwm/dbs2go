@@ -415,6 +415,34 @@ func insert(stm string, vals []interface{}) error {
 	return nil
 }
 
+// helper function to insert values with given sequence, id and template
+func insertWithId(seqName, idName, tmplName string, values Record) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	tid, err := IncrementSequence(tx, seqName)
+	if err != nil {
+		return err
+	}
+	values[idName] = tid
+	err = InsertValues(tmplName, values)
+	if err != nil {
+		log.Println("DB error", tmplName, err)
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println("DB error", tmplName, err)
+		tx.Rollback()
+		return err
+	}
+	return nil
+}
+
 // helper function to generate operator, value pair for given argument
 func OperatorValue(arg string) (string, string) {
 	op := "="
