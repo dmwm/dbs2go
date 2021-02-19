@@ -95,5 +95,28 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertBlocks DBS API
 func (API) InsertBlocks(values Record) error {
+	// TODO: implement the following logic
+	// input values: blockname
+	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
+	// blkinput["dataset_id"] = self.datasetid.execute(conn,  ds_name, tran)
+	// blkinput["block_id"] =  self.sm.increment(conn, "SEQ_BK", tran)
+	// self.blockin.execute(conn, blkinput, tran)
+
+	return InsertValues("insert_blocks", values)
+}
+
+// InsertBulkBlocks DBS API
+func (API) InsertBulkBlocks(values Record) error {
+	// TODO: implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlock.py
+	/*
+	   #1 insert configuration
+	   configList = self.insertOutputModuleConfig(
+	                   blockcontent['dataset_conf_list'], migration)
+	   #2 insert dataset
+	   datasetId = self.insertDataset(blockcontent, configList, migration)
+	   #3 insert block & files
+	   self.insertBlockFile(blockcontent, datasetId, migration)
+	*/
 	return InsertValues("insert_blocks", values)
 }

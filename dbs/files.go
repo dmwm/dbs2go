@@ -169,5 +169,42 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertFiles DBS API
 func (API) InsertFiles(values Record) error {
+	// TODO: implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
+	/*
+	        :param qInserts: True means that inserts will be queued instead of done immediately. INSERT QUEUE
+	 Manager will perform the inserts, within few minutes.
+	        :type qInserts: bool
+	        :param logical_file_name (required) : string
+	        :param is_file_valid: (optional, default = 1): 1/0
+	        :param block, required: /a/b/c#d
+	        :param dataset, required: /a/b/c
+	        :param file_type (optional, default = EDM): one of the predefined types,
+	        :param check_sum (optional): string
+	        :param event_count (optional, default = -1): int
+	        :param file_size (optional, default = -1.): float
+	        :param adler32 (optional): string
+	        :param md5 (optional): string
+	        :param auto_cross_section (optional, default = -1.): float
+	        :param file_lumi_list (optional, default = []): [{'run_num': 123, 'lumi_section_num': 12},{}....]
+	        :param file_parent_list(optional, default = []) :[{'file_parent_lfn': 'mylfn'},{}....]
+	        :param file_assoc_list(optional, default = []) :[{'file_parent_lfn': 'mylfn'},{}....]
+	        :param file_output_config_list(optional, default = []) :
+	        [{'app_name':..., 'release_version':..., 'pset_hash':...., output_module_label':...},{}.....]
+	*/
+	// logic:
+	// dataset_id = self.datasetid.execute(conn, dataset=f["dataset"])
+	// dsconfigs = [x['output_mod_config_id'] for x in self.dsconfigids.execute(conn, dataset=f["dataset"])]
+	// block_info = self.blocklist.execute(conn, block_name=f["block_name"])
+	// file_type_id = self.ftypeid.execute( conn, f.get("file_type", "EDM"))
+	// self.filein.execute(conn, filein, transaction=tran)
+	// fcdao["output_mod_config_id"] = self.outconfigid.execute(conn, fc["app_name"],
+	// self.flumiin.execute(conn, flumis2insert, transaction=tran)
+	// self.fparentin.execute(conn, fparents2insert, transaction=tran)
+	// self.fconfigin.execute(conn, fconfigs2insert, transaction=tran)
+	// self.blkparentin.execute(conn, bkParentage2insert, transaction=tran)
+	// self.dsparentin.execute(conn, dsParentage2insert, transaction=tran)
+	// blkParams = self.blkstats.execute(conn, block_id, transaction=tran)
+	// self.blkstatsin.execute(conn, blkParams, transaction=tran)
 	return InsertValues("insert_files", values)
 }

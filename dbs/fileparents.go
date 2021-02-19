@@ -50,5 +50,15 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertFileParents DBS API
 func (API) InsertFileParents(values Record) error {
+	// TODO: implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
+	/*
+	   input block_name: is a child block name.
+	   input chils_parent_id_list: is a list of file id of child, parent  pair: [[cid1, pid1],[cid2,pid2],[cid3,pid3],...]
+	   The requirment for this API is
+	   1. All the child files belong to the block.
+	   2. All the child-parent pairs are not already in DBS.
+	   3. The dataset parentage is already in DBS.
+	*/
 	return InsertValues("insert_file_parents", values)
 }

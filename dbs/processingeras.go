@@ -21,5 +21,9 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertProcessingEras DBS API
 func (API) InsertProcessingEras(values Record) error {
+	// TODO: implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSProcessingEra.py
+	// input values: processing_version, creation_date,  create_by, description
+	// businput["processing_era_id"] = self.sm.increment(conn, "SEQ_PE", tran)
 	return InsertValues("insert_processing_eras", values)
 }
