@@ -576,3 +576,17 @@ func AddParam(name, sqlName string, params Record, conds []string, args []interf
 	}
 	return conds, args
 }
+
+// IncrementSequence API
+func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
+	if DBOWNER == "sqlite" {
+		return 0, nil
+	}
+	stm := fmt.Sprintf("select %s%s.nextval as val from dual", DBOWNER, seq)
+	res, err := tx.Exec(stm)
+	if err != nil {
+		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
+		return 0, errors.New(msg)
+	}
+	return res.LastInsertId()
+}
