@@ -24,7 +24,7 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 
 // InsertAcquisitionEras DBS API
 func (API) InsertAcquisitionEras(values Record) error {
-	// TODO: implement the following logic
+	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
