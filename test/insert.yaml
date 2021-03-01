@@ -64,7 +64,7 @@
   insertParams:
   - primary_ds_id: 1
   - primary_ds_name: "primds"
-  - primary_ds_type_id: 1
+  - primary_ds_type: "primds-type"
   - creation_date: 123
   - create_by: "test"
   api: PrimaryDatasets
@@ -86,6 +86,13 @@
   api: ReleaseVersions
   params:
   - release_version: ["rel_version"]
+# -
+#   insertApi: InsertFileParents
+#   insertParams:
+#   - this_file_id: 1
+#   - parent_file_id: 1
+#   api: FileParents
+#   params:
 -
   insertApi: InsertFiles
   insertParams:
