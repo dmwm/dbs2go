@@ -1,6 +1,8 @@
 package dbs
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -26,6 +28,11 @@ func (API) InsertDataTiers(values Record) error {
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataTier.py
 	// input values: data_tier_name, creation_date, create_by
 
+	params := []string{"data_tier_name", "creation_date", "create_by"}
+	if !checkParams(values, params) {
+		msg := fmt.Sprintf("Not sufficient number of parameters %s, we expect %s", values, params)
+		return errors.New(msg)
+	}
 	if v, ok := values["data_tier_name"]; ok {
 		values["data_tier_name"] = strings.ToUpper(v.(string))
 	}
