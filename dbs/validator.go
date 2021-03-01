@@ -154,7 +154,23 @@ func Validate(r *http.Request) error {
 
 // ValidatePostPayload function to validate POST request
 func ValidatePostPayload(rec Record) error {
-	// TODO: I need to implement validation of POST payload here
-	// for instance, check that provided set of parameters has correct key-values
+	for key, val := range rec {
+		errMsg := fmt.Sprintf("unable to match '%s' value '%+v'", key, val)
+		if key == "data_tier_name" {
+			v, err := utils.CastString(val)
+			if err != nil {
+				return errors.New(errMsg)
+			} else if matched := tierPattern.MatchString(v); !matched {
+				return errors.New(errMsg)
+			}
+		} else if key == "creation_date" || key == "last_modification_date" {
+			v, err := utils.CastInt(val)
+			if err != nil {
+				return errors.New(errMsg)
+			} else if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", v)); !matched {
+				return errors.New(errMsg)
+			}
+		}
+	}
 	return nil
 }
