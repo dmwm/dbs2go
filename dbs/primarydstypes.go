@@ -28,5 +28,27 @@ func (API) InsertPrimaryDSTypes(values Record) error {
 		msg := fmt.Sprintf("Not sufficient number of parameters %s, we expect %s", values, params)
 		return errors.New(msg)
 	}
-	return InsertValues("insert_primary_ds_types", values)
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	// get last inserted id
+	pid, err := LastInsertId(tx, "primary_ds_types", "primary_ds_type_id")
+	if err != nil {
+		return err
+	}
+	values["primary_ds_type_id"] = pid + 1
+	res := InsertValues("insert_primary_ds_types", values)
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return res
 }
