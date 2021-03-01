@@ -70,6 +70,16 @@
   params:
   - primary_ds_name: ["primds"]
 -
+  insertApi: InsertProcessingEras
+  insertParams:
+  - processing_version: "version"
+  - creation_date: 123
+  - create_by: "tester"
+  - description: "description"
+  api: ProcessingEras
+  params:
+  - processing_version: ["version"]
+-
   insertApi: InsertProcessedDatasets
   insertParams:
   - processed_ds_id: 1
