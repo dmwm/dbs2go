@@ -23,7 +23,7 @@ func StatementValues(tmpl string, values Record) (string, []interface{}, error) 
 	}
 	stm = fmt.Sprintf("%s (%s) VALUES (%s)", stm, strings.Join(params, ","), strings.Join(args, ","))
 	if utils.VERBOSE > 0 {
-		log.Println("InsertValues", stm, vals)
+		log.Println("StatementValues", stm, vals)
 	}
 	return stm, vals, nil
 }
