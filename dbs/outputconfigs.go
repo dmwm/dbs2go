@@ -52,10 +52,14 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertOutputConfigs DBS API
 func (API) InsertOutputConfigs(values Record) error {
-	// TODO: implement the following logic
+	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
 	// creation_date, create_by
 	// optional: scenario, pset_name
+	params := []string{"app_name", "release_version", "pset_hash", "global_tab", "output_module_label", "creation_date", "create_by"}
+	if err := checkParams(values, params); err != nil {
+		return err
+	}
 	return InsertValues("insert_output_configs", values)
 }
