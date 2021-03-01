@@ -31,9 +31,8 @@ func (api API) InsertPrimaryDatasets(values Record) error {
 	// insert primary_ds_name, creation_date, create_by, primary_ds_id
 
 	params := []string{"primary_ds_name", "primary_ds_type", "creation_date", "create_by"}
-	if !checkParams(values, params) {
-		msg := fmt.Sprintf("Not sufficient number of parameters %s, we expect %s", values, params)
-		return errors.New(msg)
+	if err := checkParams(values, params); err != nil {
+		return err
 	}
 
 	// start transaction
@@ -51,11 +50,20 @@ func (api API) InsertPrimaryDatasets(values Record) error {
 		api.InsertPrimaryDSTypes(rec)
 		pid, err := LastInsertId(tx, "primary_ds_types", "primary_ds_type_id")
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 		values["primary_ds_type_id"] = pid + 1
 	}
 	delete(values, "primary_ds_type")
+	if _, ok := values["primary_ds_id"]; !ok {
+		sid, err := IncrementSequence(tx, "SEQ_PDS")
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		values["primary_ds_id"] = sid + 1
+	}
 	res := InsertValues("insert_primary_datasets", values)
 
 	// commit transaction
