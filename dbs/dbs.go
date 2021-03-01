@@ -427,6 +427,14 @@ func insertWithId(seqName, idName, tmplName string, values Record) error {
 	if err != nil {
 		return err
 	}
+	if DBOWNER == "sqlite" {
+		if val, ok := values[idName]; ok {
+			v, e := utils.CastInt64(val)
+			if e == nil {
+				tid = v
+			}
+		}
+	}
 	values[idName] = tid
 	err = InsertValues(tmplName, values)
 	if err != nil {
