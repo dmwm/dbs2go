@@ -1,5 +1,9 @@
 // DBS APIs
-// Copyright (c) 2015-2016 - Valentin Kuznetsov <vkuznet@gmail.com>
+// Copyright (c) 2015 - Valentin Kuznetsov <vkuznet@gmail.com>
+// some docs:
+// goland SQL: https://golang.org/pkg/database/sql/
+// golang SQL transactions: https://www.sohamkamani.com/golang/sql-transactions/
+
 package dbs
 
 import (
@@ -618,11 +622,37 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	if DBOWNER == "sqlite" {
 		return 0, nil
 	}
+	var pid int64
 	stm := fmt.Sprintf("select %s%s.nextval as val from dual", DBOWNER, seq)
-	res, err := tx.Exec(stm)
+	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
 		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
 		return 0, errors.New(msg)
 	}
-	return res.LastInsertId()
+	return pid, nil
+}
+
+// LastInsertId shoudl return last insert id of given table and idname parameter
+func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
+	if DBOWNER == "sqlite" {
+		return 0, nil
+	}
+	var pid int64
+	stm := fmt.Sprintf("select MAX(%s) from %s%s", idName, DBOWNER, table)
+	err := tx.QueryRow(stm).Scan(&pid)
+	if err != nil {
+		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
+		return 0, errors.New(msg)
+	}
+	return pid, nil
+}
+
+// helper function to check given input of parameters
+func checkParams(values Record, params []string) bool {
+	for _, k := range params {
+		if _, ok := values[k]; !ok {
+			return false
+		}
+	}
+	return true
 }
