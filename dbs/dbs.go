@@ -648,11 +648,12 @@ func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
 }
 
 // helper function to check given input of parameters
-func checkParams(values Record, params []string) bool {
+func checkParams(values Record, params []string) error {
 	for _, k := range params {
 		if _, ok := values[k]; !ok {
-			return false
+			msg := fmt.Sprintf("Not sufficient number of parameters %v, we expect %s", values, params)
+			return errors.New(msg)
 		}
 	}
-	return true
+	return nil
 }
