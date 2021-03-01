@@ -8,12 +8,12 @@
   insertApi: InsertDataTiers
   insertParams:
   - data_tier_id: 1
-  - data_tier_name: "tier"
+  - data_tier_name: "tier-name"
   - creation_date: 123
   - create_by: "test"
   api: DataTiers
   params:
-  - data_tier_name: ["tier"]
+  - data_tier_name: ["tier-name"]
 -
   insertApi: InsertAcquisitionEras
   insertParams:
@@ -86,13 +86,6 @@
   api: ReleaseVersions
   params:
   - release_version: ["rel_version"]
--
-  insertApi: InsertFileParents
-  insertParams:
-  - this_file_id: 1
-  - parent_file_id: 1
-  api: FileParents
-  params:
 -
   insertApi: InsertFiles
   insertParams:
