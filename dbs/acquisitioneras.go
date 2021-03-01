@@ -1,7 +1,8 @@
 package dbs
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -22,20 +23,46 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 }
 
 // InsertAcquisitionEras DBS API
-func (API) InsertAcquisitionEras(params Record) error {
+func (API) InsertAcquisitionEras(values Record) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
-	log.Println("InsertAE", params)
-	return InsertValues("insert_acquisition_eras", params)
+	params := []string{"acquisition_era_name", "creation_date", "start_date", "end_date", "create_by"}
+	if err := checkParams(values, params); err != nil {
+		return err
+	}
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	if _, ok := values["acquisition_era_id"]; !ok {
+		sid, err := IncrementSequence(tx, "SEQ_AQE")
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		values["acquisition_era_id"] = sid + 1
+	}
+	res := InsertValues("insert_acquisition_eras", values)
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return res
 }
 
 // UpdateAcquisitionEras DBS API
-func (API) UpdateAcquisitionEras(params Record) error {
+func (API) UpdateAcquisitionEras(values Record) error {
 	// TODO: implement the following logic
 	// input values: acquisition_era_name ="", end_date=0
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
-	log.Println("InsertAE", params)
-	return InsertValues("insert_acquisition_eras", params)
+	return InsertValues("insert_acquisition_eras", values)
 }

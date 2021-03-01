@@ -17,7 +17,6 @@
 -
   insertApi: InsertAcquisitionEras
   insertParams:
-  - acquisition_era_id: 1
   - acquisition_era_name: "era"
   - start_date: 123
   - end_date: 321
