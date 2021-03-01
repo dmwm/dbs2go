@@ -24,9 +24,8 @@ func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 // InsertPrimaryDSTypes DBS API
 func (API) InsertPrimaryDSTypes(values Record) error {
 	params := []string{"primary_ds_type"}
-	if !checkParams(values, params) {
-		msg := fmt.Sprintf("Not sufficient number of parameters %s, we expect %s", values, params)
-		return errors.New(msg)
+	if err := checkParams(values, params); err != nil {
+		return err
 	}
 	// start transaction
 	tx, err := DB.Begin()
