@@ -45,15 +45,15 @@ func (api API) InsertPrimaryDatasets(values Record) error {
 	defer tx.Rollback()
 
 	// if primary_ds_id is not given we will insert primary ds type first
-	if _, ok := values["primary_ds_id"]; !ok {
+	if _, ok := values["primary_ds_type_id"]; !ok {
 		rec := make(Record)
 		rec["primary_ds_type"] = values["primary_ds_type"]
-		api.InsertPrimaryDSTypes(values)
-		pid, err := LastInsertId(tx, "primary_ds_types", "primary_ds_id")
+		api.InsertPrimaryDSTypes(rec)
+		pid, err := LastInsertId(tx, "primary_ds_types", "primary_ds_type_id")
 		if err != nil {
 			return err
 		}
-		values["primary_ds_id"] = pid
+		values["primary_ds_type_id"] = pid + 1
 	}
 	delete(values, "primary_ds_type")
 	res := InsertValues("insert_primary_datasets", values)
