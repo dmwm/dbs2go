@@ -21,6 +21,7 @@ type Configuration struct {
 	UTC              bool   `json:"utc"`                // report logger time in UTC
 	PrintMonitRecord bool   `json:"print_monit_record"` // print monit record on stdout
 	Hmac             string `json:"hmac"`               // cmsweb hmac file location
+	LimiterPeriod    string `json:"rate"`               // github.com/ulule/limiter rate value
 
 	// db related configuration
 	DBFile             string `json:"dbfile"`               // dbs db file with secrets

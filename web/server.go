@@ -44,6 +44,11 @@ import (
 	"github.com/vkuznet/dbs2go/config"
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
+
+	limiter "github.com/ulule/limiter/v3"
+	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	memory "github.com/ulule/limiter/v3/drivers/store/memory"
+
 	_ "gopkg.in/rana/ora.v4"
 )
 
@@ -57,6 +62,9 @@ var StartTime time.Time
 
 // CMSAuth structure to create CMS Auth headers
 var CMSAuth cmsauth.CMSAuth
+
+// limiter middleware pointer
+var limiterMiddleware *stdlib.Middleware
 
 // helper function to serve index.html web page
 func indexPage(w http.ResponseWriter, r *http.Request) {
@@ -142,7 +150,22 @@ func handlers() *mux.Router {
 	// validate all input parameters
 	router.Use(validateMiddleware)
 
+	// use limiter middleware to slow down clients
+	router.Use(limitMiddleware)
+
 	return router
+}
+
+// initialize Limiter middleware pointer
+func initLimiter(period string) {
+	// create rate limiter with 5 req/second
+	rate, err := limiter.NewRateFromFormatted(period)
+	if err != nil {
+		panic(err)
+	}
+	store := memory.NewStore()
+	instance := limiter.New(store, rate)
+	limiterMiddleware = stdlib.NewMiddleware(instance)
 }
 
 // Server represents main web server for DBS service
@@ -170,6 +193,9 @@ func Server(configFile string) {
 
 	// initialize cmsauth layer
 	CMSAuth.Init(config.Config.Hmac)
+
+	// initialize limiter
+	initLimiter(config.Config.LimiterPeriod)
 
 	// initialize templates
 	tmplData := make(map[string]interface{})

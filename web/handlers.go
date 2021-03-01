@@ -60,6 +60,13 @@ func validateMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// limit middleware limits incoming requests
+func limitMiddleware(next http.Handler) http.Handler {
+	return limiterMiddleware.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+	}))
+}
+
 // LoggingHandlerFunc declares new handler function type which
 // should return status (int) and error
 type LoggingHandlerFunc func(w http.ResponseWriter, r *http.Request) (int, int64, error)
