@@ -1,6 +1,8 @@
 package dbs
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -21,5 +23,10 @@ func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 
 // InsertPrimaryDSTypes DBS API
 func (API) InsertPrimaryDSTypes(values Record) error {
+	params := []string{"primary_ds_type"}
+	if !checkParams(values, params) {
+		msg := fmt.Sprintf("Not sufficient number of parameters %s, we expect %s", values, params)
+		return errors.New(msg)
+	}
 	return InsertValues("insert_primary_ds_types", values)
 }
