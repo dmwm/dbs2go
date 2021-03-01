@@ -57,6 +57,8 @@ test-util:
 	cd test && go test -v -run Util
 test-sql:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run SQL
+test-insert:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run InsertSQL
 test-validator:
 	cd test && go test -v -run Validator
 test-stm:
