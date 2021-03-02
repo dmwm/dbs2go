@@ -2,6 +2,8 @@ package dbs
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -57,8 +59,78 @@ func (API) InsertOutputConfigs(values Record) error {
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
 	// creation_date, create_by
 	// optional: scenario, pset_name
+	optional := []string{"scenario"}
+	for _, key := range optional {
+		if _, ok := values[key]; !ok {
+			values[key] = ""
+		}
+	}
 	params := []string{"app_name", "release_version", "pset_hash", "global_tag", "output_module_label", "creation_date", "create_by"}
+	params = append(params, optional...)
 	if err := checkParams(values, params); err != nil {
+		return err
+	}
+	if DBOWNER == "sqlite" {
+		// we decouple multiple inserts into individual one
+
+		// start transaction
+		tx, err := DB.Begin()
+		if err != nil {
+			msg := fmt.Sprintf("unable to get DB transaction %v", err)
+			return errors.New(msg)
+		}
+		defer tx.Rollback()
+		aid, err := LastInsertId(tx, "APPLICATION_EXECUTABLES", "app_exec_id")
+		if err != nil {
+			log.Println("fail to obtain app_exec_id", err)
+			return err
+		}
+		vals := make(Record)
+		vals["app_exec_id"] = fmt.Sprintf("%d", aid+1)
+		vals["app_name"] = values["app_name"]
+		err = InsertValuesTxt(tx, "insert_application_executables", vals)
+		values["app_exec_id"] = fmt.Sprintf("%d", aid+1)
+
+		rid, err := LastInsertId(tx, "RELEASE_VERSIONS", "release_version_id")
+		if err != nil {
+			log.Println("fail to obtain release_version_id", err)
+			return err
+		}
+		vals = make(Record)
+		vals["release_version_id"] = fmt.Sprintf("%d", rid+1)
+		vals["release_version"] = values["release_version"]
+		err = InsertValuesTxt(tx, "insert_release_versions", vals)
+		values["release_version_id"] = fmt.Sprintf("%d", rid+1)
+
+		pid, err := LastInsertId(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id")
+		if err != nil {
+			log.Println("fail to obtain parameter_set_hash_id", err)
+			return err
+		}
+		vals = make(Record)
+		vals["parameter_set_hash_id"] = fmt.Sprintf("%d", rid+1)
+		vals["pset_hash"] = values["pset_hash"]
+		err = InsertValuesTxt(tx, "insert_parameter_set_hashes", vals)
+		values["parameter_set_hash_id"] = fmt.Sprintf("%d", pid+1)
+
+		oid, err := LastInsertId(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id")
+		if err != nil {
+			log.Println("fail to obtain output_mod_config_id", err)
+			return err
+		}
+		values["output_mod_config_id"] = fmt.Sprintf("%d", oid+1)
+		err = InsertPlainValuesTxt(tx, "insert_outputconfigs_sqlite", values)
+		if err != nil {
+			log.Println("fail to insert_outputconfigs_sqlite", err)
+			return err
+		}
+
+		// commit transaction
+		err = tx.Commit()
+		if err != nil {
+			log.Println("faile to insert_outputconfigs_sqlite", err)
+			return err
+		}
 		return err
 	}
 	return InsertValues("insert_outputconfigs", values)

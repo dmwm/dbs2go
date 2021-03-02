@@ -64,7 +64,7 @@ func (api API) InsertPrimaryDatasets(values Record) error {
 		}
 		values["primary_ds_id"] = sid + 1
 	}
-	res := InsertValues("insert_primary_datasets", values)
+	res := InsertValuesTxt(tx, "insert_primary_datasets", values)
 
 	// commit transaction
 	err = tx.Commit()

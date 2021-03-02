@@ -36,17 +36,16 @@ func (API) InsertPrimaryDSTypes(values Record) error {
 	defer tx.Rollback()
 
 	// get last inserted id
-	pid, err := LastInsertId(tx, "primary_ds_types", "primary_ds_type_id")
+	pid, err := LastInsertId(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
 	if err != nil {
 		return err
 	}
 	values["primary_ds_type_id"] = pid + 1
-	res := InsertValues("insert_primary_ds_types", values)
+	res := InsertValuesTxt(tx, "insert_primary_ds_types", values)
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	return res

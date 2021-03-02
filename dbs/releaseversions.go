@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -29,5 +30,30 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 
 // InsertReleaseVersions DBS API
 func (API) InsertReleaseVersions(values Record) error {
-	return InsertValues("insert_release_versions", values)
+	params := []string{"release_version"}
+	if err := checkParams(values, params); err != nil {
+		return err
+	}
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	// get last inserted id
+	pid, err := LastInsertId(tx, "RELEASE_VERSIONS", "release_version_id")
+	if err != nil {
+		return err
+	}
+	values["release_version_id"] = pid + 1
+	res := InsertValuesTxt(tx, "insert_release_versions", values)
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return res
 }

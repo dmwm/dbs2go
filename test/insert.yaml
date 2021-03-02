@@ -90,11 +90,23 @@
 -
   insertApi: InsertReleaseVersions
   insertParams:
-  - release_version_id: 1
   - release_version: "rel_version"
   api: ReleaseVersions
   params:
   - release_version: ["rel_version"]
+-
+  insertApi: InsertOutputConfigs
+  insertParams:
+  - app_name: "app-name"
+  - release_version: "release-version"
+  - pset_hash: "pset-hash"
+  - global_tag: "global-tag"
+  - output_module_label: "label"
+  - creation_date: 123
+  - create_by: "test"
+  api: OutputConfigs
+  params:
+    - release_version: ["release-version"]
 # -
 #   insertApi: InsertFileParents
 #   insertParams:
