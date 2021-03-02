@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dmwm/das2go/utils"
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // TestCleanStatement

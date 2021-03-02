@@ -9,8 +9,6 @@ import (
 	"bytes"
 	"html/template"
 	"path/filepath"
-
-	"github.com/vkuznet/dbs2go/config"
 )
 
 // consume list of templates and release their full path counterparts
@@ -66,6 +64,6 @@ func (q ServerTemplates) Tmpl(tdir, tfile string, tmplData map[string]interface{
 	if q.top != "" {
 		return q.top
 	}
-	q.top = parseTmpl(config.Config.Templates, tfile, tmplData)
+	q.top = parseTmpl(Config.Templates, tfile, tmplData)
 	return q.top
 }

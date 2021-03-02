@@ -10,7 +10,6 @@ import (
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
-	"github.com/vkuznet/dbs2go/config"
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
@@ -19,6 +18,7 @@ var limiterMiddleware *stdlib.Middleware
 
 // initialize Limiter middleware pointer
 func initLimiter(period string) {
+	log.Printf("limiter rate='%s'", period)
 	// create rate limiter with 5 req/second
 	rate, err := limiter.NewRateFromFormatted(period)
 	if err != nil {
@@ -39,7 +39,7 @@ func authMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		if config.Config.Verbose > 2 {
+		if Config.Verbose > 2 {
 			log.Printf("Auth layer status: %v headers: %+v\n", status, r.Header)
 		}
 		// Call the next handler

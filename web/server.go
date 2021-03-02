@@ -41,7 +41,6 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/vkuznet/dbs2go/config"
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
 
@@ -66,14 +65,14 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 
 // helper function to provide end-point path
 func basePath(s string) string {
-	if config.Config.Base != "" {
+	if Config.Base != "" {
 		if strings.HasPrefix(s, "/") {
 			s = strings.Replace(s, "/", "", 1)
 		}
-		if strings.HasPrefix(config.Config.Base, "/") {
-			return fmt.Sprintf("%s/%s", config.Config.Base, s)
+		if strings.HasPrefix(Config.Base, "/") {
+			return fmt.Sprintf("%s/%s", Config.Base, s)
 		}
-		return fmt.Sprintf("/%s/%s", config.Config.Base, s)
+		return fmt.Sprintf("/%s/%s", Config.Base, s)
 	}
 	return s
 }
@@ -152,16 +151,19 @@ func handlers() *mux.Router {
 // Server represents main web server for DBS service
 func Server(configFile string) {
 	StartTime = time.Now()
-	err := config.ParseConfig(configFile)
-	utils.VERBOSE = config.Config.Verbose
-	utils.STATICDIR = config.Config.StaticDir
+	err := ParseConfig(configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	utils.VERBOSE = Config.Verbose
+	utils.STATICDIR = Config.StaticDir
 	log.SetFlags(0)
-	if config.Config.Verbose > 0 {
+	if Config.Verbose > 0 {
 		log.SetFlags(log.Lshortfile)
 	}
 	log.SetOutput(new(logWriter))
-	if config.Config.LogFile != "" {
-		rl, err := rotatelogs.New(config.Config.LogFile + "-%Y%m%d")
+	if Config.LogFile != "" {
+		rl, err := rotatelogs.New(Config.LogFile + "-%Y%m%d")
 		if err == nil {
 			rotlogs := rotateLogWriter{RotateLogs: rl}
 			log.SetOutput(rotlogs)
@@ -170,13 +172,13 @@ func Server(configFile string) {
 	if err != nil {
 		log.Printf("Unable to parse, time: %v, config: %v\n", time.Now(), configFile)
 	}
-	log.Println("Configuration:", config.Config.String())
+	log.Println("Configuration:", Config.String())
 
 	// initialize cmsauth layer
-	CMSAuth.Init(config.Config.Hmac)
+	CMSAuth.Init(Config.Hmac)
 
 	// initialize limiter
-	initLimiter(config.Config.LimiterPeriod)
+	initLimiter(Config.LimiterPeriod)
 
 	// initialize templates
 	tmplData := make(map[string]interface{})
@@ -187,13 +189,13 @@ func Server(configFile string) {
 
 	// static handlers
 	for _, dir := range []string{"js", "css", "images"} {
-		m := fmt.Sprintf("/%s/%s/", config.Config.Base, dir)
+		m := fmt.Sprintf("/%s/%s/", Config.Base, dir)
 		d := fmt.Sprintf("%s/%s", utils.STATICDIR, dir)
 		http.Handle(m, http.StripPrefix(m, http.FileServer(http.Dir(d))))
 	}
 
 	// set database connection once
-	dbtype, dburi, dbowner := dbs.ParseDBFile(config.Config.DBFile)
+	dbtype, dburi, dbowner := dbs.ParseDBFile(Config.DBFile)
 	// for oci driver we know it is oracle backend
 	if strings.HasPrefix(dbtype, "oci") {
 		utils.ORACLE = true
@@ -207,8 +209,8 @@ func Server(configFile string) {
 	if dberr != nil {
 		log.Println("DB ping error", dberr)
 	}
-	db.SetMaxOpenConns(config.Config.MaxDBConnections)
-	db.SetMaxIdleConns(config.Config.MaxIdleConnections)
+	db.SetMaxOpenConns(Config.MaxDBConnections)
+	db.SetMaxIdleConns(Config.MaxIdleConnections)
 	dbs.DB = db
 	dbs.DBTYPE = dbtype
 
@@ -218,12 +220,12 @@ func Server(configFile string) {
 	dbs.DBOWNER = dbowner
 
 	// dynamic handlers
-	if config.Config.CSRFKey != "" {
+	if Config.CSRFKey != "" {
 		CSRF := csrf.Protect(
-			[]byte(config.Config.CSRFKey),
+			[]byte(Config.CSRFKey),
 			csrf.RequestHeader("Authenticity-Token"),
 			csrf.FieldName("authenticity_token"),
-			csrf.Secure(config.Config.Production),
+			csrf.Secure(Config.Production),
 			csrf.ErrorHandler(http.HandlerFunc(
 				func(w http.ResponseWriter, r *http.Request) {
 					log.Printf("### CSRF error handler: %+v\n", r)
@@ -238,13 +240,13 @@ func Server(configFile string) {
 	}
 
 	// Start server
-	addr := fmt.Sprintf(":%d", config.Config.Port)
-	_, e1 := os.Stat(config.Config.ServerCrt)
-	_, e2 := os.Stat(config.Config.ServerKey)
+	addr := fmt.Sprintf(":%d", Config.Port)
+	_, e1 := os.Stat(Config.ServerCrt)
+	_, e2 := os.Stat(Config.ServerKey)
 	if e1 == nil && e2 == nil {
 		//start HTTPS server which require user certificates
 		rootCA := x509.NewCertPool()
-		caCert, _ := ioutil.ReadFile(config.Config.RootCA)
+		caCert, _ := ioutil.ReadFile(Config.RootCA)
 		rootCA.AppendCertsFromPEM(caCert)
 		server := &http.Server{
 			Addr: addr,
@@ -254,7 +256,7 @@ func Server(configFile string) {
 			},
 		}
 		log.Println("Starting HTTPs server", addr)
-		err = server.ListenAndServeTLS(config.Config.ServerCrt, config.Config.ServerKey)
+		err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
 	} else {
 		// Start server without user certificates
 		log.Println("Starting HTTP server", addr)

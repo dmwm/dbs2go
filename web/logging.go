@@ -16,7 +16,6 @@ import (
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/vkuznet/dbs2go/config"
 )
 
 // LogRecord represents data we can send to StompAMQ or HTTP endpoint
@@ -52,7 +51,7 @@ type HTTPRecord struct {
 // helper function to produce UTC time prefixed output
 func utcMsg(data []byte) string {
 	var msg string
-	if config.Config.UTC {
+	if Config.UTC {
 		msg = fmt.Sprintf("[" + time.Now().UTC().String() + "] " + string(data))
 	} else {
 		msg = fmt.Sprintf("[" + time.Now().String() + "] " + string(data))
@@ -121,7 +120,7 @@ func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status 
 		RequestTime:    time.Since(start).Seconds(),
 		Timestamp:      tstamp,
 	}
-	if config.Config.PrintMonitRecord {
+	if Config.PrintMonitRecord {
 		data, err := monitRecord(rec)
 		if err == nil {
 			fmt.Println(string(data))

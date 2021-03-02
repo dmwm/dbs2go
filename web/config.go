@@ -1,4 +1,4 @@
-package config
+package web
 
 // configuration module for dbs2go
 //
@@ -71,6 +71,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MaxIdleConnections == 0 {
 		Config.MaxIdleConnections = 100
+	}
+	if Config.LimiterPeriod == "" {
+		Config.LimiterPeriod = "100-S"
 	}
 	return nil
 }

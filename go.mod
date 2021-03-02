@@ -3,11 +3,14 @@ module github.com/vkuznet/dbs2go
 go 1.16
 
 require (
+	github.com/StackExchange/wmi v0.0.0-20210224194228-fe8f1750fd46 // indirect
 	github.com/dmwm/cmsauth v0.0.0-20200227183320-1e78c9119730
-	github.com/dmwm/das2go v0.0.0-20210201151053-74c2fbecf77f
+	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
+	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/mattn/go-oci8 v0.1.1
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/shirou/gopsutil v3.21.2+incompatible
