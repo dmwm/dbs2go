@@ -386,7 +386,7 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 	for _, s := range sessions {
 		_, err := tx.Exec(s)
 		if err != nil {
-			log.Println("DB error", s, err)
+			log.Printf("DB error\n### %s\n%v", s, err)
 			return err
 		}
 	}
@@ -406,14 +406,12 @@ func insert(stm string, vals []interface{}) error {
 	defer tx.Rollback()
 	_, err = tx.Exec(stm, vals...)
 	if err != nil {
-		log.Println("DB error", stm, err)
-		tx.Rollback()
+		log.Printf("DB error\n### %s\n%v", stm, err)
 		return err
 	}
 	err = tx.Commit()
 	if err != nil {
-		log.Println("DB error", stm, err)
-		tx.Rollback()
+		log.Printf("DB error\n### %s\n%v", stm, err)
 		return err
 	}
 	return nil
@@ -442,13 +440,13 @@ func insertWithId(seqName, idName, tmplName string, values Record) error {
 	values[idName] = tid
 	err = InsertValues(tmplName, values)
 	if err != nil {
-		log.Println("DB error", tmplName, err)
+		log.Printf("DB error\n### %s\n%v", tmplName, err)
 		tx.Rollback()
 		return err
 	}
 	err = tx.Commit()
 	if err != nil {
-		log.Println("DB error", tmplName, err)
+		log.Printf("DB error\n### %s\n%v", tmplName, err)
 		tx.Rollback()
 		return err
 	}
@@ -634,17 +632,21 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 
 // LastInsertId shoudl return last insert id of given table and idname parameter
 func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
+	//     if DBOWNER == "sqlite" {
+	//         return 0, nil
+	//     }
+	dbowner := DBOWNER
 	if DBOWNER == "sqlite" {
-		return 0, nil
+		dbowner = ""
 	}
-	var pid int64
-	stm := fmt.Sprintf("select MAX(%s) from %s%s", idName, DBOWNER, table)
+	var pid sql.NullInt64
+	stm := fmt.Sprintf("select MAX(%s) from %s%s", idName, dbowner, table)
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
 		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
 		return 0, errors.New(msg)
 	}
-	return pid, nil
+	return pid.Int64, nil
 }
 
 // helper function to check given input of parameters
