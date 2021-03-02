@@ -104,6 +104,7 @@
   - output_module_label: "label"
   - creation_date: 123
   - create_by: "test"
+  - scenario: "scenario"
   api: OutputConfigs
   params:
     - release_version: ["release-version"]
