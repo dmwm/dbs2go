@@ -43,9 +43,8 @@ func (API) OutputModules(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertOutputModules DBS API
-func (API) InsertOutputModules(values Record) error {
-	return InsertValues("insert_outputmodule", values)
-	args := make(Record)
-	args["Owner"] = DBOWNER
-	return InsertTemplateValues("insert_outputmodule", args, values)
-}
+// func (API) InsertOutputModules(values Record) error {
+//     args := make(Record)
+//     args["Owner"] = DBOWNER
+//     return InsertTemplateValues("insert_outputmodule", args, values)
+// }
