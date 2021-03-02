@@ -651,7 +651,8 @@ func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
 func checkParams(values Record, params []string) error {
 	for _, k := range params {
 		if _, ok := values[k]; !ok {
-			msg := fmt.Sprintf("Not sufficient number of parameters %v, we expect %s", values, params)
+			keys := utils.MapKeys(values)
+			msg := fmt.Sprintf("missing %s in %v, expected keys %v", k, keys, params)
 			return errors.New(msg)
 		}
 	}
