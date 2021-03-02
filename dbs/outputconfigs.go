@@ -90,6 +90,7 @@ func (API) InsertOutputConfigs(values Record) error {
 		vals["app_name"] = values["app_name"]
 		err = InsertValuesTxt(tx, "insert_application_executables", vals)
 		values["app_exec_id"] = fmt.Sprintf("%d", aid+1)
+		delete(values, "app_name")
 
 		rid, err := LastInsertId(tx, "RELEASE_VERSIONS", "release_version_id")
 		if err != nil {
@@ -101,6 +102,7 @@ func (API) InsertOutputConfigs(values Record) error {
 		vals["release_version"] = values["release_version"]
 		err = InsertValuesTxt(tx, "insert_release_versions", vals)
 		values["release_version_id"] = fmt.Sprintf("%d", rid+1)
+		delete(values, "release_version")
 
 		pid, err := LastInsertId(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id")
 		if err != nil {
@@ -108,10 +110,16 @@ func (API) InsertOutputConfigs(values Record) error {
 			return err
 		}
 		vals = make(Record)
-		vals["parameter_set_hash_id"] = fmt.Sprintf("%d", rid+1)
+		vals["parameter_set_hash_id"] = fmt.Sprintf("%d", pid+1)
+		if _, ok := values["pset_name"]; ok {
+			vals["pset_name"] = values["pset_name"]
+		} else {
+			vals["pset_name"] = ""
+		}
 		vals["pset_hash"] = values["pset_hash"]
 		err = InsertValuesTxt(tx, "insert_parameter_set_hashes", vals)
 		values["parameter_set_hash_id"] = fmt.Sprintf("%d", pid+1)
+		delete(values, "pset_hash")
 
 		oid, err := LastInsertId(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id")
 		if err != nil {
@@ -119,7 +127,7 @@ func (API) InsertOutputConfigs(values Record) error {
 			return err
 		}
 		values["output_mod_config_id"] = fmt.Sprintf("%d", oid+1)
-		err = InsertPlainValuesTxt(tx, "insert_outputconfigs_sqlite", values)
+		err = InsertValuesTxt(tx, "insert_outputconfigs_sqlite", values)
 		if err != nil {
 			log.Println("fail to insert_outputconfigs_sqlite", err)
 			return err
