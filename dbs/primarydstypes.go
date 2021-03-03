@@ -2,10 +2,14 @@ package dbs
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"unsafe"
 )
 
 // PrimaryDSTypes DBS API
@@ -60,7 +64,7 @@ type PrimaryDSTypes struct {
 }
 
 // Insert implementation of PrimaryDSTypes
-func (r PrimaryDSTypes) Insert(tx *sql.Tx) error {
+func (r *PrimaryDSTypes) Insert(tx *sql.Tx) error {
 	if r.PRIMARY_DS_TYPE_ID == 0 {
 		pid, err := LastInsertId(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
 		if err != nil {
@@ -77,7 +81,38 @@ func (r PrimaryDSTypes) Insert(tx *sql.Tx) error {
 	return err
 }
 
+// Validate implementation of PrimaryDSTypes
+func (r *PrimaryDSTypes) Validate() error {
+	return nil
+}
+
+// Decode implementation for PrimaryDSTypes
+func (r *PrimaryDSTypes) Decode(reader io.Reader) error {
+	// init record with given data record
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return err
+	}
+	err = json.Unmarshal(data, &r)
+
+	//     decoder := json.NewDecoder(r)
+	//     err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return err
+	}
+	return nil
+}
+
+// Size implementation for PrimaryDSTypes
+func (r *PrimaryDSTypes) Size() int64 {
+	size := int64(unsafe.Sizeof(*r))
+	size += int64(len(r.PRIMARY_DS_TYPE))
+	return size
+}
+
 // PostPrimaryDSTypes DBS API
 func (API) PostPrimaryDSTypes(r io.Reader) (int64, error) {
-	return insertRecord(PrimaryDSTypes{}, r)
+	return insertRecord(&PrimaryDSTypes{}, r)
 }

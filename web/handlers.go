@@ -33,6 +33,7 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		start := time.Now()
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		status, dataSize, err := h(w, r)
+		//         w.WriteHeader(status)
 		if err != nil {
 			uri, e := url.QueryUnescape(r.RequestURI)
 			if e != nil {
@@ -133,7 +134,6 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
-		log.Println("Content-Type is not application/json")
 		return http.StatusUnsupportedMediaType, 0, errors.New("unsupported Content-Type")
 	}
 	var api dbs.API
@@ -143,6 +143,12 @@ func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, i
 		size, err = api.PostDataTiers(r.Body)
 	}
 	if err != nil {
+		rec := make(dbs.Record)
+		rec["error"] = fmt.Sprintf("%v", err)
+		rec["api"] = a
+		data, _ := json.Marshal(rec)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(data)
 		return http.StatusInternalServerError, 0, err
 	}
 	return http.StatusOK, size, nil
@@ -295,7 +301,8 @@ func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) (
 // Takes the following arguments: data_tier_name
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "datatiers")
+		//         return DBSPostHandler(w, r, "datatiers")
+		return DBSPostHandlerNew(w, r, "datatiers")
 	}
 	return DBSGetHandler(w, r, "datatiers")
 }

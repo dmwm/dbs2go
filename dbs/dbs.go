@@ -38,32 +38,38 @@ var DRYRUN bool
 // DBRecord interface allows to insert DBS record using given transaction
 type DBRecord interface {
 	Insert(tx *sql.Tx) error
+	Validate() error
+	Decode(r io.Reader) error
+	Size() int64
 }
 
+// helper function to insert DB record with given transaction and reader
 func insertTxtRecord(tx *sql.Tx, rec DBRecord, r io.Reader) (int64, error) {
 	// init record with given data record
-	decoder := json.NewDecoder(r)
-	err := decoder.Decode(&rec)
+	err := rec.Decode(r)
 	if err != nil {
-		log.Println("unable to get DB record from provided data")
+		log.Println("fail to decode record", err)
 		return 0, err
 	}
 
+	// insert record
 	err = rec.Insert(tx)
 	if err != nil {
 		log.Println("unable to insert %v", rec)
 		return 0, err
 	}
-	var size int64 // TODO: implement how to get size of the record
-	return size, nil
+	return rec.Size(), nil
 }
+
+// helper function to insert DB record with given reader
 func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
-	// init record with given data record
-	decoder := json.NewDecoder(r)
-	err := decoder.Decode(&rec)
+	err := rec.Decode(r)
 	if err != nil {
-		log.Println("unable to get DB record from provided data")
+		log.Println("fail to decode record", err)
 		return 0, err
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("insertRecord %+v", rec)
 	}
 
 	// start transaction
@@ -73,19 +79,28 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 		return 0, err
 	}
 	defer tx.Rollback()
-	err = rec.Insert(tx)
+
+	// validate record
+	err = rec.Validate()
 	if err != nil {
-		log.Println("unable to insert %v", rec)
+		log.Printf("fail to validate record, %v", err)
 		return 0, err
 	}
+
+	// insert record
+	err = rec.Insert(tx)
+	if err != nil {
+		log.Printf("unable to insert %+v, %v", rec, err)
+		return 0, err
+	}
+
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
 		return 0, err
 	}
-	var size int64 // TODO: implement how to get size of the record
-	return size, nil
+	return rec.Size(), nil
 }
 
 // helper function
