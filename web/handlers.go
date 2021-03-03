@@ -129,6 +129,25 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// DBSPostHandlerNew is a generic Post Handler to call DBS Post APIs
+func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+	headerContentType := r.Header.Get("Content-Type")
+	if headerContentType != "application/json" {
+		log.Println("Content-Type is not application/json")
+		return http.StatusUnsupportedMediaType, 0, errors.New("unsupported Content-Type")
+	}
+	var api dbs.API
+	var err error
+	var size int64
+	if a == "datatiers" {
+		size, err = api.PostDataTiers(r.Body)
+	}
+	if err != nil {
+		return http.StatusInternalServerError, 0, err
+	}
+	return http.StatusOK, size, nil
+}
+
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	headerContentType := r.Header.Get("Content-Type")
@@ -184,6 +203,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		size, err = api.FileLumis(params, w)
 	} else if a == "blockparents" {
 		size, err = api.BlockParents(params, w)
+	} else if a == "datatiers" {
+		err = api.InsertDataTiers(params)
 	}
 	if err != nil {
 		return http.StatusInternalServerError, 0, err
