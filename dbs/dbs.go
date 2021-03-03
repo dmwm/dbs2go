@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -33,6 +34,59 @@ var DBOWNER string
 
 // DRYRUN allows to skip query execution and printout DB statements along with passed parameters
 var DRYRUN bool
+
+// DBRecord interface allows to insert DBS record using given transaction
+type DBRecord interface {
+	Insert(tx *sql.Tx) error
+}
+
+func insertTxtRecord(tx *sql.Tx, rec DBRecord, r io.Reader) (int64, error) {
+	// init record with given data record
+	decoder := json.NewDecoder(r)
+	err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("unable to get DB record from provided data")
+		return 0, err
+	}
+
+	err = rec.Insert(tx)
+	if err != nil {
+		log.Println("unable to insert %v", rec)
+		return 0, err
+	}
+	var size int64 // TODO: implement how to get size of the record
+	return size, nil
+}
+func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
+	// init record with given data record
+	decoder := json.NewDecoder(r)
+	err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("unable to get DB record from provided data")
+		return 0, err
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return 0, err
+	}
+	defer tx.Rollback()
+	err = rec.Insert(tx)
+	if err != nil {
+		log.Println("unable to insert %v", rec)
+		return 0, err
+	}
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
+		return 0, err
+	}
+	var size int64 // TODO: implement how to get size of the record
+	return size, nil
+}
 
 // helper function
 func dbsError(w http.ResponseWriter, msg string) (int64, error) {
