@@ -1,8 +1,10 @@
 package dbs
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -49,4 +51,33 @@ func (API) InsertPrimaryDSTypes(values Record) error {
 		return err
 	}
 	return res
+}
+
+// PrimaryDSTypes
+type PrimaryDSTypes struct {
+	PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id"`
+	PRIMARY_DS_TYPE    string `json:"primary_ds_type"`
+}
+
+// Insert implementation of PrimaryDSTypes
+func (r PrimaryDSTypes) Insert(tx *sql.Tx) error {
+	if r.PRIMARY_DS_TYPE_ID == 0 {
+		pid, err := LastInsertId(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
+		if err != nil {
+			return err
+		}
+		r.PRIMARY_DS_TYPE_ID = pid + 1
+	}
+	// get SQL statement from static area
+	stm := getSQL("insert_primary_ds_types")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("insert_primary_ds_types_sqlite")
+	}
+	_, err := tx.Exec(stm, r.PRIMARY_DS_TYPE_ID, r.PRIMARY_DS_TYPE)
+	return err
+}
+
+// PostPrimaryDSTypes DBS API
+func (API) PostPrimaryDSTypes(r io.Reader) (int64, error) {
+	return insertRecord(PrimaryDSTypes{}, r)
 }
