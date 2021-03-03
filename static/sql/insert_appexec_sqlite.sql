@@ -1,0 +1,1 @@
+INSERT INTO APPLICATION_EXECUTABLES (app_exec_id,app_name) VALUES (?,?)

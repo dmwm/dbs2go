@@ -1,9 +1,17 @@
 package dbs
 
 import (
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"unsafe"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // ReleaseVersions DBS API
@@ -56,4 +64,72 @@ func (API) InsertReleaseVersions(values Record) error {
 		return err
 	}
 	return res
+}
+
+// ReleaseVersions
+type ReleaseVersions struct {
+	RELEASE_VERSION_ID int64  `json:"release_version_id"`
+	RELEASE_VERSION    string `json:"release_version"`
+}
+
+// Insert implementation of ReleaseVersions
+func (r *ReleaseVersions) Insert(tx *sql.Tx) error {
+	var tid int64
+	var err error
+	if r.RELEASE_VERSION_ID == 0 {
+		if DBOWNER == "sqlite" {
+			tid, err = LastInsertId(tx, "RELEASE_VERSIONS", "release_version_id")
+			r.RELEASE_VERSION_ID = tid + 1
+		} else {
+			tid, err = IncrementSequence(tx, "SEQ_RV")
+			r.RELEASE_VERSION_ID = tid
+		}
+		if err != nil {
+			return err
+		}
+	}
+	// get SQL statement from static area
+	stm := getSQL("insert_relase_versions")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("insert_relase_versions_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert ReleaseVersions\n%s\n%+v", stm, r)
+	}
+	_, err = tx.Exec(stm, r.RELEASE_VERSION_ID, r.RELEASE_VERSION)
+	return err
+}
+
+// Validate implementation of ReleaseVersions
+func (r *ReleaseVersions) Validate() error {
+	if r.RELEASE_VERSION == "" {
+		return errors.New("missing release_version")
+	}
+	return nil
+}
+
+// Decode implementation for ReleaseVersions
+func (r *ReleaseVersions) Decode(reader io.Reader) error {
+	// init record with given data record
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return err
+	}
+	err = json.Unmarshal(data, &r)
+
+	//     decoder := json.NewDecoder(r)
+	//     err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return err
+	}
+	return nil
+}
+
+// Size implementation for ReleaseVersions
+func (r *ReleaseVersions) Size() int64 {
+	size := int64(unsafe.Sizeof(*r))
+	size += int64(len(r.RELEASE_VERSION))
+	return size
 }
