@@ -39,14 +39,14 @@ var DRYRUN bool
 type DBRecord interface {
 	Insert(tx *sql.Tx) error
 	Validate() error
-	Decode(r io.Reader) error
+	Decode(r io.Reader) (int64, error)
 	Size() int64
 }
 
 // helper function to insert DB record with given transaction and reader
 func insertTxtRecord(tx *sql.Tx, rec DBRecord, r io.Reader) (int64, error) {
 	// init record with given data record
-	err := rec.Decode(r)
+	size, err := rec.Decode(r)
 	if err != nil {
 		log.Println("fail to decode record", err)
 		return 0, err
@@ -58,12 +58,12 @@ func insertTxtRecord(tx *sql.Tx, rec DBRecord, r io.Reader) (int64, error) {
 		log.Println("unable to insert %v", rec)
 		return 0, err
 	}
-	return rec.Size(), nil
+	return size, nil
 }
 
 // helper function to insert DB record with given reader
 func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
-	err := rec.Decode(r)
+	size, err := rec.Decode(r)
 	if err != nil {
 		log.Println("fail to decode record", err)
 		return 0, err
@@ -100,7 +100,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 		log.Println("unable to commit transaction", err)
 		return 0, err
 	}
-	return rec.Size(), nil
+	return size, nil
 }
 
 // helper function

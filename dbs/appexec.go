@@ -55,12 +55,12 @@ func (r *ApplicationExecutables) Validate() error {
 }
 
 // Decode implementation for ApplicationExecutables
-func (r *ApplicationExecutables) Decode(reader io.Reader) error {
+func (r *ApplicationExecutables) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return 0, err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -68,9 +68,10 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return 0, err
 	}
-	return nil
+	size := int64(len(data))
+	return size, nil
 }
 
 // Size implementation for ApplicationExecutables
