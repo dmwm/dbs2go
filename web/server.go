@@ -96,7 +96,7 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/primarydstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET")
 	router.HandleFunc(basePath("/datatypes"), LoggingHandler(DataTypesHandler)).Methods("GET")
 	router.HandleFunc(basePath("/processingeras"), LoggingHandler(ProcessingErasHandler)).Methods("GET")
-	router.HandleFunc(basePath("/outputconfigs"), LoggingHandler(OutputConfigsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/outputconfigs"), LoggingHandler(OutputConfigsHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/datasetaccesstypes"), LoggingHandler(DatasetAccessTypesHandler)).Methods("GET")
 
 	router.HandleFunc(basePath("/runs"), LoggingHandler(RunsHandler)).Methods("GET")

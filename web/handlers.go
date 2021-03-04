@@ -141,6 +141,8 @@ func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, i
 	var size int64
 	if a == "datatiers" {
 		size, err = api.PostDataTiers(r.Body)
+	} else if a == "outputconfigs" {
+		size, err = api.PostOutputConfigs(r.Body)
 	}
 	if err != nil {
 		rec := make(dbs.Record)
@@ -448,6 +450,9 @@ func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) (int, int64, e
 // OutputConfigsHandler provides access to OutputConfigs DBS API.
 // Takes the following arguments: dataset, logical_file_name, release_version, pset_hash, app_name, output_module_label, block_id, global_tag
 func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandlerNew(w, r, "outputconfigs")
+	}
 	return DBSGetHandler(w, r, "outputconfigs")
 }
 

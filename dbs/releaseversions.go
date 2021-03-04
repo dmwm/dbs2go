@@ -89,9 +89,9 @@ func (r *ReleaseVersions) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_relase_versions")
+	stm := getSQL("insert_release_versions")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_relase_versions_sqlite")
+		stm = getSQL("insert_release_versions_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ReleaseVersions\n%s\n%+v", stm, r)

@@ -179,14 +179,14 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_tiers")
+	stm := getSQL("insert_outputconfigs")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_tiers_sqlite")
+		stm = getSQL("insert_outputconfigs_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert OutputConfigs\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.OUTPUT_MOD_CONFIG_ID, r.APP_EXEC_ID, r.RELEASE_VERSION_ID, r.PARAMETER_SET_HASH_ID, r.GLOBAL_TAG, r.SCENARIO, r.CREATION_DATE, r.CREATE_BY)
+	_, err = tx.Exec(stm, r.OUTPUT_MOD_CONFIG_ID, r.APP_EXEC_ID, r.RELEASE_VERSION_ID, r.PARAMETER_SET_HASH_ID, r.OUTPUT_MODULE_LABEL, r.GLOBAL_TAG, r.SCENARIO, r.CREATION_DATE, r.CREATE_BY)
 	return err
 }
 
