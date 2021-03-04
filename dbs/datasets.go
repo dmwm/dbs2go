@@ -2,11 +2,16 @@ package dbs
 
 import (
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // Datasets API
@@ -181,6 +186,109 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	return execute(w, stm, cols, vals, args...)
 }
 
+// Datasets
+type Datasets struct {
+	DATASET_ID             int64   `json:"dataset_id"`
+	DATASET                string  `json:"datset"`
+	IS_DATASET_VALID       int     `json:"is_dataset_valid"`
+	PRIMARY_DS_ID          int64   `json:"primary_ds_id"`
+	PROCESSED_DS_ID        int64   `json:"processed_ds_id"`
+	DATA_TIER_ID           int64   `json:"data_tier_id"`
+	DATASET_ACCESS_TYPE_ID int64   `json:"dataset_access_type_id"`
+	ACQUISITION_ERA_ID     int64   `json:"acquisition_era_id"`
+	PROCESSING_ERA_ID      int64   `json:"processing_era_id"`
+	PHYSICS_GROUP_ID       int64   `json:"physics_group_id"`
+	XTCROSSSECTION         float64 `json:"xtcrosssection"`
+	PREP_ID                string  `json:"prep_id"`
+	CREATION_DATE          int64   `json:"creation_date"`
+	CREATE_BY              string  `json:"create_by"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+}
+
+// Insert implementation of Datasets
+func (r *Datasets) Insert(tx *sql.Tx) error {
+	var tid int64
+	var err error
+	if r.DATASET_ID == 0 {
+		if DBOWNER == "sqlite" {
+			tid, err = LastInsertId(tx, "DATASETS", "dataset_id")
+			r.DATASET_ID = tid + 1
+		} else {
+			tid, err = IncrementSequence(tx, "SEQ_DS")
+			r.DATASET_ID = tid
+		}
+		if err != nil {
+			return err
+		}
+	}
+	// get SQL statement from static area
+	stm := getSQL("insert_datasets")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("insert_datasets_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
+	}
+	_, err = tx.Exec(stm, r.DATASET_ID, r.DATASET, r.IS_DATASET_VALID, r.PRIMARY_DS_ID, r.PROCESSED_DS_ID, r.DATA_TIER_ID, r.DATASET_ACCESS_TYPE_ID, r.ACQUISITION_ERA_ID, r.PROCESSING_ERA_ID, r.PHYSICS_GROUP_ID, r.XTCROSSSECTION, r.PREP_ID, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	return err
+}
+
+// Validate implementation of Datasets
+func (r *Datasets) Validate() error {
+	if matched := datasetPattern.MatchString(r.DATASET); !matched {
+		log.Println("validate Dataset", r)
+		return errors.New("invalid pattern for dataset")
+	}
+	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
+		return errors.New("invalid pattern for createion date")
+	}
+	if r.CREATION_DATE == 0 {
+		return errors.New("missing creation_date")
+	}
+	if r.CREATE_BY == "" {
+		return errors.New("missing create_by")
+	}
+	return nil
+}
+
+// Decode implementation for Datasets
+func (r *Datasets) Decode(reader io.Reader) (int64, error) {
+	// init record with given data record
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	err = json.Unmarshal(data, &r)
+
+	//     decoder := json.NewDecoder(r)
+	//     err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	return size, nil
+}
+
+// DatasetRecord we receive for InsertDatasets API
+type DatasetRecord struct {
+	DATASET                string  `json:"dataset"`
+	PRIMARY_DS_NAME        string  `json:"primary_ds_name"`
+	PROCESSED_DS           string  `json:"processed_ds"`
+	DATA_TIER              string  `json:"data_tier"`
+	ACQUISITION_ERA        string  `json:"acquisition_era"`
+	DATASET_ACCESS_TYPE    string  `json:"dataset_access_type"`
+	PROCESSING_VERSION     string  `json:"processing_version"`
+	PHYSICS_GROUP          string  `json:"physics_group"`
+	XTCROSSSECTION         float64 `json:"xtcrosssection"`
+	CREATION_DATE          int64   `json:"creation_date"`
+	CREATE_BY              string  `json:"create_by"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+}
+
 // InsertDatasets DBS API
 func (API) InsertDatasets(r io.Reader) (int64, error) {
 	// TODO: implement the following logic
@@ -192,7 +300,6 @@ func (API) InsertDatasets(r io.Reader) (int64, error) {
 	// dsdaoinput["dataset_id"] = self.sm.increment(conn, "SEQ_DS")
 	// logic:
 	// dsdaoinput["physics_group_id"] = self.phygrpid.execute(conn, businput["physics_group_name"])
-	// dsdaoinput["physics_group_id"] = self.phygrpid.execute(conn, businput["physics_group_name"])
 	// dsdaoinput["processing_era_id"] = self.proceraid.execute(conn, businput["processing_version"])
 	// dsdaoinput["acquisition_era_id"] = self.acqeraid.execute(conn, businput["acquisition_era_name"])
 	// self.datasetin.execute(conn, dsdaoinput, tran)
@@ -202,5 +309,58 @@ func (API) InsertDatasets(r io.Reader) (int64, error) {
 	//     args := make(Record)
 	//     args["Owner"] = DBOWNER
 	//     return InsertTemplateValues("insert_datasets", args, values)
-	return 0, nil
+
+	// read given input
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	var rec DatasetRecord
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	// set dependent's records
+	aerec := AcquisitionEras{ACQUISITION_ERA_NAME: rec.ACQUISITION_ERA}
+	pdrec := PrimaryDatasets{PRIMARY_DS_NAME: rec.PRIMARY_DS_NAME}
+	perec := ProcessingEras{PROCESSING_VERSION: rec.PROCESSING_VERSION}
+	psrec := ProcessedDatasets{}
+	pgrec := PhysicsGroups{PHYSICS_GROUP_NAME: rec.PHYSICS_GROUP}
+	darec := DatasetAccessTypes{DATASET_ACCESS_TYPE: rec.DATASET_ACCESS_TYPE}
+	dtrec := DataTiers{DATA_TIER_NAME: rec.DATA_TIER}
+	dsrec := Datasets{DATASET: rec.DATASET, XTCROSSSECTION: rec.XTCROSSSECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return 0, errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	// TODO: get all necessary IDs from different tables
+
+	// init all foreign Id's in output config record
+	dsrec.PRIMARY_DS_ID = pdrec.PRIMARY_DS_ID
+	dsrec.PROCESSED_DS_ID = psrec.PROCESSED_DS_ID
+	dsrec.DATA_TIER_ID = dtrec.DATA_TIER_ID
+	dsrec.DATASET_ACCESS_TYPE_ID = darec.DATASET_ACCESS_TYPE_ID
+	dsrec.ACQUISITION_ERA_ID = aerec.ACQUISITION_ERA_ID
+	dsrec.PROCESSING_ERA_ID = perec.PROCESSING_ERA_ID
+	dsrec.PHYSICS_GROUP_ID = pgrec.PHYSICS_GROUP_ID
+	err = dsrec.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return 0, err
+	}
+	return size, err
 }

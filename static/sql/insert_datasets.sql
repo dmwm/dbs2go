@@ -7,7 +7,7 @@ THEN
     (processed_ds_id, processed_ds_name)
     VALUES ({{.Owner}}.seq_psds.nextval, processed_n)
 WHEN NOT EXISTS
-    w(SELECT * FROM {{.Owner}}.dataset_access_types
+    (SELECT * FROM {{.Owner}}.dataset_access_types
         WHERE dataset_access_type=access_t)
 THEN
     INTO {{.Owner}}.dataset_access_types
