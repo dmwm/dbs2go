@@ -115,33 +115,33 @@
 #   - parent_file_id: 1
 #   api: FileParents
 #   params:
--
-  insertApi: InsertFiles
-  insertParams:
-  - file_id: 1
-  - logical_file_name: "/a/file.root"
-  - is_file_valid: 0
-  - dataset_id: 1
-  - block_id: 1
-  - file_type_id: 1
-  - check_sum: "123"
-  - event_count: 1
-  - file_size: 123.0
-  - adler32: "adler"
-  - md5: "md5"
-  - auto_cross_section: 123
-  - last_modification_date: 123
-  - last_modified_by: "tester"
-  api: Files
-  params:
-  - logical_file_name: ["/a/file.root"]
--
-  insertApi: InsertFileLumis
-  insertParams:
-  - file_id: 1
-  - run_num: 1
-  - lumi_section_num: 1
-  - event_count: 1
+# -
+#   insertApi: InsertFiles
+#   insertParams:
+#   - file_id: 1
+#   - logical_file_name: "/a/file.root"
+#   - is_file_valid: 0
+#   - dataset_id: 1
+#   - block_id: 1
+#   - file_type_id: 1
+#   - check_sum: "123"
+#   - event_count: 1
+#   - file_size: 123.0
+#   - adler32: "adler"
+#   - md5: "md5"
+#   - auto_cross_section: 123
+#   - last_modification_date: 123
+#   - last_modified_by: "tester"
+#   api: Files
+#   params:
+#   - logical_file_name: ["/a/file.root"]
+# -
+#   insertApi: InsertFileLumis
+#   insertParams:
+#   - file_id: 1
+#   - run_num: 1
+#   - lumi_section_num: 1
+#   - event_count: 1
 #   api: FileLumis
 #   params:
 #   - run_num: ["1"]

@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"unsafe"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -126,11 +125,4 @@ func (r *ReleaseVersions) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
-}
-
-// Size implementation for ReleaseVersions
-func (r *ReleaseVersions) Size() int64 {
-	size := int64(unsafe.Sizeof(*r))
-	size += int64(len(r.RELEASE_VERSION))
-	return size
 }

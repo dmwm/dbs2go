@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"unsafe"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -73,11 +72,4 @@ func (r *ParameterSetHashes) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
-}
-
-// Size implementation for ParameterSetHashes
-func (r *ParameterSetHashes) Size() int64 {
-	size := int64(unsafe.Sizeof(*r))
-	size += int64(len(r.PSET_NAME))
-	return size
 }

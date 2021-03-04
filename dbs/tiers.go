@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"unsafe"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -122,14 +121,6 @@ func (r *DataTiers) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
-}
-
-// Size implementation for DataTiers
-func (r *DataTiers) Size() int64 {
-	size := int64(unsafe.Sizeof(*r))
-	size += int64(len(r.DATA_TIER_NAME))
-	size += int64(len(r.CREATE_BY))
-	return size
 }
 
 // PostDataTiers DBS API

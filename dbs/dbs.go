@@ -40,7 +40,6 @@ type DBRecord interface {
 	Insert(tx *sql.Tx) error
 	Validate() error
 	Decode(r io.Reader) (int64, error)
-	Size() int64
 }
 
 // helper function to insert DB record with given transaction and reader

@@ -143,7 +143,33 @@ func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, i
 		size, err = api.PostDataTiers(r.Body)
 	} else if a == "outputconfigs" {
 		size, err = api.PostOutputConfigs(r.Body)
+	} else if a == "primarydatasets" {
+		size, err = api.PostPrimaryDatasets(r.Body)
+	} else if a == "acquisitioneras" {
+		size, err = api.PostAcquisitionEras(r.Body)
+	} else if a == "processingeras" {
+		size, err = api.PostProcessingEras(r.Body)
 	}
+	//     } else if a == "datasets" {
+	//         size, err = api.PostDatasets(r.Body)
+	//     } else if a == "blocks" {
+	//         size, err = api.PostBlocks(r.Body)
+	//     } else if a == "bulkblocks" {
+	//         size, err = api.PostBulkBlocks(r.Body)
+	//     } else if a == "files" {
+	//         size, err = api.PostFiles(r.Body)
+	//     } else if a == "fileparentss" {
+	//         size, err = api.PostFileParents(r.Body)
+	//     } else if a == "fileparentsbylumi" {
+	//         size, err = api.PostFileParentsByLumi(r.Body)
+	//     } else if a == "datasetlist" {
+	//         size, err = api.PostDatasetList(r.Body)
+	//     } else if a == "fileArray" {
+	//         size, err = api.PostFileArray(r.Body)
+	//     } else if a == "filelumis" {
+	//         size, err = api.PostFileLumis(r.Body)
+	//     } else if a == "blockparents" {
+	//         size, err = api.PostBlockParents(r.Body)
 	if err != nil {
 		rec := make(dbs.Record)
 		rec["error"] = fmt.Sprintf("%v", err)

@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"unsafe"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -72,11 +71,4 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
-}
-
-// Size implementation for ApplicationExecutables
-func (r *ApplicationExecutables) Size() int64 {
-	size := int64(unsafe.Sizeof(*r))
-	size += int64(len(r.APP_NAME))
-	return size
 }

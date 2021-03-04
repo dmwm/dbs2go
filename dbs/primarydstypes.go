@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"unsafe"
 )
 
 // PrimaryDSTypes DBS API
@@ -104,13 +103,6 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
-}
-
-// Size implementation for PrimaryDSTypes
-func (r *PrimaryDSTypes) Size() int64 {
-	size := int64(unsafe.Sizeof(*r))
-	size += int64(len(r.PRIMARY_DS_TYPE))
-	return size
 }
 
 // PostPrimaryDSTypes DBS API
