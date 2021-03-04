@@ -7,7 +7,6 @@
 -
   insertApi: InsertDataTiers
   insertParams:
-    data_tier_id: 1
     data_tier_name: "TEST-RAW-TIER"
     creation_date: 1614880522
     create_by: "test"
@@ -29,7 +28,6 @@
 -
   insertApi: InsertDatasetAccessTypes
   insertParams:
-    dataset_access_type_id: 1
     dataset_access_type: "atype"
   api: DatasetAccessTypes
   params:
@@ -37,7 +35,6 @@
 -
   insertApi: InsertFileDataTypes
   insertParams:
-    file_type_id: 1
     file_type: "file-type"
   api: FileDataTypes
   params:
@@ -45,7 +42,6 @@
 -
   insertApi: InsertPhysicsGroups
   insertParams:
-    physics_group_id: 1
     physics_group_name: "phys-name"
   api: PhysicsGroups
   params:
@@ -53,7 +49,6 @@
 -
   insertApi: InsertPrimaryDSTypes
   insertParams:
-    primary_ds_type_id: 1
     primary_ds_type: "prim_ds_type"
   api: PrimaryDSTypes
   params:
@@ -61,7 +56,6 @@
 -
   insertApi: InsertPrimaryDatasets
   insertParams:
-    primary_ds_id: 1
     primary_ds_name: "primds"
     primary_ds_type: "primds-type"
     creation_date: 1614880522
@@ -82,7 +76,6 @@
 -
   insertApi: InsertProcessedDatasets
   insertParams:
-    processed_ds_id: 1
     processed_ds_name: "ps_ds_name"
   api: ProcessedDatasets
   params:
