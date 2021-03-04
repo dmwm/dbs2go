@@ -102,7 +102,8 @@ func (API) InsertBlocks(values Record) error {
 	// blkinput["block_id"] =  self.sm.increment(conn, "SEQ_BK", tran)
 	// self.blockin.execute(conn, blkinput, tran)
 
-	return InsertValues("insert_blocks", values)
+	//     return InsertValues("insert_blocks", values)
+	return nil
 }
 
 // InsertBulkBlocks DBS API
@@ -118,5 +119,7 @@ func (API) InsertBulkBlocks(values Record) error {
 	   #3 insert block & files
 	   self.insertBlockFile(blockcontent, datasetId, migration)
 	*/
-	return InsertValues("insert_blocks", values)
+
+	//     return InsertValues("insert_blocks", values)
+	return nil
 }

@@ -3,6 +3,7 @@ package dbs
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -181,7 +182,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertDatasets DBS API
-func (API) InsertDatasets(values Record) error {
+func (API) InsertDatasets(r io.Reader) (int64, error) {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
 	// input values: dataset, primary_ds_name(name), processed_ds(name), data_tier(name),
@@ -197,7 +198,9 @@ func (API) InsertDatasets(values Record) error {
 	// self.datasetin.execute(conn, dsdaoinput, tran)
 	// dsoutconfdaoin["output_mod_config_id"] = self.outconfigid.execute ...
 	// self.datasetoutmodconfigin.execute(conn, dsoutconfdaoin, tran
-	args := make(Record)
-	args["Owner"] = DBOWNER
-	return InsertTemplateValues("insert_datasets", args, values)
+
+	//     args := make(Record)
+	//     args["Owner"] = DBOWNER
+	//     return InsertTemplateValues("insert_datasets", args, values)
+	return 0, nil
 }

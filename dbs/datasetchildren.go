@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"errors"
+	"io"
 	"net/http"
 )
 
@@ -28,6 +29,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 }
 
 // InsertDatasetChildren DBS API
-func (API) InsertDatasetChildren(values Record) error {
-	return InsertValues("insert_dataset_children", values)
+func (API) InsertDatasetChildren(r io.Reader) (int64, error) {
+	//     return InsertValues("insert_dataset_children", values)
+	return 0, nil
 }

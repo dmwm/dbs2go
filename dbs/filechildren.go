@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -55,6 +56,6 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileChildren DBS API
-func (API) InsertFileChildren(values Record) error {
-	return InsertValues("insert_file_children", values)
+func (API) InsertFileChildren(r io.Reader) (int64, error) {
+	return 0, nil
 }

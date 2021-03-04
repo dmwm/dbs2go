@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"io"
 	"net/http"
 )
 
@@ -20,6 +21,7 @@ func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertDataTypes DBS API
-func (API) InsertDataTypes(values Record) error {
-	return InsertValues("insert_data_types", values)
+func (API) InsertDataTypes(r io.Reader) (int64, error) {
+	//     return InsertValues("insert_data_types", values)
+	return 0, nil
 }

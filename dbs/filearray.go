@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -74,6 +75,7 @@ func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileArray DBS API
-func (API) InsertFileArray(values Record) error {
-	return InsertValues("insert_file_array", values)
+func (API) InsertFileArray(r io.Reader) (int64, error) {
+	//     return InsertValues("insert_file_array", values)
+	return 0, nil
 }

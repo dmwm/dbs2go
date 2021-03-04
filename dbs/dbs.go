@@ -485,42 +485,6 @@ func insert(stm string, vals []interface{}) error {
 	return nil
 }
 
-// helper function to insert values with given sequence, id and template
-func insertWithId(seqName, idName, tmplName string, values Record) error {
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-	tid, err := IncrementSequence(tx, seqName)
-	if err != nil {
-		return err
-	}
-	if DBOWNER == "sqlite" {
-		if val, ok := values[idName]; ok {
-			v, e := utils.CastInt64(val)
-			if e == nil {
-				tid = v
-			}
-		}
-	}
-	values[idName] = tid
-	err = InsertValues(tmplName, values)
-	if err != nil {
-		log.Printf("DB error\n### %s\n%v", tmplName, err)
-		tx.Rollback()
-		return err
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Printf("DB error\n### %s\n%v", tmplName, err)
-		tx.Rollback()
-		return err
-	}
-	return nil
-}
-
 // helper function to generate operator, value pair for given argument
 func OperatorValue(arg string) (string, string) {
 	op := "="

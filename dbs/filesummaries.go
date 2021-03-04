@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -61,6 +62,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileSummaries DBS API
-func (API) InsertFileSummaries(values Record) error {
-	return InsertValues("insert_file_summaries", values)
+func (API) InsertFileSummaries(r io.Reader) (int64, error) {
+	//     return InsertValues("insert_file_summaries", values)
+	return 0, nil
 }

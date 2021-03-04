@@ -60,5 +60,5 @@ func (API) InsertFileParents(values Record) error {
 	   2. All the child-parent pairs are not already in DBS.
 	   3. The dataset parentage is already in DBS.
 	*/
-	return InsertValues("insert_file_parents", values)
+	return nil
 }

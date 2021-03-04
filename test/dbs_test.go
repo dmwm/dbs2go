@@ -49,56 +49,6 @@ func TestOperatorValue(t *testing.T) {
 	}
 }
 
-// TestStatementTemplateValues
-func TestStatementTemplateValues(t *testing.T) {
-	// initialize DB for testing
-	db := initDB(false)
-	defer db.Close()
-
-	args := make(dbs.Record)
-	args["Owner"] = "sqlite"
-	values := make(dbs.Record)
-	values["id"] = 123
-	values["name"] = "name"
-	stm, vals, err := dbs.StatementTemplateValues("insert_test_tmpl_values", args, values)
-	if err != nil {
-		t.Error("Fail TestStatementTemplateValues", err)
-	}
-	fmt.Printf("### stm='%s' vals=%+v, err=%v\n", stm, vals, err)
-	if stm != "INSERT INTO TEST (ID, NAME) VALUES (?, ?)\n" {
-		t.Error("wrong statement", stm)
-	}
-	if vals[0] != 123 && vals[1] != "name" {
-		if vals[0] != "name" && vals[1] != 123 {
-			t.Error("wrong values", vals)
-		}
-	}
-}
-
-// TestStatementInsertValues
-func TestStatementInsertValues(t *testing.T) {
-	// initialize DB for testing
-	db := initDB(false)
-	defer db.Close()
-
-	values := make(dbs.Record)
-	values["id"] = 123
-	values["name"] = "name"
-	stm, vals, err := dbs.StatementValues("insert_test_values", values)
-	if err != nil {
-		t.Error("Fail TestStatementInsertValues", err)
-	}
-	stm = strings.Replace(stm, "\n", "", -1)
-	fmt.Printf("### stm='%s' vals=%+v, err=%v\n", stm, vals, err)
-	expect := "INSERT INTO TEST (ID,NAME) VALUES (?,?)"
-	if stm != expect {
-		t.Errorf("wrong statement\n'%s'\n'%s'", stm, expect)
-	}
-	if vals[0] != 123 || vals[1] != "name" {
-		t.Error("wrong values", vals)
-	}
-}
-
 // TestUtilParseRuns
 func TestUtilParseRuns(t *testing.T) {
 	input := []string{"1", "11-22", "3", "4"}

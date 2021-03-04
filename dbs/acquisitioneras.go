@@ -34,7 +34,7 @@ func (API) UpdateAcquisitionEras(values Record) error {
 	// TODO: implement the following logic
 	// input values: acquisition_era_name ="", end_date=0
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
-	return InsertValues("insert_acquisition_eras", values)
+	return nil
 }
 
 // AcquisitionEras
@@ -119,5 +119,7 @@ func (API) InsertAcquisitionEras(r io.Reader) (int64, error) {
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
+
+	//     return InsertValues("insert_acquisition_eras", values)
 	return insertRecord(&AcquisitionEras{}, r)
 }

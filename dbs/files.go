@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -168,7 +169,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFiles DBS API
-func (API) InsertFiles(values Record) error {
+func (API) InsertFiles(r io.Reader) (int64, error) {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -206,5 +207,7 @@ func (API) InsertFiles(values Record) error {
 	// self.dsparentin.execute(conn, dsParentage2insert, transaction=tran)
 	// blkParams = self.blkstats.execute(conn, block_id, transaction=tran)
 	// self.blkstatsin.execute(conn, blkParams, transaction=tran)
-	return InsertValues("insert_files", values)
+
+	//     return InsertValues("insert_files", values)
+	return 0, nil
 }

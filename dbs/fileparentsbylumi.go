@@ -3,6 +3,7 @@ package dbs
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -52,6 +53,6 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 }
 
 // InsertFileParentsByLumi DBS API
-func (API) InsertFileParentsByLumi(values Record) error {
-	return InsertValues("insert_file_parent_by_lumis", values)
+func (API) InsertFileParentsByLumi(r io.Reader) (int64, error) {
+	return 0, nil
 }

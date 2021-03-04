@@ -3,6 +3,7 @@ package dbs
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -49,6 +50,7 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertRuns DBS API
-func (API) InsertRuns(values Record) error {
-	return InsertValues("insert_runs", values)
+func (API) InsertRuns(r io.Reader) (int64, error) {
+	//     return InsertValues("insert_runs", values)
+	return 0, nil
 }

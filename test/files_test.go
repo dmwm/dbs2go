@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -31,11 +33,13 @@ func TestFiles(t *testing.T) {
 	rec["auto_cross_section"] = 123.123
 	rec["last_modification_date"] = 1607536535
 	rec["last_modified_by"] = "Valentin"
+	data, _ := json.Marshal(rec)
+	reader := bytes.NewReader(data)
 
 	// insert new record
 	var api dbs.API
 	utils.VERBOSE = 1
-	err := api.InsertFiles(rec)
+	_, err := api.InsertFiles(reader)
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}
