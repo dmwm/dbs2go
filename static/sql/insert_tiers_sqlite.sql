@@ -1,1 +1,3 @@
-INSERT INTO DATA_TIERS (data_tier_id, data_tier_name, creation_date, create_by) VALUES (?,?,?,?)
+INSERT INTO DATA_TIERS
+    (data_tier_id, data_tier_name, creation_date, create_by)
+    VALUES (?,?,?,?)
