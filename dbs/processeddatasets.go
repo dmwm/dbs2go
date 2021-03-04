@@ -35,7 +35,7 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 	var err error
 	if r.PROCESSED_DS_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "PROCESS_DATASETS", "processed_ds_id")
+			tid, err = LastInsertId(tx, "PROCESSED_DATASETS", "processed_ds_id")
 			r.PROCESSED_DS_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_PDT")
