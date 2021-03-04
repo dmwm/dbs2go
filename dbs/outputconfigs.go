@@ -78,14 +78,6 @@ func (API) InsertOutputConfigs(values Record) error {
 		return err
 	}
 	if DBOWNER == "sqlite" {
-
-		// TODO:
-		// b = read data from reader
-		// create reader = bytes.NewReader(b)
-		// pass new reader to decode method of different DBRecords
-
-		// we decouple multiple inserts into individual one
-
 		// start transaction
 		tx, err := DB.Begin()
 		if err != nil {
@@ -243,7 +235,79 @@ func (r *OutputConfigs) Size() int64 {
 	return size
 }
 
+// OutputConfigRecord represents input to InsertOutputConfigs API
+type OutputConfigRecord struct {
+	APP_NAME            string `json:"app_name"`
+	RELEASE_VERSION     string `json:"release_version"`
+	PSET_HASH           string `json:"pset_hash"`
+	PSET_NAME           string `json:"pset_name"`
+	GLOBAL_TAG          string `json:"global_tag"`
+	OUTPUT_MODULE_LABEL string `json:"output_module_label"`
+	CREATION_DATE       int64  `json:"creation_date"`
+	CREATE_BY           string `json:"create_by"`
+	SCENARIO            string `json:"scenario"`
+}
+
 // PostOutputConfigs DBS API
 func (API) PostOutputConfigs(r io.Reader) (int64, error) {
-	return insertRecord(&OutputConfigs{}, r)
+	// implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
+	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
+	// creation_date, create_by
+	// optional: scenario, pset_name
+
+	// read given input
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	var rec OutputConfigRecord
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	arec := ApplicationExecutables{APP_NAME: rec.APP_NAME}
+	rrec := ReleaseVersions{RELEASE_VERSION: rec.RELEASE_VERSION}
+	prec := ParameterSetHashes{PSET_HASH: rec.PSET_HASH, PSET_NAME: rec.PSET_NAME}
+	orec := OutputConfigs{GLOBAL_TAG: rec.GLOBAL_TAG, OUTPUT_MODULE_LABEL: rec.OUTPUT_MODULE_LABEL, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, SCENARIO: rec.SCENARIO}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return 0, errors.New(msg)
+	}
+	defer tx.Rollback()
+	err = arec.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+	err = rrec.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+	err = prec.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+
+	// init all foreign Id's in output config record
+	orec.APP_EXEC_ID = arec.APP_EXEC_ID
+	orec.RELEASE_VERSION_ID = rrec.RELEASE_VERSION_ID
+	orec.PARAMETER_SET_HASH_ID = prec.PARAMETER_SET_HASH_ID
+	err = orec.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return 0, err
+	}
+	return size, err
 }
