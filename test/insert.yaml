@@ -101,25 +101,25 @@
   api: OutputConfigs
   params:
     - release_version: ["release-version"]
-# -
-#   insertApi: InsertDatasets
-#   insertParams:
-#     dataset: "dataset"
-#     primary_ds_name: "primary-ds"
-#     processing_ds: "processing-ds"
-#     data_tier: "TEST-RAW-TIER"
-#     acquisition_era: "era"
-#     dataset_access_type: "atype"
-#     processing_version: "processing-version"
-#     physics_group: "phys-name"
-#     xtcrosssection: 1.1
-#     creation_date: 1614880522
-#     create_by: "test"
-#     last_modification_date: 1614880522
-#     last_modified_by: "test"
-#   api: Datasets
-#   params:
-#     - dataset: ["dataset"]
+-
+  insertApi: InsertDatasets
+  insertParams:
+    dataset: "/AAAbbb/XXXyyy/TEST-RAW-TIER"
+    primary_ds_name: "primary-ds"
+    processing_ds: "processing-ds"
+    data_tier: "TEST-RAW-TIER"
+    acquisition_era: "era"
+    dataset_access_type: "atype"
+    processing_version: "processing-version"
+    physics_group: "phys-name"
+    xtcrosssection: 1.1
+    creation_date: 1614880522
+    create_by: "test"
+    last_modification_date: 1614880522
+    last_modified_by: "test"
+  api: Datasets
+  params:
+    - dataset: ["/AAAbbb/XXXyyy/TEST-RAW-TIER"]
 # -
 #   insertApi: InsertFileParents
 #   insertParams:

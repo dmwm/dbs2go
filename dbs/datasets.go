@@ -230,6 +230,11 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
 	}
+	// validate our record
+	err = r.Validate()
+	if err != nil {
+		return err
+	}
 	_, err = tx.Exec(stm, r.DATASET_ID, r.DATASET, r.IS_DATASET_VALID, r.PRIMARY_DS_ID, r.PROCESSED_DS_ID, r.DATA_TIER_ID, r.DATASET_ACCESS_TYPE_ID, r.ACQUISITION_ERA_ID, r.PROCESSING_ERA_ID, r.PHYSICS_GROUP_ID, r.XTCROSSSECTION, r.PREP_ID, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
 	return err
 }
@@ -243,11 +248,43 @@ func (r *Datasets) Validate() error {
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
 	}
+	if r.IS_DATASET_VALID != 0 {
+		if r.IS_DATASET_VALID != 1 {
+			return errors.New("wrong is_dataset_valid value")
+		}
+	}
 	if r.CREATION_DATE == 0 {
 		return errors.New("missing creation_date")
 	}
 	if r.CREATE_BY == "" {
 		return errors.New("missing create_by")
+	}
+	if r.LAST_MODIFICATION_DATE == 0 {
+		return errors.New("missing last_modification_date")
+	}
+	if r.LAST_MODIFIED_BY == "" {
+		return errors.New("missing last_modified_by")
+	}
+	if r.PRIMARY_DS_ID == 0 {
+		return errors.New("incorrect primary_ds_id")
+	}
+	if r.PROCESSED_DS_ID == 0 {
+		return errors.New("incorrect processed_ds_id")
+	}
+	if r.DATA_TIER_ID == 0 {
+		return errors.New("incorrect data_tier_id")
+	}
+	if r.DATASET_ACCESS_TYPE_ID == 0 {
+		return errors.New("incorrect dataset_access_type_id")
+	}
+	if r.ACQUISITION_ERA_ID == 0 {
+		return errors.New("incorrect acquisition_era_id")
+	}
+	if r.PROCESSING_ERA_ID == 0 {
+		return errors.New("incorrect processing_era_id")
+	}
+	if r.PHYSICS_GROUP_ID == 0 {
+		return errors.New("incorrect physics_group_id")
 	}
 	return nil
 }
