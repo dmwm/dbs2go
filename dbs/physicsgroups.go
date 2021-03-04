@@ -28,11 +28,6 @@ func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm, args...)
 }
 
-// InsertPhysicsGroups DBS API
-func (API) InsertPhysicsGroups(values Record) error {
-	return InsertValues("insert_physics_groups", values)
-}
-
 // PhysicsGroups
 type PhysicsGroups struct {
 	PHYSICS_GROUP_ID   int64  `json:"physics_group_id"`
@@ -56,9 +51,9 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_physicsgroups")
+	stm := getSQL("insert_physics_groups")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_physicsgroups_sqlite")
+		stm = getSQL("insert_physics_groups_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert PhysicsGroups\n%s\n%+v", stm, r)
@@ -93,4 +88,9 @@ func (r *PhysicsGroups) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
+}
+
+// InsertPhysicsGroups DBS API
+func (API) InsertPhysicsGroups(r io.Reader) (int64, error) {
+	return insertRecord(&PhysicsGroups{}, r)
 }

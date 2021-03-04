@@ -130,8 +130,8 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// DBSPostHandlerNew is a generic Post Handler to call DBS Post APIs
-func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+// DBSPostHandler is a generic Post Handler to call DBS Post APIs
+func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
 		return http.StatusUnsupportedMediaType, 0, errors.New("unsupported Content-Type")
@@ -140,36 +140,36 @@ func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, i
 	var err error
 	var size int64
 	if a == "datatiers" {
-		size, err = api.PostDataTiers(r.Body)
+		size, err = api.InsertDataTiers(r.Body)
 	} else if a == "outputconfigs" {
-		size, err = api.PostOutputConfigs(r.Body)
+		size, err = api.InsertOutputConfigs(r.Body)
 	} else if a == "primarydatasets" {
-		size, err = api.PostPrimaryDatasets(r.Body)
+		size, err = api.InsertPrimaryDatasets(r.Body)
 	} else if a == "acquisitioneras" {
-		size, err = api.PostAcquisitionEras(r.Body)
+		size, err = api.InsertAcquisitionEras(r.Body)
 	} else if a == "processingeras" {
-		size, err = api.PostProcessingEras(r.Body)
+		size, err = api.InsertProcessingEras(r.Body)
 	}
 	//     } else if a == "datasets" {
-	//         size, err = api.PostDatasets(r.Body)
+	//         size, err = api.InsertDatasets(r.Body)
 	//     } else if a == "blocks" {
-	//         size, err = api.PostBlocks(r.Body)
+	//         size, err = api.InsertBlocks(r.Body)
 	//     } else if a == "bulkblocks" {
-	//         size, err = api.PostBulkBlocks(r.Body)
+	//         size, err = api.InsertBulkBlocks(r.Body)
 	//     } else if a == "files" {
-	//         size, err = api.PostFiles(r.Body)
+	//         size, err = api.InsertFiles(r.Body)
 	//     } else if a == "fileparentss" {
-	//         size, err = api.PostFileParents(r.Body)
+	//         size, err = api.InsertFileParents(r.Body)
 	//     } else if a == "fileparentsbylumi" {
-	//         size, err = api.PostFileParentsByLumi(r.Body)
+	//         size, err = api.InsertFileParentsByLumi(r.Body)
 	//     } else if a == "datasetlist" {
-	//         size, err = api.PostDatasetList(r.Body)
+	//         size, err = api.InsertDatasetList(r.Body)
 	//     } else if a == "fileArray" {
-	//         size, err = api.PostFileArray(r.Body)
+	//         size, err = api.InsertFileArray(r.Body)
 	//     } else if a == "filelumis" {
-	//         size, err = api.PostFileLumis(r.Body)
+	//         size, err = api.InsertFileLumis(r.Body)
 	//     } else if a == "blockparents" {
-	//         size, err = api.PostBlockParents(r.Body)
+	//         size, err = api.InsertBlockParents(r.Body)
 	if err != nil {
 		rec := make(dbs.Record)
 		rec["error"] = fmt.Sprintf("%v", err)
@@ -182,6 +182,7 @@ func DBSPostHandlerNew(w http.ResponseWriter, r *http.Request, a string) (int, i
 	return http.StatusOK, size, nil
 }
 
+/*
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	headerContentType := r.Header.Get("Content-Type")
@@ -245,6 +246,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	}
 	return status, size, nil
 }
+*/
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
@@ -329,8 +331,7 @@ func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) (
 // Takes the following arguments: data_tier_name
 func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	if r.Method == "POST" {
-		//         return DBSPostHandler(w, r, "datatiers")
-		return DBSPostHandlerNew(w, r, "datatiers")
+		return DBSPostHandler(w, r, "datatiers")
 	}
 	return DBSGetHandler(w, r, "datatiers")
 }
@@ -477,7 +478,7 @@ func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) (int, int64, e
 // Takes the following arguments: dataset, logical_file_name, release_version, pset_hash, app_name, output_module_label, block_id, global_tag
 func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	if r.Method == "POST" {
-		return DBSPostHandlerNew(w, r, "outputconfigs")
+		return DBSPostHandler(w, r, "outputconfigs")
 	}
 	return DBSGetHandler(w, r, "outputconfigs")
 }

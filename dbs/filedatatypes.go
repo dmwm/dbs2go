@@ -23,24 +23,19 @@ func (API) FileDataTypes(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm, args...)
 }
 
-// InsertFileDataTypes DBS API
-func (API) InsertFileDataTypes(values Record) error {
-	return InsertValues("insert_file_data_types", values)
-}
-
-// FileTypes
-type FileTypes struct {
+// FileDataTypes
+type FileDataTypes struct {
 	FILE_TYPE_ID int64  `json:"file_type_id"`
 	FILE_TYPE    string `json:"file_type"`
 }
 
-// Insert implementation of FileTypes
-func (r *FileTypes) Insert(tx *sql.Tx) error {
+// Insert implementation of FileDataTypes
+func (r *FileDataTypes) Insert(tx *sql.Tx) error {
 	var tid int64
 	var err error
 	if r.FILE_TYPE_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "FILE_TYPES", "file_type_id")
+			tid, err = LastInsertId(tx, "FILE_DATA_TYPES", "file_type_id")
 			r.FILE_TYPE_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_FT")
@@ -51,27 +46,27 @@ func (r *FileTypes) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_filetypes")
+	stm := getSQL("insert_file_data_types")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_filetypes_sqlite")
+		stm = getSQL("insert_file_data_types_sqlite")
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("Insert FileTypes\n%s\n%+v", stm, r)
+		log.Printf("Insert FileDataTypes\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.FILE_TYPE_ID, r.FILE_TYPE)
 	return err
 }
 
-// Validate implementation of FileTypes
-func (r *FileTypes) Validate() error {
+// Validate implementation of FileDataTypes
+func (r *FileDataTypes) Validate() error {
 	if r.FILE_TYPE == "" {
 		return errors.New("missing file_type")
 	}
 	return nil
 }
 
-// Decode implementation for FileTypes
-func (r *FileTypes) Decode(reader io.Reader) (int64, error) {
+// Decode implementation for FileDataTypes
+func (r *FileDataTypes) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
@@ -88,4 +83,9 @@ func (r *FileTypes) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
+}
+
+// InsertFileDataTypes DBS API
+func (API) InsertFileDataTypes(r io.Reader) (int64, error) {
+	return insertRecord(&FileDataTypes{}, r)
 }

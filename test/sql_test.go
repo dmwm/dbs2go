@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,10 +17,10 @@ import (
 
 // SQLRecord represents API mapping for dbs server
 type SQLRecord struct {
-	Api          string                   `yaml:"api"`          // DBS API name
-	Params       []map[string][]string    `yaml:"params"`       // DBS API parameters
-	InsertApi    string                   `yaml:"insertApi"`    // DBS insert API name
-	InsertParams []map[string]interface{} `yaml:"insertParams"` // DBS insert API parameters
+	Api          string                 `yaml:"api"`          // DBS API name
+	Params       []map[string][]string  `yaml:"params"`       // DBS API parameters
+	InsertApi    string                 `yaml:"insertApi"`    // DBS insert API name
+	InsertParams map[string]interface{} `yaml:"insertParams"` // DBS insert API parameters
 }
 
 // TestSQL API
@@ -87,6 +88,9 @@ func TestInsertSQL(t *testing.T) {
 
 	// run insert APIs
 	for _, rec := range records {
+		// create reader from our record and pass it around to insert APIs
+		data, _ := json.Marshal(rec.InsertParams)
+		reader := bytes.NewReader(data)
 
 		// create new writer for our test
 		var w http.ResponseWriter
@@ -94,21 +98,17 @@ func TestInsertSQL(t *testing.T) {
 
 		// insert some info in DBS
 		dbs.DRYRUN = true
-		params := make(dbs.Record)
-		for _, rmap := range rec.InsertParams {
-			for k, v := range rmap {
-				params[k] = v
-			}
-		}
-		data, _ := json.Marshal(params)
 		log.Printf("SQL test for %s API with params %+v\n", rec.InsertApi, string(data))
 		r := reflect.ValueOf(dbs.API{})
 		m := r.MethodByName(rec.InsertApi)
-		args := []reflect.Value{reflect.ValueOf(params)}
+		args := []reflect.Value{reflect.ValueOf(reader)}
+		// call to InsertXXX DBS API, it returns output which consists
+		// of two values, the size of inserted record and the error
 		output := m.Call(args)
-		//         log.Println("output of insert", output[0].Interface())
-		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {
-			t.Fatalf("Fail to insert data %v\n", output[0].Interface())
+		//         log.Println("output of insert", output[0].Interface(), output[1].Interface())
+		// we look-up the error from output[1]
+		if fmt.Sprintf("%v", output[1].Interface()) != "<nil>" {
+			t.Fatalf("Fail to insert data %v\n", output[1].Interface())
 		}
 
 		// skip look-up test
@@ -118,7 +118,7 @@ func TestInsertSQL(t *testing.T) {
 
 		// look-up back inserted info
 		dbs.DRYRUN = false
-		params = make(dbs.Record)
+		params := make(dbs.Record)
 		for _, rmap := range rec.Params {
 			for k, v := range rmap {
 				params[k] = v

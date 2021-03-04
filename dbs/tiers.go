@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -27,23 +26,6 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
-}
-
-// InsertDataTiers DBS API
-func (API) InsertDataTiers(values Record) error {
-	// implement the following
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataTier.py
-	// input values: data_tier_name, creation_date, create_by
-
-	params := []string{"data_tier_name", "creation_date", "create_by"}
-	if err := checkParams(values, params); err != nil {
-		return err
-	}
-	if v, ok := values["data_tier_name"]; ok {
-		values["data_tier_name"] = strings.ToUpper(v.(string))
-	}
-	err := insertWithId("SEQ_DT", "data_tier_id", "insert_tiers", values)
-	return err
 }
 
 // DataTiers
@@ -123,7 +105,7 @@ func (r *DataTiers) Decode(reader io.Reader) (int64, error) {
 	return size, nil
 }
 
-// PostDataTiers DBS API
-func (API) PostDataTiers(r io.Reader) (int64, error) {
+// InsertDataTiers DBS API
+func (API) InsertDataTiers(r io.Reader) (int64, error) {
 	return insertRecord(&DataTiers{}, r)
 }

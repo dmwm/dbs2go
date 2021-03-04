@@ -29,43 +29,6 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 	return executeAll(w, stm, args...)
 }
 
-// InsertAcquisitionEras DBS API
-func (API) InsertAcquisitionEras(values Record) error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
-	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
-	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
-	params := []string{"acquisition_era_name", "creation_date", "start_date", "end_date", "create_by"}
-	if err := checkParams(values, params); err != nil {
-		return err
-	}
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-
-	if _, ok := values["acquisition_era_id"]; !ok {
-		sid, err := IncrementSequence(tx, "SEQ_AQE")
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		values["acquisition_era_id"] = sid + 1
-	}
-	res := InsertValues("insert_acquisition_eras", values)
-
-	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	return res
-}
-
 // UpdateAcquisitionEras DBS API
 func (API) UpdateAcquisitionEras(values Record) error {
 	// TODO: implement the following logic
@@ -102,9 +65,9 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_acquisitioneras")
+	stm := getSQL("insert_acquisition_eras")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_acquisitioneras_sqlite")
+		stm = getSQL("insert_acquisition_eras_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert AcquisitionEras\n%s\n%+v", stm, r)
@@ -150,7 +113,11 @@ func (r *AcquisitionEras) Decode(reader io.Reader) (int64, error) {
 	return size, nil
 }
 
-// PostAcquisitionEras DBS API
-func (API) PostAcquisitionEras(r io.Reader) (int64, error) {
+// InsertAcquisitionEras DBS API
+func (API) InsertAcquisitionEras(r io.Reader) (int64, error) {
+	// implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
+	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
+	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
 	return insertRecord(&AcquisitionEras{}, r)
 }

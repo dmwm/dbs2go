@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -129,11 +131,13 @@ func TestGetID(t *testing.T) {
 	rec["data_tier_name"] = "RAW-TEST-0"
 	rec["creation_date"] = 1607536535
 	rec["create_by"] = "Valentin"
+	data, _ := json.Marshal(rec)
+	reader := bytes.NewReader(data)
 
 	// insert new record
 	var api dbs.API
 	utils.VERBOSE = 1
-	err := api.InsertDataTiers(rec)
+	_, err := api.InsertDataTiers(reader)
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}

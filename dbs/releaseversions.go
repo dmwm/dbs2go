@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -33,36 +32,6 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
-}
-
-// InsertReleaseVersions DBS API
-func (API) InsertReleaseVersions(values Record) error {
-	params := []string{"release_version"}
-	if err := checkParams(values, params); err != nil {
-		return err
-	}
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-
-	// get last inserted id
-	pid, err := LastInsertId(tx, "RELEASE_VERSIONS", "release_version_id")
-	if err != nil {
-		return err
-	}
-	values["release_version_id"] = pid + 1
-	res := InsertValuesTxt(tx, "insert_release_versions", values)
-
-	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-	return res
 }
 
 // ReleaseVersions
@@ -125,4 +94,9 @@ func (r *ReleaseVersions) Decode(reader io.Reader) (int64, error) {
 	}
 	size := int64(len(data))
 	return size, nil
+}
+
+// InsertReleaseVersions DBS API
+func (API) InsertReleaseVersions(r io.Reader) (int64, error) {
+	return insertRecord(&ReleaseVersions{}, r)
 }

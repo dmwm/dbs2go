@@ -3,8 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -24,36 +22,6 @@ func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
-}
-
-// InsertPrimaryDSTypes DBS API
-func (API) InsertPrimaryDSTypes(values Record) error {
-	params := []string{"primary_ds_type"}
-	if err := checkParams(values, params); err != nil {
-		return err
-	}
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-
-	// get last inserted id
-	pid, err := LastInsertId(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
-	if err != nil {
-		return err
-	}
-	values["primary_ds_type_id"] = pid + 1
-	res := InsertValuesTxt(tx, "insert_primary_ds_types", values)
-
-	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-	return res
 }
 
 // PrimaryDSTypes
@@ -105,7 +73,7 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) (int64, error) {
 	return size, nil
 }
 
-// PostPrimaryDSTypes DBS API
-func (API) PostPrimaryDSTypes(r io.Reader) (int64, error) {
+// InsertPrimaryDSTypes DBS API
+func (API) InsertPrimaryDSTypes(r io.Reader) (int64, error) {
 	return insertRecord(&PrimaryDSTypes{}, r)
 }

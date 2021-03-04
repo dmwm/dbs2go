@@ -23,11 +23,6 @@ func (API) ProcessedDatasets(params Record, w http.ResponseWriter) (int64, error
 	return executeAll(w, stm, args...)
 }
 
-// InsertProcessedDatasets DBS API
-func (API) InsertProcessedDatasets(values Record) error {
-	return InsertValues("insert_processed_datasets", values)
-}
-
 // ProcessedDatasets
 type ProcessedDatasets struct {
 	PROCESSED_DS_ID   int64  `json:"processed_ds_id"`
@@ -51,9 +46,9 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_processeddatasets")
+	stm := getSQL("insert_processed_datasets")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_processeddatasets_sqlite")
+		stm = getSQL("insert_processed_datasets_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ProcessedDatasets\n%s\n%+v", stm, r)
@@ -94,7 +89,7 @@ func (r *ProcessedDatasets) Decode(reader io.Reader) (int64, error) {
 	return size, nil
 }
 
-// PostProcessedDatasets DBS API
-func (API) PostProcessedDatasets(r io.Reader) (int64, error) {
+// InsertProcessedDatasets DBS API
+func (API) InsertProcessedDatasets(r io.Reader) (int64, error) {
 	return insertRecord(&ProcessedDatasets{}, r)
 }

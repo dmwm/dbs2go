@@ -28,43 +28,6 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm, args...)
 }
 
-// InsertProcessingEras DBS API
-func (API) InsertProcessingEras(values Record) error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSProcessingEra.py
-	// input values: processing_version, creation_date,  create_by, description
-	// businput["processing_era_id"] = self.sm.increment(conn, "SEQ_PE", tran)
-	params := []string{"processing_version", "creation_date", "create_by", "description"}
-	if err := checkParams(values, params); err != nil {
-		return err
-	}
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-
-	if _, ok := values["processing_era_id"]; !ok {
-		sid, err := IncrementSequence(tx, "SEQ_PE")
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		values["processing_era_id"] = sid + 1
-	}
-	res := InsertValues("insert_processing_eras", values)
-
-	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	return res
-}
-
 // ProcessingEras
 type ProcessingEras struct {
 	PROCESSING_ERA_ID  int64  `json:"processing_era_id"`
@@ -91,9 +54,9 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_processingeras")
+	stm := getSQL("insert_processing_eras")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_processingeras_sqlite")
+		stm = getSQL("insert_processing_eras_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ProcessingEras\n%s\n%+v", stm, r)
@@ -139,7 +102,7 @@ func (r *ProcessingEras) Decode(reader io.Reader) (int64, error) {
 	return size, nil
 }
 
-// PostProcessingEras DBS API
-func (API) PostProcessingEras(r io.Reader) (int64, error) {
+// InsertProcessingEras DBS API
+func (API) InsertProcessingEras(r io.Reader) (int64, error) {
 	return insertRecord(&ProcessingEras{}, r)
 }

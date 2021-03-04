@@ -28,60 +28,6 @@ func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) 
 	return executeAll(w, stm, args...)
 }
 
-// InsertPrimaryDatasets DBS API
-func (api API) InsertPrimaryDatasets(values Record) error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
-	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by
-	// insert primary_ds_type and get primary_ds_type_id
-	// businput["primary_ds_id"] = self.sm.increment(conn, "SEQ_PDS")
-	// insert primary_ds_name, creation_date, create_by, primary_ds_id
-
-	params := []string{"primary_ds_name", "primary_ds_type", "creation_date", "create_by"}
-	if err := checkParams(values, params); err != nil {
-		return err
-	}
-
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-
-	// if primary_ds_id is not given we will insert primary ds type first
-	if _, ok := values["primary_ds_type_id"]; !ok {
-		rec := make(Record)
-		rec["primary_ds_type"] = values["primary_ds_type"]
-		api.InsertPrimaryDSTypes(rec)
-		pid, err := LastInsertId(tx, "primary_ds_types", "primary_ds_type_id")
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		values["primary_ds_type_id"] = pid + 1
-	}
-	delete(values, "primary_ds_type")
-	if _, ok := values["primary_ds_id"]; !ok {
-		sid, err := IncrementSequence(tx, "SEQ_PDS")
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		values["primary_ds_id"] = sid + 1
-	}
-	res := InsertValuesTxt(tx, "insert_primary_datasets", values)
-
-	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	return res
-}
-
 // PrimaryDatasets
 type PrimaryDatasets struct {
 	PRIMARY_DS_ID      int64  `json:"primary_ds_id"`
@@ -108,9 +54,9 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 		}
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_primarydatastes")
+	stm := getSQL("insert_primary_datasets")
 	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_primarydatasets_sqlite")
+		stm = getSQL("insert_primary_datasets_sqlite")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert PrimaryDatasets\n%s\n%+v", stm, r)
@@ -164,8 +110,8 @@ type PrimaryDatasetRecord struct {
 	CREATE_BY       string `json:"create_by"`
 }
 
-// PostPrimaryDatasets DBS API
-func (API) PostPrimaryDatasets(r io.Reader) (int64, error) {
+// InsertPrimaryDatasets DBS API
+func (API) InsertPrimaryDatasets(r io.Reader) (int64, error) {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
 	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by

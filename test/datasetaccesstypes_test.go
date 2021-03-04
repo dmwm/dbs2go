@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"testing"
@@ -21,11 +23,13 @@ func TestDatasetAccessTypes(t *testing.T) {
 	rec := make(dbs.Record)
 	rec["dataset_access_type_id"] = 0
 	rec["dataset_access_type"] = "dataset_access_type"
+	data, _ := json.Marshal(rec)
+	reader := bytes.NewReader(data)
 
 	// insert new record
 	var api dbs.API
 	utils.VERBOSE = 1
-	err := api.InsertDatasetAccessTypes(rec)
+	_, err := api.InsertDatasetAccessTypes(reader)
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}

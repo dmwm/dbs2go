@@ -7,141 +7,141 @@
 -
   insertApi: InsertDataTiers
   insertParams:
-  - data_tier_id: 1
-  - data_tier_name: "tier-name"
-  - creation_date: 123
-  - create_by: "test"
+    data_tier_id: 1
+    data_tier_name: "TEST-RAW-TIER"
+    creation_date: 1614880522
+    create_by: "test"
   api: DataTiers
   params:
-  - data_tier_name: ["tier-name"]
+  - data_tier_name: ["TEST-RAW-TIER"]
 -
   insertApi: InsertAcquisitionEras
   insertParams:
-  - acquisition_era_name: "era"
-  - start_date: 123
-  - end_date: 321
-  - creation_date: 123
-  - create_by: "tester"
-  - description: "description"
+    acquisition_era_name: "era"
+    start_date: 1614880522
+    end_date: 1614880522
+    creation_date: 1614880522
+    create_by: "tester"
+    description: "description"
   api: AcquisitionEras
   params:
   - acquisition_era_name: ["era"]
 -
   insertApi: InsertDatasetAccessTypes
   insertParams:
-  - dataset_access_type_id: 1
-  - dataset_access_type: "atype"
+    dataset_access_type_id: 1
+    dataset_access_type: "atype"
   api: DatasetAccessTypes
   params:
   - dataset_access_type: ["atype"]
 -
   insertApi: InsertFileDataTypes
   insertParams:
-  - file_type_id: 1
-  - file_type: "file-type"
+    file_type_id: 1
+    file_type: "file-type"
   api: FileDataTypes
   params:
   - file_type: ["file-type"]
 -
   insertApi: InsertPhysicsGroups
   insertParams:
-  - physics_group_id: 1
-  - physics_group_name: "phys-name"
+    physics_group_id: 1
+    physics_group_name: "phys-name"
   api: PhysicsGroups
   params:
   - physics_group_name: ["phys-name"]
 -
   insertApi: InsertPrimaryDSTypes
   insertParams:
-  - primary_ds_type_id: 1
-  - primary_ds_type: "prim_ds_type"
+    primary_ds_type_id: 1
+    primary_ds_type: "prim_ds_type"
   api: PrimaryDSTypes
   params:
   - primary_ds_type: ["prim_ds_type"]
 -
   insertApi: InsertPrimaryDatasets
   insertParams:
-  - primary_ds_id: 1
-  - primary_ds_name: "primds"
-  - primary_ds_type: "primds-type"
-  - creation_date: 123
-  - create_by: "test"
+    primary_ds_id: 1
+    primary_ds_name: "primds"
+    primary_ds_type: "primds-type"
+    creation_date: 1614880522
+    create_by: "test"
   api: PrimaryDatasets
   params:
   - primary_ds_name: ["primds"]
 -
   insertApi: InsertProcessingEras
   insertParams:
-  - processing_version: "version"
-  - creation_date: 123
-  - create_by: "tester"
-  - description: "description"
+    processing_version: "version"
+    creation_date: 1614880522
+    create_by: "tester"
+    description: "description"
   api: ProcessingEras
   params:
   - processing_version: ["version"]
 -
   insertApi: InsertProcessedDatasets
   insertParams:
-  - processed_ds_id: 1
-  - processed_ds_name: "ps_ds_name"
+    processed_ds_id: 1
+    processed_ds_name: "ps_ds_name"
   api: ProcessedDatasets
   params:
   - processed_ds_name: ["ps_ds_name"]
 -
   insertApi: InsertReleaseVersions
   insertParams:
-  - release_version: "rel_version"
+    release_version: "rel_version"
   api: ReleaseVersions
   params:
   - release_version: ["rel_version"]
 -
   insertApi: InsertOutputConfigs
   insertParams:
-  - app_name: "app-name"
-  - release_version: "release-version"
-  - pset_hash: "pset-hash"
-  - global_tag: "global-tag"
-  - output_module_label: "label"
-  - creation_date: 123
-  - create_by: "test"
-  - scenario: "scenario"
+    app_name: "app-name"
+    release_version: "release-version"
+    pset_hash: "pset-hash"
+    global_tag: "global-tag"
+    output_module_label: "label"
+    creation_date: 1614880522
+    create_by: "test"
+    scenario: "scenario"
   api: OutputConfigs
   params:
     - release_version: ["release-version"]
 # -
 #   insertApi: InsertFileParents
 #   insertParams:
-#   - this_file_id: 1
-#   - parent_file_id: 1
+#     this_file_id: 1
+#     parent_file_id: 1
 #   api: FileParents
 #   params:
 # -
 #   insertApi: InsertFiles
 #   insertParams:
-#   - file_id: 1
-#   - logical_file_name: "/a/file.root"
-#   - is_file_valid: 0
-#   - dataset_id: 1
-#   - block_id: 1
-#   - file_type_id: 1
-#   - check_sum: "123"
-#   - event_count: 1
-#   - file_size: 123.0
-#   - adler32: "adler"
-#   - md5: "md5"
-#   - auto_cross_section: 123
-#   - last_modification_date: 123
-#   - last_modified_by: "tester"
+#     file_id: 1
+#     logical_file_name: "/a/file.root"
+#     is_file_valid: 0
+#     dataset_id: 1
+#     block_id: 1
+#     file_type_id: 1
+#     check_sum: "123"
+#     event_count: 1
+#     file_size: 123.0
+#     adler32: "adler"
+#     md5: "md5"
+#     auto_cross_section: 123
+#     last_modification_date: 1614880522
+#     last_modified_by: "tester"
 #   api: Files
 #   params:
 #   - logical_file_name: ["/a/file.root"]
 # -
 #   insertApi: InsertFileLumis
 #   insertParams:
-#   - file_id: 1
-#   - run_num: 1
-#   - lumi_section_num: 1
-#   - event_count: 1
+#     file_id: 1
+#     run_num: 1
+#     lumi_section_num: 1
+#     event_count: 1
 #   api: FileLumis
 #   params:
 #   - run_num: ["1"]
