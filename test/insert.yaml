@@ -120,6 +120,21 @@
   api: Datasets
   params:
     - dataset: ["/AAAbbb/XXXyyy/TEST-RAW-TIER"]
+-
+  insertApi: InsertBlocks
+  insertParams:
+    block_name: "/AAAbbb/XXXyyy/TEST-RAW-TIER#123"
+    open_for_writing: 1
+    origin_site_name: "origing_site"
+    block_size: 12345
+    file_count: 111
+    creation_date: 1614880522
+    create_by: "test"
+    last_modification_date: 1614880522
+    last_modified_by: "test"
+  api: Blocks
+  params:
+    - dataset: ["/AAAbbb/XXXyyy/TEST-RAW-TIER"]
 # -
 #   insertApi: InsertFileParents
 #   insertParams:
