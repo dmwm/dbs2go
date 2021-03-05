@@ -28,10 +28,10 @@
 -
   insertApi: InsertDatasetAccessTypes
   insertParams:
-    dataset_access_type: "atype"
+    dataset_access_type: "VALID"
   api: DatasetAccessTypes
   params:
-  - dataset_access_type: ["atype"]
+  - dataset_access_type: ["VALID"]
 -
   insertApi: InsertFileDataTypes
   insertParams:
@@ -105,11 +105,11 @@
   insertApi: InsertDatasets
   insertParams:
     dataset: "/AAAbbb/XXXyyy/TEST-RAW-TIER"
-    primary_ds_name: "primary-ds"
-    processing_ds: "processing-ds"
+    primary_ds_name: "primds"
+    processed_ds: "ps_ds_name"
     data_tier: "TEST-RAW-TIER"
     acquisition_era: "era"
-    dataset_access_type: "atype"
+    dataset_access_type: "VALID"
     processing_version: "processing-version"
     physics_group: "phys-name"
     xtcrosssection: 1.1

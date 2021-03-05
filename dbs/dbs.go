@@ -485,6 +485,19 @@ func insert(stm string, vals []interface{}) error {
 	return nil
 }
 
+// helper function to get table primary id for a given value
+func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error) {
+	var tid int64
+	var stm string
+	if DBOWNER == "sqlite" {
+		stm = fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", id, table, attr)
+	} else {
+		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, id)
+	}
+	err := tx.QueryRow(stm, val).Scan(&tid)
+	return tid, err
+}
+
 // helper function to generate operator, value pair for given argument
 func OperatorValue(arg string) (string, string) {
 	op := "="
@@ -598,36 +611,18 @@ func runsClause(table string, runs []string) (string, string, []string) {
 
 // helper function to get attribute ID from a given table
 func GetID(table, id, attr, value string) (int64, error) {
-	stm := fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = ?", id, DBOWNER, table, attr)
-	if DBOWNER == "sqlite" {
-		stm = strings.Replace(stm, "sqlite.", "", -1)
-	}
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
 		return 0, errors.New(msg)
 	}
 	defer tx.Rollback()
-	var args []interface{}
-	args = append(args, value)
-	rows, err := tx.Query(stm, args...)
+	tid, err := getTxtID(tx, table, id, attr, value)
 	if err != nil {
-		msg := fmt.Sprintf("unable to query statement=%v error=%v", stm, err)
-		return 0, errors.New(msg)
+		tx.Rollback()
+		return 0, err
 	}
-	defer rows.Close()
-	var rid int64
-	for rows.Next() {
-		if err := rows.Scan(&rid); err != nil {
-			return 0, errors.New(fmt.Sprintf("rows.Scan, error=%v", err))
-		}
-		break
-	}
-	// Check for errors from iterating over rows.
-	if err := rows.Err(); err != nil {
-		return 0, errors.New(fmt.Sprintf("rows.Err, error=%v", err))
-	}
-	return rid, nil
+	return tid, nil
 }
 
 // AddParam adds single parameter to SQL statement

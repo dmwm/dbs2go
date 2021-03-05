@@ -361,14 +361,7 @@ func (API) InsertDatasets(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	// set dependent's records
-	aerec := AcquisitionEras{ACQUISITION_ERA_NAME: rec.ACQUISITION_ERA}
-	pdrec := PrimaryDatasets{PRIMARY_DS_NAME: rec.PRIMARY_DS_NAME}
-	perec := ProcessingEras{PROCESSING_VERSION: rec.PROCESSING_VERSION}
-	psrec := ProcessedDatasets{}
-	pgrec := PhysicsGroups{PHYSICS_GROUP_NAME: rec.PHYSICS_GROUP}
-	darec := DatasetAccessTypes{DATASET_ACCESS_TYPE: rec.DATASET_ACCESS_TYPE}
-	dtrec := DataTiers{DATA_TIER_NAME: rec.DATA_TIER}
-	dsrec := Datasets{DATASET: rec.DATASET, XTCROSSSECTION: rec.XTCROSSSECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
+	dsrec := Datasets{DATASET: rec.DATASET, XTCROSSSECTION: rec.XTCROSSSECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY, IS_DATASET_VALID: 1}
 
 	// start transaction
 	tx, err := DB.Begin()
@@ -379,15 +372,50 @@ func (API) InsertDatasets(r io.Reader) (int64, error) {
 	defer tx.Rollback()
 
 	// TODO: get all necessary IDs from different tables
+	primId, err := getTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
+	if err != nil {
+		log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
+		return 0, err
+	}
+	procId, err := getTxtID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS)
+	if err != nil {
+		log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS)
+		return 0, err
+	}
+	tierId, err := getTxtID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER)
+	if err != nil {
+		log.Println("unable to find data_tier_id for", rec.DATA_TIER)
+		return 0, err
+	}
+	daccId, err := getTxtID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
+	if err != nil {
+		log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
+		return 0, err
+	}
+	aeraId, err := getTxtID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA)
+	if err != nil {
+		log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA)
+		return 0, err
+	}
+	peraId, err := getTxtID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
+	if err != nil {
+		log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
+		return 0, err
+	}
+	pgrpId, err := getTxtID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP)
+	if err != nil {
+		log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP)
+		return 0, err
+	}
 
 	// init all foreign Id's in output config record
-	dsrec.PRIMARY_DS_ID = pdrec.PRIMARY_DS_ID
-	dsrec.PROCESSED_DS_ID = psrec.PROCESSED_DS_ID
-	dsrec.DATA_TIER_ID = dtrec.DATA_TIER_ID
-	dsrec.DATASET_ACCESS_TYPE_ID = darec.DATASET_ACCESS_TYPE_ID
-	dsrec.ACQUISITION_ERA_ID = aerec.ACQUISITION_ERA_ID
-	dsrec.PROCESSING_ERA_ID = perec.PROCESSING_ERA_ID
-	dsrec.PHYSICS_GROUP_ID = pgrec.PHYSICS_GROUP_ID
+	dsrec.PRIMARY_DS_ID = primId
+	dsrec.PROCESSED_DS_ID = procId
+	dsrec.DATA_TIER_ID = tierId
+	dsrec.DATASET_ACCESS_TYPE_ID = daccId
+	dsrec.ACQUISITION_ERA_ID = aeraId
+	dsrec.PROCESSING_ERA_ID = peraId
+	dsrec.PHYSICS_GROUP_ID = pgrpId
 	err = dsrec.Insert(tx)
 	if err != nil {
 		return 0, err
