@@ -1,10 +1,17 @@
 package dbs
 
 import (
+	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // Files DBS API
@@ -168,6 +175,136 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm, args...)
 }
 
+// Files
+type Files struct {
+	FILE_ID                int64   `json:"block_id"`
+	LOGICAL_FILE_NAME      string  `json:"block_name"`
+	IS_FILE_VALID          int64   `json:"is_file_valid"`
+	DATASET_ID             int64   `json:"dataset_id"`
+	BLOCK_ID               int64   `json:"block_id"`
+	FILE_TYPE_ID           int64   `json:"file_type_id"`
+	CHECK_SUM              string  `json:"check_sum"`
+	FILE_SIZE              int64   `json:"block_size"`
+	EVENT_COUNT            int64   `json:"file_count"`
+	BRANCH_HASH_ID         int64   `json:"branch_hash_id"`
+	ADLER32                string  `json:"adler32"`
+	MD5                    string  `json:"md5"`
+	AUTO_CROSS_SECTION     float64 `json:"auto_cross_section"`
+	CREATION_DATE          int64   `json:"creation_date"`
+	CREATE_BY              string  `json:"create_by"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+}
+
+// Insert implementation of Files
+func (r *Files) Insert(tx *sql.Tx) error {
+	var tid int64
+	var err error
+	if r.DATASET_ID == 0 {
+		if DBOWNER == "sqlite" {
+			tid, err = LastInsertId(tx, "FILES", "file_id")
+			r.DATASET_ID = tid + 1
+		} else {
+			tid, err = IncrementSequence(tx, "SEQ_FL")
+			r.DATASET_ID = tid
+		}
+		if err != nil {
+			return err
+		}
+	}
+	// get SQL statement from static area
+	stm := getSQL("insert_files")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("insert_files_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert Files\n%s\n%+v", stm, r)
+	}
+	// validate our record
+	err = r.Validate()
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(stm, r.FILE_ID, r.LOGICAL_FILE_NAME, r.IS_FILE_VALID, r.DATASET_ID, r.BLOCK_ID, r.FILE_TYPE_ID, r.CHECK_SUM, r.FILE_SIZE, r.EVENT_COUNT, r.BRANCH_HASH_ID, r.ADLER32, r.MD5, r.AUTO_CROSS_SECTION, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	return err
+}
+
+// Validate implementation of Files
+func (r *Files) Validate() error {
+	if matched := filePattern.MatchString(r.LOGICAL_FILE_NAME); !matched {
+		log.Println("validate File", r)
+		return errors.New("invalid pattern for file")
+	}
+	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
+		return errors.New("invalid pattern for createion date")
+	}
+	if r.CREATION_DATE == 0 {
+		return errors.New("missing creation_date")
+	}
+	if r.CREATE_BY == "" {
+		return errors.New("missing create_by")
+	}
+	if r.LAST_MODIFICATION_DATE == 0 {
+		return errors.New("missing last_modification_date")
+	}
+	if r.LAST_MODIFIED_BY == "" {
+		return errors.New("missing last_modified_by")
+	}
+	return nil
+}
+
+// Decode implementation for Files
+func (r *Files) Decode(reader io.Reader) (int64, error) {
+	// init record with given data record
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	err = json.Unmarshal(data, &r)
+
+	//     decoder := json.NewDecoder(r)
+	//     err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	return size, nil
+}
+
+type RunLumi struct {
+	RunNumber    int64 `json:"run_num"`
+	LumitSection int64 `json:"lumi_section_num"`
+}
+
+// type FileParent struct {
+//     FileParentLfn string `json:"file_parent_lfn"`
+// }
+
+// FileRecord represent input recor for insert blocks API
+type FileRecord struct {
+	LOGICAL_FILE_NAME      string  `json:"block_name"`
+	IS_FILE_VALID          int64   `json:"is_file_valid"`
+	DATASET                string  `json:"dataset"`
+	BLOCK                  string  `json:"block"`
+	FILE_TYPE              string  `json:"file_type"`
+	CHECK_SUM              string  `json:"check_sum"`
+	FILE_SIZE              int64   `json:"block_size"`
+	EVENT_COUNT            int64   `json:"file_count"`
+	ADLER32                string  `json:"adler32"`
+	MD5                    string  `json:"md5"`
+	AUTO_CROSS_SECTION     float64 `json:"auto_cross_section"`
+	CREATION_DATE          int64   `json:"creation_date"`
+	CREATE_BY              string  `json:"create_by"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+
+	FILE_LUMI_LIST          []RunLumi            `json:"file_lumi_list"`
+	FILE_PARENT_LIST        []FileParent         `json:"file_parent_list"`
+	FILE_OUTPUT_CONFIG_LIST []OutputConfigRecord `json:"file_output_config"`
+}
+
 // InsertFiles DBS API
 func (API) InsertFiles(r io.Reader) (int64, error) {
 	// TODO: implement the following logic
@@ -209,5 +346,62 @@ func (API) InsertFiles(r io.Reader) (int64, error) {
 	// self.blkstatsin.execute(conn, blkParams, transaction=tran)
 
 	//     return InsertValues("insert_files", values)
-	return 0, nil
+
+	// read given input
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	var rec FileRecord
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	// set dependent's records
+	frec := Files{LOGICAL_FILE_NAME: rec.LOGICAL_FILE_NAME, IS_FILE_VALID: rec.IS_FILE_VALID, CHECK_SUM: rec.CHECK_SUM, FILE_SIZE: rec.FILE_SIZE, EVENT_COUNT: rec.EVENT_COUNT, ADLER32: rec.ADLER32, MD5: rec.MD5, AUTO_CROSS_SECTION: rec.AUTO_CROSS_SECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return 0, errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	// get all necessary IDs from different tables
+	blkId, err := getTxtID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK)
+	if err != nil {
+		log.Println("unable to find block_id for", rec.BLOCK)
+		return 0, err
+	}
+	dsId, err := getTxtID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
+	if err != nil {
+		log.Println("unable to find dataset_id for", rec.DATASET)
+		return 0, err
+	}
+	ftId, err := getTxtID(tx, "FILE_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
+	if err != nil {
+		log.Println("unable to find file_type_id for", rec.FILE_TYPE)
+		return 0, err
+	}
+
+	// assign all Id's in dataset DB record
+	frec.DATASET_ID = dsId
+	frec.BLOCK_ID = blkId
+	frec.FILE_TYPE_ID = ftId
+	err = frec.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return 0, err
+	}
+	return size, err
 }
