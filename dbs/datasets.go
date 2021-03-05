@@ -408,7 +408,7 @@ func (API) InsertDatasets(r io.Reader) (int64, error) {
 		return 0, err
 	}
 
-	// init all foreign Id's in output config record
+	// assign all Id's in dataset DB record
 	dsrec.PRIMARY_DS_ID = primId
 	dsrec.PROCESSED_DS_ID = procId
 	dsrec.DATA_TIER_ID = tierId
