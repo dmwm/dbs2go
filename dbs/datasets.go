@@ -371,7 +371,7 @@ func (API) InsertDatasets(r io.Reader) (int64, error) {
 	}
 	defer tx.Rollback()
 
-	// TODO: get all necessary IDs from different tables
+	// get all necessary IDs from different tables
 	primId, err := getTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
