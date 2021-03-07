@@ -1,9 +1,12 @@
 package dbs
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 )
 
@@ -111,39 +114,172 @@ type FileParent struct {
 }
 
 // BulkBlocks DBS API
-func (API) BulkBlocks(decoder *json.Decoder) error {
-	var rec BulkBlocks
-	err := decoder.Decode(&rec)
+// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
+// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
+/*
+   #1 insert configuration
+   configList = self.insertOutputModuleConfig(
+                   blockcontent['dataset_conf_list'], migration)
+   #2 insert dataset
+   datasetId = self.insertDataset(blockcontent, configList, migration)
+   #3 insert block & files
+   self.insertBlockFile(blockcontent, datasetId, migration)
+*/
+func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
+	//     var rec BulkBlocks
+	//     err := decoder.Decode(&rec)
+	//     if err != nil {
+	//         log.Println("BulkBlocks decoder error", err)
+	//         return 0, err
+	//     }
+	data, err := ioutil.ReadAll(r)
 	if err != nil {
-		log.Println("BulkBlocks decoder error", err)
-		return err
+		log.Println("unable to read bulkblock input", err)
+		return 0, err
 	}
-	// API logic
-	// validate input record
-	if err := validateBulkBlockData(rec); err != nil {
-		log.Println("ERROR: invalid BulkBlock record", err)
-		return err
+	var rec BulkBlocks
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Println("unable to unmarshal bulkblock record", err)
+		return 0, err
 	}
+
+	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		return 0, errors.New(msg)
 	}
 	defer tx.Rollback()
-	// insert configuration and get back config list
-	// insert dataset with config list and get back dataset_id
-	// insert block with dataset_id
+
+	var reader *bytes.Reader
+	//     var data []byte
+	var api API
+	var size, s int64
+
+	// insert dataset configuration
+	for _, rrr := range rec.DatasetConfigList {
+		data, err = json.Marshal(rrr)
+		if err != nil {
+			log.Println("unable to marshal dataset config list", err)
+			return 0, err
+		}
+		reader = bytes.NewReader(data)
+		s, err = api.InsertOutputConfigs(reader)
+		if err != nil {
+			return 0, err
+		}
+		size += s
+	}
+
+	// insert file configuration
+	for _, rrr := range rec.FileConfigList {
+		data, err = json.Marshal(rrr)
+		if err != nil {
+			log.Println("unable to marshal file config list", err)
+			return 0, err
+		}
+		reader = bytes.NewReader(data)
+		s, err = api.InsertFileOutputModConfigs(reader)
+		if err != nil {
+			return 0, err
+		}
+		size += s
+	}
+
+	// insert primary dataset
+	data, err = json.Marshal(rec.PrimaryDataset)
+	if err != nil {
+		log.Println("unable to marshal primary dataset", err)
+		return 0, err
+	}
+	reader = bytes.NewReader(data)
+	s, err = api.InsertPrimaryDatasets(reader)
+	if err != nil {
+		return 0, err
+	}
+	size += s
+
+	// insert processing era
+	data, err = json.Marshal(rec.ProcessingEra)
+	if err != nil {
+		log.Println("unable to marshal processing era", err)
+		return 0, err
+	}
+	reader = bytes.NewReader(data)
+	s, err = api.InsertProcessingEras(reader)
+	if err != nil {
+		return 0, err
+	}
+	size += s
+
+	// insert acquisition era
+	data, err = json.Marshal(rec.AcquisitionEra)
+	if err != nil {
+		log.Println("unable to marshal processing era", err)
+		return 0, err
+	}
+	reader = bytes.NewReader(data)
+	s, err = api.InsertAcquisitionEras(reader)
+	if err != nil {
+		return 0, err
+	}
+	size += s
+
+	// insert dataset
+	data, err = json.Marshal(rec.Dataset)
+	if err != nil {
+		log.Println("unable to marshal processing era", err)
+		return 0, err
+	}
+	reader = bytes.NewReader(data)
+	s, err = api.InsertDatasets(reader)
+	if err != nil {
+		return 0, err
+	}
+	size += s
+
+	// insert block
+	data, err = json.Marshal(rec.Block)
+	if err != nil {
+		log.Println("unable to marshal processing era", err)
+		return 0, err
+	}
+	reader = bytes.NewReader(data)
+	s, err = api.InsertBlocks(reader)
+	if err != nil {
+		return 0, err
+	}
+	size += s
+
 	// insert files
+	for _, rrr := range rec.Files {
+		data, err = json.Marshal(rrr)
+		if err != nil {
+			log.Println("unable to marshal file config list", err)
+			return 0, err
+		}
+		reader = bytes.NewReader(data)
+		s, err = api.InsertFiles(reader)
+		if err != nil {
+			return 0, err
+		}
+		size += s
+	}
+
 	// insert file parent list
 	// insert file lumi list
 	// insert file config object
 	// insert dataset parent list
-	data, err := json.MarshalIndent(rec, "", "    ")
-	if err == nil {
-		log.Printf("BulkBlocks record: %+v\n", string(data))
-	}
-	return nil
+
+	//     data, err = json.MarshalIndent(rec, "", "    ")
+	//     if err == nil {
+	//         log.Printf("BulkBlocks record: %+v\n", string(data))
+	//     }
+	return size, nil
 }
+
+/*
 
 // helper function to validate bulk block data
 func validateBulkBlockData(rec BulkBlocks) error {
@@ -153,3 +289,4 @@ func validateBulkBlockData(rec BulkBlocks) error {
 // helper function to insert configuration
 func insertConfiguration(rec BulkBlocks) {
 }
+*/

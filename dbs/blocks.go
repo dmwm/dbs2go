@@ -263,21 +263,3 @@ func (API) InsertBlocks(r io.Reader) (int64, error) {
 	}
 	return size, err
 }
-
-// InsertBulkBlocks DBS API
-func (API) InsertBulkBlocks(values Record) error {
-	// TODO: implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlock.py
-	/*
-	   #1 insert configuration
-	   configList = self.insertOutputModuleConfig(
-	                   blockcontent['dataset_conf_list'], migration)
-	   #2 insert dataset
-	   datasetId = self.insertDataset(blockcontent, configList, migration)
-	   #3 insert block & files
-	   self.insertBlockFile(blockcontent, datasetId, migration)
-	*/
-
-	//     return InsertValues("insert_blocks", values)
-	return nil
-}

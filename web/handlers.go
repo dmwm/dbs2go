@@ -149,15 +149,15 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		size, err = api.InsertAcquisitionEras(r.Body)
 	} else if a == "processingeras" {
 		size, err = api.InsertProcessingEras(r.Body)
+	} else if a == "datasets" {
+		size, err = api.InsertDatasets(r.Body)
+	} else if a == "blocks" {
+		size, err = api.InsertBlocks(r.Body)
+	} else if a == "bulkblocks" {
+		size, err = api.InsertBulkBlocks(r.Body)
+	} else if a == "files" {
+		size, err = api.InsertFiles(r.Body)
 	}
-	//     } else if a == "datasets" {
-	//         size, err = api.InsertDatasets(r.Body)
-	//     } else if a == "blocks" {
-	//         size, err = api.InsertBlocks(r.Body)
-	//     } else if a == "bulkblocks" {
-	//         size, err = api.InsertBulkBlocks(r.Body)
-	//     } else if a == "files" {
-	//         size, err = api.InsertFiles(r.Body)
 	//     } else if a == "fileparentss" {
 	//         size, err = api.InsertFileParents(r.Body)
 	//     } else if a == "fileparentsbylumi" {
@@ -478,13 +478,16 @@ func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) (int, int6
 // BulkBlocksHandler provides access to BulkBlocks DBS API
 // POST API takes no argument, the payload should be supplied as JSON
 func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	defer r.Body.Close()
-	decoder := json.NewDecoder(r.Body)
-	var api dbs.API
-	err := api.BulkBlocks(decoder)
-	if err != nil {
-		log.Println("BulkBlocksHandler error", err)
-		return http.StatusInternalServerError, 0, err
-	}
-	return http.StatusOK, 0, nil
+	return DBSPostHandler(w, r, "bulkblocks")
+	/*
+		defer r.Body.Close()
+		decoder := json.NewDecoder(r.Body)
+		var api dbs.API
+		err := api.BulkBlocks(decoder)
+		if err != nil {
+			log.Println("BulkBlocksHandler error", err)
+			return http.StatusInternalServerError, 0, err
+		}
+		return http.StatusOK, 0, nil
+	*/
 }
