@@ -43,7 +43,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 			tid, err = LastInsertId(tx, "PHYSICS_GROUPS", "physics_group_id")
 			r.PHYSICS_GROUP_ID = tid + 1
 		} else {
-			tid, err = IncrementSequence(tx, "SEQ_FT")
+			tid, err = IncrementSequence(tx, "SEQ_PG")
 			r.PHYSICS_GROUP_ID = tid
 		}
 		if err != nil {
