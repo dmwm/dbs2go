@@ -177,15 +177,15 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 // Files
 type Files struct {
-	FILE_ID                int64   `json:"block_id"`
-	LOGICAL_FILE_NAME      string  `json:"block_name"`
+	FILE_ID                int64   `json:"file_id"`
+	LOGICAL_FILE_NAME      string  `json:"logical_file_name"`
 	IS_FILE_VALID          int64   `json:"is_file_valid"`
 	DATASET_ID             int64   `json:"dataset_id"`
 	BLOCK_ID               int64   `json:"block_id"`
 	FILE_TYPE_ID           int64   `json:"file_type_id"`
 	CHECK_SUM              string  `json:"check_sum"`
-	FILE_SIZE              int64   `json:"block_size"`
-	EVENT_COUNT            int64   `json:"file_count"`
+	FILE_SIZE              int64   `json:"file_size"`
+	EVENT_COUNT            int64   `json:"event_count"`
 	BRANCH_HASH_ID         int64   `json:"branch_hash_id"`
 	ADLER32                string  `json:"adler32"`
 	MD5                    string  `json:"md5"`
@@ -231,7 +231,7 @@ func (r *Files) Insert(tx *sql.Tx) error {
 
 // Validate implementation of Files
 func (r *Files) Validate() error {
-	if matched := filePattern.MatchString(r.LOGICAL_FILE_NAME); !matched {
+	if matched := lfnPattern.MatchString(r.LOGICAL_FILE_NAME); !matched {
 		log.Println("validate File", r)
 		return errors.New("invalid pattern for file")
 	}
@@ -284,14 +284,14 @@ type RunLumi struct {
 
 // FileRecord represent input recor for insert blocks API
 type FileRecord struct {
-	LOGICAL_FILE_NAME      string  `json:"block_name"`
+	LOGICAL_FILE_NAME      string  `json:"logical_file_name"`
 	IS_FILE_VALID          int64   `json:"is_file_valid"`
 	DATASET                string  `json:"dataset"`
 	BLOCK                  string  `json:"block"`
 	FILE_TYPE              string  `json:"file_type"`
 	CHECK_SUM              string  `json:"check_sum"`
-	FILE_SIZE              int64   `json:"block_size"`
-	EVENT_COUNT            int64   `json:"file_count"`
+	FILE_SIZE              int64   `json:"file_size"`
+	EVENT_COUNT            int64   `json:"event_count"`
 	ADLER32                string  `json:"adler32"`
 	MD5                    string  `json:"md5"`
 	AUTO_CROSS_SECTION     float64 `json:"auto_cross_section"`
@@ -382,7 +382,7 @@ func (API) InsertFiles(r io.Reader) (int64, error) {
 		log.Println("unable to find dataset_id for", rec.DATASET)
 		return 0, err
 	}
-	ftId, err := getTxtID(tx, "FILE_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
+	ftId, err := getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
 	if err != nil {
 		log.Println("unable to find file_type_id for", rec.FILE_TYPE)
 		return 0, err
