@@ -317,7 +317,7 @@ type DatasetRecord struct {
 	DATA_TIER              string  `json:"data_tier"`
 	ACQUISITION_ERA        string  `json:"acquisition_era"`
 	DATASET_ACCESS_TYPE    string  `json:"dataset_access_type"`
-	PROCESSING_VERSION     string  `json:"processing_version"`
+	PROCESSING_VERSION     int64   `json:"processing_version"`
 	PHYSICS_GROUP          string  `json:"physics_group"`
 	XTCROSSSECTION         float64 `json:"xtcrosssection"`
 	CREATION_DATE          int64   `json:"creation_date"`
