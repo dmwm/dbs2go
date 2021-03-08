@@ -57,6 +57,20 @@ func TestBulkBlocks(t *testing.T) {
 	if err != nil {
 		t.Errorf("Fail to insert dataset access type %v\n", err)
 	}
+	files := dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/abcd3.root_15825", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
+	data, _ = json.Marshal(files)
+	reader = bytes.NewReader(data)
+	_, err = api.InsertFiles(reader)
+	if err != nil {
+		t.Errorf("Fail to insert files %v\n", err)
+	}
+	files = dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/abcd2.root_15825", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
+	data, _ = json.Marshal(files)
+	reader = bytes.NewReader(data)
+	_, err = api.InsertFiles(reader)
+	if err != nil {
+		t.Errorf("Fail to insert files %v\n", err)
+	}
 
 	// read bulkblocks.json from test area and process it
 	dir, err := os.Getwd()
