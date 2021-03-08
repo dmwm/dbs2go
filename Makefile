@@ -33,12 +33,12 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test: test-dbs test-sql test-validator test-blocks
+test: test-dbs test-sql test-validator test-bulk
 
 test-dbs:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run TestDBS
-test-blocks:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Block
+test-bulk:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Bulk
 test-sql:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run SQL
 test-validator:
