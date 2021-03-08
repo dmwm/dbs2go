@@ -42,6 +42,11 @@ type DBRecord interface {
 	Decode(r io.Reader) (int64, error)
 }
 
+// CreateBy provides default CreateBy string
+func CreateBy() string {
+	return "DBS-workflow"
+}
+
 // helper function to insert DB record with given transaction and reader
 func insertTxtRecord(tx *sql.Tx, rec DBRecord, r io.Reader) (int64, error) {
 	// init record with given data record
