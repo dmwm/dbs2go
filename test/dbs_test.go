@@ -12,8 +12,8 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// TestCleanStatement
-func TestCleanStatement(t *testing.T) {
+// TestDBSCleanStatement
+func TestDBSCleanStatement(t *testing.T) {
 	stm := `SELECT A
 
 	FROM B
@@ -28,8 +28,8 @@ func TestCleanStatement(t *testing.T) {
 	}
 }
 
-// TestOperatorValue
-func TestOperatorValue(t *testing.T) {
+// TestDBSOperatorValue
+func TestDBSOperatorValue(t *testing.T) {
 	arg := "*val"
 	op, res := dbs.OperatorValue(arg)
 	if res != "%val" {
@@ -49,8 +49,8 @@ func TestOperatorValue(t *testing.T) {
 	}
 }
 
-// TestUtilParseRuns
-func TestUtilParseRuns(t *testing.T) {
+// TestDBSUtilParseRuns
+func TestDBSUtilParseRuns(t *testing.T) {
 	input := []string{"1", "11-22", "3", "4"}
 	runs, err := dbs.ParseRuns(input)
 	if len(runs) != 4 {
@@ -69,8 +69,8 @@ func TestUtilParseRuns(t *testing.T) {
 	}
 }
 
-// TestGetID
-func TestGetID(t *testing.T) {
+// TestDBSGetID
+func TestDBSGetID(t *testing.T) {
 	// initialize DB for testing
 	db := initDB(false)
 	defer db.Close()
@@ -100,8 +100,8 @@ func TestGetID(t *testing.T) {
 	}
 }
 
-// TestUtilGetChunks
-func TestUtilGetChunks(t *testing.T) {
+// TestDBSUtilGetChunks
+func TestDBSUtilGetChunks(t *testing.T) {
 	input := []string{"1", "2", "3", "4", "5"}
 	chunks := dbs.GetChunks(input, 20)
 	if len(chunks) != 1 {
@@ -115,8 +115,8 @@ func TestUtilGetChunks(t *testing.T) {
 	//     fmt.Printf("input %+v, chunks %+v\n", input, chunks)
 }
 
-// TestUtilWhereClause
-func TestUtilWhereClause(t *testing.T) {
+// TestDBSUtilWhereClause
+func TestDBSUtilWhereClause(t *testing.T) {
 	stm := "SELECT A FROM B"
 	input := []string{"1", "2", "3"}
 	newStm := dbs.WhereClause(stm, input)
@@ -136,8 +136,8 @@ func TestUtilWhereClause(t *testing.T) {
 	}
 }
 
-// TestUtilAddParam
-func TestUtilAddParam(t *testing.T) {
+// TestDBSUtilAddParam
+func TestDBSUtilAddParam(t *testing.T) {
 	params := make(dbs.Record)
 	params["name"] = []string{"1"} // must be list of strings due to how HTTP params are passed in request
 	var conds []string
@@ -153,8 +153,8 @@ func TestUtilAddParam(t *testing.T) {
 	log.Println("args", args)
 }
 
-// TestUtilFlatLumis
-func TestUtilFlatLumis(t *testing.T) {
+// TestDBSUtilFlatLumis
+func TestDBSUtilFlatLumis(t *testing.T) {
 	input := "[[1, 3], [5, 7]]"
 	lumis, err := dbs.FlatLumis(input)
 	if err != nil {

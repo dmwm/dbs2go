@@ -33,35 +33,15 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test : test-all
+test: test-dbs test-sql test-validator test-blocks
 
-test-all:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v .
-test-primds:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run PrimDS
-test-procds:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run ProcDS
-test-datasets:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Dataset
+test-dbs:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run TestDBS
 test-blocks:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Block
-test-files:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run File && go test -v -run LFN
-test-runs:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Run
-test-ae:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run AcquisitionEra
-test-rel:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Release
-test-util:
-	cd test && go test -v -run Util
 test-sql:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run SQL
-test-insert:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run InsertSQL
 test-validator:
 	cd test && go test -v -run Validator
-test-stm:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && go test -v -run Statement
 bench:
 	cd test; go test -bench=.
