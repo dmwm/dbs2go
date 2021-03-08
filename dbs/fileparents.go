@@ -1,8 +1,16 @@
 package dbs
 
 import (
+	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // FileParents API
@@ -48,8 +56,78 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm, args...)
 }
 
+// FileParents
+type FileParents struct {
+	THIS_FILE_ID   int64 `json:"this_file_id"`
+	PARENT_FILE_ID int64 `json:"parent_file_id"`
+}
+
+// Insert implementation of FileParents
+func (r *FileParents) Insert(tx *sql.Tx) error {
+	var tid int64
+	var err error
+	if r.THIS_FILE_ID == 0 {
+		if DBOWNER == "sqlite" {
+			tid, err = LastInsertId(tx, "FILE_PARENTS", "this_file_id")
+			r.THIS_FILE_ID = tid + 1
+		} else {
+			tid, err = IncrementSequence(tx, "SEQ_FP")
+			r.THIS_FILE_ID = tid
+		}
+		if err != nil {
+			return err
+		}
+	}
+	// get SQL statement from static area
+	stm := getSQL("insert_fileparents")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("insert_fileparents_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert FileParents\n%s\n%+v", stm, r)
+	}
+	_, err = tx.Exec(stm, r.THIS_FILE_ID, r.PARENT_FILE_ID)
+	return err
+}
+
+// Validate implementation of FileParents
+func (r *FileParents) Validate() error {
+	if r.THIS_FILE_ID == 0 {
+		return errors.New("missing this_file_id")
+	}
+	if r.PARENT_FILE_ID == 0 {
+		return errors.New("missing parent_file_id")
+	}
+	return nil
+}
+
+// Decode implementation for FileParents
+func (r *FileParents) Decode(reader io.Reader) (int64, error) {
+	// init record with given data record
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	err = json.Unmarshal(data, &r)
+
+	//     decoder := json.NewDecoder(r)
+	//     err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	return size, nil
+}
+
+type FileParentRecord struct {
+	LogicalFileName       string `json:"logical_file_name"`
+	ParentLogicalFileName string `json:"parent_logical_file_name"`
+}
+
 // InsertFileParents DBS API
-func (API) InsertFileParents(values Record) error {
+func (API) InsertFileParents(tx *sql.Tx, r io.Reader) (int64, error) {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -60,5 +138,43 @@ func (API) InsertFileParents(values Record) error {
 	   2. All the child-parent pairs are not already in DBS.
 	   3. The dataset parentage is already in DBS.
 	*/
-	return nil
+	// read given input
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return 0, err
+	}
+	size := int64(len(data))
+	var rec FileParentRecord
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return 0, err
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert FileParents record %+v", rec)
+	}
+	// get file id for given lfn
+	fid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
+	if err != nil {
+		log.Println("unable to find file_id for", rec.LogicalFileName)
+		return 0, err
+	}
+	pid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
+	if err != nil {
+		log.Println("unable to find file_id for", rec.ParentLogicalFileName)
+		return 0, err
+	}
+	var rrr FileParents
+	rrr.THIS_FILE_ID = fid
+	rrr.PARENT_FILE_ID = pid
+	err = rrr.Validate()
+	if err != nil {
+		return 0, err
+	}
+	err = rrr.Insert(tx)
+	if err != nil {
+		return 0, err
+	}
+	return size, nil
 }
