@@ -96,6 +96,7 @@ type Dataset struct {
 type AcquisitionEra struct {
 	AcquisitionEraName string `json:"acquisition_era_name"`
 	StartDate          int64  `json:"start_date"`
+	CreateBy           string `json:"create_by"`
 }
 
 // Block represents Block structure
@@ -223,6 +224,9 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	}
 
 	// insert acquisition era if it does not exists
+	if rec.AcquisitionEra.CreateBy == "" {
+		rec.AcquisitionEra.CreateBy = rec.ProcessingEra.CreateBy
+	}
 	aera := AcquisitionEras{
 		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
 		START_DATE:           rec.AcquisitionEra.StartDate,
