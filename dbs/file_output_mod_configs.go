@@ -119,7 +119,7 @@ func (API) InsertFileOutputModConfigs(r io.Reader) (int64, error) {
 	}
 	defer tx.Rollback()
 
-	fid, err := getTxtID(tx, "FILES", "logical_file_id", "logical_file_name", rec.Lfn)
+	fid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.Lfn)
 		return 0, err
