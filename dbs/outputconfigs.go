@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 	"unsafe"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -88,6 +89,11 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	err = r.Validate()
+	if err != nil {
+		log.Printf("fail to validate output config record\n%+v\nerror %v", r, err)
+		return err
+	}
 	// get SQL statement from static area
 	stm := getSQL("insert_outputconfigs")
 	if DBOWNER == "sqlite" {
@@ -104,6 +110,15 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 func (r *OutputConfigs) Validate() error {
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
+	}
+	if r.APP_EXEC_ID == 0 {
+		return errors.New("missing app_exec_id")
+	}
+	if r.RELEASE_VERSION_ID == 0 {
+		return errors.New("missing release_version_id")
+	}
+	if r.PARAMETER_SET_HASH_ID == 0 {
+		return errors.New("missing parameter_set_hash_id")
 	}
 	if r.OUTPUT_MODULE_LABEL == "" {
 		return errors.New("missing data_output_module_label")
@@ -178,6 +193,12 @@ func (API) InsertOutputConfigs(r io.Reader) (int64, error) {
 	if err != nil {
 		log.Println("fail to decode data", err)
 		return 0, err
+	}
+	if rec.CREATION_DATE == 0 {
+		rec.CREATION_DATE = time.Now().Unix()
+	}
+	if rec.CREATE_BY == "" {
+		rec.CREATE_BY = CreateBy()
 	}
 	arec := ApplicationExecutables{APP_NAME: rec.APP_NAME}
 	rrec := ReleaseVersions{RELEASE_VERSION: rec.RELEASE_VERSION}
