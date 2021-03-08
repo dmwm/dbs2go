@@ -174,20 +174,6 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		}
 	}
 
-	// insert file configuration
-	for _, rrr := range rec.FileConfigList {
-		data, err = json.Marshal(rrr)
-		if err != nil {
-			log.Println("unable to marshal file config list", err)
-			return 0, err
-		}
-		reader = bytes.NewReader(data)
-		_, err = api.InsertFileOutputModConfigs(reader)
-		if err != nil {
-			return 0, err
-		}
-	}
-
 	// insert primary dataset if it does not exists
 	primDS := PrimaryDatasets{
 		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
@@ -366,6 +352,20 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		err = r.Insert(tx)
 		if err != nil {
 			log.Println("unable to insert File record", err)
+			return 0, err
+		}
+	}
+
+	// insert file configuration
+	for _, rrr := range rec.FileConfigList {
+		data, err = json.Marshal(rrr)
+		if err != nil {
+			log.Println("unable to marshal file config list", err)
+			return 0, err
+		}
+		reader = bytes.NewReader(data)
+		_, err = api.InsertFileOutputModConfigs(reader)
+		if err != nil {
 			return 0, err
 		}
 	}
