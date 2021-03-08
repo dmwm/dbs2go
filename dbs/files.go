@@ -200,13 +200,13 @@ type Files struct {
 func (r *Files) Insert(tx *sql.Tx) error {
 	var tid int64
 	var err error
-	if r.DATASET_ID == 0 {
+	if r.FILE_ID == 0 {
 		if DBOWNER == "sqlite" {
 			tid, err = LastInsertId(tx, "FILES", "file_id")
-			r.DATASET_ID = tid + 1
+			r.FILE_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_FL")
-			r.DATASET_ID = tid
+			r.FILE_ID = tid
 		}
 		if err != nil {
 			return err

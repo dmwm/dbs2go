@@ -157,8 +157,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	var api API
 	var isFileValid, datasetID, blockID, fileTypeID, branchHashID int64
 	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
-	var dataTierID, physicsGroupID, processingDatasetID, datasetAccessTypeID int64
-	var createBy string
+	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
 	creationDate := time.Now().Unix()
 
 	// insert dataset configuration
@@ -269,12 +268,17 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
 		return 0, err
 	}
+	processedDatasetID, err = getTxtID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.Dataset.ProcessedDSName)
+	if err != nil {
+		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
+		return 0, err
+	}
 	// insert dataset
 	dataset := Datasets{
 		DATASET:                rec.Dataset.Dataset,
 		IS_DATASET_VALID:       1,
 		PRIMARY_DS_ID:          primaryDatasetID,
-		PROCESSED_DS_ID:        processingDatasetID,
+		PROCESSED_DS_ID:        processedDatasetID,
 		DATA_TIER_ID:           dataTierID,
 		DATASET_ACCESS_TYPE_ID: datasetAccessTypeID,
 		ACQUISITION_ERA_ID:     acquisitionEraID,
@@ -297,7 +301,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	// get datasetID
-	datasetID, err = getTxtID(tx, "DATASETS", "dataset_id", "dataset_", rec.Dataset.Dataset)
+	datasetID, err = getTxtID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 	if err != nil {
 		log.Println("unable to find dataset_id for", rec.Dataset.Dataset)
 		return 0, err
@@ -368,7 +372,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertFileOutputModConfigs(reader)
+		_, err = api.InsertFileOutputModConfigs(tx, reader)
 		if err != nil {
 			return 0, err
 		}
@@ -378,6 +382,13 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	// insert file lumi list
 	// insert file config object
 	// insert dataset parent list
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return 0, err
+	}
 
 	//     data, err = json.MarshalIndent(rec, "", "    ")
 	//     if err == nil {

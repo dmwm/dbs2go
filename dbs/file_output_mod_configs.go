@@ -3,8 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -95,8 +93,7 @@ type FileOutputModConfigRecord struct {
 }
 
 // InsertFileOutputModConfigs DBS API
-func (API) InsertFileOutputModConfigs(r io.Reader) (int64, error) {
-	//     return insertRecord(&FileOutputModConfigs{}, r)
+func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader) (int64, error) {
 	// read given input
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -112,12 +109,12 @@ func (API) InsertFileOutputModConfigs(r io.Reader) (int64, error) {
 	}
 
 	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
-	}
-	defer tx.Rollback()
+	//     tx, err := DB.Begin()
+	//     if err != nil {
+	//         msg := fmt.Sprintf("unable to get DB transaction %v", err)
+	//         return 0, errors.New(msg)
+	//     }
+	//     defer tx.Rollback()
 
 	fid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
 	if err != nil {
@@ -137,7 +134,7 @@ func (API) InsertFileOutputModConfigs(r io.Reader) (int64, error) {
 	conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
 	conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
 	conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", params, conds, args)
-	conds, args = AddParam("global_tag", "P.GLOBAL_TAG", params, conds, args)
+	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", params, conds, args)
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("outputconfigs", tmpl)
@@ -162,10 +159,10 @@ func (API) InsertFileOutputModConfigs(r io.Reader) (int64, error) {
 	}
 
 	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		log.Println("faile to insert_outputconfigs_sqlite", err)
-		return 0, err
-	}
+	//     err = tx.Commit()
+	//     if err != nil {
+	//         log.Println("faile to insert_outputconfigs_sqlite", err)
+	//         return 0, err
+	//     }
 	return size, err
 }

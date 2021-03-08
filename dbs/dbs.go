@@ -174,8 +174,14 @@ func getValues(params Record, key string) []string {
 	var out []string
 	val, ok := params[key]
 	if ok {
-		values := val.([]string)
-		return values
+		switch v := val.(type) {
+		case []string:
+			return v
+		case string:
+			return []string{v}
+		}
+		//         values := val.([]string)
+		//         return values
 	}
 	return out
 }
