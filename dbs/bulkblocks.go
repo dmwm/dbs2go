@@ -379,6 +379,19 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	}
 
 	// insert file parent list
+	for _, rrr := range rec.FileParentList {
+		data, err = json.Marshal(rrr)
+		if err != nil {
+			log.Println("unable to marshal file parent list", err)
+			return 0, err
+		}
+		reader = bytes.NewReader(data)
+		_, err = api.InsertFileParents(tx, reader)
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	// insert file lumi list
 	// insert file config object
 	// insert dataset parent list
@@ -390,21 +403,5 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		return 0, err
 	}
 
-	//     data, err = json.MarshalIndent(rec, "", "    ")
-	//     if err == nil {
-	//         log.Printf("BulkBlocks record: %+v\n", string(data))
-	//     }
 	return size, nil
 }
-
-/*
-
-// helper function to validate bulk block data
-func validateBulkBlockData(rec BulkBlocks) error {
-	return nil
-}
-
-// helper function to insert configuration
-func insertConfiguration(rec BulkBlocks) {
-}
-*/
