@@ -66,13 +66,13 @@
 -
   insertApi: InsertProcessingEras
   insertParams:
-    processing_version: "processing-version"
+    processing_version: 10
     creation_date: 1614880522
     create_by: "tester"
     description: "description"
   api: ProcessingEras
   params:
-  - processing_version: ["processing-version"]
+  - processing_version: [10]
 -
   insertApi: InsertProcessedDatasets
   insertParams:
@@ -110,7 +110,7 @@
     data_tier: "TEST-RAW-TIER"
     acquisition_era: "era"
     dataset_access_type: "VALID"
-    processing_version: "processing-version"
+    processing_version: 10
     physics_group: "phys-name"
     xtcrosssection: 1.1
     creation_date: 1614880522

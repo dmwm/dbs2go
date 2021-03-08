@@ -1,8 +1,9 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -23,14 +24,13 @@ func TestBulkBlocks(t *testing.T) {
 		t.Errorf("Fail to get current directory %v\n", err)
 	}
 	fname := fmt.Sprintf("%s/bulkblocks.json", dir)
-	file, err := os.Open(fname)
+	data, err := ioutil.ReadFile(fname)
 	if err != nil {
-		t.Errorf("Fail to open file %s, error %v\n", fname, err)
+		t.Errorf("Fail to read file %s, error %v\n", fname, err)
 	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
 	var api dbs.API
-	err = api.BulkBlocks(decoder)
+	reader := bytes.NewReader(data)
+	_, err = api.InsertBulkBlocks(reader)
 	if err != nil {
 		t.Errorf("Fail to process bulkblocks data %v\n", err)
 	}
