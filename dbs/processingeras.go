@@ -31,7 +31,7 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 // ProcessingEras
 type ProcessingEras struct {
 	PROCESSING_ERA_ID  int64  `json:"processing_era_id"`
-	PROCESSING_VERSION string `json:"processing_version"`
+	PROCESSING_VERSION int64  `json:"processing_version"`
 	CREATION_DATE      int64  `json:"creation_date"`
 	CREATE_BY          string `json:"create_by"`
 	DESCRIPTION        string `json:"description"`
@@ -70,7 +70,7 @@ func (r *ProcessingEras) Validate() error {
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
 	}
-	if r.PROCESSING_VERSION == "" {
+	if r.PROCESSING_VERSION == 0 {
 		return errors.New("missing processing_version")
 	}
 	if r.CREATION_DATE == 0 {

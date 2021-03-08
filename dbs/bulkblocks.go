@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"time"
 )
 
 // BulkBlocks represents bulk block JSON structure
@@ -53,6 +54,7 @@ type File struct {
 	CheckSum         string     `json:"check_sum"`
 	FileLumiList     []FileLumi `json:"file_lumi_list"`
 	Adler32          string     `json:"adler32"`
+	FileSize         int64      `json:"file_size"`
 	EventCount       int64      `json:"event_count"`
 	FileType         string     `json:"file_type"`
 	LastModifiedBy   string     `json:"last_modified_by"`
@@ -100,7 +102,7 @@ type AcquisitionEra struct {
 type Block struct {
 	CreateBy       string `json:"create_by"`
 	CreationDate   int64  `json:"creation_date"`
-	OpenForWriting int    `json:"open_for_writing"`
+	OpenForWriting int64  `json:"open_for_writing"`
 	BlockName      string `json:"block_name"`
 	FileCount      int64  `json:"file_count"`
 	OriginSiteName string `json:"origin_site_name"`
@@ -137,6 +139,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		log.Println("unable to read bulkblock input", err)
 		return 0, err
 	}
+	size := int64(len(data))
 	var rec BulkBlocks
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
@@ -153,9 +156,12 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	defer tx.Rollback()
 
 	var reader *bytes.Reader
-	//     var data []byte
 	var api API
-	var size, s int64
+	var isFileValid, datasetID, blockID, fileTypeID, branchHashID int64
+	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
+	var dataTierID, physicsGroupID, processingDatasetID, datasetAccessTypeID int64
+	var createBy string
+	creationDate := time.Now().Unix()
 
 	// insert dataset configuration
 	for _, rrr := range rec.DatasetConfigList {
@@ -165,12 +171,12 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		s, err = api.InsertOutputConfigs(reader)
+		_, err = api.InsertOutputConfigs(reader)
 		if err != nil {
 			return 0, err
 		}
-		size += s
 	}
+	// TODO: get outputModConfigID
 
 	// insert file configuration
 	for _, rrr := range rec.FileConfigList {
@@ -180,91 +186,156 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		s, err = api.InsertFileOutputModConfigs(reader)
+		_, err = api.InsertFileOutputModConfigs(reader)
 		if err != nil {
 			return 0, err
 		}
-		size += s
 	}
+	// TODO: get fileOutputModConfigID
 
 	// insert primary dataset
-	data, err = json.Marshal(rec.PrimaryDataset)
+	// TODO: get primaryDatasetTypeID from rec.PrimaryDataset.PrimaryDSTypeName
+	primDS := PrimaryDatasets{
+		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
+		PRIMARY_DS_TYPE_ID: primaryDatasetTypeID,
+		CREATION_DATE:      rec.PrimaryDataset.CreationDate,
+		CREATE_BY:          rec.PrimaryDataset.CreateBy,
+	}
+	err = primDS.Validate()
 	if err != nil {
-		log.Println("unable to marshal primary dataset", err)
+		log.Println("unable to validate primary dataset record", err)
 		return 0, err
 	}
-	reader = bytes.NewReader(data)
-	s, err = api.InsertPrimaryDatasets(reader)
+	err = primDS.Insert(tx)
 	if err != nil {
+		log.Println("unable to insert primary dataset record", err)
 		return 0, err
 	}
-	size += s
+	// TODO: get primaryDatasetID
 
 	// insert processing era
-	data, err = json.Marshal(rec.ProcessingEra)
+	pera := ProcessingEras{
+		PROCESSING_VERSION: rec.ProcessingEra.ProcessingVersion,
+		CREATION_DATE:      creationDate,
+		CREATE_BY:          rec.ProcessingEra.CreateBy,
+		DESCRIPTION:        rec.ProcessingEra.Description,
+	}
+	err = pera.Validate()
 	if err != nil {
-		log.Println("unable to marshal processing era", err)
+		log.Println("unable to validate processing era record", err)
 		return 0, err
 	}
-	reader = bytes.NewReader(data)
-	s, err = api.InsertProcessingEras(reader)
+	err = pera.Insert(tx)
 	if err != nil {
+		log.Println("unable to insert processing era record", err)
 		return 0, err
 	}
-	size += s
+	// TODO: get processingEraID
 
 	// insert acquisition era
-	data, err = json.Marshal(rec.AcquisitionEra)
+	aera := AcquisitionEras{
+		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
+		START_DATE:           rec.AcquisitionEra.StartDate,
+		END_DATE:             0,
+		CREATION_DATE:        creationDate,
+		CREATE_BY:            createBy,
+	}
+	err = aera.Validate()
 	if err != nil {
-		log.Println("unable to marshal processing era", err)
+		log.Println("unable to validate acquisition era record", err)
 		return 0, err
 	}
-	reader = bytes.NewReader(data)
-	s, err = api.InsertAcquisitionEras(reader)
+	err = aera.Insert(tx)
 	if err != nil {
+		log.Println("unable to insert acquisition era record", err)
 		return 0, err
 	}
-	size += s
+	// TODO: get acquisitionEraID
 
 	// insert dataset
-	data, err = json.Marshal(rec.Dataset)
+	dataset := Datasets{
+		DATASET:                rec.Dataset.Dataset,
+		IS_DATASET_VALID:       1,
+		PRIMARY_DS_ID:          primaryDatasetID,
+		PROCESSED_DS_ID:        processingDatasetID,
+		DATA_TIER_ID:           dataTierID,
+		DATASET_ACCESS_TYPE_ID: datasetAccessTypeID,
+		ACQUISITION_ERA_ID:     acquisitionEraID,
+		PROCESSING_ERA_ID:      processingEraID,
+		PHYSICS_GROUP_ID:       physicsGroupID,
+		XTCROSSSECTION:         rec.Dataset.Xtcrosssection,
+		CREATION_DATE:          rec.Dataset.CreationDate,
+		CREATE_BY:              rec.Dataset.CreateBy,
+		LAST_MODIFICATION_DATE: creationDate,
+		LAST_MODIFIED_BY:       rec.Dataset.CreateBy,
+	}
+	err = dataset.Validate()
 	if err != nil {
-		log.Println("unable to marshal processing era", err)
+		log.Println("unable to validate dataset record", err)
 		return 0, err
 	}
-	reader = bytes.NewReader(data)
-	s, err = api.InsertDatasets(reader)
+	err = dataset.Insert(tx)
 	if err != nil {
+		log.Println("unable to insert dataset record", err)
 		return 0, err
 	}
-	size += s
+	// TODO: get datasetID
 
 	// insert block
-	data, err = json.Marshal(rec.Block)
+	blk := Blocks{
+		BLOCK_NAME:             rec.Block.BlockName,
+		DATASET_ID:             datasetID,
+		OPEN_FOR_WRITING:       rec.Block.OpenForWriting,
+		ORIGIN_SITE_NAME:       rec.Block.OriginSiteName,
+		BLOCK_SIZE:             rec.Block.BlockSize,
+		FILE_COUNT:             rec.Block.FileCount,
+		CREATION_DATE:          rec.Block.CreationDate,
+		CREATE_BY:              rec.Block.CreateBy,
+		LAST_MODIFICATION_DATE: rec.Block.CreationDate,
+		LAST_MODIFIED_BY:       rec.Block.CreateBy,
+	}
+	err = blk.Validate()
 	if err != nil {
-		log.Println("unable to marshal processing era", err)
+		log.Println("unable to validate block record", err)
 		return 0, err
 	}
-	reader = bytes.NewReader(data)
-	s, err = api.InsertBlocks(reader)
+	err = blk.Insert(tx)
 	if err != nil {
+		log.Println("unable to insert block record", err)
 		return 0, err
 	}
-	size += s
+	// TODO: get blockID
 
 	// insert files
 	for _, rrr := range rec.Files {
-		data, err = json.Marshal(rrr)
+		r := Files{
+			LOGICAL_FILE_NAME:      rrr.LogicalFileName,
+			IS_FILE_VALID:          isFileValid,
+			DATASET_ID:             datasetID,
+			BLOCK_ID:               blockID,
+			FILE_TYPE_ID:           fileTypeID,
+			CHECK_SUM:              rrr.CheckSum,
+			FILE_SIZE:              rrr.FileSize,
+			EVENT_COUNT:            rrr.EventCount,
+			BRANCH_HASH_ID:         branchHashID,
+			ADLER32:                rrr.Adler32,
+			MD5:                    rrr.MD5,
+			AUTO_CROSS_SECTION:     rrr.AutoCrossSection,
+			CREATION_DATE:          creationDate,
+			CREATE_BY:              rrr.LastModifiedBy,
+			LAST_MODIFICATION_DATE: creationDate,
+			LAST_MODIFIED_BY:       rrr.LastModifiedBy,
+		}
+		err = r.Validate()
 		if err != nil {
-			log.Println("unable to marshal file config list", err)
+			log.Println("unable to validate File record", err)
 			return 0, err
 		}
-		reader = bytes.NewReader(data)
-		s, err = api.InsertFiles(reader)
+		err = r.Insert(tx)
 		if err != nil {
+			log.Println("unable to insert File record", err)
 			return 0, err
 		}
-		size += s
 	}
 
 	// insert file parent list
