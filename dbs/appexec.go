@@ -72,3 +72,8 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) (int64, error) {
 	size := int64(len(data))
 	return size, nil
 }
+
+// InsertApplicationExecutables DBS API
+func (API) InsertApplicationExecutables(r io.Reader) (int64, error) {
+	return insertRecord(&ApplicationExecutables{}, r)
+}
