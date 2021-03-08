@@ -98,7 +98,7 @@
 "block_size": 20122119010, "origin_site_name": "my_site"}, 
 
 "file_parent_list":[{"logical_file_name":"/store/data/a/b/A/a/1/abcd4.root" , "parent_logical_file_name":
-"/store/data/a/b/A/a/1/abcd3.root_15825"},
-{"logical_file_name":"/store/data/a/b/A/a/1/abcd5.root" , "parent_logical_file_name":"/store/data/a/b/A/a/1/abcd2.root_15825" }]
+"/store/data/a/b/A/a/1/parent/abcd3.root"},
+{"logical_file_name":"/store/data/a/b/A/a/1/abcd5.root" , "parent_logical_file_name":"/store/data/a/b/A/a/1/parent/abcd2.root" }]
 
 }

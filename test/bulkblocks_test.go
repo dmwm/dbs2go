@@ -57,19 +57,26 @@ func TestBulkBlocks(t *testing.T) {
 	if err != nil {
 		t.Errorf("Fail to insert dataset access type %v\n", err)
 	}
-	files := dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/abcd3.root_15825", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
-	data, _ = json.Marshal(files)
-	reader = bytes.NewReader(data)
-	_, err = api.InsertFiles(reader)
+
+	// we insert parent files via transaction
+	tx, err := db.Begin()
+	if err != nil {
+		t.Errorf("Fail to get db transaction %v\n", err)
+	}
+	defer tx.Rollback()
+	files := dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/parent/abcd3.root", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
+	err = files.Insert(tx)
 	if err != nil {
 		t.Errorf("Fail to insert files %v\n", err)
 	}
-	files = dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/abcd2.root_15825", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
-	data, _ = json.Marshal(files)
-	reader = bytes.NewReader(data)
-	_, err = api.InsertFiles(reader)
+	files = dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/parent/abcd2.root", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
+	err = files.Insert(tx)
 	if err != nil {
 		t.Errorf("Fail to insert files %v\n", err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		t.Errorf("Fail to commit %v\n", err)
 	}
 
 	// read bulkblocks.json from test area and process it
