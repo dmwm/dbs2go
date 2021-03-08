@@ -128,18 +128,15 @@ type FileParent struct {
    self.insertBlockFile(blockcontent, datasetId, migration)
 */
 func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
-	//     var rec BulkBlocks
-	//     err := decoder.Decode(&rec)
-	//     if err != nil {
-	//         log.Println("BulkBlocks decoder error", err)
-	//         return 0, err
-	//     }
+	// read input data
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("unable to read bulkblock input", err)
 		return 0, err
 	}
 	size := int64(len(data))
+
+	// unmarshal the data into BulkBlocks record
 	var rec BulkBlocks
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
@@ -176,7 +173,6 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 	}
-	// TODO: get outputModConfigID
 
 	// insert file configuration
 	for _, rrr := range rec.FileConfigList {
@@ -191,10 +187,8 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 	}
-	// TODO: get fileOutputModConfigID
 
-	// insert primary dataset
-	// TODO: get primaryDatasetTypeID from rec.PrimaryDataset.PrimaryDSTypeName
+	// insert primary dataset if it does not exists
 	primDS := PrimaryDatasets{
 		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
 		PRIMARY_DS_TYPE_ID: primaryDatasetTypeID,
@@ -211,9 +205,14 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		log.Println("unable to insert primary dataset record", err)
 		return 0, err
 	}
-	// TODO: get primaryDatasetID
+	// get primaryDatasetID
+	primaryDatasetID, err = getTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName)
+	if err != nil {
+		log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
+		return 0, err
+	}
 
-	// insert processing era
+	// insert processing era if it does not exists
 	pera := ProcessingEras{
 		PROCESSING_VERSION: rec.ProcessingEra.ProcessingVersion,
 		CREATION_DATE:      creationDate,
@@ -230,9 +229,14 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		log.Println("unable to insert processing era record", err)
 		return 0, err
 	}
-	// TODO: get processingEraID
+	// get processingEraID
+	processingEraID, err = getTxtID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion)
+	if err != nil {
+		log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
+		return 0, err
+	}
 
-	// insert acquisition era
+	// insert acquisition era if it does not exists
 	aera := AcquisitionEras{
 		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
 		START_DATE:           rec.AcquisitionEra.StartDate,
@@ -250,8 +254,31 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		log.Println("unable to insert acquisition era record", err)
 		return 0, err
 	}
-	// TODO: get acquisitionEraID
+	// get acquisitionEraID
+	acquisitionEraID, err = getTxtID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName)
+	if err != nil {
+		log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
+		return 0, err
+	}
 
+	// get dataTierID
+	dataTierID, err = getTxtID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.Dataset.DataTierName)
+	if err != nil {
+		log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
+		return 0, err
+	}
+	// get physicsGroupID
+	physicsGroupID, err = getTxtID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.Dataset.PhysicsGroupName)
+	if err != nil {
+		log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
+		return 0, err
+	}
+	// get datasetAccessTypeID
+	datasetAccessTypeID, err = getTxtID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.Dataset.DatasetAccessType)
+	if err != nil {
+		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
+		return 0, err
+	}
 	// insert dataset
 	dataset := Datasets{
 		DATASET:                rec.Dataset.Dataset,
@@ -279,7 +306,12 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		log.Println("unable to insert dataset record", err)
 		return 0, err
 	}
-	// TODO: get datasetID
+	// get datasetID
+	datasetID, err = getTxtID(tx, "DATASETS", "dataset_id", "dataset_", rec.Dataset.Dataset)
+	if err != nil {
+		log.Println("unable to find dataset_id for", rec.Dataset.Dataset)
+		return 0, err
+	}
 
 	// insert block
 	blk := Blocks{
