@@ -145,7 +145,7 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader) (int64, error) {
 	var oid int64
 	err = tx.QueryRow(stm, args...).Scan(&oid)
 	if err != nil {
-		log.Printf("unable to find output_mod_config_id for %+v", rec)
+		log.Printf("unable to find output_mod_config_id for\n%s\n%+v", stm, args)
 		return 0, err
 	}
 
