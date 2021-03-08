@@ -505,6 +505,9 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 	} else {
 		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, id)
 	}
+	if utils.VERBOSE > 0 {
+		log.Printf("getTxtID\n%s %+v", stm, val)
+	}
 	err := tx.QueryRow(stm, val).Scan(&tid)
 	return tid, err
 }
