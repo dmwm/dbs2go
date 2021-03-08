@@ -232,7 +232,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		START_DATE:           rec.AcquisitionEra.StartDate,
 		END_DATE:             0,
 		CREATION_DATE:        creationDate,
-		CREATE_BY:            createBy,
+		CREATE_BY:            rec.AcquisitionEra.CreateBy,
 	}
 	err = aera.Validate()
 	if err != nil {
