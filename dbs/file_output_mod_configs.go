@@ -108,14 +108,7 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader) (int64, error) {
 		return 0, err
 	}
 
-	// start transaction
-	//     tx, err := DB.Begin()
-	//     if err != nil {
-	//         msg := fmt.Sprintf("unable to get DB transaction %v", err)
-	//         return 0, errors.New(msg)
-	//     }
-	//     defer tx.Rollback()
-
+	// get file id for given lfn
 	fid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.Lfn)
@@ -130,14 +123,13 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader) (int64, error) {
 	params["pset_hash"] = rec.PsetHash
 	params["output_module_label"] = rec.OutputModuleLabel
 	params["global_tag"] = rec.GlobalTag
-	conds, args = AddParam("logical_file_name", "FS.LOGICAL_FILE_NAME", params, conds, args)
 	conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
 	conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
 	conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", params, conds, args)
 	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", params, conds, args)
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
-	stm, err := LoadTemplateSQL("outputconfigs", tmpl)
+	stm, err := LoadTemplateSQL("outputconfigs_id", tmpl)
 	if err != nil {
 		return 0, err
 	}
@@ -153,16 +145,13 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader) (int64, error) {
 	var rrr FileOutputModConfigs
 	rrr.FILE_ID = fid
 	rrr.OUTPUT_MOD_CONFIG_ID = oid
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert FileOutputModConfigs\n%s\n%+v", stm, rrr)
+	}
 	err = rrr.Insert(tx)
 	if err != nil {
 		return 0, err
 	}
 
-	// commit transaction
-	//     err = tx.Commit()
-	//     if err != nil {
-	//         log.Println("faile to insert_outputconfigs_sqlite", err)
-	//         return 0, err
-	//     }
 	return size, err
 }
