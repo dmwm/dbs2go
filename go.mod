@@ -6,6 +6,7 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20210224194228-fe8f1750fd46 // indirect
 	github.com/dmwm/cmsauth v0.0.0-20200227183320-1e78c9119730
 	github.com/go-ole/go-ole v1.2.5 // indirect
+	github.com/go-playground/validator/v10 v10.2.0
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jonboulle/clockwork v0.2.2 // indirect

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	validator "github.com/go-playground/validator/v10"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
@@ -60,5 +61,7 @@ func initDB(dryRun bool) *sql.DB {
 	if dryRun {
 		dbs.DRYRUN = true
 	}
+	// init validator
+	dbs.RecordValidator = validator.New()
 	return db
 }

@@ -31,9 +31,9 @@ func (API) DataTiers(params Record, w http.ResponseWriter) (int64, error) {
 // DataTiers
 type DataTiers struct {
 	DATA_TIER_ID   int64  `json:"data_tier_id"`
-	DATA_TIER_NAME string `json:"data_tier_name"`
-	CREATION_DATE  int64  `json:"creation_date"`
-	CREATE_BY      string `json:"create_by"`
+	DATA_TIER_NAME string `json:"data_tier_name" validate:"required,uppercase"`
+	CREATION_DATE  int64  `json:"creation_date" validate:"required,number"`
+	CREATE_BY      string `json:"create_by" validate:"required"`
 }
 
 // Insert implementation of DataTiers
@@ -66,21 +66,15 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 
 // Validate implementation of DataTiers
 func (r *DataTiers) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := tierPattern.MatchString(r.DATA_TIER_NAME); !matched {
 		log.Println("validate DataTiers", r)
 		return errors.New("invalid pattern for data tier")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return errors.New("invalid pattern for createion date")
-	}
-	if r.DATA_TIER_NAME == "" {
-		return errors.New("missing data_tier_name")
-	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
+		return errors.New("invalid pattern for creation date")
 	}
 	return nil
 }

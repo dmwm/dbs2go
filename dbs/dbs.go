@@ -17,11 +17,15 @@ import (
 	"net/http"
 	"strings"
 
+	validator "github.com/go-playground/validator/v10"
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // use API struct for reflection
 type API struct{}
+
+// use a single instance of Validate, it caches struct info
+var RecordValidator *validator.Validate
 
 // main record we work with
 type Record map[string]interface{}
@@ -40,6 +44,19 @@ type DBRecord interface {
 	Insert(tx *sql.Tx) error
 	Validate() error
 	Decode(r io.Reader) (int64, error)
+}
+
+// DecodeValidatorError provides uniform error representation
+// of DBRecord validation errors
+func DecodeValidatorError(r, err interface{}) error {
+	if err != nil {
+		msg := fmt.Sprintf("ERROR:\n%+v", r)
+		for _, err := range err.(validator.ValidationErrors) {
+			msg = fmt.Sprintf("%s\nkey=%v type=%v value=%v, constrain %v %v", msg, err.Field(), err.Type(), err.Value(), err.ActualTag(), err.Param())
+		}
+		return errors.New(msg)
+	}
+	return nil
 }
 
 // CreateBy provides default CreateBy string

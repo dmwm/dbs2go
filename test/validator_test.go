@@ -3,9 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"testing"
+	"time"
 
+	validator "github.com/go-playground/validator/v10"
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
@@ -54,6 +57,39 @@ func TestValidatePostPayload(t *testing.T) {
 	}
 	req, _ = http.NewRequest("POST", rurl, bytes.NewBuffer(data))
 	err = dbs.Validate(req)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+// TestDBRecordValidator
+func TestDBRecordValidator(t *testing.T) {
+	if dbs.RecordValidator == nil {
+		dbs.RecordValidator = validator.New()
+	}
+	ts := time.Now().Unix()
+	cby := "test"
+	tier := "raw"
+	rec := dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts, CREATE_BY: cby}
+	// this should fail by design since we provide tier in lower-case
+	err := rec.Validate()
+	if err == nil {
+		t.Error("No error is raised when we request validation")
+	} else {
+		log.Println("WE SHOULD GET ERROR message from Validator =>", err)
+	}
+	rec = dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts}
+	// this should fail by design since we do not provide create by value
+	err = rec.Validate()
+	if err == nil {
+		t.Error("No error is raised when we request validation")
+	} else {
+		log.Println("WE SHOULD GET ERROR message from Validator =>", err)
+	}
+	tier = "RAW"
+	rec = dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts, CREATE_BY: cby}
+	err = rec.Validate()
+	// now validation should pass
 	if err != nil {
 		t.Error(err)
 	}

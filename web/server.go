@@ -36,6 +36,7 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/dmwm/cmsauth"
+	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -179,6 +180,9 @@ func Server(configFile string) {
 
 	// initialize limiter
 	initLimiter(Config.LimiterPeriod)
+
+	// initialize record validator
+	dbs.RecordValidator = validator.New()
 
 	// initialize templates
 	tmplData := make(map[string]interface{})
