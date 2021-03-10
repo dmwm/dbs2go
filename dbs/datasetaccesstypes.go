@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -30,7 +29,7 @@ func (API) DatasetAccessTypes(params Record, w http.ResponseWriter) (int64, erro
 // DatasetAccessTypes
 type DatasetAccessTypes struct {
 	DATASET_ACCESS_TYPE_ID int64  `json:"dataset_access_type_id"`
-	DATASET_ACCESS_TYPE    string `json:"dataset_access_type"`
+	DATASET_ACCESS_TYPE    string `json:"dataset_access_type" validate:"required"`
 }
 
 // Insert implementation of DatasetAccessTypes
@@ -63,8 +62,8 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 
 // Validate implementation of DatasetAccessTypes
 func (r *DatasetAccessTypes) Validate() error {
-	if r.DATASET_ACCESS_TYPE == "" {
-		return errors.New("missing dataset_access_type")
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
 	}
 	return nil
 }

@@ -40,11 +40,11 @@ func (API) UpdateAcquisitionEras(values Record) error {
 // AcquisitionEras
 type AcquisitionEras struct {
 	ACQUISITION_ERA_ID   int64  `json:"acquisition_era_id"`
-	ACQUISITION_ERA_NAME string `json:"acquisition_era_name"`
-	START_DATE           int64  `json:"start_date"`
+	ACQUISITION_ERA_NAME string `json:"acquisition_era_name" validate:"required"`
+	START_DATE           int64  `json:"start_date" validate:"required,number"`
 	END_DATE             int64  `json:"end_date"`
-	CREATION_DATE        int64  `json:"creation_date"`
-	CREATE_BY            string `json:"create_by"`
+	CREATION_DATE        int64  `json:"creation_date" validate:"required,number"`
+	CREATE_BY            string `json:"create_by" validate:"required"`
 	DESCRIPTION          string `json:"description"`
 }
 
@@ -78,17 +78,11 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 
 // Validate implementation of AcquisitionEras
 func (r *AcquisitionEras) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
-	}
-	if r.ACQUISITION_ERA_NAME == "" {
-		return errors.New("missing acquisition_era_name")
-	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
 	}
 	return nil
 }

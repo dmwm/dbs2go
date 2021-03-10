@@ -37,7 +37,7 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 // ReleaseVersions
 type ReleaseVersions struct {
 	RELEASE_VERSION_ID int64  `json:"release_version_id"`
-	RELEASE_VERSION    string `json:"release_version"`
+	RELEASE_VERSION    string `json:"release_version" validate:"required"`
 }
 
 // Insert implementation of ReleaseVersions
@@ -70,8 +70,8 @@ func (r *ReleaseVersions) Insert(tx *sql.Tx) error {
 
 // Validate implementation of ReleaseVersions
 func (r *ReleaseVersions) Validate() error {
-	if r.RELEASE_VERSION == "" {
-		return errors.New("missing release_version")
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
 	}
 	return nil
 }

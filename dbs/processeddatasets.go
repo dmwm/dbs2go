@@ -26,7 +26,7 @@ func (API) ProcessedDatasets(params Record, w http.ResponseWriter) (int64, error
 // ProcessedDatasets
 type ProcessedDatasets struct {
 	PROCESSED_DS_ID   int64  `json:"processed_ds_id"`
-	PROCESSED_DS_NAME string `json:"processed_ds_name"`
+	PROCESSED_DS_NAME string `json:"processed_ds_name" validate:"required"`
 }
 
 // Insert implementation of ProcessedDatasets
@@ -59,12 +59,12 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 
 // Validate implementation of ProcessedDatasets
 func (r *ProcessedDatasets) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := procDSPattern.MatchString(r.PROCESSED_DS_NAME); !matched {
 		log.Println("validate ProcessedDatasets", r)
-		return errors.New("invalid pattern for data tier")
-	}
-	if r.PROCESSED_DS_NAME == "" {
-		return errors.New("missing processed_ds_name")
+		return errors.New("invalid pattern for processed dataset name")
 	}
 	return nil
 }

@@ -27,7 +27,7 @@ func (API) PrimaryDSTypes(params Record, w http.ResponseWriter) (int64, error) {
 // PrimaryDSTypes
 type PrimaryDSTypes struct {
 	PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id"`
-	PRIMARY_DS_TYPE    string `json:"primary_ds_type"`
+	PRIMARY_DS_TYPE    string `json:"primary_ds_type" validate:"required"`
 }
 
 // Insert implementation of PrimaryDSTypes
@@ -50,6 +50,9 @@ func (r *PrimaryDSTypes) Insert(tx *sql.Tx) error {
 
 // Validate implementation of PrimaryDSTypes
 func (r *PrimaryDSTypes) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	return nil
 }
 

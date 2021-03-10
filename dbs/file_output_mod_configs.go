@@ -25,8 +25,8 @@ func (API) FileOutputModConfigs(params Record, w http.ResponseWriter) (int64, er
 // FileOutputModConfigs
 type FileOutputModConfigs struct {
 	FILE_OUTPUT_CONFIG_ID int64 `json:"file_output_config_id"`
-	FILE_ID               int64 `json:"file_id"`
-	OUTPUT_MOD_CONFIG_ID  int64 `json:"output_mod_config_id"`
+	FILE_ID               int64 `json:"file_id" validate:"required,number,gt=0"`
+	OUTPUT_MOD_CONFIG_ID  int64 `json:"output_mod_config_id" validate:"required,number,gt=0"`
 }
 
 // Insert implementation of FileOutputModConfigs
@@ -59,6 +59,9 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 
 // Validate implementation of FileOutputModConfigs
 func (r *FileOutputModConfigs) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	return nil
 }
 

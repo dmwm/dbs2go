@@ -31,9 +31,9 @@ func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
 // ProcessingEras
 type ProcessingEras struct {
 	PROCESSING_ERA_ID  int64  `json:"processing_era_id"`
-	PROCESSING_VERSION int64  `json:"processing_version"`
-	CREATION_DATE      int64  `json:"creation_date"`
-	CREATE_BY          string `json:"create_by"`
+	PROCESSING_VERSION int64  `json:"processing_version" validate:"required,number,gt=0"`
+	CREATION_DATE      int64  `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY          string `json:"create_by validate:"required""`
 	DESCRIPTION        string `json:"description"`
 }
 
@@ -67,17 +67,11 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 
 // Validate implementation of ProcessingEras
 func (r *ProcessingEras) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
-	}
-	if r.PROCESSING_VERSION == 0 {
-		return errors.New("missing processing_version")
-	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
 	}
 	return nil
 }

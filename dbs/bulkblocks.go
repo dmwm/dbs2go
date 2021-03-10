@@ -174,6 +174,27 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		}
 	}
 
+	// insert primary dataset type if it does not exists
+	pdstDS := PrimaryDSTypes{
+		PRIMARY_DS_TYPE: rec.PrimaryDataset.PrimaryDSType,
+	}
+	err = pdstDS.Validate()
+	if err != nil {
+		log.Println("unable to validate primary dataset type record", err)
+		return 0, err
+	}
+	err = pdstDS.Insert(tx)
+	if err != nil {
+		log.Println("unable to insert primary dataset type record", err)
+		return 0, err
+	}
+	// get primaryDatasetTypeID
+	primaryDatasetTypeID, err = getTxtID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType)
+	if err != nil {
+		log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
+		return 0, err
+	}
+
 	// insert primary dataset if it does not exists
 	primDS := PrimaryDatasets{
 		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
@@ -331,9 +352,32 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	// TODO: get blockID
+	// get blockID
+	blockID, err = getTxtID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
+	if err != nil {
+		log.Println("unable to find block_id for", rec.Block.BlockName)
+		return 0, err
+	}
 
 	// insert files
 	for _, rrr := range rec.Files {
+		// get fileTypeID
+		fileTypeID, err = getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
+		if err != nil {
+			fType := FileDataTypes{
+				FILE_TYPE: rrr.FileType,
+			}
+			err = fType.Insert(tx)
+			if err != nil {
+				log.Println("unable to insert file data type record", err)
+				return 0, err
+			}
+			fileTypeID, err = getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
+			if err != nil {
+				log.Println("unable to find file_type_id for", rrr.FileType)
+				return 0, err
+			}
+		}
 		r := Files{
 			LOGICAL_FILE_NAME:      rrr.LogicalFileName,
 			IS_FILE_VALID:          isFileValid,

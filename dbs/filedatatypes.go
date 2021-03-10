@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -26,7 +25,7 @@ func (API) FileDataTypes(params Record, w http.ResponseWriter) (int64, error) {
 // FileDataTypes
 type FileDataTypes struct {
 	FILE_TYPE_ID int64  `json:"file_type_id"`
-	FILE_TYPE    string `json:"file_type"`
+	FILE_TYPE    string `json:"file_type" validate:"required"`
 }
 
 // Insert implementation of FileDataTypes
@@ -59,8 +58,8 @@ func (r *FileDataTypes) Insert(tx *sql.Tx) error {
 
 // Validate implementation of FileDataTypes
 func (r *FileDataTypes) Validate() error {
-	if r.FILE_TYPE == "" {
-		return errors.New("missing file_type")
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
 	}
 	return nil
 }

@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -31,7 +30,7 @@ func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
 // PhysicsGroups
 type PhysicsGroups struct {
 	PHYSICS_GROUP_ID   int64  `json:"physics_group_id"`
-	PHYSICS_GROUP_NAME string `json:"physics_group_name"`
+	PHYSICS_GROUP_NAME string `json:"physics_group_name" validate:"required"`
 }
 
 // Insert implementation of PhysicsGroups
@@ -64,8 +63,8 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 
 // Validate implementation of PhysicsGroups
 func (r *PhysicsGroups) Validate() error {
-	if r.PHYSICS_GROUP_NAME == "" {
-		return errors.New("missing physics_group_name")
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
 	}
 	return nil
 }

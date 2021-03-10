@@ -189,21 +189,21 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 // Datasets
 type Datasets struct {
 	DATASET_ID             int64   `json:"dataset_id"`
-	DATASET                string  `json:"datset"`
-	IS_DATASET_VALID       int     `json:"is_dataset_valid"`
-	PRIMARY_DS_ID          int64   `json:"primary_ds_id"`
-	PROCESSED_DS_ID        int64   `json:"processed_ds_id"`
-	DATA_TIER_ID           int64   `json:"data_tier_id"`
-	DATASET_ACCESS_TYPE_ID int64   `json:"dataset_access_type_id"`
-	ACQUISITION_ERA_ID     int64   `json:"acquisition_era_id"`
-	PROCESSING_ERA_ID      int64   `json:"processing_era_id"`
-	PHYSICS_GROUP_ID       int64   `json:"physics_group_id"`
-	XTCROSSSECTION         float64 `json:"xtcrosssection"`
+	DATASET                string  `json:"datset" validate:"required"`
+	IS_DATASET_VALID       int     `json:"is_dataset_valid" validate:"required,number"`
+	PRIMARY_DS_ID          int64   `json:"primary_ds_id" validate:"required,number,gt=0"`
+	PROCESSED_DS_ID        int64   `json:"processed_ds_id" validate:"required,number,gt=0"`
+	DATA_TIER_ID           int64   `json:"data_tier_id" validate:"required,number,gt=0"`
+	DATASET_ACCESS_TYPE_ID int64   `json:"dataset_access_type_id" validate:"required,number,gt=0"`
+	ACQUISITION_ERA_ID     int64   `json:"acquisition_era_id" validate:"required,number,gt=0"`
+	PROCESSING_ERA_ID      int64   `json:"processing_era_id" validate:"required,number,gt=0"`
+	PHYSICS_GROUP_ID       int64   `json:"physics_group_id" validate:"required,number,gt=0"`
+	XTCROSSSECTION         float64 `json:"xtcrosssection" validate:"required"`
 	PREP_ID                string  `json:"prep_id"`
-	CREATION_DATE          int64   `json:"creation_date"`
-	CREATE_BY              string  `json:"create_by"`
-	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
-	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+	CREATION_DATE          int64   `json:"creation_date" validate:"required,number"`
+	CREATE_BY              string  `json:"create_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date" validate:"required,number"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by" validate:"required"`
 }
 
 // Insert implementation of Datasets

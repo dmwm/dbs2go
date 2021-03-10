@@ -178,22 +178,22 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 // Files
 type Files struct {
 	FILE_ID                int64   `json:"file_id"`
-	LOGICAL_FILE_NAME      string  `json:"logical_file_name"`
-	IS_FILE_VALID          int64   `json:"is_file_valid"`
-	DATASET_ID             int64   `json:"dataset_id"`
-	BLOCK_ID               int64   `json:"block_id"`
-	FILE_TYPE_ID           int64   `json:"file_type_id"`
-	CHECK_SUM              string  `json:"check_sum"`
-	FILE_SIZE              int64   `json:"file_size"`
-	EVENT_COUNT            int64   `json:"event_count"`
+	LOGICAL_FILE_NAME      string  `json:"logical_file_name" validate:"required"`
+	IS_FILE_VALID          int64   `json:"is_file_valid" validate:"number"`
+	DATASET_ID             int64   `json:"dataset_id" validate:"number,gt=0"`
+	BLOCK_ID               int64   `json:"block_id" validate:"number,gt=0"`
+	FILE_TYPE_ID           int64   `json:"file_type_id" validate:"number,gt=0"`
+	CHECK_SUM              string  `json:"check_sum" validate:"required"`
+	FILE_SIZE              int64   `json:"file_size" validate:"required,number,gt=0"`
+	EVENT_COUNT            int64   `json:"event_count" validate:"required,number"`
 	BRANCH_HASH_ID         int64   `json:"branch_hash_id"`
-	ADLER32                string  `json:"adler32"`
+	ADLER32                string  `json:"adler32" validate:"required"`
 	MD5                    string  `json:"md5"`
 	AUTO_CROSS_SECTION     float64 `json:"auto_cross_section"`
-	CREATION_DATE          int64   `json:"creation_date"`
-	CREATE_BY              string  `json:"create_by"`
-	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
-	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+	CREATION_DATE          int64   `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY              string  `json:"create_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date" validate:"required,number,gt=0"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by" validate:"required"`
 }
 
 // Insert implementation of Files
@@ -231,6 +231,9 @@ func (r *Files) Insert(tx *sql.Tx) error {
 
 // Validate implementation of Files
 func (r *Files) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := lfnPattern.MatchString(r.LOGICAL_FILE_NAME); !matched {
 		log.Println("validate File", r)
 		return errors.New("invalid pattern for file")
@@ -238,17 +241,8 @@ func (r *Files) Validate() error {
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
 	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
-	}
-	if r.LAST_MODIFICATION_DATE == 0 {
-		return errors.New("missing last_modification_date")
-	}
-	if r.LAST_MODIFIED_BY == "" {
-		return errors.New("missing last_modified_by")
+	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.LAST_MODIFICATION_DATE)); !matched {
+		return errors.New("invalid pattern for last modification date")
 	}
 	return nil
 }

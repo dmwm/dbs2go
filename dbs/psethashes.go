@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,8 +13,8 @@ import (
 // ParameterSetHashes
 type ParameterSetHashes struct {
 	PARAMETER_SET_HASH_ID int64  `json:"parameter_set_hash_id"`
-	PSET_NAME             string `json:"pset_name"`
-	PSET_HASH             string `json:"pset_hash"`
+	PSET_NAME             string `json:"pset_name" validate:"required"`
+	PSET_HASH             string `json:"pset_hash" validate:"required"`
 }
 
 // Insert implementation of ParameterSetHashes
@@ -48,8 +47,8 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 
 // Validate implementation of ParameterSetHashes
 func (r *ParameterSetHashes) Validate() error {
-	if r.PSET_NAME == "" {
-		return errors.New("missing pset_name")
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
 	}
 	return nil
 }

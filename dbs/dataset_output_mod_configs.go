@@ -25,8 +25,8 @@ func (API) DatasetOutputModConfigs(params Record, w http.ResponseWriter) (int64,
 // DatasetOutputModConfigs
 type DatasetOutputModConfigs struct {
 	DS_OUTPUT_MOD_CONF_ID int64 `json:"ds_output_mod_conf_id"`
-	DATASET_ID            int64 `json:"dataset_id"`
-	OUTPUT_MOD_CONFIG_ID  int64 `json:"output_mod_config_id"`
+	DATASET_ID            int64 `json:"dataset_id" validate:"required,number,gt=0"`
+	OUTPUT_MOD_CONFIG_ID  int64 `json:"output_mod_config_id" validate:"required,number,gt=0"`
 }
 
 // Insert implementation of DatasetOutputModConfigs
@@ -59,6 +59,9 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 
 // Validate implementation of DatasetOutputModConfigs
 func (r *DatasetOutputModConfigs) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	return nil
 }
 

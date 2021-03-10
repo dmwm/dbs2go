@@ -59,7 +59,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 // FileParents
 type FileParents struct {
 	THIS_FILE_ID   int64 `json:"this_file_id"`
-	PARENT_FILE_ID int64 `json:"parent_file_id"`
+	PARENT_FILE_ID int64 `json:"parent_file_id" validate:"required,number,gt=0"`
 }
 
 // Insert implementation of FileParents
@@ -92,6 +92,9 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 
 // Validate implementation of FileParents
 func (r *FileParents) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if r.THIS_FILE_ID == 0 {
 		return errors.New("missing this_file_id")
 	}

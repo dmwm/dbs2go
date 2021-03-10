@@ -105,29 +105,29 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 // Blocks
 type Blocks struct {
 	BLOCK_ID               int64  `json:"block_id"`
-	BLOCK_NAME             string `json:"block_name"`
-	DATASET_ID             int64  `json:"dataset_id"`
-	OPEN_FOR_WRITING       int64  `json:"open_for_writing"`
-	ORIGIN_SITE_NAME       string `json:"origin_site_name"`
-	BLOCK_SIZE             int64  `json:"block_size"`
-	FILE_COUNT             int64  `json:"file_count"`
-	CREATION_DATE          int64  `json:"creation_date"`
-	CREATE_BY              string `json:"create_by"`
-	LAST_MODIFICATION_DATE int64  `json:"last_modification_date"`
-	LAST_MODIFIED_BY       string `json:"last_modified_by"`
+	BLOCK_NAME             string `json:"block_name" validate:"required"`
+	DATASET_ID             int64  `json:"dataset_id" validate:"required,number,gt=0"`
+	OPEN_FOR_WRITING       int64  `json:"open_for_writing" validate:"required,number"`
+	ORIGIN_SITE_NAME       string `json:"origin_site_name" validate:"required"`
+	BLOCK_SIZE             int64  `json:"block_size" validate:"required,number"`
+	FILE_COUNT             int64  `json:"file_count" validate:"required,number"`
+	CREATION_DATE          int64  `json:"creation_date" validate:"required,number"`
+	CREATE_BY              string `json:"create_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64  `json:"last_modification_date" validate:"required,number"`
+	LAST_MODIFIED_BY       string `json:"last_modified_by" validate:"required"`
 }
 
 // Insert implementation of Blocks
 func (r *Blocks) Insert(tx *sql.Tx) error {
 	var tid int64
 	var err error
-	if r.DATASET_ID == 0 {
+	if r.BLOCK_ID == 0 {
 		if DBOWNER == "sqlite" {
 			tid, err = LastInsertId(tx, "BLOCKS", "block_id")
-			r.DATASET_ID = tid + 1
+			r.BLOCK_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_BK")
-			r.DATASET_ID = tid
+			r.BLOCK_ID = tid
 		}
 		if err != nil {
 			return err
@@ -152,6 +152,9 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 
 // Validate implementation of Blocks
 func (r *Blocks) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := blockPattern.MatchString(r.BLOCK_NAME); !matched {
 		log.Println("validate Block", r)
 		return errors.New("invalid pattern for block")
@@ -159,17 +162,8 @@ func (r *Blocks) Validate() error {
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
 	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
-	}
-	if r.LAST_MODIFICATION_DATE == 0 {
-		return errors.New("missing last_modification_date")
-	}
-	if r.LAST_MODIFIED_BY == "" {
-		return errors.New("missing last_modified_by")
+	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.LAST_MODIFICATION_DATE)); !matched {
+		return errors.New("invalid pattern for last modification date")
 	}
 	return nil
 }

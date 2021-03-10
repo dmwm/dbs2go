@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,7 +13,7 @@ import (
 // ApplicationExecutables
 type ApplicationExecutables struct {
 	APP_EXEC_ID int64  `json:"app_exec_id"`
-	APP_NAME    string `json:"app_name"`
+	APP_NAME    string `json:"app_name" validate:"required"`
 }
 
 // Insert implementation of ApplicationExecutables
@@ -47,8 +46,8 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 
 // Validate implementation of ApplicationExecutables
 func (r *ApplicationExecutables) Validate() error {
-	if r.APP_NAME == "" {
-		return errors.New("missing app_name")
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
 	}
 	return nil
 }

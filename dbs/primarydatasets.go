@@ -31,10 +31,10 @@ func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) 
 // PrimaryDatasets
 type PrimaryDatasets struct {
 	PRIMARY_DS_ID      int64  `json:"primary_ds_id"`
-	PRIMARY_DS_NAME    string `json:"primary_ds_name"`
-	PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id"`
-	CREATION_DATE      int64  `json:"creation_date"`
-	CREATE_BY          string `json:"create_by"`
+	PRIMARY_DS_NAME    string `json:"primary_ds_name" validate:"required"`
+	PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id" validate:"required,number,gt=0"`
+	CREATION_DATE      int64  `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY          string `json:"create_by" validate:"required"`
 }
 
 // Insert implementation of PrimaryDatasets
@@ -67,17 +67,11 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 
 // Validate implementation of PrimaryDatasets
 func (r *PrimaryDatasets) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
-	}
-	if r.PRIMARY_DS_NAME == "" {
-		return errors.New("missing primary_ds_name")
-	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
 	}
 	return nil
 }

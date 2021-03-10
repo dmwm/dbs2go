@@ -64,12 +64,20 @@ func TestBulkBlocks(t *testing.T) {
 		t.Errorf("Fail to get db transaction %v\n", err)
 	}
 	defer tx.Rollback()
-	files := dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/parent/abcd3.root", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
+	isValid := int64(1)
+	datasetID := int64(1)
+	blockID := int64(1)
+	fileTypeID := int64(1)
+	checkSum := "123"
+	fileSize := int64(100)
+	eventCount := int64(100)
+	adler32 := "adler"
+	files := dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/parent/abcd3.root", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy, IS_FILE_VALID: isValid, DATASET_ID: datasetID, BLOCK_ID: blockID, FILE_TYPE_ID: fileTypeID, CHECK_SUM: checkSum, FILE_SIZE: fileSize, EVENT_COUNT: eventCount, ADLER32: adler32}
 	err = files.Insert(tx)
 	if err != nil {
 		t.Errorf("Fail to insert files %v\n", err)
 	}
-	files = dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/parent/abcd2.root", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy}
+	files = dbs.Files{LOGICAL_FILE_NAME: "/store/data/a/b/A/a/1/parent/abcd2.root", CREATION_DATE: ts, CREATE_BY: createBy, LAST_MODIFICATION_DATE: ts, LAST_MODIFIED_BY: createBy, IS_FILE_VALID: isValid, DATASET_ID: datasetID, BLOCK_ID: blockID, FILE_TYPE_ID: fileTypeID, CHECK_SUM: checkSum, FILE_SIZE: fileSize, EVENT_COUNT: eventCount, ADLER32: adler32}
 	err = files.Insert(tx)
 	if err != nil {
 		t.Errorf("Fail to insert files %v\n", err)

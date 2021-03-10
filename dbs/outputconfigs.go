@@ -63,14 +63,14 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 // OutputConfigs
 type OutputConfigs struct {
 	OUTPUT_MOD_CONFIG_ID  int64  `json:"output_mod_config_id"`
-	APP_EXEC_ID           int64  `json:"app_exec_id"`
-	RELEASE_VERSION_ID    int64  `json:"release_version_id"`
-	PARAMETER_SET_HASH_ID int64  `json:"parameter_set_hash_id"`
-	OUTPUT_MODULE_LABEL   string `json:"output_module_label"`
-	GLOBAL_TAG            string `json:"global_tag"`
+	APP_EXEC_ID           int64  `json:"app_exec_id" validate:"required,number,gt=0"`
+	RELEASE_VERSION_ID    int64  `json:"release_version_id" validate:"required,number,gt=0"`
+	PARAMETER_SET_HASH_ID int64  `json:"parameter_set_hash_id" validate:"required,number,gt=0"`
+	OUTPUT_MODULE_LABEL   string `json:"output_module_label" validate:"required"`
+	GLOBAL_TAG            string `json:"global_tag" validate:"required"`
 	SCENARIO              string `json:"scenario"`
-	CREATION_DATE         int64  `json:"creation_date"`
-	CREATE_BY             string `json:"create_by"`
+	CREATION_DATE         int64  `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY             string `json:"create_by" validate:"required"`
 }
 
 // Insert implementation of OutputConfigs
@@ -108,26 +108,11 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 
 // Validate implementation of OutputConfigs
 func (r *OutputConfigs) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
-	}
-	if r.APP_EXEC_ID == 0 {
-		return errors.New("missing app_exec_id")
-	}
-	if r.RELEASE_VERSION_ID == 0 {
-		return errors.New("missing release_version_id")
-	}
-	if r.PARAMETER_SET_HASH_ID == 0 {
-		return errors.New("missing parameter_set_hash_id")
-	}
-	if r.OUTPUT_MODULE_LABEL == "" {
-		return errors.New("missing data_output_module_label")
-	}
-	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
-	}
-	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
 	}
 	return nil
 }
