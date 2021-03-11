@@ -17,6 +17,11 @@
 // SQLite driver:
 //  _ "github.com/mattn/go-sqlite3"
 //
+// Get profile's output
+// visit http://localhost:<port>/debug/pprof
+// or generate png plots
+// go tool pprof -png http://localhost:<port>/debug/pprof/heap > /tmp/heap.png
+// go tool pprof -png http://localhost:<port>/debug/pprof/profile > /tmp/profile.png
 package web
 
 import (
