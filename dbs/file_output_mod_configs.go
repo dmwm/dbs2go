@@ -65,6 +65,10 @@ func (r *FileOutputModConfigs) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for FileOutputModConfigs
+func (r *FileOutputModConfigs) SetDefaults() {
+}
+
 // Decode implementation for FileOutputModConfigs
 func (r *FileOutputModConfigs) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

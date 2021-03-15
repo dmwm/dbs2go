@@ -56,6 +56,10 @@ func (r *PrimaryDSTypes) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for PrimaryDSTypes
+func (r *PrimaryDSTypes) SetDefaults() {
+}
+
 // Decode implementation for PrimaryDSTypes
 func (r *PrimaryDSTypes) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

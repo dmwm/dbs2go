@@ -68,6 +68,10 @@ func (r *DatasetAccessTypes) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for DatasetAccessTypes
+func (r *DatasetAccessTypes) SetDefaults() {
+}
+
 // Decode implementation for DatasetAccessTypes
 func (r *DatasetAccessTypes) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

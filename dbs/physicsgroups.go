@@ -69,6 +69,10 @@ func (r *PhysicsGroups) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for PhysicsGroups
+func (r *PhysicsGroups) SetDefaults() {
+}
+
 // Decode implementation for PhysicsGroups
 func (r *PhysicsGroups) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

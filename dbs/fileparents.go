@@ -104,6 +104,10 @@ func (r *FileParents) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for FileParents
+func (r *FileParents) SetDefaults() {
+}
+
 // Decode implementation for FileParents
 func (r *FileParents) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

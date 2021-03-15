@@ -65,6 +65,10 @@ func (r *DatasetOutputModConfigs) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for DatasetOutputModConfigs
+func (r *DatasetOutputModConfigs) SetDefaults() {
+}
+
 // Decode implementation for DatasetOutputModConfigs
 func (r *DatasetOutputModConfigs) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

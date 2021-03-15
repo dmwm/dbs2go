@@ -76,6 +76,13 @@ func (r *ProcessingEras) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for ProcessingEras
+func (r *ProcessingEras) SetDefaults() {
+	if r.CREATION_DATE == 0 {
+		r.CREATION_DATE = Date()
+	}
+}
+
 // Decode implementation for ProcessingEras
 func (r *ProcessingEras) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

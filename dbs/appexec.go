@@ -52,6 +52,10 @@ func (r *ApplicationExecutables) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for ApplicationExecutables
+func (r *ApplicationExecutables) SetDefaults() {
+}
+
 // Decode implementation for ApplicationExecutables
 func (r *ApplicationExecutables) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

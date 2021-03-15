@@ -16,6 +16,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	validator "github.com/go-playground/validator/v10"
 	"github.com/vkuznet/dbs2go/utils"
@@ -43,6 +44,7 @@ var DRYRUN bool
 type DBRecord interface {
 	Insert(tx *sql.Tx) error
 	Validate() error
+	SetDefaults()
 	Decode(r io.Reader) (int64, error)
 }
 
@@ -62,6 +64,11 @@ func DecodeValidatorError(r, err interface{}) error {
 // CreateBy provides default CreateBy string
 func CreateBy() string {
 	return "DBS-workflow"
+}
+
+// Date provides default date for DB records
+func Date() int64 {
+	return time.Now().Unix()
 }
 
 // helper function to insert DB record with given transaction and reader
@@ -100,6 +107,9 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 		return 0, err
 	}
 	defer tx.Rollback()
+
+	// set defaults
+	rec.SetDefaults()
 
 	// validate record
 	err = rec.Validate()

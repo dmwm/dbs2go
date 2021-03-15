@@ -76,6 +76,10 @@ func (r *ReleaseVersions) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for ReleaseVersions
+func (r *ReleaseVersions) SetDefaults() {
+}
+
 // Decode implementation for ReleaseVersions
 func (r *ReleaseVersions) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

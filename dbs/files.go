@@ -247,6 +247,16 @@ func (r *Files) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for Files
+func (r *Files) SetDefaults() {
+	if r.CREATION_DATE == 0 {
+		r.CREATION_DATE = Date()
+	}
+	if r.LAST_MODIFICATION_DATE == 0 {
+		r.LAST_MODIFICATION_DATE = Date()
+	}
+}
+
 // Decode implementation for Files
 func (r *Files) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

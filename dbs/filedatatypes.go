@@ -64,6 +64,10 @@ func (r *FileDataTypes) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for FileDataTypes
+func (r *FileDataTypes) SetDefaults() {
+}
+
 // Decode implementation for FileDataTypes
 func (r *FileDataTypes) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

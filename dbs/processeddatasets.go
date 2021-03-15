@@ -69,6 +69,10 @@ func (r *ProcessedDatasets) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for ProcessedDatasets
+func (r *ProcessedDatasets) SetDefaults() {
+}
+
 // Decode implementation for ProcessedDatasets
 func (r *ProcessedDatasets) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

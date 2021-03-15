@@ -53,6 +53,10 @@ func (r *ParameterSetHashes) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for ParameterSetHashes
+func (r *ParameterSetHashes) SetDefaults() {
+}
+
 // Decode implementation for ParameterSetHashes
 func (r *ParameterSetHashes) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record

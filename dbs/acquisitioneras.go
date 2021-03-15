@@ -87,6 +87,19 @@ func (r *AcquisitionEras) Validate() error {
 	return nil
 }
 
+// SetDefaults implements set defaults for AcquisitionEras
+func (r *AcquisitionEras) SetDefaults() {
+	if r.CREATION_DATE == 0 {
+		r.CREATION_DATE = Date()
+	}
+	if r.START_DATE == 0 {
+		r.START_DATE = Date()
+	}
+	if r.END_DATE == 0 {
+		r.END_DATE = Date()
+	}
+}
+
 // Decode implementation for AcquisitionEras
 func (r *AcquisitionEras) Decode(reader io.Reader) (int64, error) {
 	// init record with given data record
