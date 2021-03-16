@@ -87,7 +87,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileLumis DBS API
-func (API) InsertFileLumis(r io.Reader) (int64, error) {
+func (API) InsertFileLumis(r io.Reader, cby string) (int64, error) {
 	//     if _, ok := params["event_count"]; ok {
 	//         return InsertValues("insert_filelumi", params)
 	//     }

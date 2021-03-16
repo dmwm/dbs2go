@@ -94,6 +94,6 @@ func (r *ProcessedDatasets) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertProcessedDatasets DBS API
-func (API) InsertProcessedDatasets(r io.Reader) (int64, error) {
+func (API) InsertProcessedDatasets(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&ProcessedDatasets{}, r)
 }

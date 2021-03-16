@@ -14,7 +14,7 @@ func (api API) DatasetList(params Record, w http.ResponseWriter) (int64, error) 
 }
 
 // InsertDatasetList DBS API
-func (API) InsertDatasetList(r io.Reader) (int64, error) {
+func (API) InsertDatasetList(r io.Reader, cby string) (int64, error) {
 	//     return InsertValues("insert_dataset_list", values)
 	return 0, nil
 }

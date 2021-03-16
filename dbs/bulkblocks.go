@@ -128,7 +128,7 @@ type FileParent struct {
    #3 insert block & files
    self.insertBlockFile(blockcontent, datasetId, migration)
 */
-func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
+func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	// read input data
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -168,7 +168,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertOutputConfigs(reader)
+		_, err = api.InsertOutputConfigs(reader, cby)
 		if err != nil {
 			return 0, err
 		}
@@ -196,6 +196,9 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	}
 
 	// insert primary dataset if it does not exists
+	if rec.PrimaryDataset.CreateBy == "" {
+		rec.PrimaryDataset.CreateBy = cby
+	}
 	primDS := PrimaryDatasets{
 		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
 		PRIMARY_DS_TYPE_ID: primaryDatasetTypeID,
@@ -220,6 +223,9 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	}
 
 	// insert processing era if it does not exists
+	if rec.ProcessingEra.CreateBy == "" {
+		rec.ProcessingEra.CreateBy = cby
+	}
 	pera := ProcessingEras{
 		PROCESSING_VERSION: rec.ProcessingEra.ProcessingVersion,
 		CREATION_DATE:      creationDate,
@@ -245,7 +251,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 
 	// insert acquisition era if it does not exists
 	if rec.AcquisitionEra.CreateBy == "" {
-		rec.AcquisitionEra.CreateBy = rec.ProcessingEra.CreateBy
+		rec.AcquisitionEra.CreateBy = cby
 	}
 	aera := AcquisitionEras{
 		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
@@ -295,6 +301,9 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	// insert dataset
+	if rec.Dataset.CreateBy == "" {
+		rec.Dataset.CreateBy = cby
+	}
 	dataset := Datasets{
 		DATASET:                rec.Dataset.Dataset,
 		IS_DATASET_VALID:       1,
@@ -329,6 +338,9 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 	}
 
 	// insert block
+	if rec.Block.CreateBy == "" {
+		rec.Block.CreateBy = cby
+	}
 	blk := Blocks{
 		BLOCK_NAME:             rec.Block.BlockName,
 		DATASET_ID:             datasetID,
@@ -416,7 +428,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertFileOutputModConfigs(tx, reader)
+		_, err = api.InsertFileOutputModConfigs(tx, reader, cby)
 		if err != nil {
 			return 0, err
 		}
@@ -430,7 +442,7 @@ func (API) InsertBulkBlocks(r io.Reader) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertFileParents(tx, reader)
+		_, err = api.InsertFileParents(tx, reader, cby)
 		if err != nil {
 			return 0, err
 		}

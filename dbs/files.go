@@ -310,7 +310,7 @@ type FileRecord struct {
 }
 
 // InsertFiles DBS API
-func (API) InsertFiles(r io.Reader) (int64, error) {
+func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -358,7 +358,7 @@ func (API) InsertFiles(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	size := int64(len(data))
-	var rec FileRecord
+	rec := FileRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)

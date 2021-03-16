@@ -212,7 +212,7 @@ type BlockRecord struct {
 }
 
 // InsertBlocks DBS API
-func (API) InsertBlocks(r io.Reader) (int64, error) {
+func (API) InsertBlocks(r io.Reader, cby string) (int64, error) {
 	// TODO: implement the following logic
 	// input values: blockname
 	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
@@ -227,7 +227,7 @@ func (API) InsertBlocks(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	size := int64(len(data))
-	var rec BlockRecord
+	rec := BlockRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)

@@ -89,6 +89,6 @@ func (r *FileDataTypes) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertFileDataTypes DBS API
-func (API) InsertFileDataTypes(r io.Reader) (int64, error) {
+func (API) InsertFileDataTypes(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&FileDataTypes{}, r)
 }

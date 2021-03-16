@@ -121,12 +121,12 @@ func (r *AcquisitionEras) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertAcquisitionEras DBS API
-func (API) InsertAcquisitionEras(r io.Reader) (int64, error) {
+func (API) InsertAcquisitionEras(r io.Reader, cby string) (int64, error) {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
 
 	//     return InsertValues("insert_acquisition_eras", values)
-	return insertRecord(&AcquisitionEras{}, r)
+	return insertRecord(&AcquisitionEras{CREATE_BY: cby}, r)
 }

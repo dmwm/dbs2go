@@ -28,7 +28,7 @@ func (API) BlockParents(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertBlockParents DBS API
-func (API) InsertBlockParents(r io.Reader) (int64, error) {
+func (API) InsertBlockParents(r io.Reader, cby string) (int64, error) {
 	/*
 		args := make(Record)
 		args["Owner"] = DBOWNER

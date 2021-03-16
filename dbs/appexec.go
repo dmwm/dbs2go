@@ -77,6 +77,6 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertApplicationExecutables DBS API
-func (API) InsertApplicationExecutables(r io.Reader) (int64, error) {
+func (API) InsertApplicationExecutables(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&ApplicationExecutables{}, r)
 }

@@ -104,6 +104,6 @@ func (r *ProcessingEras) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertProcessingEras DBS API
-func (API) InsertProcessingEras(r io.Reader) (int64, error) {
-	return insertRecord(&ProcessingEras{}, r)
+func (API) InsertProcessingEras(r io.Reader, cby string) (int64, error) {
+	return insertRecord(&ProcessingEras{CREATE_BY: cby}, r)
 }

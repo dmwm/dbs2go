@@ -57,6 +57,18 @@ func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code i
 	w.Write(data)
 }
 
+// helper function to extract user name or DN
+func createBy(r *http.Request) string {
+	cby := r.Header.Get("Cms-Authn-Login")
+	if cby == "" {
+		cby = r.Header.Get("Cms-Authn-Dn")
+	}
+	if cby == "" {
+		return "DBS-workflow"
+	}
+	return cby
+}
+
 // MetricsHandler provides metrics
 func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
@@ -153,36 +165,36 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	var err error
 	var size int64
 	if a == "datatiers" {
-		size, err = api.InsertDataTiers(r.Body)
+		size, err = api.InsertDataTiers(r.Body, createBy(r))
 	} else if a == "outputconfigs" {
-		size, err = api.InsertOutputConfigs(r.Body)
+		size, err = api.InsertOutputConfigs(r.Body, createBy(r))
 	} else if a == "primarydatasets" {
-		size, err = api.InsertPrimaryDatasets(r.Body)
+		size, err = api.InsertPrimaryDatasets(r.Body, createBy(r))
 	} else if a == "acquisitioneras" {
-		size, err = api.InsertAcquisitionEras(r.Body)
+		size, err = api.InsertAcquisitionEras(r.Body, createBy(r))
 	} else if a == "processingeras" {
-		size, err = api.InsertProcessingEras(r.Body)
+		size, err = api.InsertProcessingEras(r.Body, createBy(r))
 	} else if a == "datasets" {
-		size, err = api.InsertDatasets(r.Body)
+		size, err = api.InsertDatasets(r.Body, createBy(r))
 	} else if a == "blocks" {
-		size, err = api.InsertBlocks(r.Body)
+		size, err = api.InsertBlocks(r.Body, createBy(r))
 	} else if a == "bulkblocks" {
-		size, err = api.InsertBulkBlocks(r.Body)
+		size, err = api.InsertBulkBlocks(r.Body, createBy(r))
 	} else if a == "files" {
-		size, err = api.InsertFiles(r.Body)
+		size, err = api.InsertFiles(r.Body, createBy(r))
 	}
 	//     } else if a == "fileparentss" {
-	//         size, err = api.InsertFileParents(r.Body)
+	//         size, err = api.InsertFileParents(r.Body, createBy(r))
 	//     } else if a == "fileparentsbylumi" {
-	//         size, err = api.InsertFileParentsByLumi(r.Body)
+	//         size, err = api.InsertFileParentsByLumi(r.Body, createBy(r))
 	//     } else if a == "datasetlist" {
-	//         size, err = api.InsertDatasetList(r.Body)
+	//         size, err = api.InsertDatasetList(r.Body, createBy(r))
 	//     } else if a == "fileArray" {
-	//         size, err = api.InsertFileArray(r.Body)
+	//         size, err = api.InsertFileArray(r.Body, createBy(r))
 	//     } else if a == "filelumis" {
-	//         size, err = api.InsertFileLumis(r.Body)
+	//         size, err = api.InsertFileLumis(r.Body, createBy(r))
 	//     } else if a == "blockparents" {
-	//         size, err = api.InsertBlockParents(r.Body)
+	//         size, err = api.InsertBlockParents(r.Body, createBy(r))
 	if err != nil {
 		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 		return http.StatusInternalServerError, 0, err

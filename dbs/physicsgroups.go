@@ -94,6 +94,6 @@ func (r *PhysicsGroups) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertPhysicsGroups DBS API
-func (API) InsertPhysicsGroups(r io.Reader) (int64, error) {
+func (API) InsertPhysicsGroups(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&PhysicsGroups{}, r)
 }

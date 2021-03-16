@@ -93,6 +93,6 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertDatasetAccessTypes DBS API
-func (API) InsertDatasetAccessTypes(r io.Reader) (int64, error) {
+func (API) InsertDatasetAccessTypes(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&DatasetAccessTypes{}, r)
 }

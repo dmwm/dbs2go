@@ -91,6 +91,7 @@ func TestInsertSQL(t *testing.T) {
 		// create reader from our record and pass it around to insert APIs
 		data, _ := json.Marshal(rec.InsertParams)
 		reader := bytes.NewReader(data)
+		cby := "test"
 
 		// create new writer for our test
 		var w http.ResponseWriter
@@ -101,7 +102,7 @@ func TestInsertSQL(t *testing.T) {
 		log.Printf("SQL test for %s API with params %+v\n", rec.InsertApi, string(data))
 		r := reflect.ValueOf(dbs.API{})
 		m := r.MethodByName(rec.InsertApi)
-		args := []reflect.Value{reflect.ValueOf(reader)}
+		args := []reflect.Value{reflect.ValueOf(reader), reflect.ValueOf(cby)}
 		// call to InsertXXX DBS API, it returns output which consists
 		// of two values, the size of inserted record and the error
 		output := m.Call(args)

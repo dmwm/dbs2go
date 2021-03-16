@@ -101,6 +101,6 @@ func (r *ReleaseVersions) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertReleaseVersions DBS API
-func (API) InsertReleaseVersions(r io.Reader) (int64, error) {
+func (API) InsertReleaseVersions(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&ReleaseVersions{}, r)
 }

@@ -61,11 +61,6 @@ func DecodeValidatorError(r, err interface{}) error {
 	return nil
 }
 
-// CreateBy provides default CreateBy string
-func CreateBy() string {
-	return "DBS-workflow"
-}
-
 // Date provides default date for DB records
 func Date() int64 {
 	return time.Now().Unix()

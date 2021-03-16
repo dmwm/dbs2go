@@ -107,6 +107,6 @@ func (r *DataTiers) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertDataTiers DBS API
-func (API) InsertDataTiers(r io.Reader) (int64, error) {
-	return insertRecord(&DataTiers{}, r)
+func (API) InsertDataTiers(r io.Reader, cby string) (int64, error) {
+	return insertRecord(&DataTiers{CREATE_BY: cby}, r)
 }

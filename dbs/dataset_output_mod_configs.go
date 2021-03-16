@@ -90,6 +90,6 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertDatasetOutputModConfigs DBS API
-func (API) InsertDatasetOutputModConfigs(r io.Reader) (int64, error) {
+func (API) InsertDatasetOutputModConfigs(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&DatasetOutputModConfigs{}, r)
 }

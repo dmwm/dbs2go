@@ -100,7 +100,7 @@ type FileOutputModConfigRecord struct {
 }
 
 // InsertFileOutputModConfigs DBS API
-func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader) (int64, error) {
+func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) (int64, error) {
 	// read given input
 	data, err := ioutil.ReadAll(r)
 	if err != nil {

@@ -166,7 +166,7 @@ type OutputConfigRecord struct {
 }
 
 // InsertOutputConfigs DBS API
-func (API) InsertOutputConfigs(r io.Reader) (int64, error) {
+func (API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -180,7 +180,7 @@ func (API) InsertOutputConfigs(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	size := int64(len(data))
-	var rec OutputConfigRecord
+	rec := OutputConfigRecord{CREATE_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
@@ -188,9 +188,6 @@ func (API) InsertOutputConfigs(r io.Reader) (int64, error) {
 	}
 	if rec.CREATION_DATE == 0 {
 		rec.CREATION_DATE = time.Now().Unix()
-	}
-	if rec.CREATE_BY == "" {
-		rec.CREATE_BY = CreateBy()
 	}
 	arec := ApplicationExecutables{APP_NAME: rec.APP_NAME}
 	rrec := ReleaseVersions{RELEASE_VERSION: rec.RELEASE_VERSION}

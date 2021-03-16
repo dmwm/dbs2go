@@ -134,7 +134,7 @@ type FileParentRecord struct {
 }
 
 // InsertFileParents DBS API
-func (API) InsertFileParents(tx *sql.Tx, r io.Reader) (int64, error) {
+func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) (int64, error) {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*

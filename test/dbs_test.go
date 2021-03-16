@@ -76,17 +76,18 @@ func TestDBSGetID(t *testing.T) {
 	defer db.Close()
 
 	// prepare record for insertion
+	createBy := "Valentin"
 	rec := make(dbs.Record)
 	rec["data_tier_name"] = "RAW-TEST-0"
 	rec["creation_date"] = 1607536535
-	rec["create_by"] = "Valentin"
+	rec["create_by"] = createBy
 	data, _ := json.Marshal(rec)
 	reader := bytes.NewReader(data)
 
 	// insert new record
 	var api dbs.API
 	utils.VERBOSE = 1
-	_, err := api.InsertDataTiers(reader)
+	_, err := api.InsertDataTiers(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}

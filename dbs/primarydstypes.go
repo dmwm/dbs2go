@@ -81,6 +81,6 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) (int64, error) {
 }
 
 // InsertPrimaryDSTypes DBS API
-func (API) InsertPrimaryDSTypes(r io.Reader) (int64, error) {
+func (API) InsertPrimaryDSTypes(r io.Reader, cby string) (int64, error) {
 	return insertRecord(&PrimaryDSTypes{}, r)
 }

@@ -112,7 +112,7 @@ type PrimaryDatasetRecord struct {
 }
 
 // InsertPrimaryDatasets DBS API
-func (API) InsertPrimaryDatasets(r io.Reader) (int64, error) {
+func (API) InsertPrimaryDatasets(r io.Reader, cby string) (int64, error) {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
 	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by
@@ -127,7 +127,7 @@ func (API) InsertPrimaryDatasets(r io.Reader) (int64, error) {
 		return 0, err
 	}
 	size := int64(len(data))
-	var rec PrimaryDatasetRecord
+	rec := PrimaryDatasetRecord{CREATE_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
