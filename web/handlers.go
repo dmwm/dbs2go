@@ -134,7 +134,8 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
-		return http.StatusUnsupportedMediaType, 0, errors.New("unsupported Content-Type")
+		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
+		return http.StatusUnsupportedMediaType, 0, errors.New(msg)
 	}
 	var api dbs.API
 	var err error
