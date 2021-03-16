@@ -46,6 +46,17 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 	}
 }
 
+// responseMsg helper function to provide response to end-user
+func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) {
+	rec := make(dbs.Record)
+	rec["error"] = msg
+	rec["api"] = api
+	rec["method"] = r.Method
+	data, _ := json.Marshal(rec)
+	w.WriteHeader(code)
+	w.Write(data)
+}
+
 // MetricsHandler provides metrics
 func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
@@ -135,6 +146,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
 		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
+		responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
 		return http.StatusUnsupportedMediaType, 0, errors.New(msg)
 	}
 	var api dbs.API
@@ -172,12 +184,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	//     } else if a == "blockparents" {
 	//         size, err = api.InsertBlockParents(r.Body)
 	if err != nil {
-		rec := make(dbs.Record)
-		rec["error"] = fmt.Sprintf("%v", err)
-		rec["api"] = a
-		data, _ := json.Marshal(rec)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(data)
+		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 		return http.StatusInternalServerError, 0, err
 	}
 	return http.StatusOK, size, nil
@@ -251,6 +258,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
 	if err != nil {
+		responseMsg(w, r, "DBSGetHandler", a, http.StatusInternalServerError)
 		return http.StatusInternalServerError, 0, err
 	}
 	return status, size, nil
@@ -259,6 +267,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 // NotImplementedHandler returns server status error
 func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) (int, int64, error) {
 	log.Println("NotImplementedAPI", api)
+	responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
 	return http.StatusInternalServerError, 0, nil
 }
 
