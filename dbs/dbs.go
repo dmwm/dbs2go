@@ -91,7 +91,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 		log.Println("fail to decode record", err)
 		return 0, err
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 2 {
 		log.Printf("insertRecord %+v", rec)
 	}
 
@@ -104,13 +104,13 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 	defer tx.Rollback()
 
 	// set defaults
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 2 {
 		log.Printf("record %+v setdefauls", rec)
 	}
 	rec.SetDefaults()
 
 	// validate record
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 2 {
 		log.Printf("record %+v validate", rec)
 	}
 	err = rec.Validate()
@@ -120,7 +120,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 	}
 
 	// insert record
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 2 {
 		log.Printf("record %+v insert", rec)
 	}
 	err = rec.Insert(tx)
@@ -130,7 +130,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 	}
 
 	// commit transaction
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 2 {
 		log.Printf("record %+v tx.Commit", rec)
 	}
 	err = tx.Commit()
@@ -138,7 +138,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 		log.Println("unable to commit transaction", err)
 		return 0, err
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 2 {
 		log.Printf("record size %v, error %v", size, err)
 	}
 	return size, nil
