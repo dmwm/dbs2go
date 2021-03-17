@@ -165,8 +165,8 @@ type OutputConfigRecord struct {
 	SCENARIO            string `json:"scenario"`
 }
 
-// InsertOutputConfigs DBS API
-func (API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
+// InsertOutputConfigsTx DBS API
+func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, error) {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -194,13 +194,6 @@ func (API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
 	prec := ParameterSetHashes{PSET_HASH: rec.PSET_HASH, PSET_NAME: rec.PSET_NAME}
 	orec := OutputConfigs{GLOBAL_TAG: rec.GLOBAL_TAG, OUTPUT_MODULE_LABEL: rec.OUTPUT_MODULE_LABEL, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, SCENARIO: rec.SCENARIO}
 
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
-	}
-	defer tx.Rollback()
 	// get and insert (if necessary) records IDs
 	var appID, psetID, relID int64
 	appID, err = getInsertTxtID(tx, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME, &arec)
@@ -224,6 +217,27 @@ func (API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	return size, err
+}
+
+// InsertOutputConfigs DBS API
+func (api API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
+	// implement the following logic
+	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
+	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
+	// creation_date, create_by
+	// optional: scenario, pset_name
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return 0, errors.New(msg)
+	}
+	defer tx.Rollback()
+
+	size, err := api.InsertOutputConfigsTx(tx, r, cby)
 
 	// commit transaction
 	err = tx.Commit()

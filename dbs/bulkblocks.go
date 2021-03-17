@@ -173,7 +173,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 			return 0, err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertOutputConfigs(reader, cby)
+		_, err = api.InsertOutputConfigsTx(tx, reader, cby)
 		if err != nil {
 			return 0, err
 		}
