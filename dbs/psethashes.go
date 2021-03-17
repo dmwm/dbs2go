@@ -13,7 +13,7 @@ import (
 // ParameterSetHashes
 type ParameterSetHashes struct {
 	PARAMETER_SET_HASH_ID int64  `json:"parameter_set_hash_id"`
-	PSET_NAME             string `json:"pset_name" validate:"required"`
+	PSET_NAME             string `json:"pset_name"`
 	PSET_HASH             string `json:"pset_hash" validate:"required"`
 }
 
