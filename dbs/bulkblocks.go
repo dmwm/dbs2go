@@ -59,6 +59,7 @@ type File struct {
 	FileSize         int64      `json:"file_size"`
 	EventCount       int64      `json:"event_count"`
 	FileType         string     `json:"file_type"`
+	BranchHash       string     `json:"branch_hash"`
 	LastModifiedBy   string     `json:"last_modified_by"`
 	LogicalFileName  string     `json:"logical_file_name"`
 	MD5              string     `json:"md5"`
@@ -285,6 +286,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
 		return 0, err
 	}
+
 	// insert dataset
 	if utils.VERBOSE > 0 {
 		log.Println("insert dataset")
@@ -369,23 +371,23 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		log.Println("insert files")
 	}
 	for _, rrr := range rec.Files {
-		// get fileTypeID
-		fileTypeID, err = getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
+		// get fileTypeID and insert record if it does not exists
+		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
+		fileTypeID, err = getInsertTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType, &ftype)
 		if err != nil {
-			fType := FileDataTypes{
-				FILE_TYPE: rrr.FileType,
-			}
-			err = fType.Insert(tx)
-			if err != nil {
-				log.Println("unable to insert file data type record", err)
-				return 0, err
-			}
-			fileTypeID, err = getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
-			if err != nil {
-				log.Println("unable to find file_type_id for", rrr.FileType)
-				return 0, err
-			}
+			log.Println("unable to find file_type_id for", rrr.FileType)
+			return 0, err
 		}
+		// get branch hash ID and insert record if it does not exists
+		bhash := BranchHashes{
+			BRANCH_HASH: rrr.BranchHash,
+		}
+		branchHashID, err = getInsertTxtID(tx, "BRANCH_HASHES", "branch_hash_id", "branch_hash", rrr.BranchHash, &bhash)
+		if err != nil {
+			log.Println("unable to find branch hash_id for", rrr.BranchHash)
+			return 0, err
+		}
+
 		r := Files{
 			LOGICAL_FILE_NAME:      rrr.LogicalFileName,
 			IS_FILE_VALID:          isFileValid,
