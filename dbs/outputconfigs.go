@@ -214,10 +214,6 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, er
 	orec.RELEASE_VERSION_ID = relID
 	orec.PARAMETER_SET_HASH_ID = psetID
 	err = orec.Insert(tx)
-	if err != nil {
-		return 0, err
-	}
-
 	return size, err
 }
 
@@ -242,7 +238,7 @@ func (api API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("faile to insert_outputconfigs_sqlite", err)
+		log.Println("unable to commit transaction", err)
 		return 0, err
 	}
 	return size, err

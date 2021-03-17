@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // LoggingHandlerFunc declares new handler function type which
@@ -161,9 +162,13 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
 		return http.StatusUnsupportedMediaType, 0, errors.New(msg)
 	}
+	defer r.Body.Close()
 	var api dbs.API
 	var err error
 	var size int64
+	if utils.VERBOSE > 0 {
+		log.Println("DBSPostHandler: API=%s, header=%+v", a, r.Header)
+	}
 	if a == "datatiers" {
 		size, err = api.InsertDataTiers(r.Body, createBy(r))
 	} else if a == "outputconfigs" {
@@ -208,6 +213,9 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	params := make(dbs.Record)
 	for k, v := range r.URL.Query() {
 		params[k] = v
+	}
+	if utils.VERBOSE > 0 {
+		log.Println("DBSGetHandler: API=%s, header=%+v, params %+v", a, r.Header, params)
 	}
 	var api dbs.API
 	var err error
