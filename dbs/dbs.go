@@ -539,7 +539,7 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 	if DBOWNER == "sqlite" {
 		stm = fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", id, table, attr)
 	} else {
-		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, id)
+		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, attr)
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("getTxtID\n%s %+v", stm, val)
