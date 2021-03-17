@@ -174,28 +174,17 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		}
 	}
 
-	// insert primary dataset type if it does not exists
+	// get primaryDatasetTypeID and insert record if it does not exists
 	pdstDS := PrimaryDSTypes{
 		PRIMARY_DS_TYPE: rec.PrimaryDataset.PrimaryDSType,
 	}
-	err = pdstDS.Validate()
-	if err != nil {
-		log.Println("unable to validate primary dataset type record", err)
-		return 0, err
-	}
-	err = pdstDS.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert primary dataset type record", err)
-		return 0, err
-	}
-	// get primaryDatasetTypeID
-	primaryDatasetTypeID, err = getTxtID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType)
+	primaryDatasetTypeID, err = getInsertTxtID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType, &pdstDS)
 	if err != nil {
 		log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
 		return 0, err
 	}
 
-	// insert primary dataset if it does not exists
+	// get primarayDatasetID and insert record if it does not exists
 	if rec.PrimaryDataset.CreateBy == "" {
 		rec.PrimaryDataset.CreateBy = cby
 	}
@@ -205,24 +194,13 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATION_DATE:      rec.PrimaryDataset.CreationDate,
 		CREATE_BY:          rec.PrimaryDataset.CreateBy,
 	}
-	err = primDS.Validate()
-	if err != nil {
-		log.Println("unable to validate primary dataset record", err)
-		return 0, err
-	}
-	err = primDS.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert primary dataset record", err)
-		return 0, err
-	}
-	// get primaryDatasetID
-	primaryDatasetID, err = getTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName)
+	primaryDatasetID, err = getInsertTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName, &primDS)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
 		return 0, err
 	}
 
-	// insert processing era if it does not exists
+	// get processing era ID and insert record if it does not exists
 	if rec.ProcessingEra.CreateBy == "" {
 		rec.ProcessingEra.CreateBy = cby
 	}
@@ -232,18 +210,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATE_BY:          rec.ProcessingEra.CreateBy,
 		DESCRIPTION:        rec.ProcessingEra.Description,
 	}
-	err = pera.Validate()
-	if err != nil {
-		log.Println("unable to validate processing era record", err)
-		return 0, err
-	}
-	err = pera.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert processing era record", err)
-		return 0, err
-	}
-	// get processingEraID
-	processingEraID, err = getTxtID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion)
+	processingEraID, err = getInsertTxtID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion, &pera)
 	if err != nil {
 		log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
 		return 0, err
@@ -260,18 +227,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATION_DATE:        creationDate,
 		CREATE_BY:            rec.AcquisitionEra.CreateBy,
 	}
-	err = aera.Validate()
-	if err != nil {
-		log.Println("unable to validate acquisition era record", err)
-		return 0, err
-	}
-	err = aera.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert acquisition era record", err)
-		return 0, err
-	}
-	// get acquisitionEraID
-	acquisitionEraID, err = getTxtID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName)
+	acquisitionEraID, err = getInsertTxtID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName, &aera)
 	if err != nil {
 		log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
 		return 0, err
