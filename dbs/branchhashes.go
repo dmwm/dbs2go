@@ -51,6 +51,13 @@ func (r *BranchHashes) Validate() error {
 
 // SetDefaults implements set defaults for BranchHashes
 func (r *BranchHashes) SetDefaults() {
+	// TODO: clarify what is requried and what should be defaults
+	if r.BRANCH_HASH == "" {
+		r.BRANCH_HASH = "branch-hash"
+	}
+	if r.CONTENT == "" {
+		r.CONTENT = "branch-hash content"
+	}
 }
 
 // Decode implementation for BranchHashes
