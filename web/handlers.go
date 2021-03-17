@@ -167,7 +167,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	var err error
 	var size int64
 	if utils.VERBOSE > 0 {
-		log.Println("DBSPostHandler: API=%s, header=%+v", a, r.Header)
+		dn, _ := r.Header["Cms-Authn-Dn"]
+		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
 	}
 	if a == "datatiers" {
 		size, err = api.InsertDataTiers(r.Body, createBy(r))
@@ -215,7 +216,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		params[k] = v
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("DBSGetHandler: API=%s, header=%+v, params %+v", a, r.Header, params)
+		dn, _ := r.Header["Cms-Authn-Dn"]
+		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, r.URL.RequestURI(), params)
 	}
 	var api dbs.API
 	var err error
