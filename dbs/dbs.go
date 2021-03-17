@@ -542,7 +542,7 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, attr)
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("getTxtID\n%s %+v", stm, val)
+		log.Printf("getTxtID\n%s; binding value='%+v'", stm, val)
 	}
 	var tid float64
 	err := tx.QueryRow(stm, val).Scan(&tid)
