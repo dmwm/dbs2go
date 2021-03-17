@@ -520,7 +520,6 @@ func insert(stm string, vals []interface{}) error {
 
 // helper function to get table primary id for a given value
 func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error) {
-	var tid int64
 	var stm string
 	if DBOWNER == "sqlite" {
 		stm = fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", id, table, attr)
@@ -530,8 +529,9 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 	if utils.VERBOSE > 0 {
 		log.Printf("getTxtID\n%s %+v", stm, val)
 	}
+	var tid float64
 	err := tx.QueryRow(stm, val).Scan(&tid)
-	return tid, err
+	return int64(tid), err
 }
 
 // helper function to get table primary id for a given value and insert it if necessary
