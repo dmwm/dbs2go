@@ -201,23 +201,25 @@ func (API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
 		return 0, errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = arec.Insert(tx)
+	// get and insert (if necessary) records IDs
+	var appID, psetID, relID int64
+	appID, err = getInsertTxtID(tx, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME, &arec)
 	if err != nil {
 		return 0, err
 	}
-	err = rrec.Insert(tx)
+	psetID, err = getInsertTxtID(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH, &prec)
 	if err != nil {
 		return 0, err
 	}
-	err = prec.Insert(tx)
+	relID, err = getInsertTxtID(tx, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION, &rrec)
 	if err != nil {
 		return 0, err
 	}
 
 	// init all foreign Id's in output config record
-	orec.APP_EXEC_ID = arec.APP_EXEC_ID
-	orec.RELEASE_VERSION_ID = rrec.RELEASE_VERSION_ID
-	orec.PARAMETER_SET_HASH_ID = prec.PARAMETER_SET_HASH_ID
+	orec.APP_EXEC_ID = appID
+	orec.RELEASE_VERSION_ID = relID
+	orec.PARAMETER_SET_HASH_ID = psetID
 	err = orec.Insert(tx)
 	if err != nil {
 		return 0, err
