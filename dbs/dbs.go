@@ -531,6 +531,9 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 	}
 	var tid float64
 	err := tx.QueryRow(stm, val).Scan(&tid)
+	if err != nil {
+		log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
+	}
 	return int64(tid), err
 }
 
@@ -700,14 +703,15 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	if DBOWNER == "sqlite" {
 		return 0, nil
 	}
-	var pid int64
+	var pid float64
 	stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
-		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
+		msg := fmt.Sprintf("fail to increment sequence, query='%s' error=%v", stm, err)
+		log.Println(msg)
 		return 0, errors.New(msg)
 	}
-	return pid, nil
+	return int64(pid), nil
 }
 
 // LastInsertId shoudl return last insert id of given table and idname parameter
