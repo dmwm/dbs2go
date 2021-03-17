@@ -534,6 +534,23 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 	return tid, err
 }
 
+// helper function to get table primary id for a given value and insert it if necessary
+func getInsertTxtID(tx *sql.Tx, table, id, attr string, val interface{}, rec DBRecord) (int64, error) {
+	rid, err := getTxtID(tx, table, id, attr, val)
+	if err != nil {
+		log.Printf("unable to find %s for %v", id, val)
+		err = rec.Insert(tx)
+		if err != nil {
+			return 0, err
+		}
+		rid, err = getTxtID(tx, table, id, attr, val)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return rid, err
+}
+
 // helper function to generate operator, value pair for given argument
 func OperatorValue(arg string) (string, string) {
 	op := "="
