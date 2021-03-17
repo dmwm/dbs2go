@@ -710,6 +710,9 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	}
 	var pid float64
 	stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
+	if utils.VERBOSE > 0 {
+		log.Println("execute", stm)
+	}
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
 		msg := fmt.Sprintf("fail to increment sequence, query='%s' error=%v", stm, err)
@@ -726,6 +729,9 @@ func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
 		stm = fmt.Sprintf("select MAX(%s) from %s", idName, table)
 	}
 	var pid sql.NullInt64
+	if utils.VERBOSE > 0 {
+		log.Println("execute", stm)
+	}
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
 		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)

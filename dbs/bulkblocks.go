@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"log"
 	"time"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // BulkBlocks represents bulk block JSON structure
@@ -161,6 +163,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	creationDate := time.Now().Unix()
 
 	// insert dataset configuration
+	if utils.VERBOSE > 0 {
+		log.Println("insert output configs")
+	}
 	for _, rrr := range rec.DatasetConfigList {
 		data, err = json.Marshal(rrr)
 		if err != nil {
@@ -175,6 +180,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// get primaryDatasetTypeID and insert record if it does not exists
+	if utils.VERBOSE > 0 {
+		log.Println("get primary dataset type ID")
+	}
 	pdstDS := PrimaryDSTypes{
 		PRIMARY_DS_TYPE: rec.PrimaryDataset.PrimaryDSType,
 	}
@@ -185,6 +193,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// get primarayDatasetID and insert record if it does not exists
+	if utils.VERBOSE > 0 {
+		log.Println("get primary dataset ID")
+	}
 	if rec.PrimaryDataset.CreateBy == "" {
 		rec.PrimaryDataset.CreateBy = cby
 	}
@@ -201,6 +212,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// get processing era ID and insert record if it does not exists
+	if utils.VERBOSE > 0 {
+		log.Println("get processing era ID")
+	}
 	if rec.ProcessingEra.CreateBy == "" {
 		rec.ProcessingEra.CreateBy = cby
 	}
@@ -217,6 +231,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// insert acquisition era if it does not exists
+	if utils.VERBOSE > 0 {
+		log.Println("get acquisition era ID")
+	}
 	if rec.AcquisitionEra.CreateBy == "" {
 		rec.AcquisitionEra.CreateBy = cby
 	}
@@ -234,22 +251,34 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// get dataTierID
+	if utils.VERBOSE > 0 {
+		log.Println("get data tier ID")
+	}
 	dataTierID, err = getTxtID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.Dataset.DataTierName)
 	if err != nil {
 		log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
 		return 0, err
 	}
 	// get physicsGroupID
+	if utils.VERBOSE > 0 {
+		log.Println("get physics group ID")
+	}
 	physicsGroupID, err = getTxtID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.Dataset.PhysicsGroupName)
 	if err != nil {
 		log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
 		return 0, err
 	}
 	// get datasetAccessTypeID
+	if utils.VERBOSE > 0 {
+		log.Println("get dataset access type ID")
+	}
 	datasetAccessTypeID, err = getTxtID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.Dataset.DatasetAccessType)
 	if err != nil {
 		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
 		return 0, err
+	}
+	if utils.VERBOSE > 0 {
+		log.Println("get processed dataset ID")
 	}
 	processedDatasetID, err = getTxtID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.Dataset.ProcessedDSName)
 	if err != nil {
@@ -257,6 +286,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		return 0, err
 	}
 	// insert dataset
+	if utils.VERBOSE > 0 {
+		log.Println("insert dataset")
+	}
 	if rec.Dataset.CreateBy == "" {
 		rec.Dataset.CreateBy = cby
 	}
@@ -287,6 +319,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		return 0, err
 	}
 	// get datasetID
+	if utils.VERBOSE > 0 {
+		log.Println("get dataset ID")
+	}
 	datasetID, err = getTxtID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 	if err != nil {
 		log.Println("unable to find dataset_id for", rec.Dataset.Dataset)
@@ -294,6 +329,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// insert block
+	if utils.VERBOSE > 0 {
+		log.Println("insert block")
+	}
 	if rec.Block.CreateBy == "" {
 		rec.Block.CreateBy = cby
 	}
@@ -319,7 +357,6 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		log.Println("unable to insert block record", err)
 		return 0, err
 	}
-	// TODO: get blockID
 	// get blockID
 	blockID, err = getTxtID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 	if err != nil {
@@ -328,6 +365,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	}
 
 	// insert files
+	if utils.VERBOSE > 0 {
+		log.Println("insert files")
+	}
 	for _, rrr := range rec.Files {
 		// get fileTypeID
 		fileTypeID, err = getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
