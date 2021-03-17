@@ -542,6 +542,11 @@ func getInsertTxtID(tx *sql.Tx, table, id, attr string, val interface{}, rec DBR
 	rid, err := getTxtID(tx, table, id, attr, val)
 	if err != nil {
 		log.Printf("unable to find %s for %v", id, val)
+		err = rec.Validate()
+		if err != nil {
+			log.Printf("unable to validate %+v record, error %v", err)
+			return 0, err
+		}
 		err = rec.Insert(tx)
 		if err != nil {
 			return 0, err
@@ -716,15 +721,11 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 
 // LastInsertId shoudl return last insert id of given table and idname parameter
 func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
-	//     if DBOWNER == "sqlite" {
-	//         return 0, nil
-	//     }
-	dbowner := DBOWNER
+	stm := fmt.Sprintf("select MAX(%s) from %s.%s", idName, DBOWNER, table)
 	if DBOWNER == "sqlite" {
-		dbowner = ""
+		stm = fmt.Sprintf("select MAX(%s) from %s", idName, table)
 	}
 	var pid sql.NullInt64
-	stm := fmt.Sprintf("select MAX(%s) from %s%s", idName, dbowner, table)
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
 		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
