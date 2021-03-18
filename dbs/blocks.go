@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -270,9 +271,34 @@ func (API) InsertBlocks(r io.Reader, cby string) error {
 }
 
 // UpdateBlocks DBS API
-func (API) UpdateBlocks(r io.Reader, cby string) error {
-	// read data from io.Reader and define if we'll use site info
-	site := true
+func (API) UpdateBlocks(params Record) error {
+	// get input parameters
+	date := time.Now().Unix()
+	var create_by string
+	var blockName string
+	var origSiteName string
+	var openForWriting int
+
+	if v, ok := params["block_name"]; ok {
+		blockName = v.(string)
+	}
+	site := false
+	if v, ok := params["origin_site_name"]; ok {
+		origSiteName = v.(string)
+		site = true
+	}
+	if v, ok := params["open_for_writing"]; ok {
+		val, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Println("invalid input parameter", err)
+		}
+		openForWriting = val
+	}
+	if v, ok := params["create_by"]; ok {
+		create_by = v.(string)
+	}
+	// TODO: validate input parameters
+
 	var err error
 	var stm string
 
@@ -295,15 +321,11 @@ func (API) UpdateBlocks(r io.Reader, cby string) error {
 		return err
 	}
 	defer tx.Rollback()
-	// TODO: read date blockName from io.Reader
-	var blockName string
-	var origSiteName string
-	var openForWriting int
-	date := time.Now().Unix()
+
 	if site {
-		_, err = tx.Exec(stm, origSiteName, cby, date, blockName)
+		_, err = tx.Exec(stm, origSiteName, create_by, date, blockName)
 	} else {
-		_, err = tx.Exec(stm, openForWriting, cby, date, blockName)
+		_, err = tx.Exec(stm, openForWriting, create_by, date, blockName)
 	}
 	if err != nil {
 		log.Printf("unable to update %v", err)

@@ -442,7 +442,26 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 }
 
 // UpdateDatasets DBS API
-func (API) UpdateDatasets(r io.Reader, cby string) error {
+func (API) UpdateDatasets(params Record) error {
+
+	// TODO: read date accessType from io.Reader
+	// get accessTypeID from Access dataset types table
+	var create_by string
+	if v, ok := params["create_by"]; ok {
+		create_by = v.(string)
+	}
+	var dataset string
+	var datasetAccessType string
+	if v, ok := params["dataset"]; ok {
+		dataset = v.(string)
+	}
+	if v, ok := params["dataset_access_type"]; ok {
+		datasetAccessType = v.(string)
+	}
+	date := time.Now().Unix()
+
+	// TODO: validate input parameters
+
 	// get SQL statement from static area
 	stm := getSQL("update_datasets")
 	if DBOWNER == "sqlite" {
@@ -459,11 +478,12 @@ func (API) UpdateDatasets(r io.Reader, cby string) error {
 		return err
 	}
 	defer tx.Rollback()
-	// TODO: read date accessType from io.Reader
-	// get accessTypeID from Access dataset types table
-	var accessTypeID int
-	date := time.Now().Unix()
-	_, err = tx.Exec(stm, cby, date, accessTypeID)
+	accessTypeID, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", datasetAccessType)
+	if err != nil {
+		log.Println("unable to find dataset_access_type_id for", datasetAccessType)
+		return err
+	}
+	_, err = tx.Exec(stm, create_by, date, accessTypeID, dataset)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err

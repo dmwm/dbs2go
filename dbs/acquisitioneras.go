@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -130,7 +131,19 @@ func (API) InsertAcquisitionEras(r io.Reader, cby string) error {
 }
 
 // UpdateAcquisitionEras DBS API
-func (API) UpdateAcquisitionEras(r io.Reader, cby string) error {
+func (API) UpdateAcquisitionEras(params Record) error {
+
+	var endDate int
+	if v, ok := params["end_date"]; ok {
+		val, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Println("invalid input parameter", err)
+		}
+		endDate = val
+	}
+
+	// TODO: validate input params
+
 	// get SQL statement from static area
 	stm := getSQL("update_acquisition_eras")
 	if DBOWNER == "sqlite" {
@@ -147,8 +160,6 @@ func (API) UpdateAcquisitionEras(r io.Reader, cby string) error {
 		return err
 	}
 	defer tx.Rollback()
-	// TODO: read endDate from io.Reader
-	var endDate int64
 	_, err = tx.Exec(stm, endDate)
 	if err != nil {
 		log.Printf("unable to update %v", err)

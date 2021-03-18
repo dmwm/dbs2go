@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -412,7 +413,25 @@ func (API) InsertFiles(r io.Reader, cby string) error {
 }
 
 // UpdateFiles DBS API
-func (API) UpdateFiles(r io.Reader, cby string) error {
+func (API) UpdateFiles(params Record) error {
+
+	// read input parameters
+	var create_by string
+	var isFileValid int
+	if v, ok := params["is_file_valid"]; ok {
+		val, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Println("invalid input parameter", err)
+		}
+		isFileValid = val
+	}
+	if v, ok := params["create_by"]; ok {
+		create_by = v.(string)
+	}
+	date := time.Now().Unix()
+
+	// TODO: validate input parameters
+
 	// get SQL statement from static area
 	stm := getSQL("update_files")
 	if DBOWNER == "sqlite" {
@@ -429,10 +448,7 @@ func (API) UpdateFiles(r io.Reader, cby string) error {
 		return err
 	}
 	defer tx.Rollback()
-	// TODO: read date isFileValid from io.Reader
-	var isFileValid int
-	date := time.Now().Unix()
-	_, err = tx.Exec(stm, cby, date, isFileValid)
+	_, err = tx.Exec(stm, create_by, date, isFileValid)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err

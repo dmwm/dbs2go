@@ -157,13 +157,15 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
-	headerContentType := r.Header.Get("Content-Type")
-	if headerContentType != "application/json" {
-		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
-		size := responseMsg(w, r, msg, "DBSPutHandler", http.StatusUnsupportedMediaType)
-		return http.StatusUnsupportedMediaType, size, errors.New(msg)
+	params := make(dbs.Record)
+	for k, v := range r.URL.Query() {
+		params[k] = v
 	}
-	defer r.Body.Close()
+	if utils.VERBOSE > 0 {
+		dn, _ := r.Header["Cms-Authn-Dn"]
+		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, r.URL.RequestURI(), params)
+	}
+	params["create_by"] = createBy(r)
 	var api dbs.API
 	var err error
 	if utils.VERBOSE > 0 {
@@ -171,13 +173,13 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
 	}
 	if a == "acquisitioneras" {
-		err = api.InsertAcquisitionEras(r.Body, createBy(r))
+		err = api.UpdateAcquisitionEras(params)
 	} else if a == "datasets" {
-		err = api.InsertDatasets(r.Body, createBy(r))
+		err = api.UpdateDatasets(params)
 	} else if a == "blocks" {
-		err = api.InsertBlocks(r.Body, createBy(r))
+		err = api.UpdateBlocks(params)
 	} else if a == "files" {
-		err = api.InsertFiles(r.Body, createBy(r))
+		err = api.UpdateFiles(params)
 	}
 	if err != nil {
 		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
