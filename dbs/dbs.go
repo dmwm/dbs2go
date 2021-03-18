@@ -493,30 +493,6 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 	return nil
 }
 
-// insert api to insert data into DB
-func insert(stm string, vals []interface{}) error {
-	if utils.VERBOSE > 1 {
-		log.Println("insert data\n### SQL query\n", stm, "\n### SQL values\n", vals)
-	}
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to obtain transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-	_, err = tx.Exec(stm, vals...)
-	if err != nil {
-		log.Printf("DB error\n### %s\n%v", stm, err)
-		return err
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Printf("DB error\n### %s\n%v", stm, err)
-		return err
-	}
-	return nil
-}
-
 // helper function to get table primary id for a given value
 func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error) {
 	var stm string
@@ -716,16 +692,4 @@ func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 		return 0, errors.New(msg)
 	}
 	return pid.Int64, nil
-}
-
-// helper function to check given input of parameters
-func checkParams(values Record, params []string) error {
-	for _, k := range params {
-		if _, ok := values[k]; !ok {
-			keys := utils.MapKeys(values)
-			msg := fmt.Sprintf("missing %s in %v, expected keys %v", k, keys, params)
-			return errors.New(msg)
-		}
-	}
-	return nil
 }

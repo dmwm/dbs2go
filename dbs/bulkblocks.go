@@ -369,6 +369,9 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 			return 0, err
 		}
 		// get branch hash ID and insert record if it does not exists
+		if rrr.BranchHash == "" {
+			rrr.BranchHash = "branch-hash"
+		}
 		bhash := BranchHashes{
 			BRANCH_HASH: rrr.BranchHash,
 		}
