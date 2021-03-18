@@ -39,7 +39,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 	var err error
 	if r.PHYSICS_GROUP_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "PHYSICS_GROUPS", "physics_group_id")
+			tid, err = LastInsertID(tx, "PHYSICS_GROUPS", "physics_group_id")
 			r.PHYSICS_GROUP_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_PG")
@@ -48,6 +48,13 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_physics_groups")

@@ -79,7 +79,7 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 	var err error
 	if r.OUTPUT_MOD_CONFIG_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id")
+			tid, err = LastInsertID(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id")
 			r.OUTPUT_MOD_CONFIG_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_OMC")
@@ -89,9 +89,11 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	// set defaults and validate the record
+	r.SetDefaults()
 	err = r.Validate()
 	if err != nil {
-		log.Printf("fail to validate output config record\n%+v\nerror %v", r, err)
+		log.Println("unable to validate record", err)
 		return err
 	}
 	// get SQL statement from static area

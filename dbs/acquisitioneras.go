@@ -54,7 +54,7 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 	var err error
 	if r.ACQUISITION_ERA_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "ACQUISITION_ERAS", "acquisition_era_id")
+			tid, err = LastInsertID(tx, "ACQUISITION_ERAS", "acquisition_era_id")
 			r.ACQUISITION_ERA_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_AQE")
@@ -63,6 +63,13 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_acquisition_eras")

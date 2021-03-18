@@ -42,7 +42,7 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 	var err error
 	if r.DATA_TIER_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "DATA_TIERS", "data_tier_id")
+			tid, err = LastInsertID(tx, "DATA_TIERS", "data_tier_id")
 			r.DATA_TIER_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_DT")
@@ -51,6 +51,13 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_tiers")

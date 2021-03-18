@@ -202,7 +202,7 @@ func (r *Files) Insert(tx *sql.Tx) error {
 	var err error
 	if r.FILE_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "FILES", "file_id")
+			tid, err = LastInsertID(tx, "FILES", "file_id")
 			r.FILE_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_FL")
@@ -212,6 +212,13 @@ func (r *Files) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
+	}
 	// get SQL statement from static area
 	stm := getSQL("insert_files")
 	if DBOWNER == "sqlite" {
@@ -219,11 +226,6 @@ func (r *Files) Insert(tx *sql.Tx) error {
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Files\n%s\n%+v", stm, r)
-	}
-	// validate our record
-	err = r.Validate()
-	if err != nil {
-		return err
 	}
 	_, err = tx.Exec(stm, r.FILE_ID, r.LOGICAL_FILE_NAME, r.IS_FILE_VALID, r.DATASET_ID, r.BLOCK_ID, r.FILE_TYPE_ID, r.CHECK_SUM, r.FILE_SIZE, r.EVENT_COUNT, r.BRANCH_HASH_ID, r.ADLER32, r.MD5, r.AUTO_CROSS_SECTION, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
 	return err

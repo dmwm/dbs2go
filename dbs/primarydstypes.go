@@ -32,19 +32,28 @@ type PrimaryDSTypes struct {
 
 // Insert implementation of PrimaryDSTypes
 func (r *PrimaryDSTypes) Insert(tx *sql.Tx) error {
+	var err error
 	if r.PRIMARY_DS_TYPE_ID == 0 {
-		pid, err := LastInsertId(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
+		// there is no SEQ_XXX for this table, will use LastInsertId
+		pid, err := LastInsertID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
 		if err != nil {
 			return err
 		}
 		r.PRIMARY_DS_TYPE_ID = pid + 1
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_primary_ds_types")
 	if DBOWNER == "sqlite" {
 		stm = getSQL("insert_primary_ds_types_sqlite")
 	}
-	_, err := tx.Exec(stm, r.PRIMARY_DS_TYPE_ID, r.PRIMARY_DS_TYPE)
+	_, err = tx.Exec(stm, r.PRIMARY_DS_TYPE_ID, r.PRIMARY_DS_TYPE)
 	return err
 }
 

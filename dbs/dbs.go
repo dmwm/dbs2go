@@ -105,23 +105,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 
 	// set defaults
 	if utils.VERBOSE > 2 {
-		log.Printf("record %+v setdefauls", rec)
-	}
-	rec.SetDefaults()
-
-	// validate record
-	if utils.VERBOSE > 2 {
-		log.Printf("record %+v validate", rec)
-	}
-	err = rec.Validate()
-	if err != nil {
-		log.Printf("fail to validate record, %v", err)
-		return 0, err
-	}
-
-	// insert record
-	if utils.VERBOSE > 2 {
-		log.Printf("record %+v insert", rec)
+		log.Printf("insert record %+v", rec)
 	}
 	err = rec.Insert(tx)
 	if err != nil {
@@ -557,11 +541,6 @@ func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface
 	rid, err := GetID(tx, table, id, attr, val...)
 	if err != nil {
 		log.Printf("unable to find %s for %v", id, val)
-		err = rec.Validate()
-		if err != nil {
-			log.Printf("unable to validate %+v record, error %v", rec, err)
-			return 0, err
-		}
 		err = rec.Insert(tx)
 		if err != nil {
 			return 0, err
@@ -722,7 +701,7 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 }
 
 // LastInsertId shoudl return last insert id of given table and idname parameter
-func LastInsertId(tx *sql.Tx, table, idName string) (int64, error) {
+func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 	stm := fmt.Sprintf("select MAX(%s) from %s.%s", idName, DBOWNER, table)
 	if DBOWNER == "sqlite" {
 		stm = fmt.Sprintf("select MAX(%s) from %s", idName, table)

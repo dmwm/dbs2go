@@ -23,11 +23,18 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 	var err error
 	if r.BRANCH_HASH_ID == 0 {
 		// there is no SEQ_BH, will use LastInsertId
-		tid, err = LastInsertId(tx, "BRANCH_HASHES", "branch_hash_id")
+		tid, err = LastInsertID(tx, "BRANCH_HASHES", "branch_hash_id")
 		r.BRANCH_HASH_ID = tid + 1
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_branch_hashes")

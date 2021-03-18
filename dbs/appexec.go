@@ -22,7 +22,7 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 	var err error
 	if r.APP_EXEC_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "APPLICATION_EXECUTABLES", "app_exec_id")
+			tid, err = LastInsertID(tx, "APPLICATION_EXECUTABLES", "app_exec_id")
 			r.APP_EXEC_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_AE")
@@ -31,6 +31,13 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_appexec")

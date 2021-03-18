@@ -310,11 +310,6 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		LAST_MODIFICATION_DATE: creationDate,
 		LAST_MODIFIED_BY:       rec.Dataset.CreateBy,
 	}
-	err = dataset.Validate()
-	if err != nil {
-		log.Println("unable to validate dataset record", err)
-		return 0, err
-	}
 	err = dataset.Insert(tx)
 	if err != nil {
 		log.Println("unable to insert dataset record", err)
@@ -348,11 +343,6 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATE_BY:              rec.Block.CreateBy,
 		LAST_MODIFICATION_DATE: rec.Block.CreationDate,
 		LAST_MODIFIED_BY:       rec.Block.CreateBy,
-	}
-	err = blk.Validate()
-	if err != nil {
-		log.Println("unable to validate block record", err)
-		return 0, err
 	}
 	err = blk.Insert(tx)
 	if err != nil {
@@ -408,11 +398,6 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 			CREATE_BY:              rrr.LastModifiedBy,
 			LAST_MODIFICATION_DATE: creationDate,
 			LAST_MODIFIED_BY:       rrr.LastModifiedBy,
-		}
-		err = r.Validate()
-		if err != nil {
-			log.Println("unable to validate File record", err)
-			return 0, err
 		}
 		err = r.Insert(tx)
 		if err != nil {

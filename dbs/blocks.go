@@ -123,7 +123,7 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 	var err error
 	if r.BLOCK_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "BLOCKS", "block_id")
+			tid, err = LastInsertID(tx, "BLOCKS", "block_id")
 			r.BLOCK_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_BK")
@@ -133,6 +133,13 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
+	}
 	// get SQL statement from static area
 	stm := getSQL("insert_blocks")
 	if DBOWNER == "sqlite" {
@@ -140,11 +147,6 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Blocks\n%s\n%+v", stm, r)
-	}
-	// validate our record
-	err = r.Validate()
-	if err != nil {
-		return err
 	}
 	_, err = tx.Exec(stm, r.BLOCK_ID, r.BLOCK_NAME, r.DATASET_ID, r.OPEN_FOR_WRITING, r.ORIGIN_SITE_NAME, r.BLOCK_SIZE, r.FILE_COUNT, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
 	return err

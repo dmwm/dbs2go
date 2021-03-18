@@ -68,7 +68,7 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	var err error
 	if r.THIS_FILE_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "FILE_PARENTS", "this_file_id")
+			tid, err = LastInsertID(tx, "FILE_PARENTS", "this_file_id")
 			r.THIS_FILE_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_FP")
@@ -77,6 +77,13 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_fileparents")

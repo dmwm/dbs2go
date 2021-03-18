@@ -23,7 +23,7 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 	var err error
 	if r.PARAMETER_SET_HASH_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id")
+			tid, err = LastInsertID(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id")
 			r.PARAMETER_SET_HASH_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_PSET")
@@ -32,6 +32,13 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_psethashes")

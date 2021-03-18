@@ -212,7 +212,7 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 	var err error
 	if r.DATASET_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "DATASETS", "dataset_id")
+			tid, err = LastInsertID(tx, "DATASETS", "dataset_id")
 			r.DATASET_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_DS")
@@ -222,6 +222,13 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
+	}
 	// get SQL statement from static area
 	stm := getSQL("insert_datasets")
 	if DBOWNER == "sqlite" {
@@ -229,11 +236,6 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
-	}
-	// validate our record
-	err = r.Validate()
-	if err != nil {
-		return err
 	}
 	_, err = tx.Exec(stm, r.DATASET_ID, r.DATASET, r.IS_DATASET_VALID, r.PRIMARY_DS_ID, r.PROCESSED_DS_ID, r.DATA_TIER_ID, r.DATASET_ACCESS_TYPE_ID, r.ACQUISITION_ERA_ID, r.PROCESSING_ERA_ID, r.PHYSICS_GROUP_ID, r.XTCROSSSECTION, r.PREP_ID, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
 	return err

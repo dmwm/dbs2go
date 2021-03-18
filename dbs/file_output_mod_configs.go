@@ -35,7 +35,7 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 	var err error
 	if r.FILE_OUTPUT_CONFIG_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "FILE_OUTPUT_MOD_CONFIGS", "file_output_config_id")
+			tid, err = LastInsertID(tx, "FILE_OUTPUT_MOD_CONFIGS", "file_output_config_id")
 			r.FILE_OUTPUT_CONFIG_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_FC")
@@ -44,6 +44,13 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_file_output_mod_configs")

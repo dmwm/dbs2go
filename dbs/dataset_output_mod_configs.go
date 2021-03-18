@@ -35,7 +35,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 	var err error
 	if r.DS_OUTPUT_MOD_CONF_ID == 0 {
 		if DBOWNER == "sqlite" {
-			tid, err = LastInsertId(tx, "DATASET_OUTPUT_MOD_CONFIGS", "ds_output_mod_conf_id")
+			tid, err = LastInsertID(tx, "DATASET_OUTPUT_MOD_CONFIGS", "ds_output_mod_conf_id")
 			r.DS_OUTPUT_MOD_CONF_ID = tid + 1
 		} else {
 			tid, err = IncrementSequence(tx, "SEQ_DOMC")
@@ -44,6 +44,13 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 		if err != nil {
 			return err
 		}
+	}
+	// set defaults and validate the record
+	r.SetDefaults()
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_output_mod_configs")
