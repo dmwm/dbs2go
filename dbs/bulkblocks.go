@@ -427,7 +427,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 			return err
 		}
 		reader = bytes.NewReader(data)
-		err = api.InsertFileParents(tx, reader, cby)
+		err = api.InsertFileParentsTxt(tx, reader, cby)
 		if err != nil {
 			return err
 		}
@@ -440,7 +440,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("faile to insert_outputconfigs_sqlite", err)
+		log.Println("fail to commit transaction", err)
 		return err
 	}
 

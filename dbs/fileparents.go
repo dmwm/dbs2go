@@ -140,7 +140,27 @@ type FileParentRecord struct {
 }
 
 // InsertFileParents DBS API
-func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) error {
+func (api API) InsertFileParents(r io.Reader, cby string) error {
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	err = api.InsertFileParentsTxt(tx, r, cby)
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("fail to commit transaction", err)
+		return err
+	}
+	return err
+}
+
+// InsertFileParents DBS API
+func (API) InsertFileParentsTxt(tx *sql.Tx, r io.Reader, cby string) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*

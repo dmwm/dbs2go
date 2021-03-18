@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -435,6 +436,43 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return err
+	}
+	return err
+}
+
+// UpdateDatasets DBS API
+func (API) UpdateDatasets(r io.Reader, cby string) error {
+	// get SQL statement from static area
+	stm := getSQL("update_datasets")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("update_datasets_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("update Datasets\n%s\n%+v", stm)
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+	// TODO: read date accessType from io.Reader
+	// get accessTypeID from Access dataset types table
+	var accessTypeID int
+	date := time.Now().Unix()
+	_, err = tx.Exec(stm, cby, date, accessTypeID)
+	if err != nil {
+		log.Printf("unable to update %v", err)
+		return err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
 		return err
 	}
 	return err

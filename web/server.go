@@ -88,20 +88,20 @@ func handlers() *mux.Router {
 
 	// visible routes
 	router.HandleFunc(basePath("/datatiers"), LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/datasets"), LoggingHandler(DatasetsHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/blocks"), LoggingHandler(BlocksHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/datasets"), LoggingHandler(DatasetsHandler)).Methods("GET", "POST", "PUT")
+	router.HandleFunc(basePath("/blocks"), LoggingHandler(BlocksHandler)).Methods("GET", "POST", "PUT")
 	router.HandleFunc(basePath("/bulkblocks"), LoggingHandler(BulkBlocksHandler)).Methods("POST")
-	router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST")
+	router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST", "PUT")
 	router.HandleFunc(basePath("/primarydatasets"), LoggingHandler(PrimaryDatasetsHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/primdstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET", "POST")
 
 	// Not implemented APIs
-	router.HandleFunc(basePath("/acquisitioneras"), LoggingHandler(AcquisitionErasHandler)).Methods("GET")
+	router.HandleFunc(basePath("/acquisitioneras"), LoggingHandler(AcquisitionErasHandler)).Methods("GET", "POST", "PUT")
 	router.HandleFunc(basePath("/releaseversions"), LoggingHandler(ReleaseVersionsHandler)).Methods("GET")
 	router.HandleFunc(basePath("/physicsgroups"), LoggingHandler(PhysicsGroupsHandler)).Methods("GET")
 	router.HandleFunc(basePath("/primarydstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET")
 	router.HandleFunc(basePath("/datatypes"), LoggingHandler(DataTypesHandler)).Methods("GET")
-	router.HandleFunc(basePath("/processingeras"), LoggingHandler(ProcessingErasHandler)).Methods("GET")
+	router.HandleFunc(basePath("/processingeras"), LoggingHandler(ProcessingErasHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/outputconfigs"), LoggingHandler(OutputConfigsHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/datasetaccesstypes"), LoggingHandler(DatasetAccessTypesHandler)).Methods("GET")
 
@@ -116,7 +116,7 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/blocksummaries"), LoggingHandler(BlockSummariesHandler)).Methods("GET")
 
 	router.HandleFunc(basePath("/filechildren"), LoggingHandler(FileChildrenHandler)).Methods("GET")
-	router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET")
+	router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/filesummaries"), LoggingHandler(FileSummariesHandler)).Methods("GET")
 	router.HandleFunc(basePath("/filelumis"), LoggingHandler(FileLumisHandler)).Methods("GET", "POST")
 	router.HandleFunc(basePath("/datasetchildren"), LoggingHandler(DatasetChildrenHandler)).Methods("GET")

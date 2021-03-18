@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -263,6 +264,56 @@ func (API) InsertBlocks(r io.Reader, cby string) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return err
+	}
+	return err
+}
+
+// UpdateBlocks DBS API
+func (API) UpdateBlocks(r io.Reader, cby string) error {
+	// read data from io.Reader and define if we'll use site info
+	site := true
+	var err error
+	var stm string
+
+	// load teamplte
+	tmplData := make(Record)
+	tmplData["Site"] = site
+	stm, err = LoadTemplateSQL("update_blocks", tmplData)
+	if DBOWNER == "sqlite" {
+		stm, err = LoadTemplateSQL("update_blocks_sqlite", tmplData)
+	}
+
+	if utils.VERBOSE > 0 {
+		log.Printf("update Blocks\n%s\n%+v", stm)
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+	// TODO: read date blockName from io.Reader
+	var blockName string
+	var origSiteName string
+	var openForWriting int
+	date := time.Now().Unix()
+	if site {
+		_, err = tx.Exec(stm, origSiteName, cby, date, blockName)
+	} else {
+		_, err = tx.Exec(stm, openForWriting, cby, date, blockName)
+	}
+	if err != nil {
+		log.Printf("unable to update %v", err)
+		return err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
 		return err
 	}
 	return err

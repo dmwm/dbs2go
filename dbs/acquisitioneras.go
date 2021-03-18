@@ -29,14 +29,6 @@ func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) 
 	return executeAll(w, stm, args...)
 }
 
-// UpdateAcquisitionEras DBS API
-func (API) UpdateAcquisitionEras(values Record) error {
-	// TODO: implement the following logic
-	// input values: acquisition_era_name ="", end_date=0
-	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
-	return nil
-}
-
 // AcquisitionEras
 type AcquisitionEras struct {
 	ACQUISITION_ERA_ID   int64  `json:"acquisition_era_id"`
@@ -135,4 +127,39 @@ func (API) InsertAcquisitionEras(r io.Reader, cby string) error {
 
 	//     return InsertValues("insert_acquisition_eras", values)
 	return insertRecord(&AcquisitionEras{CREATE_BY: cby}, r)
+}
+
+// UpdateAcquisitionEras DBS API
+func (API) UpdateAcquisitionEras(r io.Reader, cby string) error {
+	// get SQL statement from static area
+	stm := getSQL("update_acquisition_eras")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("update_acquisition_eras_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("update AcquisitionEras\n%s\n%+v", stm)
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+	// TODO: read endDate from io.Reader
+	var endDate int64
+	_, err = tx.Exec(stm, endDate)
+	if err != nil {
+		log.Printf("unable to update %v", err)
+		return err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
+		return err
+	}
+	return err
 }

@@ -155,6 +155,37 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// DBSPutHandler is a generic Post Handler to call DBS Post APIs
+func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+	headerContentType := r.Header.Get("Content-Type")
+	if headerContentType != "application/json" {
+		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
+		size := responseMsg(w, r, msg, "DBSPutHandler", http.StatusUnsupportedMediaType)
+		return http.StatusUnsupportedMediaType, size, errors.New(msg)
+	}
+	defer r.Body.Close()
+	var api dbs.API
+	var err error
+	if utils.VERBOSE > 0 {
+		dn, _ := r.Header["Cms-Authn-Dn"]
+		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
+	}
+	if a == "acquisitioneras" {
+		err = api.InsertAcquisitionEras(r.Body, createBy(r))
+	} else if a == "datasets" {
+		err = api.InsertDatasets(r.Body, createBy(r))
+	} else if a == "blocks" {
+		err = api.InsertBlocks(r.Body, createBy(r))
+	} else if a == "files" {
+		err = api.InsertFiles(r.Body, createBy(r))
+	}
+	if err != nil {
+		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+		return http.StatusInternalServerError, size, err
+	}
+	return http.StatusOK, 0, nil
+}
+
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	headerContentType := r.Header.Get("Content-Type")
@@ -188,19 +219,9 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		err = api.InsertBulkBlocks(r.Body, createBy(r))
 	} else if a == "files" {
 		err = api.InsertFiles(r.Body, createBy(r))
+	} else if a == "fileparents" {
+		err = api.InsertFileParents(r.Body, createBy(r))
 	}
-	//     } else if a == "fileparentss" {
-	//         err = api.InsertFileParents(r.Body, createBy(r))
-	//     } else if a == "fileparentsbylumi" {
-	//         err = api.InsertFileParentsByLumi(r.Body, createBy(r))
-	//     } else if a == "datasetlist" {
-	//         err = api.InsertDatasetList(r.Body, createBy(r))
-	//     } else if a == "fileArray" {
-	//         err = api.InsertFileArray(r.Body, createBy(r))
-	//     } else if a == "filelumis" {
-	//         err = api.InsertFileLumis(r.Body, createBy(r))
-	//     } else if a == "blockparents" {
-	//         err = api.InsertBlockParents(r.Body, createBy(r))
 	if err != nil {
 		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 		return http.StatusInternalServerError, size, err
@@ -305,12 +326,22 @@ func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 // DatasetsHandler provides access to Datasets DBS API.
 // Takes the following arguments: dataset, parent_dataset, release_version, pset_hash, app_name, output_module_label, global_tag, processing_version, acquisition_era_name, run_num, physics_group_name, logical_file_name, primary_ds_name, primary_ds_type, processed_ds_name, data_tier_name, dataset_access_type, prep_id, create_by, last_modified_by, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, detail, dataset_id
 func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "datasets")
+	} else if r.Method == "PUT" {
+		return DBSPutHandler(w, r, "datasets")
+	}
 	return DBSGetHandler(w, r, "datasets")
 }
 
 // BlocksHandler provides access to Blocks DBS API.
 // Takes the following arguments: dataset, block_name, data_tier_name, origin_site_name, logical_file_name, run_num, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, open_for_writing, detail
 func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "blocks")
+	} else if r.Method == "PUT" {
+		return DBSPutHandler(w, r, "blocks")
+	}
 	return DBSGetHandler(w, r, "blocks")
 }
 
@@ -335,6 +366,11 @@ func BlockOriginHandler(w http.ResponseWriter, r *http.Request) (int, int64, err
 // FilesHandler provides access to Files DBS API.
 // Takes the following arguments: dataset, block_name, logical_file_name, release_version, pset_hash, app_name, output_module_label, run_num, origin_site_name, lumi_list, detail, validFileOnly, sumOverLumi
 func FilesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "files")
+	} else if r.Method == "PUT" {
+		return DBSPutHandler(w, r, "files")
+	}
 	return DBSGetHandler(w, r, "files")
 }
 
@@ -371,6 +407,9 @@ func RunSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, er
 //ProcessingErasHandler provices access to ProcessingEras DBS API.
 // Takes the following arguments: processing_version
 func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "processingeras")
+	}
 	return DBSGetHandler(w, r, "processingeras")
 }
 
@@ -395,6 +434,11 @@ func ReleaseVersionsHandler(w http.ResponseWriter, r *http.Request) (int, int64,
 // AcquisitionErasHandler provides access to AcquisitionEras DBS API.
 // Takes the following arguments: acquisition_era_name
 func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	if r.Method == "POST" {
+		return DBSPostHandler(w, r, "acquisitioneras")
+	} else if r.Method == "PUT" {
+		return DBSPutHandler(w, r, "acquisitioneras")
+	}
 	return DBSGetHandler(w, r, "acquisitioneras")
 }
 
@@ -511,15 +555,4 @@ func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) (int, int6
 // POST API takes no argument, the payload should be supplied as JSON
 func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSPostHandler(w, r, "bulkblocks")
-	/*
-		defer r.Body.Close()
-		decoder := json.NewDecoder(r.Body)
-		var api dbs.API
-		err := api.BulkBlocks(decoder)
-		if err != nil {
-			log.Println("BulkBlocksHandler error", err)
-			return http.StatusInternalServerError, 0, err
-		}
-		return http.StatusOK, 0, nil
-	*/
 }

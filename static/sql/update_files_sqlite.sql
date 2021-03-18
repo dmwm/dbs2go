@@ -1,0 +1,4 @@
+UPDATE {{.Owner}}.FILES F
+    SET LAST_MODIFIED_BY = ?,
+        LAST_MODIFICATION_DATE = ?,
+        IS_FILE_VALID = ?

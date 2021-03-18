@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -405,6 +406,42 @@ func (API) InsertFiles(r io.Reader, cby string) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
+		return err
+	}
+	return err
+}
+
+// UpdateFiles DBS API
+func (API) UpdateFiles(r io.Reader, cby string) error {
+	// get SQL statement from static area
+	stm := getSQL("update_files")
+	if DBOWNER == "sqlite" {
+		stm = getSQL("update_files_sqlite")
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("update Files\n%s\n%+v", stm)
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+	// TODO: read date isFileValid from io.Reader
+	var isFileValid int
+	date := time.Now().Unix()
+	_, err = tx.Exec(stm, cby, date, isFileValid)
+	if err != nil {
+		log.Printf("unable to update %v", err)
+		return err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
 		return err
 	}
 	return err
