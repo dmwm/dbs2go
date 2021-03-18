@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
@@ -91,13 +92,46 @@ func TestDBSGetID(t *testing.T) {
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}
+	// start transaction
+	tx, err := db.Begin()
+	if err != nil {
+		t.Errorf("unable to get DB transaction: %v\n", err)
+	}
+	defer tx.Rollback()
 	// GetID(table, id, attribute, value)
-	rid, err := dbs.GetID("data_tiers", "data_tier_id", "data_tier_name", "RAW-TEST-0")
+	rid, err := dbs.GetID(tx, "data_tiers", "data_tier_id", "data_tier_name", "RAW-TEST-0")
 	if err != nil {
 		t.Error("fail to execute GetID", err)
 	}
 	if rid != 1 {
 		t.Errorf("fail to execute GetID, found rid=%v need rid=1", rid)
+	}
+}
+
+// TestDBSGetRecID
+func TestDBSGetRecID(t *testing.T) {
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+
+	// prepare record for insertion
+	tier := "RAW-TEST-0"
+	cby := "Valentin"
+	rec := dbs.DataTiers{DATA_TIER_NAME: tier, CREATE_BY: cby, CREATION_DATE: time.Now().Unix()}
+
+	// start transaction
+	tx, err := db.Begin()
+	if err != nil {
+		t.Errorf("unable to get DB transaction: %v\n", err)
+	}
+	defer tx.Rollback()
+	// GetID(table, id, attribute, value)
+	rid, err := dbs.GetRecID(tx, &rec, "data_tiers", "data_tier_id", "data_tier_name", tier)
+	if err != nil {
+		t.Error("fail to execute GetRecID", err)
+	}
+	if rid != 1 {
+		t.Errorf("fail to execute GetRecID, found rid=%v need rid=1", rid)
 	}
 }
 

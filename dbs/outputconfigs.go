@@ -196,15 +196,15 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, er
 
 	// get and insert (if necessary) records IDs
 	var appID, psetID, relID int64
-	appID, err = getInsertTxtID(tx, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME, &arec)
+	appID, err = GetRecID(tx, &arec, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME)
 	if err != nil {
 		return 0, err
 	}
-	psetID, err = getInsertTxtID(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH, &prec)
+	psetID, err = GetRecID(tx, &prec, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH)
 	if err != nil {
 		return 0, err
 	}
-	relID, err = getInsertTxtID(tx, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION, &rrec)
+	relID, err = GetRecID(tx, &rrec, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION)
 	if err != nil {
 		return 0, err
 	}

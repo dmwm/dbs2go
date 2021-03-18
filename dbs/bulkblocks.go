@@ -187,7 +187,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	pdstDS := PrimaryDSTypes{
 		PRIMARY_DS_TYPE: rec.PrimaryDataset.PrimaryDSType,
 	}
-	primaryDatasetTypeID, err = getInsertTxtID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType, &pdstDS)
+	primaryDatasetTypeID, err = GetRecID(tx, &pdstDS, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType)
 	if err != nil {
 		log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
 		return 0, err
@@ -206,7 +206,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATION_DATE:      rec.PrimaryDataset.CreationDate,
 		CREATE_BY:          rec.PrimaryDataset.CreateBy,
 	}
-	primaryDatasetID, err = getInsertTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName, &primDS)
+	primaryDatasetID, err = GetRecID(tx, &primDS, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
 		return 0, err
@@ -225,7 +225,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATE_BY:          rec.ProcessingEra.CreateBy,
 		DESCRIPTION:        rec.ProcessingEra.Description,
 	}
-	processingEraID, err = getInsertTxtID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion, &pera)
+	processingEraID, err = GetRecID(tx, &pera, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion)
 	if err != nil {
 		log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
 		return 0, err
@@ -245,7 +245,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		CREATION_DATE:        creationDate,
 		CREATE_BY:            rec.AcquisitionEra.CreateBy,
 	}
-	acquisitionEraID, err = getInsertTxtID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName, &aera)
+	acquisitionEraID, err = GetRecID(tx, &aera, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName)
 	if err != nil {
 		log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
 		return 0, err
@@ -255,7 +255,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	if utils.VERBOSE > 0 {
 		log.Println("get data tier ID")
 	}
-	dataTierID, err = getTxtID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.Dataset.DataTierName)
+	dataTierID, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.Dataset.DataTierName)
 	if err != nil {
 		log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
 		return 0, err
@@ -264,7 +264,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	if utils.VERBOSE > 0 {
 		log.Println("get physics group ID")
 	}
-	physicsGroupID, err = getTxtID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.Dataset.PhysicsGroupName)
+	physicsGroupID, err = GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.Dataset.PhysicsGroupName)
 	if err != nil {
 		log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
 		return 0, err
@@ -273,7 +273,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	if utils.VERBOSE > 0 {
 		log.Println("get dataset access type ID")
 	}
-	datasetAccessTypeID, err = getTxtID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.Dataset.DatasetAccessType)
+	datasetAccessTypeID, err = GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.Dataset.DatasetAccessType)
 	if err != nil {
 		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
 		return 0, err
@@ -281,7 +281,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	if utils.VERBOSE > 0 {
 		log.Println("get processed dataset ID")
 	}
-	processedDatasetID, err = getTxtID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.Dataset.ProcessedDSName)
+	processedDatasetID, err = GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.Dataset.ProcessedDSName)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
 		return 0, err
@@ -324,7 +324,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	if utils.VERBOSE > 0 {
 		log.Println("get dataset ID")
 	}
-	datasetID, err = getTxtID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
+	datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 	if err != nil {
 		log.Println("unable to find dataset_id for", rec.Dataset.Dataset)
 		return 0, err
@@ -360,7 +360,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		return 0, err
 	}
 	// get blockID
-	blockID, err = getTxtID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
+	blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 	if err != nil {
 		log.Println("unable to find block_id for", rec.Block.BlockName)
 		return 0, err
@@ -373,7 +373,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	for _, rrr := range rec.Files {
 		// get fileTypeID and insert record if it does not exists
 		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
-		fileTypeID, err = getInsertTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType, &ftype)
+		fileTypeID, err = GetRecID(tx, &ftype, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
 		if err != nil {
 			log.Println("unable to find file_type_id for", rrr.FileType)
 			return 0, err
@@ -385,7 +385,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		bhash := BranchHashes{
 			BRANCH_HASH: rrr.BranchHash,
 		}
-		branchHashID, err = getInsertTxtID(tx, "BRANCH_HASHES", "branch_hash_id", "branch_hash", rrr.BranchHash, &bhash)
+		branchHashID, err = GetRecID(tx, &bhash, "BRANCH_HASHES", "branch_hash_id", "branch_hash", rrr.BranchHash)
 		if err != nil {
 			log.Println("unable to find branch hash_id for", rrr.BranchHash)
 			return 0, err

@@ -116,7 +116,7 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) (int6
 	}
 
 	// get file id for given lfn
-	fid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
+	fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.Lfn)
 		return 0, err

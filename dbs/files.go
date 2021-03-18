@@ -376,17 +376,17 @@ func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
 	defer tx.Rollback()
 
 	// get all necessary IDs from different tables
-	blkId, err := getTxtID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK)
+	blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK)
 	if err != nil {
 		log.Println("unable to find block_id for", rec.BLOCK)
 		return 0, err
 	}
-	dsId, err := getTxtID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
+	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
 	if err != nil {
 		log.Println("unable to find dataset_id for", rec.DATASET)
 		return 0, err
 	}
-	ftId, err := getTxtID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
+	ftId, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
 	if err != nil {
 		log.Println("unable to find file_type_id for", rec.FILE_TYPE)
 		return 0, err

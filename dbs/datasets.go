@@ -382,37 +382,37 @@ func (API) InsertDatasets(r io.Reader, cby string) (int64, error) {
 	defer tx.Rollback()
 
 	// get all necessary IDs from different tables
-	primId, err := getTxtID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
+	primId, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
 		return 0, err
 	}
-	procId, err := getTxtID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS)
+	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS)
 		return 0, err
 	}
-	tierId, err := getTxtID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER)
+	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER)
 	if err != nil {
 		log.Println("unable to find data_tier_id for", rec.DATA_TIER)
 		return 0, err
 	}
-	daccId, err := getTxtID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
+	daccId, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
 	if err != nil {
 		log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
 		return 0, err
 	}
-	aeraId, err := getTxtID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA)
+	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA)
 	if err != nil {
 		log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA)
 		return 0, err
 	}
-	peraId, err := getTxtID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
+	peraId, err := GetID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
 	if err != nil {
 		log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
 		return 0, err
 	}
-	pgrpId, err := getTxtID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP)
+	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP)
 	if err != nil {
 		log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP)
 		return 0, err

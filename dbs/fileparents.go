@@ -162,12 +162,12 @@ func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) (int64, error)
 		log.Printf("Insert FileParents record %+v", rec)
 	}
 	// get file id for given lfn
-	fid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
+	fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.LogicalFileName)
 		return 0, err
 	}
-	pid, err := getTxtID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
+	pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.ParentLogicalFileName)
 		return 0, err

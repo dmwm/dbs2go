@@ -534,18 +534,18 @@ func insert(stm string, vals []interface{}) error {
 }
 
 // helper function to get table primary id for a given value
-func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error) {
+func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error) {
 	var stm string
 	if DBOWNER == "sqlite" {
 		stm = fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", id, table, attr)
 	} else {
 		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, attr)
 	}
-	if utils.VERBOSE > 0 {
-		log.Printf("getTxtID\n%s; binding value='%+v'", stm, val)
+	if utils.VERBOSE > 1 {
+		log.Printf("getID\n%s; binding value='%+v'", stm, val)
 	}
 	var tid float64
-	err := tx.QueryRow(stm, val).Scan(&tid)
+	err := tx.QueryRow(stm, val...).Scan(&tid)
 	if err != nil {
 		log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
 	}
@@ -553,20 +553,20 @@ func getTxtID(tx *sql.Tx, table, id, attr string, val interface{}) (int64, error
 }
 
 // helper function to get table primary id for a given value and insert it if necessary
-func getInsertTxtID(tx *sql.Tx, table, id, attr string, val interface{}, rec DBRecord) (int64, error) {
-	rid, err := getTxtID(tx, table, id, attr, val)
+func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface{}) (int64, error) {
+	rid, err := GetID(tx, table, id, attr, val...)
 	if err != nil {
 		log.Printf("unable to find %s for %v", id, val)
 		err = rec.Validate()
 		if err != nil {
-			log.Printf("unable to validate %+v record, error %v", err)
+			log.Printf("unable to validate %+v record, error %v", rec, err)
 			return 0, err
 		}
 		err = rec.Insert(tx)
 		if err != nil {
 			return 0, err
 		}
-		rid, err = getTxtID(tx, table, id, attr, val)
+		rid, err = GetID(tx, table, id, attr, val...)
 		if err != nil {
 			return 0, err
 		}
@@ -683,22 +683,6 @@ func runsClause(table string, runs []string) (string, string, []string) {
 	}
 	where = fmt.Sprintf("( %s )", strings.Join(conds, " OR "))
 	return token, where, args
-}
-
-// helper function to get attribute ID from a given table
-func GetID(table, id, attr, value string) (int64, error) {
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
-	}
-	defer tx.Rollback()
-	tid, err := getTxtID(tx, table, id, attr, value)
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	return tid, nil
 }
 
 // AddParam adds single parameter to SQL statement

@@ -246,7 +246,7 @@ func (API) InsertBlocks(r io.Reader, cby string) (int64, error) {
 
 	// get all necessary IDs from different tables
 	dataset := strings.Split(rec.BLOCK_NAME, "#")[0]
-	dsId, err := getTxtID(tx, "DATASETS", "dataset_id", "dataset", dataset)
+	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", dataset)
 	if err != nil {
 		log.Println("unable to find dataset_id for", dataset)
 		return 0, err
