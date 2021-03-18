@@ -260,12 +260,12 @@ func (r *Files) SetDefaults() {
 }
 
 // Decode implementation for Files
-func (r *Files) Decode(reader io.Reader) (int64, error) {
+func (r *Files) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -273,10 +273,9 @@ func (r *Files) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 type RunLumi struct {
@@ -312,8 +311,8 @@ type FileRecord struct {
 }
 
 // InsertFiles DBS API
-func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
-	// TODO: implement the following logic
+func (API) InsertFiles(r io.Reader, cby string) error {
+	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
 	        :param qInserts: True means that inserts will be queued instead of done immediately. INSERT QUEUE
@@ -357,14 +356,13 @@ func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	rec := FileRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 	// set dependent's records
 	frec := Files{LOGICAL_FILE_NAME: rec.LOGICAL_FILE_NAME, IS_FILE_VALID: rec.IS_FILE_VALID, CHECK_SUM: rec.CHECK_SUM, FILE_SIZE: rec.FILE_SIZE, EVENT_COUNT: rec.EVENT_COUNT, ADLER32: rec.ADLER32, MD5: rec.MD5, AUTO_CROSS_SECTION: rec.AUTO_CROSS_SECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
@@ -373,7 +371,7 @@ func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 
@@ -381,17 +379,17 @@ func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
 	blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK)
 	if err != nil {
 		log.Println("unable to find block_id for", rec.BLOCK)
-		return 0, err
+		return err
 	}
 	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
 	if err != nil {
 		log.Println("unable to find dataset_id for", rec.DATASET)
-		return 0, err
+		return err
 	}
 	ftId, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
 	if err != nil {
 		log.Println("unable to find file_type_id for", rec.FILE_TYPE)
-		return 0, err
+		return err
 	}
 
 	// assign all Id's in dataset DB record
@@ -400,14 +398,14 @@ func (API) InsertFiles(r io.Reader, cby string) (int64, error) {
 	frec.FILE_TYPE_ID = ftId
 	err = frec.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
-		return 0, err
+		return err
 	}
-	return size, err
+	return err
 }

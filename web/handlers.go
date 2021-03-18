@@ -48,7 +48,7 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 }
 
 // responseMsg helper function to provide response to end-user
-func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) {
+func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
 	rec := make(dbs.Record)
 	rec["error"] = msg
 	rec["api"] = api
@@ -56,6 +56,7 @@ func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code i
 	data, _ := json.Marshal(rec)
 	w.WriteHeader(code)
 	w.Write(data)
+	return int64(len(data))
 }
 
 // helper function to extract user name or DN
@@ -159,53 +160,52 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
 		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
-		responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
-		return http.StatusUnsupportedMediaType, 0, errors.New(msg)
+		size := responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
+		return http.StatusUnsupportedMediaType, size, errors.New(msg)
 	}
 	defer r.Body.Close()
 	var api dbs.API
 	var err error
-	var size int64
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
 		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
 	}
 	if a == "datatiers" {
-		size, err = api.InsertDataTiers(r.Body, createBy(r))
+		err = api.InsertDataTiers(r.Body, createBy(r))
 	} else if a == "outputconfigs" {
-		size, err = api.InsertOutputConfigs(r.Body, createBy(r))
+		err = api.InsertOutputConfigs(r.Body, createBy(r))
 	} else if a == "primarydatasets" {
-		size, err = api.InsertPrimaryDatasets(r.Body, createBy(r))
+		err = api.InsertPrimaryDatasets(r.Body, createBy(r))
 	} else if a == "acquisitioneras" {
-		size, err = api.InsertAcquisitionEras(r.Body, createBy(r))
+		err = api.InsertAcquisitionEras(r.Body, createBy(r))
 	} else if a == "processingeras" {
-		size, err = api.InsertProcessingEras(r.Body, createBy(r))
+		err = api.InsertProcessingEras(r.Body, createBy(r))
 	} else if a == "datasets" {
-		size, err = api.InsertDatasets(r.Body, createBy(r))
+		err = api.InsertDatasets(r.Body, createBy(r))
 	} else if a == "blocks" {
-		size, err = api.InsertBlocks(r.Body, createBy(r))
+		err = api.InsertBlocks(r.Body, createBy(r))
 	} else if a == "bulkblocks" {
-		size, err = api.InsertBulkBlocks(r.Body, createBy(r))
+		err = api.InsertBulkBlocks(r.Body, createBy(r))
 	} else if a == "files" {
-		size, err = api.InsertFiles(r.Body, createBy(r))
+		err = api.InsertFiles(r.Body, createBy(r))
 	}
 	//     } else if a == "fileparentss" {
-	//         size, err = api.InsertFileParents(r.Body, createBy(r))
+	//         err = api.InsertFileParents(r.Body, createBy(r))
 	//     } else if a == "fileparentsbylumi" {
-	//         size, err = api.InsertFileParentsByLumi(r.Body, createBy(r))
+	//         err = api.InsertFileParentsByLumi(r.Body, createBy(r))
 	//     } else if a == "datasetlist" {
-	//         size, err = api.InsertDatasetList(r.Body, createBy(r))
+	//         err = api.InsertDatasetList(r.Body, createBy(r))
 	//     } else if a == "fileArray" {
-	//         size, err = api.InsertFileArray(r.Body, createBy(r))
+	//         err = api.InsertFileArray(r.Body, createBy(r))
 	//     } else if a == "filelumis" {
-	//         size, err = api.InsertFileLumis(r.Body, createBy(r))
+	//         err = api.InsertFileLumis(r.Body, createBy(r))
 	//     } else if a == "blockparents" {
-	//         size, err = api.InsertBlockParents(r.Body, createBy(r))
+	//         err = api.InsertBlockParents(r.Body, createBy(r))
 	if err != nil {
-		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-		return http.StatusInternalServerError, 0, err
+		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+		return http.StatusInternalServerError, size, err
 	}
-	return http.StatusOK, size, nil
+	return http.StatusOK, 0, nil
 }
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
@@ -280,8 +280,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
 	if err != nil {
-		responseMsg(w, r, "DBSGetHandler", a, http.StatusInternalServerError)
-		return http.StatusInternalServerError, 0, err
+		size := responseMsg(w, r, "DBSGetHandler", a, http.StatusInternalServerError)
+		return http.StatusInternalServerError, size, err
 	}
 	return status, size, nil
 }
@@ -289,8 +289,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 // NotImplementedHandler returns server status error
 func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) (int, int64, error) {
 	log.Println("NotImplementedAPI", api)
-	responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
-	return http.StatusInternalServerError, 0, nil
+	size := responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
+	return http.StatusInternalServerError, size, nil
 }
 
 // DatatiersHandler provides access to DataTiers DBS API.

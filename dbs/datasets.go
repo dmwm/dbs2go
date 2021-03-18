@@ -302,12 +302,12 @@ func (r *Datasets) SetDefaults() {
 }
 
 // Decode implementation for Datasets
-func (r *Datasets) Decode(reader io.Reader) (int64, error) {
+func (r *Datasets) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -315,10 +315,9 @@ func (r *Datasets) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // DatasetRecord we receive for InsertDatasets API
@@ -339,7 +338,7 @@ type DatasetRecord struct {
 }
 
 // InsertDatasets DBS API
-func (API) InsertDatasets(r io.Reader, cby string) (int64, error) {
+func (API) InsertDatasets(r io.Reader, cby string) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
 	// input values: dataset, primary_ds_name(name), processed_ds(name), data_tier(name),
@@ -363,14 +362,13 @@ func (API) InsertDatasets(r io.Reader, cby string) (int64, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	rec := DatasetRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 	// set dependent's records
 	dsrec := Datasets{DATASET: rec.DATASET, XTCROSSSECTION: rec.XTCROSSSECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY, IS_DATASET_VALID: 1}
@@ -379,7 +377,7 @@ func (API) InsertDatasets(r io.Reader, cby string) (int64, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 
@@ -387,37 +385,37 @@ func (API) InsertDatasets(r io.Reader, cby string) (int64, error) {
 	primId, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
-		return 0, err
+		return err
 	}
 	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS)
-		return 0, err
+		return err
 	}
 	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER)
 	if err != nil {
 		log.Println("unable to find data_tier_id for", rec.DATA_TIER)
-		return 0, err
+		return err
 	}
 	daccId, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
 	if err != nil {
 		log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
-		return 0, err
+		return err
 	}
 	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA)
 	if err != nil {
 		log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA)
-		return 0, err
+		return err
 	}
 	peraId, err := GetID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
 	if err != nil {
 		log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
-		return 0, err
+		return err
 	}
 	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP)
 	if err != nil {
 		log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP)
-		return 0, err
+		return err
 	}
 
 	// assign all Id's in dataset DB record
@@ -430,14 +428,14 @@ func (API) InsertDatasets(r io.Reader, cby string) (int64, error) {
 	dsrec.PHYSICS_GROUP_ID = pgrpId
 	err = dsrec.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
-		return 0, err
+		return err
 	}
-	return size, err
+	return err
 }

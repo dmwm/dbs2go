@@ -127,12 +127,12 @@ func (r *OutputConfigs) SetDefaults() {
 }
 
 // Decode implementation for OutputConfigs
-func (r *OutputConfigs) Decode(reader io.Reader) (int64, error) {
+func (r *OutputConfigs) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -140,10 +140,9 @@ func (r *OutputConfigs) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // Size implementation for OutputConfigs
@@ -168,7 +167,7 @@ type OutputConfigRecord struct {
 }
 
 // InsertOutputConfigsTx DBS API
-func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, error) {
+func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -179,14 +178,13 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, er
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	rec := OutputConfigRecord{CREATE_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 	if rec.CREATION_DATE == 0 {
 		rec.CREATION_DATE = time.Now().Unix()
@@ -200,15 +198,15 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, er
 	var appID, psetID, relID int64
 	appID, err = GetRecID(tx, &arec, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	psetID, err = GetRecID(tx, &prec, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	relID, err = GetRecID(tx, &rrec, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// init all foreign Id's in output config record
@@ -216,11 +214,11 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) (int64, er
 	orec.RELEASE_VERSION_ID = relID
 	orec.PARAMETER_SET_HASH_ID = psetID
 	err = orec.Insert(tx)
-	return size, err
+	return err
 }
 
 // InsertOutputConfigs DBS API
-func (api API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
+func (api API) InsertOutputConfigs(r io.Reader, cby string) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -231,17 +229,17 @@ func (api API) InsertOutputConfigs(r io.Reader, cby string) (int64, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 
-	size, err := api.InsertOutputConfigsTx(tx, r, cby)
+	err = api.InsertOutputConfigsTx(tx, r, cby)
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return 0, err
+		return err
 	}
-	return size, err
+	return err
 }

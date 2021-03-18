@@ -88,7 +88,7 @@ func TestDBSGetID(t *testing.T) {
 	// insert new record
 	var api dbs.API
 	utils.VERBOSE = 1
-	_, err := api.InsertDataTiers(reader, createBy)
+	err := api.InsertDataTiers(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}

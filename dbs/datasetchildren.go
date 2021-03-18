@@ -29,7 +29,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 }
 
 // InsertDatasetChildren DBS API
-func (API) InsertDatasetChildren(r io.Reader, cby string) (int64, error) {
+func (API) InsertDatasetChildren(r io.Reader, cby string) error {
 	//     return InsertValues("insert_dataset_children", values)
-	return 0, nil
+	return nil
 }

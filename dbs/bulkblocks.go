@@ -131,28 +131,27 @@ type FileParent struct {
    #3 insert block & files
    self.insertBlockFile(blockcontent, datasetId, migration)
 */
-func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
+func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 	// read input data
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("unable to read bulkblock input", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 
 	// unmarshal the data into BulkBlocks record
 	var rec BulkBlocks
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("unable to unmarshal bulkblock record", err)
-		return 0, err
+		return err
 	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 
@@ -171,12 +170,12 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		data, err = json.Marshal(rrr)
 		if err != nil {
 			log.Println("unable to marshal dataset config list", err)
-			return 0, err
+			return err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertOutputConfigsTx(tx, reader, cby)
+		err = api.InsertOutputConfigsTx(tx, reader, cby)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
@@ -190,7 +189,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	primaryDatasetTypeID, err = GetRecID(tx, &pdstDS, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType)
 	if err != nil {
 		log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
-		return 0, err
+		return err
 	}
 
 	// get primarayDatasetID and insert record if it does not exists
@@ -209,7 +208,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	primaryDatasetID, err = GetRecID(tx, &primDS, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
-		return 0, err
+		return err
 	}
 
 	// get processing era ID and insert record if it does not exists
@@ -228,7 +227,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	processingEraID, err = GetRecID(tx, &pera, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion)
 	if err != nil {
 		log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
-		return 0, err
+		return err
 	}
 
 	// insert acquisition era if it does not exists
@@ -248,7 +247,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	acquisitionEraID, err = GetRecID(tx, &aera, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName)
 	if err != nil {
 		log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
-		return 0, err
+		return err
 	}
 
 	// get dataTierID
@@ -258,7 +257,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	dataTierID, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.Dataset.DataTierName)
 	if err != nil {
 		log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
-		return 0, err
+		return err
 	}
 	// get physicsGroupID
 	if utils.VERBOSE > 0 {
@@ -267,7 +266,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	physicsGroupID, err = GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.Dataset.PhysicsGroupName)
 	if err != nil {
 		log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
-		return 0, err
+		return err
 	}
 	// get datasetAccessTypeID
 	if utils.VERBOSE > 0 {
@@ -276,7 +275,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	datasetAccessTypeID, err = GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.Dataset.DatasetAccessType)
 	if err != nil {
 		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
-		return 0, err
+		return err
 	}
 	if utils.VERBOSE > 0 {
 		log.Println("get processed dataset ID")
@@ -284,7 +283,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	processedDatasetID, err = GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.Dataset.ProcessedDSName)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
-		return 0, err
+		return err
 	}
 
 	// insert dataset
@@ -313,7 +312,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	err = dataset.Insert(tx)
 	if err != nil {
 		log.Println("unable to insert dataset record", err)
-		return 0, err
+		return err
 	}
 	// get datasetID
 	if utils.VERBOSE > 0 {
@@ -322,7 +321,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 	if err != nil {
 		log.Println("unable to find dataset_id for", rec.Dataset.Dataset)
-		return 0, err
+		return err
 	}
 
 	// insert block
@@ -347,13 +346,13 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	err = blk.Insert(tx)
 	if err != nil {
 		log.Println("unable to insert block record", err)
-		return 0, err
+		return err
 	}
 	// get blockID
 	blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 	if err != nil {
 		log.Println("unable to find block_id for", rec.Block.BlockName)
-		return 0, err
+		return err
 	}
 
 	// insert files
@@ -366,7 +365,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		fileTypeID, err = GetRecID(tx, &ftype, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
 		if err != nil {
 			log.Println("unable to find file_type_id for", rrr.FileType)
-			return 0, err
+			return err
 		}
 		// get branch hash ID and insert record if it does not exists
 		if rrr.BranchHash == "" {
@@ -378,7 +377,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		branchHashID, err = GetRecID(tx, &bhash, "BRANCH_HASHES", "branch_hash_id", "branch_hash", rrr.BranchHash)
 		if err != nil {
 			log.Println("unable to find branch hash_id for", rrr.BranchHash)
-			return 0, err
+			return err
 		}
 
 		r := Files{
@@ -402,7 +401,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		err = r.Insert(tx)
 		if err != nil {
 			log.Println("unable to insert File record", err)
-			return 0, err
+			return err
 		}
 	}
 
@@ -411,12 +410,12 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		data, err = json.Marshal(rrr)
 		if err != nil {
 			log.Println("unable to marshal file config list", err)
-			return 0, err
+			return err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertFileOutputModConfigs(tx, reader, cby)
+		err = api.InsertFileOutputModConfigs(tx, reader, cby)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
@@ -425,12 +424,12 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 		data, err = json.Marshal(rrr)
 		if err != nil {
 			log.Println("unable to marshal file parent list", err)
-			return 0, err
+			return err
 		}
 		reader = bytes.NewReader(data)
-		_, err = api.InsertFileParents(tx, reader, cby)
+		err = api.InsertFileParents(tx, reader, cby)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
@@ -442,8 +441,8 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) (int64, error) {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
-		return 0, err
+		return err
 	}
 
-	return size, nil
+	return nil
 }

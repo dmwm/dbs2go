@@ -45,7 +45,7 @@ type DBRecord interface {
 	Insert(tx *sql.Tx) error
 	Validate() error
 	SetDefaults()
-	Decode(r io.Reader) (int64, error)
+	Decode(r io.Reader) error
 }
 
 // DecodeValidatorError provides uniform error representation
@@ -66,30 +66,12 @@ func Date() int64 {
 	return time.Now().Unix()
 }
 
-// helper function to insert DB record with given transaction and reader
-func insertTxtRecord(tx *sql.Tx, rec DBRecord, r io.Reader) (int64, error) {
-	// init record with given data record
-	size, err := rec.Decode(r)
-	if err != nil {
-		log.Println("fail to decode record", err)
-		return 0, err
-	}
-
-	// insert record
-	err = rec.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert %v", rec)
-		return 0, err
-	}
-	return size, nil
-}
-
 // helper function to insert DB record with given reader
-func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
-	size, err := rec.Decode(r)
+func insertRecord(rec DBRecord, r io.Reader) error {
+	err := rec.Decode(r)
 	if err != nil {
 		log.Println("fail to decode record", err)
-		return 0, err
+		return err
 	}
 	if utils.VERBOSE > 2 {
 		log.Printf("insertRecord %+v", rec)
@@ -99,7 +81,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return 0, err
+		return err
 	}
 	defer tx.Rollback()
 
@@ -110,7 +92,7 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 	err = rec.Insert(tx)
 	if err != nil {
 		log.Printf("unable to insert %+v, %v", rec, err)
-		return 0, err
+		return err
 	}
 
 	// commit transaction
@@ -120,12 +102,9 @@ func insertRecord(rec DBRecord, r io.Reader) (int64, error) {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return 0, err
+		return err
 	}
-	if utils.VERBOSE > 2 {
-		log.Printf("record size %v, error %v", size, err)
-	}
-	return size, nil
+	return nil
 }
 
 // helper function
@@ -502,7 +481,7 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, attr)
 	}
 	if utils.VERBOSE > 1 {
-		log.Printf("getID\n%s; binding value='%+v'", stm, val)
+		log.Printf("getID\n%s; binding value=%+v", stm, val)
 	}
 	var tid float64
 	err := tx.QueryRow(stm, val...).Scan(&tid)

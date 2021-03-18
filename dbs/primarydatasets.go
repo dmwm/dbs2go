@@ -91,12 +91,12 @@ func (r *PrimaryDatasets) SetDefaults() {
 }
 
 // Decode implementation for PrimaryDatasets
-func (r *PrimaryDatasets) Decode(reader io.Reader) (int64, error) {
+func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -104,10 +104,9 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // PrimaryDatasetRecord
@@ -119,7 +118,7 @@ type PrimaryDatasetRecord struct {
 }
 
 // InsertPrimaryDatasets DBS API
-func (API) InsertPrimaryDatasets(r io.Reader, cby string) (int64, error) {
+func (API) InsertPrimaryDatasets(r io.Reader, cby string) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
 	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by
@@ -131,14 +130,13 @@ func (API) InsertPrimaryDatasets(r io.Reader, cby string) (int64, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	rec := PrimaryDatasetRecord{CREATE_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 	trec := PrimaryDSTypes{PRIMARY_DS_TYPE: rec.PRIMARY_DS_TYPE}
 	prec := PrimaryDatasets{PRIMARY_DS_NAME: rec.PRIMARY_DS_NAME, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY}
@@ -147,26 +145,26 @@ func (API) InsertPrimaryDatasets(r io.Reader, cby string) (int64, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 	err = trec.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// init all foreign Id's in output config record
 	prec.PRIMARY_DS_TYPE_ID = trec.PRIMARY_DS_TYPE_ID
 	err = prec.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
-		return 0, err
+		return err
 	}
-	return size, err
+	return err
 }

@@ -94,12 +94,12 @@ func (r *DataTiers) SetDefaults() {
 }
 
 // Decode implementation for DataTiers
-func (r *DataTiers) Decode(reader io.Reader) (int64, error) {
+func (r *DataTiers) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -107,13 +107,12 @@ func (r *DataTiers) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // InsertDataTiers DBS API
-func (API) InsertDataTiers(r io.Reader, cby string) (int64, error) {
+func (API) InsertDataTiers(r io.Reader, cby string) error {
 	return insertRecord(&DataTiers{CREATE_BY: cby}, r)
 }

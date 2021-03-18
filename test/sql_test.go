@@ -106,9 +106,10 @@ func TestInsertSQL(t *testing.T) {
 		// call to InsertXXX DBS API, it returns output which consists
 		// of two values, the size of inserted record and the error
 		output := m.Call(args)
-		//         log.Println("output of insert", output[0].Interface(), output[1].Interface())
-		// we look-up the error from output[1]
-		if fmt.Sprintf("%v", output[1].Interface()) != "<nil>" {
+		// output here represent array of return values
+		// in this call the insert API returns only error, therefore
+		// we look-up it from output[0]
+		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {
 			t.Fatalf("Fail to insert data %v\n", output[1].Interface())
 		}
 

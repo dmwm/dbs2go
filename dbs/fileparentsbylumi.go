@@ -53,6 +53,6 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 }
 
 // InsertFileParentsByLumi DBS API
-func (API) InsertFileParentsByLumi(r io.Reader, cby string) (int64, error) {
-	return 0, nil
+func (API) InsertFileParentsByLumi(r io.Reader, cby string) error {
+	return nil
 }

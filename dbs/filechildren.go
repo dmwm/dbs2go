@@ -56,6 +56,6 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileChildren DBS API
-func (API) InsertFileChildren(r io.Reader, cby string) (int64, error) {
-	return 0, nil
+func (API) InsertFileChildren(r io.Reader, cby string) error {
+	return nil
 }

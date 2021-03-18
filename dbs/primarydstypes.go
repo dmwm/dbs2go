@@ -70,12 +70,12 @@ func (r *PrimaryDSTypes) SetDefaults() {
 }
 
 // Decode implementation for PrimaryDSTypes
-func (r *PrimaryDSTypes) Decode(reader io.Reader) (int64, error) {
+func (r *PrimaryDSTypes) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -83,13 +83,12 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // InsertPrimaryDSTypes DBS API
-func (API) InsertPrimaryDSTypes(r io.Reader, cby string) (int64, error) {
+func (API) InsertPrimaryDSTypes(r io.Reader, cby string) error {
 	return insertRecord(&PrimaryDSTypes{}, r)
 }

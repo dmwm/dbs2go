@@ -181,12 +181,12 @@ func (r *Blocks) SetDefaults() {
 }
 
 // Decode implementation for Blocks
-func (r *Blocks) Decode(reader io.Reader) (int64, error) {
+func (r *Blocks) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -194,10 +194,9 @@ func (r *Blocks) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // BlockRecord represent input recor for insert blocks API
@@ -214,7 +213,7 @@ type BlockRecord struct {
 }
 
 // InsertBlocks DBS API
-func (API) InsertBlocks(r io.Reader, cby string) (int64, error) {
+func (API) InsertBlocks(r io.Reader, cby string) error {
 	// TODO: implement the following logic
 	// input values: blockname
 	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
@@ -226,14 +225,13 @@ func (API) InsertBlocks(r io.Reader, cby string) (int64, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	rec := BlockRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 	// set dependent's records
 	brec := Blocks{BLOCK_NAME: rec.BLOCK_NAME, OPEN_FOR_WRITING: rec.OPEN_FOR_WRITING, ORIGIN_SITE_NAME: rec.ORIGIN_SITE_NAME, BLOCK_SIZE: rec.BLOCK_SIZE, FILE_COUNT: rec.FILE_COUNT, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
@@ -242,7 +240,7 @@ func (API) InsertBlocks(r io.Reader, cby string) (int64, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 
@@ -251,21 +249,21 @@ func (API) InsertBlocks(r io.Reader, cby string) (int64, error) {
 	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", dataset)
 	if err != nil {
 		log.Println("unable to find dataset_id for", dataset)
-		return 0, err
+		return err
 	}
 
 	// assign all Id's in dataset DB record
 	brec.DATASET_ID = dsId
 	err = brec.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
-		return 0, err
+		return err
 	}
-	return size, err
+	return err
 }

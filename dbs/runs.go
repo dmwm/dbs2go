@@ -50,7 +50,7 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertRuns DBS API
-func (API) InsertRuns(r io.Reader, cby string) (int64, error) {
+func (API) InsertRuns(r io.Reader, cby string) error {
 	//     return InsertValues("insert_runs", values)
-	return 0, nil
+	return nil
 }

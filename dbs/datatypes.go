@@ -21,7 +21,7 @@ func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertDataTypes DBS API
-func (API) InsertDataTypes(r io.Reader, cby string) (int64, error) {
+func (API) InsertDataTypes(r io.Reader, cby string) error {
 	//     return InsertValues("insert_data_types", values)
-	return 0, nil
+	return nil
 }

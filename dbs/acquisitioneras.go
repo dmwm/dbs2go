@@ -108,12 +108,12 @@ func (r *AcquisitionEras) SetDefaults() {
 }
 
 // Decode implementation for AcquisitionEras
-func (r *AcquisitionEras) Decode(reader io.Reader) (int64, error) {
+func (r *AcquisitionEras) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -121,14 +121,13 @@ func (r *AcquisitionEras) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // InsertAcquisitionEras DBS API
-func (API) InsertAcquisitionEras(r io.Reader, cby string) (int64, error) {
+func (API) InsertAcquisitionEras(r io.Reader, cby string) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by

@@ -116,12 +116,12 @@ func (r *FileParents) SetDefaults() {
 }
 
 // Decode implementation for FileParents
-func (r *FileParents) Decode(reader io.Reader) (int64, error) {
+func (r *FileParents) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -129,10 +129,9 @@ func (r *FileParents) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 type FileParentRecord struct {
@@ -141,7 +140,7 @@ type FileParentRecord struct {
 }
 
 // InsertFileParents DBS API
-func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) (int64, error) {
+func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -156,14 +155,13 @@ func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) (int64, error)
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	var rec FileParentRecord
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert FileParents record %+v", rec)
@@ -172,23 +170,23 @@ func (API) InsertFileParents(tx *sql.Tx, r io.Reader, cby string) (int64, error)
 	fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.LogicalFileName)
-		return 0, err
+		return err
 	}
 	pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.ParentLogicalFileName)
-		return 0, err
+		return err
 	}
 	var rrr FileParents
 	rrr.THIS_FILE_ID = fid
 	rrr.PARENT_FILE_ID = pid
 	err = rrr.Validate()
 	if err != nil {
-		return 0, err
+		return err
 	}
 	err = rrr.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return size, nil
+	return nil
 }

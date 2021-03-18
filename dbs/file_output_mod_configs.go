@@ -77,12 +77,12 @@ func (r *FileOutputModConfigs) SetDefaults() {
 }
 
 // Decode implementation for FileOutputModConfigs
-func (r *FileOutputModConfigs) Decode(reader io.Reader) (int64, error) {
+func (r *FileOutputModConfigs) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -90,10 +90,9 @@ func (r *FileOutputModConfigs) Decode(reader io.Reader) (int64, error) {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
-	return size, nil
+	return nil
 }
 
 // FileOutputModConfigRecord
@@ -107,26 +106,25 @@ type FileOutputModConfigRecord struct {
 }
 
 // InsertFileOutputModConfigs DBS API
-func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) (int64, error) {
+func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) error {
 	// read given input
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return 0, err
+		return err
 	}
-	size := int64(len(data))
 	var rec FileOutputModConfigRecord
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return 0, err
+		return err
 	}
 
 	// get file id for given lfn
 	fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
 	if err != nil {
 		log.Println("unable to find file_id for", rec.Lfn)
-		return 0, err
+		return err
 	}
 	// find output module config id
 	var args []interface{}
@@ -145,14 +143,14 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) (int6
 	tmpl["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("outputconfigs_id", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	stm = WhereClause(stm, conds)
 	var oid int64
 	err = tx.QueryRow(stm, args...).Scan(&oid)
 	if err != nil {
 		log.Printf("unable to find output_mod_config_id for\n%s\n%+v", stm, args)
-		return 0, err
+		return err
 	}
 
 	// init all foreign Id's in output config record
@@ -164,8 +162,8 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) (int6
 	}
 	err = rrr.Insert(tx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return size, err
+	return err
 }

@@ -32,28 +32,28 @@ func TestBulkBlocks(t *testing.T) {
 	tier := dbs.DataTiers{DATA_TIER_NAME: "GEN-SIM-RAW", CREATION_DATE: ts, CREATE_BY: createBy}
 	data, _ = json.Marshal(tier)
 	reader = bytes.NewReader(data)
-	_, err = api.InsertDataTiers(reader, createBy)
+	err = api.InsertDataTiers(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail to insert data tier %v\n", err)
 	}
 	physGrp := dbs.PhysicsGroups{PHYSICS_GROUP_NAME: "Tracker"}
 	data, _ = json.Marshal(physGrp)
 	reader = bytes.NewReader(data)
-	_, err = api.InsertPhysicsGroups(reader, createBy)
+	err = api.InsertPhysicsGroups(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail to insert physics group %v\n", err)
 	}
 	dacc := dbs.DatasetAccessTypes{DATASET_ACCESS_TYPE: "PRODUCTION"}
 	data, _ = json.Marshal(dacc)
 	reader = bytes.NewReader(data)
-	_, err = api.InsertDatasetAccessTypes(reader, createBy)
+	err = api.InsertDatasetAccessTypes(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail to insert dataset access type %v\n", err)
 	}
 	procDS := dbs.ProcessedDatasets{PROCESSED_DS_NAME: "Summer2011-pstr-v10"}
 	data, _ = json.Marshal(procDS)
 	reader = bytes.NewReader(data)
-	_, err = api.InsertProcessedDatasets(reader, createBy)
+	err = api.InsertProcessedDatasets(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail to insert dataset access type %v\n", err)
 	}
@@ -98,7 +98,7 @@ func TestBulkBlocks(t *testing.T) {
 		t.Errorf("Fail to read file %s, error %v\n", fname, err)
 	}
 	reader = bytes.NewReader(data)
-	_, err = api.InsertBulkBlocks(reader, createBy)
+	err = api.InsertBulkBlocks(reader, createBy)
 	if err != nil {
 		t.Errorf("Fail to process bulkblocks data %v\n", err)
 	}

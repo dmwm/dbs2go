@@ -62,7 +62,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 }
 
 // InsertFileSummaries DBS API
-func (API) InsertFileSummaries(r io.Reader, cby string) (int64, error) {
+func (API) InsertFileSummaries(r io.Reader, cby string) error {
 	//     return InsertValues("insert_file_summaries", values)
-	return 0, nil
+	return nil
 }
