@@ -57,9 +57,6 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_access_types")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_dataset_access_types_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert DatasetAccessTypes\n%s\n%+v", stm, r)
 	}

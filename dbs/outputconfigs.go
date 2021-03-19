@@ -98,9 +98,6 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_outputconfigs")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_outputconfigs_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert OutputConfigs\n%s\n%+v", stm, r)
 	}

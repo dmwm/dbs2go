@@ -54,9 +54,6 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_output_mod_configs")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_dataset_output_mod_configs_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert DatasetOutputModConfigs\n%s\n%+v", stm, r)
 	}

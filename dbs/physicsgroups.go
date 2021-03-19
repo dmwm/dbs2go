@@ -58,9 +58,6 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_physics_groups")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_physics_groups_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert PhysicsGroups\n%s\n%+v", stm, r)
 	}

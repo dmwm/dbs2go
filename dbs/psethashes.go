@@ -42,9 +42,6 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_psethashes")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_psethashes_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ParameterSetHashes\n%s\n%+v", stm, r)
 	}

@@ -31,3 +31,23 @@ func TestRecordSize(t *testing.T) {
 	}
 	fmt.Println("record", rec, "size", size)
 }
+
+// TestReplaceBinds
+func TestReplaceBinds(t *testing.T) {
+	str := `
+	INSERT INTO {{.Owner}}.FILES
+    (file_id,logical_file_name,is_file_valid)
+    VALUES
+    (:file_id,:logical_file_name,:is_file_valid)
+	 `
+	nstr := utils.ReplaceBinds(str)
+	expect := `
+	INSERT INTO {{.Owner}}.FILES
+    (file_id,logical_file_name,is_file_valid)
+    VALUES
+    (?,?,?)
+	 `
+	if nstr != expect {
+		t.Error("unable to replace binds")
+	}
+}

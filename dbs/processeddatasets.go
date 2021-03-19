@@ -54,9 +54,6 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_processed_datasets")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_processed_datasets_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ProcessedDatasets\n%s\n%+v", stm, r)
 	}

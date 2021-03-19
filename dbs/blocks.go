@@ -144,9 +144,6 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_blocks")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_blocks_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Blocks\n%s\n%+v", stm, r)
 	}
@@ -264,7 +261,7 @@ func (API) InsertBlocks(r io.Reader, cby string) error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("faile to insert_outputconfigs_sqlite", err)
+		log.Println("fail to commit transaction", err)
 		return err
 	}
 	return err
@@ -322,9 +319,6 @@ func (API) UpdateBlocks(params Record) error {
 	tmplData := make(Record)
 	tmplData["Site"] = site
 	stm, err = LoadTemplateSQL("update_blocks", tmplData)
-	if DBOWNER == "sqlite" {
-		stm, err = LoadTemplateSQL("update_blocks_sqlite", tmplData)
-	}
 
 	if utils.VERBOSE > 0 {
 		log.Printf("update Blocks\n%s\n%+v", stm)

@@ -62,9 +62,6 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_processing_eras")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_processing_eras_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ProcessingEras\n%s\n%+v", stm, r)
 	}

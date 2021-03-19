@@ -50,9 +50,6 @@ func (r *PrimaryDSTypes) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_primary_ds_types")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_primary_ds_types_sqlite")
-	}
 	_, err = tx.Exec(stm, r.PRIMARY_DS_TYPE_ID, r.PRIMARY_DS_TYPE)
 	return err
 }

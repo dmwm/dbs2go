@@ -139,6 +139,9 @@ func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	if owner, ok := tmplData["Owner"]; ok && owner == "sqlite" {
 		stm = strings.Replace(stm, "sqlite.", "", -1)
 	}
+	if DBOWNER == "sqlite" {
+		stm = utils.ReplaceBinds(stm)
+	}
 	return stm, nil
 }
 
@@ -166,12 +169,16 @@ func LoadSQL(owner string) Record {
 // helper function to get SQL statement from DBSQL dict for a given key
 func getSQL(key string) string {
 	// use generic query API to fetch the results from DB
-	stm, ok := DBSQL[key]
+	val, ok := DBSQL[key]
 	if !ok {
 		msg := fmt.Sprintf("Unable to load %s SQL", key)
 		log.Fatal(msg)
 	}
-	return stm.(string)
+	stm := val.(string)
+	if DBOWNER == "sqlite" {
+		stm = utils.ReplaceBinds(stm)
+	}
+	return stm
 }
 
 // helper function to get value from record

@@ -38,9 +38,6 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_branch_hashes")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_branch_hashes_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert BranchHashes\n%s\n%+v", stm, r)
 	}

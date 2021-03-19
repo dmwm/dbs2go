@@ -41,9 +41,6 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_appexec")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_appexec_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ApplicationExecutables\n%s\n%+v", stm, r)
 	}

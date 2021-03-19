@@ -232,9 +232,6 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_datasets")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_datasets_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
 	}
@@ -435,7 +432,7 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("faile to insert_outputconfigs_sqlite", err)
+		log.Println("fail to commit transaction", err)
 		return err
 	}
 	return err
@@ -472,9 +469,6 @@ func (API) UpdateDatasets(params Record) error {
 
 	// get SQL statement from static area
 	stm := getSQL("update_datasets")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("update_datasets_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("update Datasets\n%s\n%+v", stm)
 	}

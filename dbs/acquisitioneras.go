@@ -66,9 +66,6 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_acquisition_eras")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("insert_acquisition_eras_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert AcquisitionEras\n%s\n%+v", stm, r)
 	}
@@ -156,9 +153,6 @@ func (API) UpdateAcquisitionEras(params Record) error {
 
 	// get SQL statement from static area
 	stm := getSQL("update_acquisition_eras")
-	if DBOWNER == "sqlite" {
-		stm = getSQL("update_acquisition_eras_sqlite")
-	}
 	if utils.VERBOSE > 0 {
 		log.Printf("update AcquisitionEras\n%s\n%+v", stm, params)
 	}

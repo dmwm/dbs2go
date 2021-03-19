@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"runtime"
 )
 
@@ -177,4 +178,14 @@ func CastFloat(val interface{}) (float64, error) {
 	}
 	msg := fmt.Sprintf("wrong data type for %v type %T", val, val)
 	return 0, errors.New(msg)
+}
+
+// ReplacePattern replaces given pattern in string
+func ReplaceBinds(stm string) string {
+	regexp, err := regexp.Compile(`:[a-zA-Z_0-9]+`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	match := regexp.ReplaceAllString(stm, "?")
+	return match
 }
