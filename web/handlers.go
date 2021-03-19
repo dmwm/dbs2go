@@ -159,7 +159,8 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	params := make(dbs.Record)
 	for k, v := range r.URL.Query() {
-		params[k] = v
+		// url query parameters are passed as list, we take first element only
+		params[k] = v[0]
 	}
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
