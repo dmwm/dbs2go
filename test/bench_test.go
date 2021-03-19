@@ -19,6 +19,10 @@ func BenchmarkRecordSize(b *testing.B) {
 
 // BenchmarkLoadTemplateSQL
 func BenchmarkLoadTemplateSQL(b *testing.B) {
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+
 	rec := make(dbs.Record)
 	rec["a"] = 1
 	rec["b"] = 2
