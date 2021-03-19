@@ -133,6 +133,7 @@ func (API) InsertAcquisitionEras(r io.Reader, cby string) error {
 // UpdateAcquisitionEras DBS API
 func (API) UpdateAcquisitionEras(params Record) error {
 
+	var aera string
 	var endDate int
 	if v, ok := params["end_date"]; ok {
 		val, err := strconv.Atoi(v.(string))
@@ -141,8 +142,17 @@ func (API) UpdateAcquisitionEras(params Record) error {
 		}
 		endDate = val
 	}
+	if v, ok := params["acquisition_era_name"]; ok {
+		aera = v.(string)
+	}
 
-	// TODO: validate input params
+	// validate input params
+	if endDate == 0 {
+		return errors.New("invalid end_date parameter")
+	}
+	if aera == "" {
+		return errors.New("invalid end_date parameter")
+	}
 
 	// get SQL statement from static area
 	stm := getSQL("update_acquisition_eras")
@@ -150,7 +160,7 @@ func (API) UpdateAcquisitionEras(params Record) error {
 		stm = getSQL("update_acquisition_eras_sqlite")
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("update AcquisitionEras\n%s\n%+v", stm)
+		log.Printf("update AcquisitionEras\n%s\n%+v", stm, params)
 	}
 
 	// start transaction
@@ -160,7 +170,7 @@ func (API) UpdateAcquisitionEras(params Record) error {
 		return err
 	}
 	defer tx.Rollback()
-	_, err = tx.Exec(stm, endDate)
+	_, err = tx.Exec(stm, endDate, aera)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err
