@@ -430,7 +430,13 @@ func (API) UpdateFiles(params Record) error {
 	}
 	date := time.Now().Unix()
 
-	// TODO: validate input parameters
+	// validate input parameters
+	if create_by == "" {
+		return errors.New("invalid create_by parameter")
+	}
+	if isFileValid < 0 || isFileValid > 1 {
+		return errors.New("invalid is_file_valid parameter")
+	}
 
 	// get SQL statement from static area
 	stm := getSQL("update_files")

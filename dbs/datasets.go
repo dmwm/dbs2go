@@ -340,7 +340,7 @@ type DatasetRecord struct {
 
 // InsertDatasets DBS API
 func (API) InsertDatasets(r io.Reader, cby string) error {
-	// TODO: implement the following logic
+	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
 	// input values: dataset, primary_ds_name(name), processed_ds(name), data_tier(name),
 	// acquisition_era(name), processing_version
@@ -444,7 +444,6 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 // UpdateDatasets DBS API
 func (API) UpdateDatasets(params Record) error {
 
-	// TODO: read date accessType from io.Reader
 	// get accessTypeID from Access dataset types table
 	var create_by string
 	if v, ok := params["create_by"]; ok {
@@ -460,7 +459,16 @@ func (API) UpdateDatasets(params Record) error {
 	}
 	date := time.Now().Unix()
 
-	// TODO: validate input parameters
+	// validate input parameters
+	if dataset == "" {
+		return errors.New("invalid dataset parameter")
+	}
+	if create_by == "" {
+		return errors.New("invalid create_by parameter")
+	}
+	if datasetAccessType == "" {
+		return errors.New("invalid datasetAccessType parameter")
+	}
 
 	// get SQL statement from static area
 	stm := getSQL("update_datasets")
