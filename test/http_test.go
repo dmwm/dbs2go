@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +15,31 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/web"
 )
+
+// helper function to create http test response recorder
+// for given HTTP Method, url, reader and DBS web handler
+func respRecorder(method, url string, reader io.Reader, hdlr web.LoggingHandlerFunc) (*httptest.ResponseRecorder, error) {
+	// setup HTTP request
+	req, err := http.NewRequest(method, url, reader)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", "application/json")
+	if method == "POST" {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(web.LoggingHandler(hdlr))
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		log.Printf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+		return nil, err
+	}
+	return rr, nil
+}
 
 // TestHTTPGet provides test of GET method for our service
 func TestHTTPGet(t *testing.T) {
@@ -38,19 +64,9 @@ func TestHTTPGet(t *testing.T) {
 	}
 
 	// setup HTTP request
-	req, err := http.NewRequest("GET", "/dbs2go/datatiers", nil)
+	rr, err := respRecorder("GET", "/dbs2go/datatiers", nil, web.DatatiersHandler)
 	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Add("Accept", "application/json")
-
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(web.LoggingHandler(web.DatatiersHandler))
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		t.Error(err)
 	}
 
 	// unmarshal received records
@@ -80,19 +96,9 @@ func TestHTTPPost(t *testing.T) {
 	reader := bytes.NewReader(data)
 
 	// test existing DBS API
-	req, err := http.NewRequest("POST", "/dbs2go/datatiers", reader)
+	rr, err := respRecorder("POST", "/dbs2go/datatiers", reader, web.DatatiersHandler)
 	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(web.LoggingHandler(web.DatatiersHandler))
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		t.Error(err)
 	}
 
 	// we should not receive anything with POST request
@@ -101,23 +107,11 @@ func TestHTTPPost(t *testing.T) {
 	}
 
 	// make GET request to get our data
-	req, err = http.NewRequest("GET", "/dbs2go/datatiers", nil)
+	rr, err = respRecorder("GET", "/dbs2go/datatiers", nil, web.DatatiersHandler)
 	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Add("Accept", "application/json")
-
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(web.LoggingHandler(web.DatatiersHandler))
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		t.Error(err)
 	}
 
-	// we should obtain the following output
-	// [{...}, {....}]
 	// unmarshal received records
 	var records []dbs.Record
 	data = rr.Body.Bytes()
@@ -167,39 +161,17 @@ func TestHTTPPut(t *testing.T) {
 	// test existing DBS API
 	endDate := 1616109166
 	rurl := fmt.Sprintf("/dbs2go/acquisitioneras?end_date=%d&acquisition_era_name=%s", endDate, era)
-	req, err := http.NewRequest("PUT", rurl, nil)
+	rr, err := respRecorder("PUT", rurl, nil, web.AcquisitionErasHandler)
 	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Add("Accept", "application/json")
-
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(web.LoggingHandler(web.AcquisitionErasHandler))
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		t.Error(err)
 	}
 
 	// make GET request to get our data
-	req, err = http.NewRequest("GET", "/dbs2go/acquisitioneras", nil)
+	rr, err = respRecorder("GET", "/dbs2go/acquisitioneras", nil, web.AcquisitionErasHandler)
 	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Add("Accept", "application/json")
-
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(web.LoggingHandler(web.AcquisitionErasHandler))
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		t.Error(err)
 	}
 
-	// we should obtain the following output
-	// [{...}, {....}]
 	// unmarshal received records
 	var records []dbs.Record
 	data = rr.Body.Bytes()
