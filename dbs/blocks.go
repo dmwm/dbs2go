@@ -216,7 +216,7 @@ type BlockRecord struct {
 
 // InsertBlocks DBS API
 func (API) InsertBlocks(r io.Reader, cby string) error {
-	// TODO: implement the following logic
+	// implement the following logic
 	// input values: blockname
 	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
 	// blkinput["dataset_id"] = self.datasetid.execute(conn,  ds_name, tran)
@@ -297,7 +297,23 @@ func (API) UpdateBlocks(params Record) error {
 	if v, ok := params["create_by"]; ok {
 		create_by = v.(string)
 	}
-	// TODO: validate input parameters
+
+	// validate input parameters
+	if blockName == "" {
+		return errors.New("invalid block_name parameter")
+	}
+	if create_by == "" {
+		return errors.New("invalid create_by parameter")
+	}
+	if site {
+		if origSiteName == "" {
+			return errors.New("invalid origin_site_name parameter")
+		}
+	} else {
+		if openForWriting < 0 || openForWriting > 1 {
+			return errors.New("invalid open_for_writing parameter")
+		}
+	}
 
 	var err error
 	var stm string
