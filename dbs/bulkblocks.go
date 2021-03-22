@@ -24,6 +24,8 @@ type BulkBlocks struct {
 	AcquisitionEra    AcquisitionEra  `json:"acquisition_era"`
 	Block             Block           `json:"block"`
 	FileParentList    []FileParent    `json:"file_parent_list"`
+	BlockParentList   []BlockParent   `json:"block_parent_list"`
+	DatasetParentList []DatasetParent `json:"dataset_parent_list"`
 }
 
 // DatasetConfig represents dataset config structure
@@ -119,6 +121,18 @@ type FileParent struct {
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 
+// BlockParent represents block parent structure
+type BlockParent struct {
+	ThisBlockID string `json:"this_block_id"`
+	ParentBlock string `json:"parent_block"`
+}
+
+// DatasetParent represents dataset parent structure
+type DatasetParent struct {
+	ThisDatasetID string `json:"this_dataset_id"`
+	ParentDataset string `json:"parent_dataset"`
+}
+
 // BulkBlocks DBS API
 // /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
 // /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
@@ -157,7 +171,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 
 	var reader *bytes.Reader
 	var api API
-	var isFileValid, datasetID, blockID, fileTypeID, branchHashID int64
+	var isFileValid, datasetID, blockID, fileID, fileTypeID, branchHashID int64
 	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
 	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
 	creationDate := time.Now().Unix()
@@ -403,6 +417,26 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 			log.Println("unable to insert File record", err)
 			return err
 		}
+		// insert file lumi list
+		fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", rrr.LogicalFileName)
+		if err != nil {
+			log.Println("unable to find block_id for", rec.Block.BlockName)
+			return err
+		}
+		for _, r := range rrr.FileLumiList {
+			fl := FileLumis{FILE_ID: fileID, RUN_NUM: r.RunNumber, LUMI_SECTION_NUM: r.LumiSectionNumber, EVENT_COUNT: rrr.EventCount}
+			data, err = json.Marshal(fl)
+			if err != nil {
+				log.Println("unable to marshal dataset file lumi list", err)
+				return err
+			}
+			reader = bytes.NewReader(data)
+			err = api.InsertFileLumisTx(tx, reader, cby)
+			if err != nil {
+				log.Println("unable to insert FileLumis record", err)
+				return err
+			}
+		}
 	}
 
 	// insert file configuration
@@ -433,8 +467,6 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 		}
 	}
 
-	// insert file lumi list
-	// insert file config object
 	// insert dataset parent list
 
 	// commit transaction
