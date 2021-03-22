@@ -1,9 +1,15 @@
 package dbs
 
 import (
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // BlockParents DBS API
@@ -27,24 +33,62 @@ func (API) BlockParents(params Record, w http.ResponseWriter) (int64, error) {
 	return executeAll(w, stm, args...)
 }
 
-// InsertBlockParents DBS API
-func (API) InsertBlockParents(r io.Reader, cby string) (int64, error) {
-	/*
-		args := make(Record)
-		args["Owner"] = DBOWNER
-		args["Query1"] = false
-		args["Query2"] = false
-		args["Query3"] = false
-		if _, ok := values["BlockName"]; ok {
-			args["Query1"] = true
-		}
-		if _, ok := values["ParentLogicalFileName"]; ok {
-			args["Query2"] = true
-		}
-		if _, ok := values["ParentBlockID"]; ok {
-			args["Query3"] = true
-		}
-		return InsertTemplateValues("insert_block_parents", args, values)
-	*/
-	return 0, nil
+// BlockParents
+type BlockParents struct {
+	THIS_BLOCK_ID   int64 `json:"this_block_id" validate:"required,number,gt=0"`
+	PARENT_BLOCK_ID int64 `json:"parent_block_id" validate:"required,number,gt=0"`
+}
+
+// Insert implementation of BlockParents
+func (r *BlockParents) Insert(tx *sql.Tx) error {
+	var err error
+	err = r.Validate()
+	if err != nil {
+		log.Println("unable to validate record", err)
+		return err
+	}
+	// get SQL statement from static area
+	stm := getSQL("insert_fileparents")
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert BlockParents\n%s\n%+v", stm, r)
+	}
+	_, err = tx.Exec(stm, r.THIS_BLOCK_ID, r.PARENT_BLOCK_ID)
+	return err
+}
+
+// Validate implementation of BlockParents
+func (r *BlockParents) Validate() error {
+	if err := RecordValidator.Struct(*r); err != nil {
+		return DecodeValidatorError(r, err)
+	}
+	if r.THIS_BLOCK_ID == 0 {
+		return errors.New("missing this_block_id")
+	}
+	if r.PARENT_BLOCK_ID == 0 {
+		return errors.New("missing parent_block_id")
+	}
+	return nil
+}
+
+// SetDefaults implements set defaults for BlockParents
+func (r *BlockParents) SetDefaults() {
+}
+
+// Decode implementation for BlockParents
+func (r *BlockParents) Decode(reader io.Reader) error {
+	// init record with given data record
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return err
+	}
+	err = json.Unmarshal(data, &r)
+
+	//     decoder := json.NewDecoder(r)
+	//     err := decoder.Decode(&rec)
+	if err != nil {
+		log.Println("fail to decode data", err)
+		return err
+	}
+	return nil
 }
