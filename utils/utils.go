@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"compress/gzip"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,6 +20,17 @@ var VERBOSE int
 var STATICDIR string
 var PROFILE bool
 var ORACLE bool
+
+// GzipReader struct to handle GZip'ed content of HTTP requests
+type GzipReader struct {
+	*gzip.Reader
+	io.Closer
+}
+
+// helper function to close gzip reader
+func (gz GzipReader) Close() error {
+	return gz.Closer.Close()
+}
 
 // RecordSize
 func RecordSize(v interface{}) (int64, error) {
