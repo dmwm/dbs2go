@@ -3,6 +3,7 @@ package web
 // handlers.go - provides handlers examples for dbs2go server
 
 import (
+	"compress/gzip"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -219,7 +220,20 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	} else if a == "blocks" {
 		err = api.InsertBlocks(r.Body, createBy(r))
 	} else if a == "bulkblocks" {
-		err = api.InsertBulkBlocks(r.Body, createBy(r))
+		// we'll delete content-length since gzip encoding will do its job
+		r.Header.Del("Content-Length")
+		if r.Header.Get("Content-Encoding") == "gzip" {
+			reader, err := gzip.NewReader(r.Body)
+			if err != nil {
+				log.Println("unable to get gzip reader", err)
+				size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+				return http.StatusInternalServerError, size, err
+			}
+			body := utils.GzipReader{reader, r.Body}
+			err = api.InsertBulkBlocks(body, createBy(r))
+		} else {
+			err = api.InsertBulkBlocks(r.Body, createBy(r))
+		}
 	} else if a == "files" {
 		err = api.InsertFiles(r.Body, createBy(r))
 	} else if a == "fileparents" {
