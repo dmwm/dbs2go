@@ -205,39 +205,39 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		dn, _ := r.Header["Cms-Authn-Dn"]
 		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
 	}
-	if a == "datatiers" {
-		err = api.InsertDataTiers(r.Body, createBy(r))
-	} else if a == "outputconfigs" {
-		err = api.InsertOutputConfigs(r.Body, createBy(r))
-	} else if a == "primarydatasets" {
-		err = api.InsertPrimaryDatasets(r.Body, createBy(r))
-	} else if a == "acquisitioneras" {
-		err = api.InsertAcquisitionEras(r.Body, createBy(r))
-	} else if a == "processingeras" {
-		err = api.InsertProcessingEras(r.Body, createBy(r))
-	} else if a == "datasets" {
-		err = api.InsertDatasets(r.Body, createBy(r))
-	} else if a == "blocks" {
-		err = api.InsertBlocks(r.Body, createBy(r))
-	} else if a == "bulkblocks" {
-		// we'll delete content-length since gzip encoding will do its job
+	cby := createBy(r)
+	body := r.Body
+	// handle gzip content encoding
+	if r.Header.Get("Content-Encoding") == "gzip" {
 		r.Header.Del("Content-Length")
-		if r.Header.Get("Content-Encoding") == "gzip" {
-			reader, err := gzip.NewReader(r.Body)
-			if err != nil {
-				log.Println("unable to get gzip reader", err)
-				size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-				return http.StatusInternalServerError, size, err
-			}
-			body := utils.GzipReader{reader, r.Body}
-			err = api.InsertBulkBlocks(body, createBy(r))
-		} else {
-			err = api.InsertBulkBlocks(r.Body, createBy(r))
+		reader, err := gzip.NewReader(r.Body)
+		if err != nil {
+			log.Println("unable to get gzip reader", err)
+			size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return http.StatusInternalServerError, size, err
 		}
+		body = utils.GzipReader{reader, r.Body}
+	}
+	if a == "datatiers" {
+		err = api.InsertDataTiers(body, cby)
+	} else if a == "outputconfigs" {
+		err = api.InsertOutputConfigs(body, cby)
+	} else if a == "primarydatasets" {
+		err = api.InsertPrimaryDatasets(body, cby)
+	} else if a == "acquisitioneras" {
+		err = api.InsertAcquisitionEras(body, cby)
+	} else if a == "processingeras" {
+		err = api.InsertProcessingEras(body, cby)
+	} else if a == "datasets" {
+		err = api.InsertDatasets(body, cby)
+	} else if a == "blocks" {
+		err = api.InsertBlocks(body, cby)
+	} else if a == "bulkblocks" {
+		err = api.InsertBulkBlocks(body, cby)
 	} else if a == "files" {
-		err = api.InsertFiles(r.Body, createBy(r))
+		err = api.InsertFiles(body, cby)
 	} else if a == "fileparents" {
-		err = api.InsertFileParents(r.Body, createBy(r))
+		err = api.InsertFileParents(body, cby)
 	}
 	if err != nil {
 		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
