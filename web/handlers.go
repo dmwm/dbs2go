@@ -156,6 +156,18 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// helper function to parse POST HTTP request payload
+func parsePayload(r *http.Request) (dbs.Record, error) {
+	defer r.Body.Close()
+	decoder := json.NewDecoder(r.Body)
+	params := make(dbs.Record)
+	err := decoder.Decode(&params)
+	if err != nil {
+		return nil, err
+	}
+	return params, nil
+}
+
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	params := make(dbs.Record)
@@ -201,6 +213,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	defer r.Body.Close()
 	var api dbs.API
 	var err error
+	var size int64
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
 		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
@@ -238,9 +251,44 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		err = api.InsertFiles(body, cby)
 	} else if a == "fileparents" {
 		err = api.InsertFileParents(body, cby)
+	} else if a == "datasetlist" {
+		params, err := parsePayload(r)
+		if err != nil {
+			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return http.StatusInternalServerError, size, err
+		}
+		size, err = api.DatasetList(params, w)
+	} else if a == "fileArray" {
+		params, err := parsePayload(r)
+		if err != nil {
+			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return http.StatusInternalServerError, size, err
+		}
+		size, err = api.FileArray(params, w)
+	} else if a == "fileparentsbylumi" {
+		params, err := parsePayload(r)
+		if err != nil {
+			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return http.StatusInternalServerError, size, err
+		}
+		size, err = api.FileParentsByLumi(params, w)
+	} else if a == "filelumis" {
+		params, err := parsePayload(r)
+		if err != nil {
+			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return http.StatusInternalServerError, size, err
+		}
+		size, err = api.FileLumis(params, w)
+	} else if a == "blockparents" {
+		params, err := parsePayload(r)
+		if err != nil {
+			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return http.StatusInternalServerError, size, err
+		}
+		size, err = api.BlockParents(params, w)
 	}
 	if err != nil {
-		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+		size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 		return http.StatusInternalServerError, size, err
 	}
 	return http.StatusOK, 0, nil
@@ -534,27 +582,6 @@ func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error
 func FileArrayHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSPostHandler(w, r, "fileArray")
 }
-
-// func FileArrayHandler(w http.ResponseWriter, r *http.Request) {
-//     log.Println("request", r)
-//     defer r.Body.Close()
-//     decoder := json.NewDecoder(r.Body)
-//     params := make(dbs.Record)
-//     err := decoder.Decode(&params)
-//     if err != nil {
-//         log.Println("FileArrayHandler error", err)
-//         w.WriteHeader(http.StatusInternalServerError)
-//         return
-//     }
-//     var api dbs.API
-//     size, err := api.FileArray(params, w)
-//     if err != nil {
-//         log.Println("FileArrayHandler error", err)
-//         w.WriteHeader(http.StatusInternalServerError)
-//         return
-//     }
-//     log.Println("size", size)
-// }
 
 // DatasteListHandler provides access to DatasetList DBS API
 // POST API takes no argument, the payload should be supplied as JSON
