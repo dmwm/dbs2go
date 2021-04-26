@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,27 +13,29 @@ import (
 func FlatLumis(val interface{}) ([]string, error) {
 	// expand input [[1, 20], [30, 40], [50, 60]]
 	// to 1,2,3..,20,30,31,..40,...
+	lumis := fmt.Sprintf("%v", val)
 	var out []string
-	switch lumis := val.(type) {
-	case string:
-		var r []int
-		err := json.Unmarshal([]byte(lumis), r)
+	var r []int
+	err := json.Unmarshal([]byte(lumis), &r)
+	if err == nil {
+		for _, v := range r {
+			out = append(out, fmt.Sprintf("%d", v))
+		}
+	} else {
+		var r [][]int
+		err := json.Unmarshal([]byte(lumis), &r)
 		if err != nil {
-			var r [][]int
-			err := json.Unmarshal([]byte(lumis), r)
-			if err == nil {
-				for _, v := range r {
-					if len(v) != 2 {
-						return out, errors.New("invalid range of lumis")
-					}
-					for i := v[0]; i < v[1]; i++ {
-						out = append(out, fmt.Sprintf("%d", i))
-					}
+			return out, err
+		}
+		for _, v := range r {
+			if len(v) == 2 {
+				for i := v[0]; i <= v[1]; i++ {
+					out = append(out, fmt.Sprintf("%d", i))
 				}
-			}
-		} else {
-			for _, v := range r {
-				out = append(out, fmt.Sprintf("%d", v))
+			} else {
+				for _, x := range v {
+					out = append(out, fmt.Sprintf("%d", x))
+				}
 			}
 		}
 	}
