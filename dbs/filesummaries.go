@@ -15,12 +15,14 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	tmpl["Valid"] = false
+	var wheresql_isFileValid, whererun string
 
 	validFileOnly := getValues(params, "validFileOnly")
 	if len(validFileOnly) == 1 {
 		tmpl["Valid"] = true
-		conds = append(conds, "f.is_file_valid = 1")
-		conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
+		wheresql_isFileValid = " and f.is_file_valid = 1 and DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION')"
+		//         conds = append(conds, "f.is_file_valid = 1")
+		//         conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
 	}
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
@@ -29,10 +31,11 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	if len(runs) > 0 {
 		token, runsCond, runsBinds := runsClause("fl", runs)
 		stm = fmt.Sprintf("%s %s", token, stm)
-		conds = append(conds, runsCond)
+		//         conds = append(conds, runsCond)
 		for _, v := range runsBinds {
 			args = append(args, v)
 		}
+		whererun = strings.Join(runsConds, " AND ")
 	}
 
 	block_name := getValues(params, "block_name")
@@ -57,12 +60,9 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		}
 	}
 	// replace whererun in stm
-	if strings.Contains(stm, "whererun") {
-		whererun := strings.Join(conds, " AND ")
-		stm = strings.Replace(stm, "whererun", whererun, -1)
-	} else {
-		stm = WhereClause(stm, conds)
-	}
+	stm = strings.Replace(stm, "whererun", whererun, -1)
+	stm = strings.Replace(stm, "wheresql_isFileValid", wheresql_isFileValid, -1)
+	//     stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
