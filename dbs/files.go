@@ -164,14 +164,15 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// check sumOverLumi
 	if sumOverLumi == "1" {
 		stm = strings.Replace(stm, "F.EVENT_COUNT,", "", -1)
+		stm = WhereClause(stm, conds)
 		tmpl["Statement"] = stm
 		stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
 		if err != nil {
 			return 0, err
 		}
+	} else {
+		stm = WhereClause(stm, conds)
 	}
-
-	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
