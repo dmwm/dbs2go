@@ -11,7 +11,7 @@ import (
 func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
 	var stm string
-	var conds []string
+	//     var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	tmpl["Valid"] = false
@@ -35,7 +35,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		for _, v := range runsBinds {
 			args = append(args, v)
 		}
-		whererun = strings.Join(runsConds, " AND ")
+		whererun = runsCond
 	}
 
 	block_name := getValues(params, "block_name")
