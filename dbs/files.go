@@ -56,7 +56,15 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl["LumiList"] = false
 	tmpl["Addition"] = false
 
-	lumis := getValues(params, "lumi_list")
+	lumiList := getValues(params, "lumi_list")
+	var lumis []string
+	var err error
+	if len(lumiList) == 1 {
+		lumis, err = FlatLumis(lumiList)
+		if err != nil {
+			return 0, err
+		}
+	}
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
 		return 0, err
@@ -150,7 +158,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 
 	// add lumis conditions
-	if len(lumis) > 1 {
+	if len(lumis) > 0 {
 		lumigen = true
 		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
