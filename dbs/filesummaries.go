@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // filesummaries API
@@ -39,9 +40,9 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		_, b := OperatorValue(block_name[0])
 		args = append(args, b, b, b, b, b) // pass 5 block values
 		if len(runs) > 0 {
-			stm = getSQL("filesummaries4block_run")
+			stm += getSQL("filesummaries4block_run")
 		} else {
-			stm = getSQL("filesummaries4block_norun")
+			stm += getSQL("filesummaries4block_norun")
 		}
 	}
 
@@ -50,12 +51,18 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		_, d := OperatorValue(dataset[0])
 		args = append(args, d, d, d, d, d) // pass 5 dataset values
 		if len(runs) > 0 {
-			stm = getSQL("filesummaries4dataset_run")
+			stm += getSQL("filesummaries4dataset_run")
 		} else {
-			stm = getSQL("filesummaries4dataset_norun")
+			stm += getSQL("filesummaries4dataset_norun")
 		}
 	}
-	stm = WhereClause(stm, conds)
+	// replace whererun in stm
+	if strings.Contains(stm, "whererun") {
+		whererun := strings.Join(conds, " AND ")
+		stm = strings.Replace(stm, "whererun", whererun, -1)
+	} else {
+		stm = WhereClause(stm, conds)
+	}
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
