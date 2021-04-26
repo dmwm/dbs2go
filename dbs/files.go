@@ -71,6 +71,8 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	// if no runs is given and asked for sumOverLumi there is no need to continue
 	if len(runs) == 0 && sumOverLumi == "1" {
+		// write empty result list and exit
+		w.Write([]byte("[]\n"))
 		return 0, nil
 	}
 
