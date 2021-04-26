@@ -43,16 +43,18 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		_, b := OperatorValue(block_name[0])
 		args = append(args, b, b, b, b, b) // pass 5 block values
 		if len(runs) > 0 {
-			stm, err = LoadTemplateSQL("filesummaries4block_run", tmpl)
-			if err != nil {
-				return 0, err
+			s, e := LoadTemplateSQL("filesummaries4block_run", tmpl)
+			if e != nil {
+				return 0, e
 			}
+			stm += s
 			//             stm += getSQL("filesummaries4block_run")
 		} else {
-			stm, err = LoadTemplateSQL("filesummaries4block_norun", tmpl)
-			if err != nil {
-				return 0, err
+			s, e := LoadTemplateSQL("filesummaries4block_norun", tmpl)
+			if e != nil {
+				return 0, e
 			}
+			stm += s
 			//             stm += getSQL("filesummaries4block_norun")
 		}
 	}
@@ -62,16 +64,18 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		_, d := OperatorValue(dataset[0])
 		args = append(args, d, d, d, d, d) // pass 5 dataset values
 		if len(runs) > 0 {
-			stm, err = LoadTemplateSQL("filesummaries4dataset_run", tmpl)
-			if err != nil {
-				return 0, err
+			s, e := LoadTemplateSQL("filesummaries4dataset_run", tmpl)
+			if e != nil {
+				return 0, e
 			}
+			stm += s
 			//             stm += getSQL("filesummaries4dataset_run")
 		} else {
-			stm, err = LoadTemplateSQL("filesummaries4dataset_norun", tmpl)
-			if err != nil {
-				return 0, err
+			s, e := LoadTemplateSQL("filesummaries4dataset_norun", tmpl)
+			if e != nil {
+				return 0, e
 			}
+			stm += s
 			//             stm += getSQL("filesummaries4dataset_norun")
 		}
 	}
