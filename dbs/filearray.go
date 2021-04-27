@@ -14,6 +14,11 @@ func FlatLumis(val interface{}) ([]string, error) {
 	// expand input [[1, 20], [30, 40], [50, 60]]
 	// to 1,2,3..,20,30,31,..40,...
 	lumis := fmt.Sprintf("%v", val)
+	if strings.Contains(lumis, "+") {
+		// input like %5B%5B1%2C+20%5D%2C+%5B30%2C+40%5D%2C+%5B50%2C+60%5D%5D
+		// [[1,+20],+[30,+40],+[50,+60]]
+		lumis = strings.Replace(lumis, "+", " ", -1)
+	}
 	if strings.Contains(lumis, " ") && !strings.Contains(lumis, ",") {
 		// input like [[1 20] [30 40]]
 		lumis = strings.Replace(lumis, " ", ",", -1)
