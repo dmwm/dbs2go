@@ -107,25 +107,6 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	return nil
 }
 
-// helper function
-func dbsError(w http.ResponseWriter, msg string) (int64, error) {
-	rec := make(Record)
-	rec["error"] = msg
-	var records []Record
-	records = append(records, rec)
-	data, err := json.Marshal(records)
-	if err != nil {
-		return 0, err
-	}
-	w.WriteHeader(http.StatusBadRequest)
-	w.Write(data)
-	size, err := utils.RecordSize(rec)
-	if err != nil {
-		return size, err
-	}
-	return size, errors.New(msg)
-}
-
 // helper function to load DBS SQL templated statements
 func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
