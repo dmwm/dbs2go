@@ -81,12 +81,13 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	stm = WhereClause(stm, conds)
 
-	// fix binding variables
-	for k, v := range params {
-		key := fmt.Sprintf(":%s", strings.ToLower(k))
-		if strings.Contains(stm, key) {
-			stm = strings.Replace(stm, key, "?", -1)
-			args = append(args, v)
+	// fix binding variables for SQLite
+	if DBOWNER == "sqlite" {
+		for k, _ := range params {
+			key := fmt.Sprintf(":%s", strings.ToLower(k))
+			if strings.Contains(stm, key) {
+				stm = strings.Replace(stm, key, "?", -1)
+			}
 		}
 	}
 
