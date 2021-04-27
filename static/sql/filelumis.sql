@@ -23,7 +23,7 @@ FROM {{.Owner}}.FILE_LUMIS FL JOIN {{.Owner}}.FILES F ON F.FILE_ID = FL.FILE_ID
 
 {{end}} {{/* end of validFileOnly block */}}
 
-{{else if .LfnList}}
+{{else}} {{/* else LfnList block */}}
 
 , F.LOGICAL_FILE_NAME as LOGICAL_FILE_NAME FROM {{.Owner}}.FILE_LUMIS FL JOIN {{.Owner}}.FILES F ON F.FILE_ID = FL.FILE_ID
 
