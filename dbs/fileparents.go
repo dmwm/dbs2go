@@ -20,7 +20,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return dbsError(w, msg)
+		return 0, errors.New(msg)
 	}
 
 	tmpl := make(Record)

@@ -13,7 +13,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
-		return dbsError(w, msg)
+		return 0, errors.New(msg)
 	}
 
 	// parse arguments
@@ -23,7 +23,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	if len(block) > 0 {
 		if strings.Contains(block[0], "*") {
 			msg := "wild-card block value is not allowed"
-			return dbsError(w, msg)
+			return 0, errors.New(msg)
 		}
 		var binds []string
 		genSQL, binds = TokenGenerator(block, 100, "block_token") // 100 is max for # of allowed datasets
@@ -43,7 +43,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
-			return dbsError(w, msg)
+			return 0, errors.New(msg)
 		}
 		_, val := OperatorValue(dataset[0])
 		if detailErr == nil {

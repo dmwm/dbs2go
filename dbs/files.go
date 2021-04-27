@@ -25,26 +25,27 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "Files API with empty parameter map"
-		return dbsError(w, msg)
+		return 0, errors.New(msg)
 	}
 	// When sumOverLumi=1, no lfn list or run_num list allowed
 	if _, ok := params["sumOverLumi"]; ok {
 		arr := getValues(params, "sumOverLumi")
 		if len(arr) != 1 {
-			return dbsError(w, "sumOverLumi has more than one value")
+			msg := "sumOverLumi has more than one value"
+			return 0, errors.New(msg)
 		}
 		sumOverLumi = arr[0]
 		if vals, ok := params["run_num"]; ok {
 			runs := fmt.Sprintf("%v", vals)
 			if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
 				msg := "When sumOverLumi=1, no run_num list allowed"
-				return dbsError(w, msg)
+				return 0, errors.New(msg)
 			}
 		} else if vals, ok := params["logical_file_name"]; ok {
 			lfns := fmt.Sprintf("%v", vals)
 			if strings.Contains(lfns, ",") {
 				msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
-				return dbsError(w, msg)
+				return 0, errors.New(msg)
 			}
 		}
 	}
@@ -80,14 +81,16 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// if no runs is given and asked for sumOverLumi there is no need to continue
 	if len(runs) == 0 && sumOverLumi == "1" {
 		// write empty result list and exit
-		w.Write([]byte("[]\n"))
-		return 0, nil
+		//         w.Write([]byte("[]\n"))
+		//         return 0, nil
+		msg := "files API does not support sumOverLumi if run_num is not provided"
+		return 0, errors.New(msg)
 	}
 
 	// files API does not supprt run_num=1 when no lumi
 	if len(runs) == 1 && len(lumis) == 0 && runs[0] == "1" {
-		msg := "files API does not supprt run_num=1 when no lumi"
-		return dbsError(w, msg)
+		msg := "files API does not support run_num=1 when no lumi"
+		return 0, errors.New(msg)
 	}
 
 	validFileOnly := getValues(params, "validFileOnly")
@@ -174,7 +177,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	if (rungen && lfngen) || (lumigen && lfngen) || (rungen && lumigen) {
 		msg := "cannot supply more than one list (lfn, run_num or lumi) at one query"
-		return dbsError(w, msg)
+		return 0, errors.New(msg)
 	}
 
 	// check sumOverLumi

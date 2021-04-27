@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,7 +17,7 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return dbsError(w, msg)
+		return 0, errors.New(msg)
 	}
 
 	blocks := getValues(params, "block_name")

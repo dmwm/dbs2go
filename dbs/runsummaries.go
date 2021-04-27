@@ -30,7 +30,7 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
-			return dbsError(w, msg)
+			return 0, errors.New(msg)
 		}
 		tmpl["Dataset"] = true
 		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)

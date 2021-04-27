@@ -2,9 +2,9 @@ package dbs
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -53,14 +53,13 @@ func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 	if lumis, ok := params["lumi_list"]; ok {
 		lumiList, err := FlatLumis(lumis)
 		if err != nil {
-			log.Println("filearray lumi_list parse error", err)
 			return 0, err
 		}
 		params["lumi_list"] = lumiList
 	}
 	if len(params) == 0 {
 		msg := "filearray api requires input parameers"
-		return dbsError(w, msg)
+		return 0, errors.New(msg)
 	}
 	// When sumOverLumi=1, no input can be a list becaue nesting of WITH clause within WITH clause not supported yet by Oracle
 	if _, ok := params["sumOverLumi"]; ok {
@@ -68,12 +67,12 @@ func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 			vals := fmt.Sprintf("%v", runs)
 			if strings.Contains(vals, "[") {
 				msg := "When sumOverLumi=1, no input can be a list becaue nesting of WITH clause within WITH clause not supported yet by Oracle"
-				return dbsError(w, msg)
+				return 0, errors.New(msg)
 			}
 		}
 		if _, ok := params["lumi_list"]; ok {
 			msg := "When sumOverLumi=1, no input can be a list becaue nesting of WITH clause within WITH clause not supported yet by Oracle"
-			return dbsError(w, msg)
+			return 0, errors.New(msg)
 		}
 	}
 	return api.Files(params, w)
