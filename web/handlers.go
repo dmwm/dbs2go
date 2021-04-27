@@ -35,7 +35,6 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 		start := time.Now()
 		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
 		status, dataSize, err := h(w, r)
-		//         w.WriteHeader(status)
 		if err != nil {
 			uri, e := url.QueryUnescape(r.RequestURI)
 			if e != nil {
@@ -50,11 +49,13 @@ func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
 
 // responseMsg helper function to provide response to end-user
 func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
+	var out []dbs.Record
 	rec := make(dbs.Record)
 	rec["error"] = msg
 	rec["api"] = api
 	rec["method"] = r.Method
-	data, _ := json.Marshal(rec)
+	out = append(out, rec)
+	data, _ := json.Marshal(out)
 	w.WriteHeader(code)
 	w.Write(data)
 	return int64(len(data))
@@ -214,6 +215,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	var api dbs.API
 	var err error
 	var size int64
+	var params dbs.Record
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
 		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
@@ -252,35 +254,35 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	} else if a == "fileparents" {
 		err = api.InsertFileParents(body, cby)
 	} else if a == "datasetlist" {
-		params, err := parsePayload(r)
+		params, err = parsePayload(r)
 		if err != nil {
 			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return http.StatusInternalServerError, size, err
 		}
 		size, err = api.DatasetList(params, w)
 	} else if a == "fileArray" {
-		params, err := parsePayload(r)
+		params, err = parsePayload(r)
 		if err != nil {
 			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return http.StatusInternalServerError, size, err
 		}
 		size, err = api.FileArray(params, w)
 	} else if a == "fileparentsbylumi" {
-		params, err := parsePayload(r)
+		params, err = parsePayload(r)
 		if err != nil {
 			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return http.StatusInternalServerError, size, err
 		}
 		size, err = api.FileParentsByLumi(params, w)
 	} else if a == "filelumis" {
-		params, err := parsePayload(r)
+		params, err = parsePayload(r)
 		if err != nil {
 			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return http.StatusInternalServerError, size, err
 		}
 		size, err = api.FileLumis(params, w)
 	} else if a == "blockparents" {
-		params, err := parsePayload(r)
+		params, err = parsePayload(r)
 		if err != nil {
 			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return http.StatusInternalServerError, size, err
