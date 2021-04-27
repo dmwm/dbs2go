@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -519,13 +520,30 @@ func ParseRuns(runs []string) ([]string, error) {
 		if matched := intPattern.MatchString(v); matched {
 			out = append(out, v)
 		} else if matched := runRangePattern.MatchString(v); matched {
-			out = append(out, v)
+			arr := strings.Split(v, "-")
+			if len(arr) != 2 {
+				msg := fmt.Sprintf("fail to parse run-range '%s'", v)
+				return out, errors.New(msg)
+			}
+			minValR := strings.Trim(arr[0], " ")
+			minR, err := strconv.Atoi(minValR)
+			if err != nil {
+				return out, err
+			}
+			maxValR := strings.Trim(arr[1], " ")
+			maxR, err := strconv.Atoi(maxValR)
+			if err != nil {
+				return out, err
+			}
+			for r := minR; r <= maxR; r++ {
+				out = append(out, fmt.Sprintf("%d", r))
+			}
 		} else if strings.HasPrefix(v, "[") && strings.HasSuffix(v, "]") {
 			runs := strings.Replace(v, "[", "", -1)
 			runs = strings.Replace(runs, "]", "", -1)
 			for _, r := range strings.Split(runs, ",") {
 				run := strings.Trim(r, " ")
-				log.Println("input", r)
+				//                 log.Println("input", r)
 				out = append(out, run)
 			}
 		} else {

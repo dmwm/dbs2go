@@ -52,14 +52,15 @@ func TestDBSOperatorValue(t *testing.T) {
 
 // TestDBSUtilParseRuns
 func TestDBSUtilParseRuns(t *testing.T) {
-	input := []string{"1", "11-22", "3", "4"}
+	input := []string{"1", "11-12", "3", "4"}
 	runs, err := dbs.ParseRuns(input)
-	if len(runs) != 4 {
+	if len(runs) != 5 {
 		t.Error("fail to parse runs input", input, runs)
 	}
 	if err != nil {
 		t.Error(err)
 	}
+	log.Println("test input runs", input, "parsed runs", runs)
 	//     fmt.Printf("runs input %+v, parsed runs %+v\n", input, runs)
 	input = []string{"1a", "11-22", "3", "4"}
 	runs, err = dbs.ParseRuns(input)
