@@ -41,12 +41,15 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(lfns) == 1 {
 		tmpl["Lfn"] = true
 		tmpl["LfnList"] = false
+		conds = append(conds, "F.LOGICAL_FILE_NAME = :logical_file_name")
 		args = append(args, lfns[0])
 	}
 
 	validFileOnly := getValues(params, "validFileOnly")
 	if len(validFileOnly) == 1 {
 		tmpl["ValidFileOnly"] = true
+		conds = append(conds, "F.IS_FILE_VALID = 1")
+		conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
 	}
 
 	blocks := getValues(params, "block_name")
@@ -86,6 +89,8 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	}
+
+	log.Println("### filelumis args", args)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
