@@ -14,6 +14,10 @@ func FlatLumis(val interface{}) ([]string, error) {
 	// expand input [[1, 20], [30, 40], [50, 60]]
 	// to 1,2,3..,20,30,31,..40,...
 	lumis := fmt.Sprintf("%v", val)
+	if strings.Contains(lumis, " ") && !strings.Contains(lumis, ",") {
+		// input like [[1 20] [30 40]]
+		lumis = strings.Replace(lumis, " ", ",", -1)
+	}
 	var out []string
 	var r []int
 	err := json.Unmarshal([]byte(lumis), &r)
@@ -45,11 +49,11 @@ func FlatLumis(val interface{}) ([]string, error) {
 // FileArray DBS API
 func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 	// perform some data preprocessing on given record
-	log.Printf("FileArray data %+v", params)
 	// flat out lumi_list
 	if lumis, ok := params["lumi_list"]; ok {
 		lumiList, err := FlatLumis(lumis)
 		if err != nil {
+			log.Println("filearray lumi_list parse error", err)
 			return 0, err
 		}
 		params["lumi_list"] = lumiList
