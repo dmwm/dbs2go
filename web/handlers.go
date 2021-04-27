@@ -54,6 +54,8 @@ func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code i
 	rec["error"] = msg
 	rec["api"] = api
 	rec["method"] = r.Method
+	rec["exception"] = code
+	rec["type"] = "HTTPError"
 	out = append(out, rec)
 	data, _ := json.Marshal(out)
 	w.WriteHeader(code)
@@ -290,8 +292,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		size, err = api.BlockParents(params, w)
 	}
 	if err != nil {
-		size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-		return http.StatusInternalServerError, size, err
+		size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		return http.StatusBadRequest, size, err
 	}
 	return http.StatusOK, 0, nil
 }
@@ -368,8 +370,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
 	if err != nil {
-		size := responseMsg(w, r, "DBSGetHandler", a, http.StatusInternalServerError)
-		return http.StatusInternalServerError, size, err
+		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		return http.StatusBadRequest, size, err
 	}
 	return status, size, nil
 }
