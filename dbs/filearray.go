@@ -23,6 +23,10 @@ func FlatLumis(val interface{}) ([]string, error) {
 		// input like [[1 20] [30 40]]
 		lumis = strings.Replace(lumis, " ", ",", -1)
 	}
+	if strings.HasPrefix(lumis, "[[[") {
+		lumis = strings.Replace(lumis, "[[[", "[[", -1)
+		lumis = strings.Replace(lumis, "]]]", "]]", -1)
+	}
 	var out []string
 	var r []int
 	err := json.Unmarshal([]byte(lumis), &r)
