@@ -191,9 +191,14 @@ func getValues(params Record, key string) []string {
 			return v
 		case string:
 			return []string{v}
+		case interface{}:
+			return []string{fmt.Sprintf("%v", v)}
+		case []interface{}:
+			for _, val := range v {
+				out = append(out, fmt.Sprintf("%v", val))
+			}
+			return out
 		}
-		//         values := val.([]string)
-		//         return values
 	}
 	return out
 }
