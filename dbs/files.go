@@ -153,11 +153,12 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if len(runs) > 1 {
 		rungen = true
 		token, whereRuns, bindsRuns := runsClause("FL", runs)
-		stm = fmt.Sprintf("%s %s", token, stm)
+//         stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, whereRuns)
 		for _, v := range bindsRuns {
 			args = append(args, v)
 		}
+		tmpl["TokenGenerator"] = token
 	} else if len(runs) == 1 {
 		conds, args = AddParam("run_num", "FL.RUN_NUM", params, conds, args)
 	}
@@ -166,13 +167,14 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if len(lumis) > 0 {
 		lumigen = true
 		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
-		stm = fmt.Sprintf("%s %s", token, stm)
+//         stm = fmt.Sprintf("%s %s", token, stm)
 		cond := " FL.LUMI_SECTION_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)"
 		conds = append(conds, cond)
 		for _, v := range binds {
 			args = append(args, v)
 		}
-		tmpl["LumiGenerator"] = token
+//         tmpl["LumiGenerator"] = token
+		tmpl["TokenGenerator"] = token
 	} else if len(lumis) == 1 {
 		conds, args = AddParam("lumi_list", "FL.LUMI_SECTION_NUM", params, conds, args)
 	}
