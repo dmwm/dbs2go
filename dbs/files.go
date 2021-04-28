@@ -40,7 +40,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 			if vals, ok := params["run_num"]; ok {
 				runs := fmt.Sprintf("%v", vals)
 				if sumOverLumi == "1" {
-					if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
+					if strings.Contains(runs, ",") || strings.Contains(runs, "-") || strings.Contains(runs, "[") {
 						runList = true
 						//                         msg := "When sumOverLumi=1, no run_num list is allowed"
 						//                         return 0, errors.New(msg)
