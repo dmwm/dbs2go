@@ -193,7 +193,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 
 	// check sumOverLumi
-	if sumOverLumi == "1" {
+	if len(runs) > 0 && sumOverLumi == "1" {
 		stm = strings.Replace(stm, "F.EVENT_COUNT,", "", -1)
 		stm = WhereClause(stm, conds)
 		tmpl["Statement"] = stm
