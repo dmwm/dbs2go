@@ -15,17 +15,16 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 
-	runs := getValues(params, "run_num")
+	//     runs := getValues(params, "run_num")
 	lfn := getValues(params, "logical_file_name")
 	block := getValues(params, "block_name")
 	dataset := getValues(params, "dataset")
+	runs, err := ParseRuns(getValues(params, "run_num"))
+	if err != nil {
+		return 0, err
+	}
 
-	if len(runs) > 1 {
-		msg := "The runs API does not support list of runs"
-		return 0, errors.New(msg)
-	} else if len(runs) == 1 {
-		conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
-	} else if len(lfn) == 1 {
+	if len(lfn) == 1 {
 		tmpl["Lfn"] = true
 		conds, args = AddParam("logical_file_name", "FILES.LOGICAL_FILE_NAME", params, conds, args)
 	} else if len(block) == 1 {
@@ -42,6 +41,18 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	stm, err := LoadTemplateSQL("runs", tmpl)
 	if err != nil {
 		return 0, err
+	}
+	if len(runs) > 1 {
+		//         msg := "The runs API does not support list of runs"
+		//         return 0, errors.New(msg)
+		token, whereRuns, bindsRuns := runsClause("FL", runs)
+		stm = fmt.Sprintf("%s %s", token, stm)
+		conds = append(conds, whereRuns)
+		for _, v := range bindsRuns {
+			args = append(args, v)
+		}
+	} else if len(runs) == 1 {
+		conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
 	}
 	stm = WhereClause(stm, conds)
 
