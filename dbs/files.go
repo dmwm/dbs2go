@@ -81,13 +81,10 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 
 	// if no runs is given and asked for sumOverLumi there is no need to continue
-	if len(runs) == 0 && sumOverLumi == "1" {
-		// write empty result list and exit
-		//         w.Write([]byte("[]\n"))
-		//         return 0, nil
-		msg := "files API does not support sumOverLumi if run_num is not provided"
-		return 0, errors.New(msg)
-	}
+	//     if len(runs) == 0 && sumOverLumi == "1" {
+	//         msg := "files API does not support sumOverLumi if run_num is not provided"
+	//         return 0, errors.New(msg)
+	//     }
 
 	// files API does not supprt run_num=1 when no lumi
 	if len(runs) == 1 && len(lumis) == 0 && runs[0] == "1" {
