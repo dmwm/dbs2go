@@ -22,6 +22,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var conds []string
 	var lumigen, rungen, lfngen bool
 	var sumOverLumi string
+	var runList, lfnList bool
 
 	if len(params) == 0 {
 		msg := "Files API with empty parameter map"
@@ -40,15 +41,18 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 				runs := fmt.Sprintf("%v", vals)
 				if sumOverLumi == "1" {
 					if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
-						msg := "When sumOverLumi=1, no run_num list is allowed"
-						return 0, errors.New(msg)
+						runList = true
+						//                         msg := "When sumOverLumi=1, no run_num list is allowed"
+						//                         return 0, errors.New(msg)
 					}
 				}
-			} else if vals, ok := params["logical_file_name"]; ok {
+			}
+			if vals, ok := params["logical_file_name"]; ok {
 				lfns := fmt.Sprintf("%v", vals)
 				if strings.Contains(lfns, ",") {
-					msg := "When sumOverLumi=1, no lfn list list is allowed"
-					return 0, errors.New(msg)
+					lfnList = true
+					//                     msg := "When sumOverLumi=1, no lfn list list is allowed"
+					//                     return 0, errors.New(msg)
 				}
 			}
 		}
@@ -191,6 +195,11 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	if (rungen && lfngen) || (lumigen && lfngen) || (rungen && lumigen) {
 		msg := "cannot supply more than one list (lfn, run_num or lumi) at one query"
+		return 0, errors.New(msg)
+	}
+
+	if sumOverLumi == "1" && (runList || lfnList) {
+		msg := "When sumOverLumi=1, no lfn list or run_num list is allowed"
 		return 0, errors.New(msg)
 	}
 
