@@ -17,10 +17,14 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 	tmpl["Owner"] = DBOWNER
 	tmpl["ChildLfnList"] = false
 
-	blockName := getValues(params, "block_name")
-	if len(blockName) == 0 {
+	blockNames := getValues(params, "block_name")
+	if len(blockNames) == 0 {
 		return 0, errors.New("Missing block_name for listFileParentssByLumi")
 	}
+	blk := blockNames[0]
+	dataset := strings.Split(blk, "#")[0]
+	args = append(args, dataset)
+	args = append(args, blk)
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
