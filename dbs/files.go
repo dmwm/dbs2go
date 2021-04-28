@@ -35,21 +35,21 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 			return 0, errors.New(msg)
 		}
 		sumOverLumi = arr[0]
-		if vals, ok := params["run_num"]; ok {
-			runs := fmt.Sprintf("%v", vals)
-			//             if sumOverLumi == "1" {
-			//                 if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
-			//                     msg := "When sumOverLumi=1, no run_num list allowed"
-			//                     return 0, errors.New(msg)
-			//                 }
-			//             }
-		} else if vals, ok := params["logical_file_name"]; ok {
-			lfns := fmt.Sprintf("%v", vals)
-			//             if strings.Contains(lfns, ",") {
-			//                 msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
-			//                 return 0, errors.New(msg)
-			//             }
-		}
+		//         if vals, ok := params["run_num"]; ok {
+		//             runs := fmt.Sprintf("%v", vals)
+		//             if sumOverLumi == "1" {
+		//                 if strings.Contains(runs, ",") || strings.Contains(runs, "-") {
+		//                     msg := "When sumOverLumi=1, no run_num list allowed"
+		//                     return 0, errors.New(msg)
+		//                 }
+		//             }
+		//         } else if vals, ok := params["logical_file_name"]; ok {
+		//             lfns := fmt.Sprintf("%v", vals)
+		//             if strings.Contains(lfns, ",") {
+		//                 msg := "When sumOverLumi=1, no lfn list or run_num list allowed"
+		//                 return 0, errors.New(msg)
+		//             }
+		//         }
 	}
 
 	tmpl := make(Record)
