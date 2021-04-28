@@ -1,4 +1,3 @@
-{{.TokenGenerator}}
 with myfiles as (
     {{.Statement}}
 ) select mf.* ,
@@ -9,6 +8,7 @@ with myfiles as (
      from myfiles mf,
 {{if .LumiList}}
 {{.LumiGenerator}}
+{{.TokenGenerator}}
           (
             select sum(fl.event_count) as event_count, fl.file_id, fl.run_num
             from {{.Owner}}.file_lumis fl
@@ -17,6 +17,7 @@ with myfiles as (
             group by fl.file_id, fl.run_num
           ) mc,
 {{else}}
+{{.TokenGenerator}}
           (
             select sum(fl.event_count) as event_count, fl.file_id, fl.run_num
             from {{.Owner}}.file_lumis fl

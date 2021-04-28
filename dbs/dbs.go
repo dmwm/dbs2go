@@ -283,7 +283,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		msg := fmt.Sprintf("unable to query statement=%v error=%v", stm, err)
+		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		return 0, errors.New(msg)
 	}
 	defer rows.Close()
