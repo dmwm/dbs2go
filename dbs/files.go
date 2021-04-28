@@ -103,10 +103,13 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 			conds = append(conds, cond)
 			cond = "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION')"
 			conds = append(conds, cond)
-		} else if val == "0" {
+		} else {
 			cond := "F.IS_FILE_VALID <> -1"
 			conds = append(conds, cond)
 		}
+	} else {
+		cond := "F.IS_FILE_VALID <> -1"
+		conds = append(conds, cond)
 	}
 
 	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
@@ -152,13 +155,20 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// add run conditions
 	if len(runs) > 1 {
 		rungen = true
-		token, whereRuns, bindsRuns := runsClause("FL", runs)
-		//         stm = fmt.Sprintf("%s %s", token, stm)
-		conds = append(conds, whereRuns)
-		for _, v := range bindsRuns {
-			args = append(args, v)
-		}
-		tmpl["TokenGenerator"] = token
+		minR := runs[0]
+		maxR := runs[len(runs)-1]
+		cond := " FL.RUN_NUM  between :minrun0 and :maxrun0 "
+		conds = append(conds, cond)
+		args = append(args, minR)
+		args = append(args, maxR)
+		/*
+			token, whereRuns, bindsRuns := runsClause("FL", runs)
+			//         stm = fmt.Sprintf("%s %s", token, stm)
+			conds = append(conds, whereRuns)
+			for _, v := range bindsRuns {
+				args = append(args, v)
+			}
+		*/
 	} else if len(runs) == 1 {
 		conds, args = AddParam("run_num", "FL.RUN_NUM", params, conds, args)
 	}
@@ -173,8 +183,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		for _, v := range binds {
 			args = append(args, v)
 		}
-		//         tmpl["LumiGenerator"] = token
-		tmpl["TokenGenerator"] = token
+		tmpl["LumiGenerator"] = token
 	} else if len(lumis) == 1 {
 		conds, args = AddParam("lumi_list", "FL.LUMI_SECTION_NUM", params, conds, args)
 	}
