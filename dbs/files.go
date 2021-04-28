@@ -174,10 +174,12 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	}
 
 	// add lumis conditions
-	if len(lumis) > 0 {
+	if len(lumis) > 1 {
 		lumigen = true
 		token, binds := TokenGenerator(lumis, 4000, "lumis_token")
-		//         stm = fmt.Sprintf("%s %s", token, stm)
+		if sumOverLumi != "1" {
+			stm = fmt.Sprintf("%s %s", token, stm)
+		}
 		cond := " FL.LUMI_SECTION_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)"
 		conds = append(conds, cond)
 		for _, v := range binds {
