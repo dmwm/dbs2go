@@ -218,3 +218,17 @@ func ConvertFloat(val string) string {
 	}
 	return val
 }
+
+// helper function to print SQL/args
+func PrintSQL(stm string, args []interface{}, msg string) {
+	if msg != "" {
+		log.Println(msg)
+	} else {
+		log.Println("")
+	}
+	fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+	fmt.Printf("### SQL arguments ###\n")
+	for _, v := range args {
+		fmt.Printf("\t'%v'\n", v)
+	}
+}
