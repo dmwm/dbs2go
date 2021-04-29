@@ -12,6 +12,8 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strconv"
+	"strings"
 )
 
 // global variable for this module which we're going to use across
@@ -201,4 +203,18 @@ func ReplaceBinds(stm string) string {
 	}
 	match := regexp.ReplaceAllString(stm, "?")
 	return match
+}
+
+// helper function to convert string representation of float scientific number to string int
+func ConvertFloat(val string) string {
+	if strings.Contains(val, "e+") || strings.Contains(val, "E+") {
+		// we got float number, should be converted to int
+		v, e := strconv.ParseFloat(val, 64)
+		if e != nil {
+			log.Println("unable to convert", val, " to float, error", e)
+			return val
+		}
+		return strings.Split(fmt.Sprintf("%f", v), ".")[0]
+	}
+	return val
 }
