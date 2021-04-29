@@ -260,11 +260,11 @@ func CleanStatement(stm string) string {
 func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, error) {
 	stm = CleanStatement(stm)
 	if DRYRUN {
-		log.Printf("\n### SQL statement ###\n%s\n### SQL arguments ###\n%+v", stm, args)
+		utils.PrintSQL(stm, args, "")
 		return 0, nil
 	}
 	if utils.VERBOSE > 1 {
-		log.Println("execute\n### SQL statement ###\n", stm, "\n### SQL arguments ###\n", args)
+		utils.PrintSQL(stm, args, "execute")
 	}
 	var size int64
 	var enc *json.Encoder
@@ -365,11 +365,11 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) (int64, error) {
 	stm = CleanStatement(stm)
 	if DRYRUN {
-		log.Printf("\n### SQL statement ###\n%s\n### SQL arguments ###\n%+v", stm, args)
+		utils.PrintSQL(stm, args, "")
 		return 0, nil
 	}
 	if utils.VERBOSE > 1 {
-		log.Println("execute\n### SQL statement ###\n", stm, "\n### SQL arguments ###\n", args)
+		utils.PrintSQL(stm, args, "execute")
 	}
 	var size int64
 	var enc *json.Encoder
@@ -618,6 +618,10 @@ func runsClause(table string, runs []string) (string, string, []string) {
 		} else { // plain run numbers we store to run list
 			runList = append(runList, r)
 		}
+	}
+	if len(args) > 0 {
+		where = fmt.Sprintf("( %s )", strings.Join(conds, " OR "))
+		return "", where, args
 	}
 	// take run list and generate token statement
 	stm := fmt.Sprintf("%s.RUN_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)", table)
