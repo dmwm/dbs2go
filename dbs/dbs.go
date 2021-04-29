@@ -572,7 +572,7 @@ func TokenGenerator(runs []string, limit int, name string) (string, []string) {
 		vals = append(vals, chunk)
 	}
 	stm += strings.Join(tstm, " UNION ALL ")
-	stm += "\n)"
+	stm += "\n)\n"
 	return stm, vals
 }
 
@@ -635,6 +635,9 @@ func AddParam(name, sqlName string, params Record, conds []string, args []interf
 	vals := getValues(params, name)
 	if len(vals) == 1 {
 		op, val := OperatorValue(vals[0])
+		if strings.Contains(val, "e+") || strings.Contains(val, "E+") {
+			val = utils.ConvertFloat(val)
+		}
 		if strings.Contains(val, "[") {
 			val = strings.Replace(val, "[", "", -1)
 			val = strings.Replace(val, "]", "", -1)
