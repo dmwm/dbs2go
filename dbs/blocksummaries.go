@@ -67,6 +67,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, val)
 		} else {
 			stm = getSQL("blocksummaries4dataset_detail")
+			args = append(args, val)
 		}
 	}
 	// use generic query API to fetch the results from DB
