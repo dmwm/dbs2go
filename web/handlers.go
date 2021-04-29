@@ -264,6 +264,9 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		size, err = api.DatasetList(params, w)
 	} else if a == "fileArray" {
 		params, err = parsePayload(r)
+		if utils.VERBOSE > 1 {
+			log.Printf("fileArray payload: %+v", params)
+		}
 		if err != nil {
 			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return http.StatusInternalServerError, size, err
