@@ -1,3 +1,4 @@
+
 select
     b.block_name as block_name,
     b.file_count as num_file,
@@ -9,8 +10,6 @@ from
     (
         select bs.block_name as block_name,
         NVL(sum(fs.event_count),0) as num_event
-        from
-        {{.Owner}}.files fs
         FROM {{.Owner}}.FILES FS
         JOIN {{.Owner}}.BLOCKS BS ON BS.BLOCK_ID=FS.BLOCK_ID
         WHERE BS.BLOCK_NAME IN (SELECT TOKEN FROM TOKEN_GENERATOR)

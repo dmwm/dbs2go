@@ -1,3 +1,4 @@
+
 SELECT (
     SELECT NVL(SUM(BS.BLOCK_SIZE),0)
     FROM {{.Owner}}.BLOCKS BS
