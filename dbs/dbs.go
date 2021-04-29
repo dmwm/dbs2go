@@ -690,3 +690,83 @@ func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 	}
 	return pid.Int64, nil
 }
+
+// RunsConditions function to handle runs conditions
+func RunsConditions(runs []string, table string) (string, []string, []interface{}, error) {
+	var args []interface{}
+	var conds []string
+	var token string
+
+	if len(runs) > 1 {
+		var runList []string
+		for _, rrr := range runs {
+			pruns, e := ParseRuns([]string{rrr})
+			if e != nil {
+				msg := "unable to parse runs input"
+				return token, conds, args, errors.New(msg)
+			}
+			for _, v := range pruns {
+				runList = append(runList, v)
+			}
+		}
+		tok, whereRuns, bindsRuns := runsClause(table, runList)
+		token = tok
+		conds = append(conds, whereRuns)
+		for _, v := range bindsRuns {
+			args = append(args, v)
+		}
+	} else if len(runs) == 1 {
+		if strings.Contains(runs[0], "[") || strings.Contains(runs[0], "'") { // ['97-99']
+			rrr := strings.Replace(runs[0], "[", "", -1)
+			rrr = strings.Replace(rrr, "]", "", -1)
+			rrr = strings.Replace(rrr, "'", "", -1)
+			if strings.Contains(rrr, "-") {
+				r := strings.Split(rrr, "-")
+				minR := r[0]
+				maxR := r[len(r)-1]
+				cond := fmt.Sprintf(" %s.RUN_NUM  between :minrun0 and :maxrun0 ", table)
+				conds = append(conds, cond)
+				args = append(args, minR)
+				args = append(args, maxR)
+			} else {
+				tok, whereRuns, bindsRuns := runsClause(table, []string{rrr})
+				token = tok
+				conds = append(conds, whereRuns)
+				for _, v := range bindsRuns {
+					args = append(args, v)
+				}
+			}
+		} else if strings.Contains(runs[0], " ") || strings.Contains(runs[0], "-") { // [97-99 200 ...]
+			var runList []string
+			for _, rrr := range strings.Split(runs[0], " ") {
+				pruns, e := ParseRuns([]string{rrr})
+				if e != nil {
+					msg := "unable to parse runs input"
+					return token, conds, args, errors.New(msg)
+				}
+				for _, v := range pruns {
+					runList = append(runList, v)
+				}
+			}
+			tok, whereRuns, bindsRuns := runsClause(table, runList)
+			token = tok
+			conds = append(conds, whereRuns)
+			for _, v := range bindsRuns {
+				args = append(args, v)
+			}
+		} else if strings.Contains(runs[0], "-") {
+			rrr := strings.Split(runs[0], "-")
+			minR := rrr[0]
+			maxR := rrr[len(rrr)-1]
+			cond := fmt.Sprintf(" %s.RUN_NUM  between :minrun0 and :maxrun0 ", table)
+			conds = append(conds, cond)
+			args = append(args, minR)
+			args = append(args, maxR)
+		} else {
+			cond := fmt.Sprintf(" %s.RUN_NUM = :run_num ", table)
+			conds = append(conds, cond)
+			args = append(args, runs[0])
+		}
+	}
+	return token, conds, args, nil
+}

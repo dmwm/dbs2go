@@ -282,3 +282,16 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 		}
 	}
 }
+
+// TestDBSRunsConditions
+func TestDBSRunsConditions(t *testing.T) {
+	// run_num=97
+	// run_num=97-99
+	// run_num=[97]
+	// run_num=[97-99]
+	// run_num=['97']
+	// run_num=['97-99']
+	// run_num=['97-99', 200, 300]
+	// run_num="['97-99', 200, 300]"
+	// run_num="['97-99' 200 300]"
+}
