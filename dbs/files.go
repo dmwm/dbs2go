@@ -158,16 +158,20 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		conds = append(conds, cond)
 		args = append(args, minR)
 		args = append(args, maxR)
-		/*
-			token, whereRuns, bindsRuns := runsClause("FL", runs)
-			//         stm = fmt.Sprintf("%s %s", token, stm)
+	} else if len(runs) == 1 {
+		if strings.Contains(runs[0], "[") || strings.Contains(runs[0], "'") { // ['97-99']
+			rrr := strings.Replace(runs[0], "[", "", -1)
+			rrr = strings.Replace(rrr, "]", "", -1)
+			rrr = strings.Replace(rrr, "'", "", -1)
+			token, whereRuns, bindsRuns := runsClause("FL", []string{rrr})
+			stm = fmt.Sprintf("%s %s", token, stm)
 			conds = append(conds, whereRuns)
 			for _, v := range bindsRuns {
 				args = append(args, v)
 			}
-		*/
-	} else if len(runs) == 1 {
-		conds, args = AddParam("run_num", "FL.RUN_NUM", params, conds, args)
+		} else {
+			conds, args = AddParam("run_num", "FL.RUN_NUM", params, conds, args)
+		}
 	}
 
 	// add lumis conditions
