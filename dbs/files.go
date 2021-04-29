@@ -80,12 +80,6 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		tmpl["LumiList"] = true
 	}
 
-	// if no runs is given and asked for sumOverLumi there is no need to continue
-	//     if len(runs) == 0 && sumOverLumi == "1" {
-	//         msg := "files API does not support sumOverLumi if run_num is not provided"
-	//         return 0, errors.New(msg)
-	//     }
-
 	// files API does not supprt run_num=1 when no lumi
 	if len(runs) == 1 && len(lumis) == 0 && runs[0] == "1" {
 		msg := "files API does not support run_num=1 when no lumi"
@@ -164,6 +158,24 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 			rrr = strings.Replace(rrr, "]", "", -1)
 			rrr = strings.Replace(rrr, "'", "", -1)
 			token, whereRuns, bindsRuns := runsClause("FL", []string{rrr})
+			stm = fmt.Sprintf("%s %s", token, stm)
+			conds = append(conds, whereRuns)
+			for _, v := range bindsRuns {
+				args = append(args, v)
+			}
+		} else if strings.Contains(runs[0], " ") || strings.Contains(runs[0], "-") { // [97-99 200 ...]
+			var runList []string
+			for _, rrr := range strings.Split(runs[0], " ") {
+				pruns, e := ParseRuns([]string{rrr})
+				if e != nil {
+					msg := "unable to parse runs input"
+					return 0, errors.New(msg)
+				}
+				for _, v := range pruns {
+					runList = append(runList, v)
+				}
+			}
+			token, whereRuns, bindsRuns := runsClause("FL", runList)
 			stm = fmt.Sprintf("%s %s", token, stm)
 			conds = append(conds, whereRuns)
 			for _, v := range bindsRuns {
