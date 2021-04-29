@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -47,6 +48,22 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	} else if len(lfns) == 1 {
+		if strings.Contains(lfns[0], "[") || strings.Contains(lfns[0], "'") || strings.Contains(lfns[0], ",") {
+			rrr := strings.Replace(lfns[0], "[", "", -1)
+			rrr = strings.Replace(rrr, "]", "", -1)
+			rrr = strings.Replace(rrr, "'", "", -1)
+			rrr = strings.Replace(rrr, " ", "", -1)
+			rrr = strings.Replace(rrr, " ", "", -1)
+			token, binds := TokenGenerator(strings.Split(rrr, ","), 200, "lfn_token")
+			stm = fmt.Sprintf("%s %s", token, stm)
+			cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+			conds = append(conds, cond)
+			for _, v := range binds {
+				args = append(args, v)
+			}
+		} else {
+			conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
+		}
 		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
 	}
 
