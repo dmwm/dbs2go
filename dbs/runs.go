@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // Runs DBS API
@@ -42,9 +43,8 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	if len(runs) > 1 {
-		//         msg := "The runs API does not support list of runs"
-		//         return 0, errors.New(msg)
 		token, whereRuns, bindsRuns := runsClause("FL", runs)
 		stm = fmt.Sprintf("%s %s", token, stm)
 		conds = append(conds, whereRuns)
@@ -52,7 +52,19 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	} else if len(runs) == 1 {
-		conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
+		if strings.Contains(runs[0], "[") || strings.Contains(runs[0], "'") { // ['97-99']
+			rrr := strings.Replace(runs[0], "[", "", -1)
+			rrr = strings.Replace(rrr, "]", "", -1)
+			rrr = strings.Replace(rrr, "'", "", -1)
+			token, whereRuns, bindsRuns := runsClause("FL", []string{rrr})
+			stm = fmt.Sprintf("%s %s", token, stm)
+			conds = append(conds, whereRuns)
+			for _, v := range bindsRuns {
+				args = append(args, v)
+			}
+		} else {
+			conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
+		}
 	}
 	stm = WhereClause(stm, conds)
 
