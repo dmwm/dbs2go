@@ -167,7 +167,29 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	conds, args = AddParam("create_by", "D.CREATE_BY", params, conds, args)
 	conds, args = AddParam("last_modified_by", "D.LAST_MODIFIED_BY", params, conds, args)
 	conds, args = AddParam("prep_id", "D.PREP_ID", params, conds, args)
-	conds, args = AddParam("dataset_id", "D.DATASET_ID", params, conds, args)
+
+	dids := getValues(params, "dataset_id")
+	if len(dids) == 1 {
+		if !strings.Contains(dids[0], "[") {
+			cond := fmt.Sprintf("D.DATASET_ID = %s", placeholder("dataset_id"))
+			conds = append(conds, cond)
+			args = append(args, dids[0])
+		} else {
+			vals := strings.Replace(dids[0], "[", "", -1)
+			vals = strings.Replace(vals, "]", "", -1)
+			var arr []string
+			for _, v := range strings.Split(vals, " ") {
+				arr = append(arr, utils.ConvertFloat(v))
+			}
+			token, binds := TokenGenerator(arr, 100, "dataset_id_token")
+			tmpl["TokenGenerator"] = token
+			cond := " D.DATASET_ID in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+			conds = append(conds, cond)
+			for _, v := range binds {
+				args = append(args, v)
+			}
+		}
+	}
 
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("datasets", tmpl)
