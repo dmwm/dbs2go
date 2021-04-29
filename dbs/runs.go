@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,9 +33,6 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	} else if len(dataset) == 1 {
 		tmpl["Dataset"] = true
 		conds, args = AddParam("dataset", "DATASETS.DATASET", params, conds, args)
-	} else {
-		msg := fmt.Sprintf("No arguments for runs API")
-		return 0, errors.New(msg)
 	}
 
 	stm, err := LoadTemplateSQL("runs", tmpl)
