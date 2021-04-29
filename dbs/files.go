@@ -39,20 +39,14 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		if sumOverLumi == "1" {
 			if vals, ok := params["run_num"]; ok {
 				runs := fmt.Sprintf("%v", vals)
-				if sumOverLumi == "1" {
-					if strings.Contains(runs, ",") || strings.Contains(runs, "-") || strings.Contains(runs, "[") {
-						runList = true
-						//                         msg := "When sumOverLumi=1, no run_num list is allowed"
-						//                         return 0, errors.New(msg)
-					}
+				if strings.Contains(runs, ",") {
+					runList = true
 				}
 			}
 			if vals, ok := params["logical_file_name"]; ok {
 				lfns := fmt.Sprintf("%v", vals)
 				if strings.Contains(lfns, ",") {
 					lfnList = true
-					//                     msg := "When sumOverLumi=1, no lfn list list is allowed"
-					//                     return 0, errors.New(msg)
 				}
 			}
 		}
