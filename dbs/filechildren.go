@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // FileChildren API
@@ -42,7 +43,21 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 	} else if len(lfns) == 1 {
-		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
+		if strings.Contains(lfns[0], "[") || strings.Contains(lfns[0], "'") || strings.Contains(lfns[0], ",") {
+			rrr := strings.Replace(lfns[0], "[", "", -1)
+			rrr = strings.Replace(rrr, "]", "", -1)
+			rrr = strings.Replace(rrr, "'", "", -1)
+			rrr = strings.Replace(rrr, " ", "", -1)
+			token, binds := TokenGenerator(strings.Split(rrr, ","), 200, "lfn_token")
+			stm = fmt.Sprintf("%s %s", token, stm)
+			cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+			conds = append(conds, cond)
+			for _, v := range binds {
+				args = append(args, v)
+			}
+		} else {
+			conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
+		}
 	}
 
 	bid := getValues(params, "block_id")
