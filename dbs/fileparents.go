@@ -40,7 +40,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
-		token, binds := TokenGenerator(lfns, 200, "lfn_token")
+		token, binds := TokenGenerator(lfns, 300, "lfn_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
 		conds = append(conds, cond)
@@ -53,7 +53,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 			rrr = strings.Replace(rrr, "]", "", -1)
 			rrr = strings.Replace(rrr, "'", "", -1)
 			rrr = strings.Replace(rrr, " ", "", -1)
-			token, binds := TokenGenerator(strings.Split(rrr, ","), 200, "lfn_token")
+			token, binds := TokenGenerator(strings.Split(rrr, ","), 300, "lfn_token")
 			stm = fmt.Sprintf("%s %s", token, stm)
 			cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
 			conds = append(conds, cond)

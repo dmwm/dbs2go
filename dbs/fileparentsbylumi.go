@@ -29,7 +29,7 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 	lfns := getValues(params, "logical_file_name")
 	if len(lfns) > 1 {
 		tmpl["ChildLfnList"] = true
-		token, binds := TokenGenerator(lfns, 100, "lfn_token") // 100 is max for # of allowed entries
+		token, binds := TokenGenerator(lfns, 300, "lfn_token") // 100 is max for # of allowed entries
 		tmpl["LfnTokenGenerator"] = token
 		for _, v := range binds {
 			args = append(args, v)
