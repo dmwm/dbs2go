@@ -70,20 +70,6 @@ func (api API) FileArray(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "filearray api requires input parameers"
 		return 0, errors.New(msg)
 	}
-	// When sumOverLumi=1, no input can be a list becaue nesting of WITH clause within WITH clause not supported yet by Oracle
-	if _, ok := params["sumOverLumi"]; ok {
-		if runs, ok := params["run_num"]; ok {
-			vals := fmt.Sprintf("%v", runs)
-			if strings.Contains(vals, "[") {
-				msg := "When sumOverLumi=1, no input can be a list becaue nesting of WITH clause within WITH clause not supported yet by Oracle"
-				return 0, errors.New(msg)
-			}
-		}
-		if _, ok := params["lumi_list"]; ok {
-			msg := "When sumOverLumi=1, no input can be a list becaue nesting of WITH clause within WITH clause not supported yet by Oracle"
-			return 0, errors.New(msg)
-		}
-	}
 	return api.Files(params, w)
 }
 
