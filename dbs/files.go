@@ -156,6 +156,9 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	for _, v := range a {
 		args = append(args, v)
 	}
+	if len(a) > 1 { // if we have more then one run arguments
+		rungen = true
+	}
 	/*
 		if len(runs) > 1 {
 			rungen = true
