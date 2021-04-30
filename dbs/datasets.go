@@ -78,18 +78,18 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 
 	// parse dataset_id argument
 	dataset_access_type, _ := getSingleValue(params, "dataset_access_type")
-	if dataset_access_type != "" {
-		oper := "="
-		if dataset_access_type == "" {
-			dataset_access_type = "VALID"
-		} else if dataset_access_type == "*" {
-			dataset_access_type = "%"
-			oper = "like"
-		}
-		cond = fmt.Sprintf("DP.DATASET_ACCESS_TYPE %s %s", oper, placeholder("dataset_access_type"))
-		conds = append(conds, cond)
-		args = append(args, dataset_access_type)
+	//     if dataset_access_type != "" {
+	oper := "="
+	if dataset_access_type == "" {
+		dataset_access_type = "VALID"
+	} else if dataset_access_type == "*" {
+		dataset_access_type = "%"
+		oper = "like"
 	}
+	cond = fmt.Sprintf("DP.DATASET_ACCESS_TYPE %s %s", oper, placeholder("dataset_access_type"))
+	conds = append(conds, cond)
+	args = append(args, dataset_access_type)
+	//     }
 
 	// optional arguments
 	if _, e := getSingleValue(params, "parent_dataset"); e == nil {
