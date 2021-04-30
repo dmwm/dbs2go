@@ -174,8 +174,10 @@ func parseParams(r *http.Request) (dbs.Record, error) {
 					x = strings.Replace(x, "'", "", -1)
 					vals = append(vals, x)
 				}
+				continue
 			}
 			v = strings.Replace(v, "'", "", -1)
+			vals = append(vals, v)
 		}
 		params[k] = vals
 	}
