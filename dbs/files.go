@@ -62,11 +62,9 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	lumiList := getValues(params, "lumi_list")
 	var lumis []string
 	var err error
-	if len(lumiList) == 1 {
-		lumis, err = FlatLumis(lumiList)
-		if err != nil {
-			return 0, err
-		}
+	lumis, err = FlatLumis(lumiList)
+	if err != nil {
+		return 0, err
 	}
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
