@@ -34,7 +34,6 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 		tmpl["TokenGenerator"] = token
 		tmpl["Lfn"] = true
 		tmpl["LfnList"] = true
-		//         conds = append(conds, token)
 		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
 		conds = append(conds, cond)
 		for _, v := range binds {
@@ -68,10 +67,6 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 
 	// generate run_num token
 	runs := getValues(params, "run_num")
-	//     runs, err := ParseRuns(getValues(params, "run_num"))
-	//     if err != nil {
-	//         return 0, err
-	//     }
 	t, c, a, e := RunsConditions(runs, "FL")
 	if e != nil {
 		return 0, e
@@ -85,58 +80,6 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	for _, v := range a {
 		args = append(args, v)
 	}
-	//     if len(runs) > 0 {
-	//         token, condRuns, bindsRuns := runsClause("FL", runs)
-	//         log.Println("### FileLumis", token, condRuns, bindsRuns)
-	//         stm = fmt.Sprintf("%s %s", token, stm)
-	//         conds = append(conds, condRuns)
-	//         for _, v := range bindsRuns {
-	//             args = append(args, v)
-	//         }
-	//     }
-	// add run conditions
-	/*
-		if len(runs) > 1 {
-			minR := runs[0]
-			maxR := runs[len(runs)-1]
-			cond := " FL.RUN_NUM  between :minrun0 and :maxrun0 "
-			conds = append(conds, cond)
-			args = append(args, minR)
-			args = append(args, maxR)
-		} else if len(runs) == 1 {
-			if strings.Contains(runs[0], "[") || strings.Contains(runs[0], "'") { // ['97-99']
-				rrr := strings.Replace(runs[0], "[", "", -1)
-				rrr = strings.Replace(rrr, "]", "", -1)
-				rrr = strings.Replace(rrr, "'", "", -1)
-				token, whereRuns, bindsRuns := runsClause("FL", []string{rrr})
-				stm = fmt.Sprintf("%s %s", token, stm)
-				conds = append(conds, whereRuns)
-				for _, v := range bindsRuns {
-					args = append(args, v)
-				}
-			} else if strings.Contains(runs[0], " ") || strings.Contains(runs[0], "-") { // [97-99 200 ...]
-				var runList []string
-				for _, rrr := range strings.Split(runs[0], " ") {
-					pruns, e := ParseRuns([]string{rrr})
-					if e != nil {
-						msg := "unable to parse runs input"
-						return 0, errors.New(msg)
-					}
-					for _, v := range pruns {
-						runList = append(runList, v)
-					}
-				}
-				token, whereRuns, bindsRuns := runsClause("FL", runList)
-				stm = fmt.Sprintf("%s %s", token, stm)
-				conds = append(conds, whereRuns)
-				for _, v := range bindsRuns {
-					args = append(args, v)
-				}
-			} else {
-				conds, args = AddParam("run_num", "FL.RUN_NUM", params, conds, args)
-			}
-		}
-	*/
 
 	stm = WhereClause(stm, conds)
 
@@ -149,8 +92,6 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 			}
 		}
 	}
-
-	log.Println("### filelumis args", args)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(w, stm, args...)
