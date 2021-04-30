@@ -610,11 +610,22 @@ func runsClause(table string, runs []string) (string, string, []string) {
 	var conds []string   // list of conditions with run numbers
 	for _, r := range runs {
 		if strings.Contains(r, "-") { // run-range argument
-			cond := fmt.Sprintf(" %s.RUN_NUM between %s and %s ", table, placeholder("minrun"), placeholder("maxrun"))
-			conds = append(conds, cond)
 			rr := strings.Split(r, "-")
-			args = append(args, rr[0])
-			args = append(args, rr[1])
+			if len(runs) == 1 {
+				cond := fmt.Sprintf(" %s.RUN_NUM between %s and %s ", table, placeholder("minrun"), placeholder("maxrun"))
+				conds = append(conds, cond)
+				args = append(args, rr[0])
+				args = append(args, rr[1])
+				where = fmt.Sprintf("( %s )", strings.Join(conds, " OR "))
+				return "", where, args
+			}
+			v, _ := strconv.Atoi(rr[0])
+			minR := v
+			v, _ = strconv.Atoi(rr[1])
+			maxR := v
+			for i := minR; i <= maxR; i++ {
+				runList = append(runList, fmt.Sprintf("%d", i))
+			}
 		} else { // plain run numbers we store to run list
 			runList = append(runList, r)
 		}
@@ -697,6 +708,8 @@ func RunsConditions(runs []string, table string) (string, []string, []interface{
 	var conds []string
 	var token string
 
+	log.Println("### runs conditions", runs)
+
 	if len(runs) > 1 {
 		var runList []string
 		for _, rrr := range runs {
@@ -716,45 +729,7 @@ func RunsConditions(runs []string, table string) (string, []string, []interface{
 			args = append(args, v)
 		}
 	} else if len(runs) == 1 {
-		if strings.Contains(runs[0], "[") || strings.Contains(runs[0], "'") { // ['97-99']
-			rrr := strings.Replace(runs[0], "[", "", -1)
-			rrr = strings.Replace(rrr, "]", "", -1)
-			rrr = strings.Replace(rrr, "'", "", -1)
-			if strings.Contains(rrr, "-") {
-				r := strings.Split(rrr, "-")
-				minR := r[0]
-				maxR := r[len(r)-1]
-				cond := fmt.Sprintf(" %s.RUN_NUM  between :minrun0 and :maxrun0 ", table)
-				conds = append(conds, cond)
-				args = append(args, minR)
-				args = append(args, maxR)
-			} else {
-				tok, whereRuns, bindsRuns := runsClause(table, []string{rrr})
-				token = tok
-				conds = append(conds, whereRuns)
-				for _, v := range bindsRuns {
-					args = append(args, v)
-				}
-			}
-		} else if strings.Contains(runs[0], " ") || strings.Contains(runs[0], "-") { // [97-99 200 ...]
-			var runList []string
-			for _, rrr := range strings.Split(runs[0], " ") {
-				pruns, e := ParseRuns([]string{rrr})
-				if e != nil {
-					msg := "unable to parse runs input"
-					return token, conds, args, errors.New(msg)
-				}
-				for _, v := range pruns {
-					runList = append(runList, v)
-				}
-			}
-			tok, whereRuns, bindsRuns := runsClause(table, runList)
-			token = tok
-			conds = append(conds, whereRuns)
-			for _, v := range bindsRuns {
-				args = append(args, v)
-			}
-		} else if strings.Contains(runs[0], "-") {
+		if strings.Contains(runs[0], "-") {
 			rrr := strings.Split(runs[0], "-")
 			minR := rrr[0]
 			maxR := rrr[len(rrr)-1]
