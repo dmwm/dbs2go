@@ -66,10 +66,11 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	runs, err := ParseRuns(getValues(params, "run_num"))
-	if err != nil {
-		return 0, err
-	}
+	runs := getValues(params, "run_num")
+	//     runs, err := ParseRuns(getValues(params, "run_num"))
+	//     if err != nil {
+	//         return 0, err
+	//     }
 	if len(runs) > 0 {
 		tmpl["RunNumber"] = true
 	}

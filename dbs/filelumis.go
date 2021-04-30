@@ -65,10 +65,11 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	}
 
 	// generate run_num token
-	runs, err := ParseRuns(getValues(params, "run_num"))
-	if err != nil {
-		return 0, err
-	}
+	runs := getValues(params, "run_num")
+	//     runs, err := ParseRuns(getValues(params, "run_num"))
+	//     if err != nil {
+	//         return 0, err
+	//     }
 	t, c, a, e := RunsConditions(runs, "FL")
 	if e != nil {
 		return 0, e
