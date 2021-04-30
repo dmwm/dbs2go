@@ -195,11 +195,17 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 	}
 	for k, v := range params {
 		s := fmt.Sprintf("%v", v)
+		if strings.ToLower(k) == "run_num" && strings.Contains(s, "[") {
+			params["runList"] = true
+		}
 		s = strings.Replace(s, "[", "", -1)
 		s = strings.Replace(s, "]", "", -1)
 		var out []string
 		for _, vv := range strings.Split(s, " ") {
-			out = append(out, strings.Trim(vv, " "))
+			ss := strings.Trim(vv, " ")
+			if ss != "" {
+				out = append(out, ss)
+			}
 		}
 		if utils.VERBOSE > 1 {
 			log.Printf("payload: key=%s val='%v' out=%v", k, v, out)
