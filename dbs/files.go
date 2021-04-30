@@ -159,13 +159,13 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if len(a) > 1 { // if we have more then one run arguments
 		rungen = true
 	}
-	/*
-		if _, ok := params["runList"]; ok {
-			// if our run value was send via POST payload as [97], then it is a rungen
-			// and not single run value like 97
+	if _, ok := params["runList"]; ok {
+		// if our run value was send via POST payload as [97], then it is a rungen
+		// and not single run value like 97
+		if sumOverLumi == "1" {
 			rungen = true
 		}
-	*/
+	}
 	/*
 		if len(runs) > 1 {
 			rungen = true
