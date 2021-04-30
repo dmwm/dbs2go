@@ -193,6 +193,19 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 	if err != nil {
 		return nil, err
 	}
+	for k, v := range params {
+		s := fmt.Sprintf("%v", v)
+		s = strings.Replace(s, "[", "", -1)
+		s = strings.Replace(s, "]", "", -1)
+		var out []string
+		for _, vv := range strings.Split(s, " ") {
+			out = append(out, strings.Trim(vv, " "))
+		}
+		if utils.VERBOSE > 1 {
+			log.Printf("payload: key=%s val='%v' out=%v", k, v, out)
+		}
+		params[k] = out
+	}
 	return params, nil
 }
 
