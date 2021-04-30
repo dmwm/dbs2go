@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -160,6 +161,28 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // helper function to parse POST HTTP request payload
+func parseParams(r *http.Request) (dbs.Record, error) {
+	params := make(dbs.Record)
+	// r.URL.Query() returns map[string][]string
+	for k, values := range r.URL.Query() {
+		var vals []string
+		for _, v := range values {
+			if strings.Contains(v, "[") {
+				v = v[1 : len(v)-1]
+				for _, x := range strings.Split(v, ",") {
+					x = strings.Trim(x, " ")
+					x = strings.Replace(x, "'", "", -1)
+					vals = append(vals, x)
+				}
+			}
+			v = strings.Replace(v, "'", "", -1)
+		}
+		params[k] = vals
+	}
+	return params, nil
+}
+
+// helper function to parse POST HTTP request payload
 func parsePayload(r *http.Request) (dbs.Record, error) {
 	defer r.Body.Close()
 	decoder := json.NewDecoder(r.Body)
@@ -304,16 +327,20 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
 	status := http.StatusOK
-	params := make(dbs.Record)
-	for k, v := range r.URL.Query() {
-		params[k] = v
+	params, err := parseParams(r)
+	if err != nil {
+		return http.StatusBadRequest, 0, err
 	}
+	//     params := make(dbs.Record)
+	//     for k, v := range r.URL.Query() {
+	//         params[k] = v
+	//     }
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
 		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, r.URL.RequestURI(), params)
 	}
 	var api dbs.API
-	var err error
+	//     var err error
 	var size int64
 	if a == "datatiers" {
 		size, err = api.DataTiers(params, w)
