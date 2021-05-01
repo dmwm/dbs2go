@@ -29,28 +29,30 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, errors.New(msg)
 	}
 	// When sumOverLumi=1, no lfn list or run_num list allowed
-	if _, ok := params["sumOverLumi"]; ok {
-		arr := getValues(params, "sumOverLumi")
-		if len(arr) != 1 {
-			msg := "sumOverLumi has more than one value"
-			return 0, errors.New(msg)
-		}
-		sumOverLumi = arr[0]
-		if sumOverLumi == "1" {
-			if vals, ok := params["run_num"]; ok {
-				runs := fmt.Sprintf("%v", vals)
-				if strings.Contains(runs, ",") {
-					runList = true
+	/*
+		if _, ok := params["sumOverLumi"]; ok {
+			arr := getValues(params, "sumOverLumi")
+			if len(arr) != 1 {
+				msg := "sumOverLumi has more than one value"
+				return 0, errors.New(msg)
+			}
+			sumOverLumi = arr[0]
+			if sumOverLumi == "1" {
+				if vals, ok := params["run_num"]; ok {
+					runs := fmt.Sprintf("%v", vals)
+					if strings.Contains(runs, ",") {
+						runList = true
+					}
+				}
+				if vals, ok := params["logical_file_name"]; ok {
+					lfns := fmt.Sprintf("%v", vals)
+					if strings.Contains(lfns, ",") {
+						lfnList = true
+					}
 				}
 			}
-			if vals, ok := params["logical_file_name"]; ok {
-				lfns := fmt.Sprintf("%v", vals)
-				if strings.Contains(lfns, ",") {
-					lfnList = true
-				}
-			}
 		}
-	}
+	*/
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
@@ -188,8 +190,12 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, errors.New(msg)
 	}
 
-	if sumOverLumi == "1" && (runList || lfnList) {
-		msg := "When sumOverLumi=1, no lfn list or run_num list is allowed"
+	if sumOverLumi == "1" && runList {
+		msg := "When sumOverLumi=1, no run_num list is allowed"
+		return 0, errors.New(msg)
+	}
+	if sumOverLumi == "1" && lfnList {
+		msg := "When sumOverLumi=1, no lfn list list is allowed"
 		return 0, errors.New(msg)
 	}
 
