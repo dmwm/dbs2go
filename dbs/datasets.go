@@ -49,6 +49,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	detail, _ := getSingleValue(params, "detail")
 	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
 		detail = "true"
+		tmpl["Detail"] = true
 	}
 	if strings.ToLower(detail) == "true" {
 		tmpl["Detail"] = true
