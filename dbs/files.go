@@ -19,40 +19,21 @@ import (
 // Files DBS API
 func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	var args []interface{}
-	var conds []string
-	var lumigen, rungen, lfngen bool
+	var conds, lumis []string
+	var lumigen, rungen, lfngen, runList, lfnList bool
 	var sumOverLumi string
-	var runList, lfnList bool
+	var err error
 
 	if len(params) == 0 {
 		msg := "Files API with empty parameter map"
 		return 0, errors.New(msg)
 	}
-	// When sumOverLumi=1, no lfn list or run_num list allowed
-	/*
-		if _, ok := params["sumOverLumi"]; ok {
-			arr := getValues(params, "sumOverLumi")
-			if len(arr) != 1 {
-				msg := "sumOverLumi has more than one value"
-				return 0, errors.New(msg)
-			}
-			sumOverLumi = arr[0]
-			if sumOverLumi == "1" {
-				if vals, ok := params["run_num"]; ok {
-					runs := fmt.Sprintf("%v", vals)
-					if strings.Contains(runs, ",") {
-						runList = true
-					}
-				}
-				if vals, ok := params["logical_file_name"]; ok {
-					lfns := fmt.Sprintf("%v", vals)
-					if strings.Contains(lfns, ",") {
-						lfnList = true
-					}
-				}
-			}
+	if _, ok := params["sumOverLumi"]; ok {
+		sumOverLumi, err = getSingleValue(params, "sumOverLumi")
+		if err != nil {
+			return 0, err
 		}
-	*/
+	}
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
@@ -62,8 +43,6 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl["Addition"] = false
 
 	lumiList := getValues(params, "lumi_list")
-	var lumis []string
-	var err error
 	lumis, err = FlatLumis(lumiList)
 	if err != nil {
 		return 0, err
@@ -190,6 +169,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		return 0, errors.New(msg)
 	}
 
+	// check sumOverLumi conditions
 	if sumOverLumi == "1" && runList {
 		msg := "When sumOverLumi=1, no run_num list is allowed"
 		return 0, errors.New(msg)
@@ -198,8 +178,6 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "When sumOverLumi=1, no lfn list list is allowed"
 		return 0, errors.New(msg)
 	}
-
-	// check sumOverLumi
 	if len(runs) > 0 && sumOverLumi == "1" {
 		stm = strings.Replace(stm, "F.EVENT_COUNT,", "", -1)
 		stm = WhereClause(stm, conds)
