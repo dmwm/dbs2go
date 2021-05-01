@@ -137,11 +137,13 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 // ServerInfoHandler provides basic functionality of status response
 func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	var records []dbs.Record
+	//     var records []dbs.Record
 	rec := make(dbs.Record)
 	rec["server"] = Info()
-	records = append(records, rec)
-	data, err := json.Marshal(records)
+	rec["dbs_version"] = "3.16.0-comp4"
+	//     records = append(records, rec)
+	//     data, err := json.Marshal(records)
+	data, err := json.Marshal(rec)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)
 	}
@@ -168,6 +170,9 @@ func parseParams(r *http.Request) (dbs.Record, error) {
 		var vals []string
 		for _, v := range values {
 			if strings.Contains(v, "[") {
+				if strings.ToLower(k) == "run_num" {
+					params["runList"] = true
+				}
 				v = v[1 : len(v)-1]
 				for _, x := range strings.Split(v, ",") {
 					x = strings.Trim(x, " ")
