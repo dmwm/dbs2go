@@ -3,6 +3,7 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -79,6 +80,14 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	for _, v := range a {
 		args = append(args, v)
+	}
+
+	// check if we got both run and lfn lists
+	if _, ok := params["runList"]; ok {
+		if len(runs) > 1 && len(lfns) > 1 {
+			msg := "filelumis API supports single list of lfns or run numbers"
+			return 0, errors.New(msg)
+		}
 	}
 
 	stm = WhereClause(stm, conds)
