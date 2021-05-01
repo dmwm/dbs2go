@@ -3,6 +3,7 @@ SELECT DISTINCT
 {{else}}
 SELECT 
 {{end}}
+{{if .Detail}}
         F.FILE_ID, F.LOGICAL_FILE_NAME, F.IS_FILE_VALID,
         F.DATASET_ID, D.DATASET,
         F.BLOCK_ID, B.BLOCK_NAME,
@@ -12,6 +13,9 @@ SELECT
         F.AUTO_CROSS_SECTION,
         F.CREATION_DATE, F.CREATE_BY,
         F.LAST_MODIFICATION_DATE, F.LAST_MODIFIED_BY
+{{else}}
+        F.LOGICAL_FILE_NAME
+{{end}}
 {{if .RunNumber}}
         , FL.RUN_NUM
 {{end}}

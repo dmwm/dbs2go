@@ -23,6 +23,16 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	tmpl["TokenGenerator"] = ""
+	tmpl["Detail"] = false
+
+	// parse detail arugment
+	detail, _ := getSingleValue(params, "detail")
+	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
+		detail = "true"
+	}
+	if strings.ToLower(detail) == "true" {
+		tmpl["Detail"] = true
+	}
 
 	// use run_num first since it may produce TokenGenerator
 	// which should contain bind variables

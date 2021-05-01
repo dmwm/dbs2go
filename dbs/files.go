@@ -28,12 +28,6 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		msg := "Files API with empty parameter map"
 		return 0, errors.New(msg)
 	}
-	if _, ok := params["sumOverLumi"]; ok {
-		sumOverLumi, err = getSingleValue(params, "sumOverLumi")
-		if err != nil {
-			return 0, err
-		}
-	}
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
@@ -41,6 +35,24 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	tmpl["RunNumber"] = false
 	tmpl["LumiList"] = false
 	tmpl["Addition"] = false
+	tmpl["Detail"] = false
+
+	// parse detail arugment
+	detail, _ := getSingleValue(params, "detail")
+	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
+		detail = "true"
+	}
+	if strings.ToLower(detail) == "true" {
+		tmpl["Detail"] = true
+	}
+
+	// parse sumOverLumi
+	if _, ok := params["sumOverLumi"]; ok {
+		sumOverLumi, err = getSingleValue(params, "sumOverLumi")
+		if err != nil {
+			return 0, err
+		}
+	}
 
 	lumiList := getValues(params, "lumi_list")
 	lumis, err = FlatLumis(lumiList)
