@@ -708,8 +708,6 @@ func RunsConditions(runs []string, table string) (string, []string, []interface{
 	var conds []string
 	var token string
 
-	log.Println("### runs conditions", runs)
-
 	if len(runs) > 1 {
 		var runList []string
 		for _, rrr := range runs {
