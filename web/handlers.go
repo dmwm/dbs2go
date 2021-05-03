@@ -140,6 +140,8 @@ func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	//     var records []dbs.Record
 	rec := make(dbs.Record)
 	rec["server"] = Info()
+	// TODO: replace with something and check that it satisfy with
+	// DBS test107 regex r'^(3+\.[0-9]+\.[0-9]+[\.\-a-z0-9]*$)'
 	rec["dbs_version"] = "3.16.0-comp4"
 	//     records = append(records, rec)
 	//     data, err := json.Marshal(records)
