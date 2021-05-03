@@ -199,7 +199,7 @@ func WhereClause(stm string, conds []string) string {
 	if len(conds) == 0 {
 		return strings.Trim(stm, " ")
 	}
-	if strings.Contains(stm, " WHERE") {
+	if strings.Contains(stm, " WHERE") && !strings.Contains(stm, "TOKEN_GENERATOR WHERE LENGTH") {
 		stm = fmt.Sprintf(" %s %s", stm, strings.Join(conds, " AND "))
 	} else {
 		stm = fmt.Sprintf("%s WHERE %s", stm, strings.Join(conds, " AND "))
@@ -555,8 +555,16 @@ func ParseRuns(runs []string) ([]string, error) {
 }
 
 // TokenGenerator creates a SQL token generator statement
-// https://betteratoracle.com/posts/20-how-do-i-bind-a-variable-in-list
 func TokenGenerator(runs []string, limit int, name string) (string, []string) {
+	if DBOWNER == "sqlite" {
+		return TokenGeneratorSQLite(runs, name)
+	}
+	return TokenGeneratorORACLE(runs, limit, name)
+}
+
+// TokenGeneratorORACLE creates a SQL token generator statement using ORACLE syntax
+// https://betteratoracle.com/posts/20-how-do-i-bind-a-variable-in-list
+func TokenGeneratorORACLE(runs []string, limit int, name string) (string, []string) {
 	stm := "WITH TOKEN_GENERATOR AS (\n"
 	var tstm []string
 	var vals []string
@@ -576,7 +584,32 @@ func TokenGenerator(runs []string, limit int, name string) (string, []string) {
 	return stm, vals
 }
 
-// helper function to get ORACLE chunks from provided list of values
+// TokenGeneratorSQLite creates a SQL token generator statement using SQLite syntax
+// https://stackoverflow.com/questions/67372811/what-is-equivalent-of-token-generator-oracle-sql-statement-in-sqlite
+func TokenGeneratorSQLite(runs []string, name string) (string, []string) {
+	stm := `WITH TOKEN_GENERATOR AS (
+  SELECT '' token, :token_0 || ',' value
+  UNION ALL
+  SELECT SUBSTR(value, 1, INSTR(value, ',') - 1),
+         SUBSTR(value, INSTR(value, ',') + 1)
+  FROM TOKEN_GENERATOR WHERE LENGTH(value) > 1
+)
+`
+	s := fmt.Sprintf(":%s", name)
+	stm = strings.Replace(stm, ":token_0", s, -1)
+	vals := strings.Join(runs, ",")
+	return stm, []string{vals}
+}
+
+// TokenCondition provides proper condition statement for TokenGenerator
+func TokenCondition() string {
+	if DBOWNER == "sqlite" {
+		return "(SELECT token FROM TOKEN_GENERATOR WHERE token <> '')"
+	}
+	return "(SELECT TOKEN FROM TOKEN_GENERATOR)"
+}
+
+// GetChunks helper function to get ORACLE chunks from provided list of values
 func GetChunks(vals []string, limit int) []string {
 	var chunks []string
 	if len(vals) < limit {
@@ -635,7 +668,7 @@ func runsClause(table string, runs []string) (string, string, []string) {
 		return "", where, args
 	}
 	// take run list and generate token statement
-	stm := fmt.Sprintf("%s.RUN_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)", table)
+	stm := fmt.Sprintf("%s.RUN_NUM in %s", table, TokenCondition())
 	token, binds := TokenGenerator(runList, 4000, "run_num_token") // 4000 is hard ORACLE limit
 	conds = append(conds, stm)
 	for _, v := range binds {
