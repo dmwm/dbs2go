@@ -12,7 +12,7 @@ from
         NVL(sum(fs.event_count),0) as num_event
         FROM {{.Owner}}.FILES FS
         JOIN {{.Owner}}.BLOCKS BS ON BS.BLOCK_ID=FS.BLOCK_ID
-        WHERE BS.BLOCK_NAME IN (SELECT TOKEN FROM TOKEN_GENERATOR)
-        group by bs.block_name )t1
+        WHERE BS.BLOCK_NAME IN {{.TokenCondition}}
+        group by bs.block_name ) t1
 where
     t1.block_name = b.block_name

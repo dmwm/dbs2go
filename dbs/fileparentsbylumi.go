@@ -16,6 +16,7 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	tmpl["ChildLfnList"] = false
+	tmpl["TokenCondition"] = TokenCondition()
 
 	blockNames := getValues(params, "block_name")
 	if len(blockNames) == 0 {

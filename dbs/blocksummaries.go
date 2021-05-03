@@ -10,6 +10,9 @@ import (
 func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	var stm string
 	var args []interface{}
+	var err error
+	tmpl := make(Record)
+	tmpl["TokenCondition"] = TokenCondition()
 
 	if len(params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
@@ -44,9 +47,12 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, v)
 		}
 		if detailErr == nil { // no details are required
-			stm = getSQL("blocksummaries4block")
+			stm, err = LoadTemplateSQL("blocksummaries4block", tmpl)
 		} else {
-			stm = getSQL("blocksummaries4block_detail")
+			stm, err = LoadTemplateSQL("blocksummaries4block_detail", tmpl)
+		}
+		if err != nil {
+			return 0, err
 		}
 	}
 	dataset := getValues(params, "dataset")
@@ -60,14 +66,17 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		}
 		_, val := OperatorValue(dataset[0])
 		if detailErr == nil {
-			stm = getSQL("blocksummaries4dataset")
+			stm, err = LoadTemplateSQL("blocksummaries4dataset", tmpl)
 			// blocksummaries4dataset contains three dataset bindings
 			args = append(args, val)
 			args = append(args, val)
 			args = append(args, val)
 		} else {
-			stm = getSQL("blocksummaries4dataset_detail")
+			stm, err = LoadTemplateSQL("blocksummaries4dataset_detail", tmpl)
 			args = append(args, val)
+		}
+		if err != nil {
+			return 0, err
 		}
 	}
 	// use generic query API to fetch the results from DB

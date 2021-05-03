@@ -17,7 +17,7 @@ where fl.file_id in (
 	select file_id from {{.Owner}}.files f
 	inner join {{.Owner}}.blocks b on f.block_id = b.block_id
 	where b.block_name = :child_block_name 
-		and f.logical_file_name in (SELECT TOKEN FROM TOKEN_GENERATOR) )
+		and f.logical_file_name in {{.TokenCondition}}
 )
 select distinct cid, pid from children c inner join parents p on c.R = p.R and c.L = p.L
 

@@ -35,7 +35,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 		tmpl["TokenGenerator"] = token
 		tmpl["Lfn"] = true
 		tmpl["LfnList"] = true
-		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME in %s", TokenCondition())
 		conds = append(conds, cond)
 		for _, v := range binds {
 			args = append(args, v)

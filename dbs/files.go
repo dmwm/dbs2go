@@ -118,7 +118,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		lfnList = true
 		token, binds := TokenGenerator(lfns, 30, "lfn_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
-		cond := " F.LOGICAL_FILE_NAME in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME in %s", TokenCondition())
 		conds = append(conds, cond)
 		for _, v := range binds {
 			args = append(args, v)
@@ -166,7 +166,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		if sumOverLumi != "1" {
 			stm = fmt.Sprintf("%s %s", token, stm)
 		}
-		cond := " FL.LUMI_SECTION_NUM in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+		cond := fmt.Sprintf(" FL.LUMI_SECTION_NUM in %s", TokenCondition())
 		conds = append(conds, cond)
 		for _, v := range binds {
 			args = append(args, v)

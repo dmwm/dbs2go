@@ -58,7 +58,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	// parse dataset argument
 	datasets := getValues(params, "dataset")
 	if len(datasets) > 1 {
-		cond := fmt.Sprintf("D.DATASET in (SELECT TOKEN FROM TOKEN_GENERATOR)")
+		cond := fmt.Sprintf("D.DATASET in %s", TokenCondition())
 		token, binds := TokenGenerator(datasets, 100, "dataset_token") // 100 is max for # of allowed datasets
 		conds = append(conds, cond+token)
 		for _, v := range binds {
@@ -186,7 +186,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 			}
 			token, binds := TokenGenerator(arr, 100, "dataset_id_token")
 			tmpl["TokenGenerator"] = token
-			cond := " D.DATASET_ID in (SELECT TOKEN FROM TOKEN_GENERATOR)"
+			cond := fmt.Sprintf(" D.DATASET_ID in %s", TokenCondition())
 			conds = append(conds, cond)
 			for _, v := range binds {
 				args = append(args, v)
