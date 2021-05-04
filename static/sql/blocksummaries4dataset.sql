@@ -1,4 +1,25 @@
-
+{{if eq .Owner "sqlite"}}
+SELECT * FROM
+    (
+        SELECT COALESCE(SUM(BS.BLOCK_SIZE), 0) AS FILE_SIZE
+        FROM BLOCKS BS
+        JOIN DATASETS DS ON BS.DATASET_ID=DS.DATASET_ID
+        WHERE DS.dataset=:dataset
+    ),
+    (
+        SELECT COALESCE(SUM(BS.FILE_COUNT), 0) AS NUM_FILE
+        FROM BLOCKS BS
+        JOIN DATASETS DS ON BS.DATASET_ID=DS.DATASET_ID
+        WHERE DS.dataset=:dataset
+    ),
+    (
+        SELECT COALESCE(SUM(FS.EVENT_COUNT), 0) AS NUM_EVENT
+        FROM FILES FS
+        JOIN BLOCKS BS ON BS.BLOCK_ID=FS.BLOCK_ID
+        JOIN DATASETS DS ON BS.DATASET_ID=DS.DATASET_ID
+        WHERE DS.dataset=:dataset
+    )
+{{else}}
 SELECT (
     SELECT NVL(SUM(BS.BLOCK_SIZE), 0)
     FROM {{.Owner}}.BLOCKS BS
@@ -19,3 +40,4 @@ SELECT (
     WHERE DS.dataset=:dataset
 ) AS NUM_EVENT
 FROM DUAL
+{{end}}
