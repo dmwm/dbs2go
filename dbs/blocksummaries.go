@@ -13,6 +13,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	var err error
 	tmpl := make(Record)
 	tmpl["TokenCondition"] = TokenCondition()
+	tmpl["Owner"] = DBOWNER
 
 	if len(params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
