@@ -85,6 +85,7 @@ func basePath(s string) string {
 
 func handlers() *mux.Router {
 	router := mux.NewRouter()
+	router.StrictSlash(true) // to allow /route and /route/ end-points
 
 	// visible routes
 	router.HandleFunc(basePath("/datatiers"), LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
