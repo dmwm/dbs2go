@@ -40,6 +40,9 @@ type Configuration struct {
 	RootCA     string `json:"rootCA"`     // RootCA file
 	CSRFKey    string `json:"csrfKey"`    // CSRF 32-byte-long-auth-key
 	Production bool   `json:"production"` // production server or not
+
+	// GraphQL parts
+	GraphQLSchema string `json:"graphqlSchema"` // graph ql schema file name
 }
 
 // global variables
