@@ -2,7 +2,7 @@ This folder contains a proof-of-concept for support
 [GraphQL](https://graphql.org/) queries for DBS. The implementation
 is done via [graph-gophers](https://github.com/graph-gophers/graphql-go)
 library. The code reads
-[DBS GraphQL schema](https://github.com/vkuznet/dbs2go/schema/schema.graphql)
+[DBS GraphQL schema](https://github.com/vkuznet/dbs2go/blob/master/static/schema/schema.graphql)
 and provides `/query` end-point to place GraphQL queries. The queries
 can be posted via HTTP POST request as following:
 ```
