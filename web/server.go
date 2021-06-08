@@ -44,10 +44,12 @@ import (
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	graphql "github.com/graph-gophers/graphql-go"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
+	dbsGraphQL "github.com/vkuznet/dbs2go/graphql"
 	"github.com/vkuznet/dbs2go/utils"
 
 	_ "gopkg.in/rana/ora.v4"
@@ -63,6 +65,9 @@ var StartTime time.Time
 
 // CMSAuth structure to create CMS Auth headers
 var CMSAuth cmsauth.CMSAuth
+
+// GraphQLSchema holds graphql schema
+var GraphQLSchema *graphql.Schema
 
 // helper function to serve index.html web page
 func indexPage(w http.ResponseWriter, r *http.Request) {
@@ -136,6 +141,13 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/help"), HelpHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 	router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
+
+	// load graphql
+	if Config.GraphQLSchema != "" {
+		//         schema := dbsGraphQL.InitSchema(Config.GraphQLSchema, dbs.DB)
+		//         router.Handle("/query", &relay.Handler{Schema: schema})
+		router.HandleFunc(basePath("/query"), LoggingHandler(QueryHandler)).Methods("POST")
+	}
 
 	// more complex example
 	// https://github.com/gorilla/mux
@@ -228,6 +240,11 @@ func Server(configFile string) {
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
 	dbs.DBOWNER = dbowner
+
+	// init graphql
+	if Config.GraphQLSchema != "" {
+		GraphQLSchema = dbsGraphQL.InitSchema(Config.GraphQLSchema, dbs.DB)
+	}
 
 	// dynamic handlers
 	if Config.CSRFKey != "" {
