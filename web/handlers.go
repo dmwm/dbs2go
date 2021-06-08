@@ -87,6 +87,30 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// QueryHandler provides access to graph ql query
+func QueryHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	var params struct {
+		Query         string                 `json:"query"`
+		OperationName string                 `json:"operationName"`
+		Variables     map[string]interface{} `json:"variables"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return http.StatusBadRequest, 0, err
+	}
+
+	response := GraphQLSchema.Exec(r.Context(), params.Query, params.OperationName, params.Variables)
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return http.StatusInternalServerError, 0, err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
+	return http.StatusOK, int64(binary.Size(responseJSON)), nil
+}
+
 // DummyHandler provides example how to write GET/POST handler
 func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	// example of handling POST request
