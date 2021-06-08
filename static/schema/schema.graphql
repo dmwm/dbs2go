@@ -1,0 +1,35 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"The query type, represents all of the entry points into our object graph"
+type Query {
+  getDataset(name: String!): Dataset
+}
+
+"The mutation type, represents all updates we can make to our data"
+type Mutation {
+  addDataset(name: String!): Boolean
+  updateDataset(dataset: DatasetInput!): Boolean
+  deleteDataset(name: String!): Boolean
+}
+
+"what is needed for a dataset"
+type Dataset {
+  name: String
+}
+
+"dataset input"
+input DatasetInput {
+  name: String!
+}
+
+"Page info for pagination"
+type PageInfo {
+  startCursor: ID
+  endCursor: ID
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
