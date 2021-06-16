@@ -13,19 +13,61 @@ import (
 )
 
 var datasetPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}$`)
+var datasetLen = 400
 var blockPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}#[a-zA-Z0-9\.\-_]+`)
+var blockLen = 400
 var primDSPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]+[*]?$|^[*]$`)
+var primDSLen = 99
 var procDSPattern = regexp.MustCompile(`[a-zA-Z0-9\.\-_]+`)
+var procDSLen = 199
 var tierPattern = regexp.MustCompile(`[A-Z\-_]+`)
+var tierLen = 99
 var eraPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var eraLen = 99
 var releasePattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var releaseLen = 99
 var appPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var appLen = 99
 var filePattern = regexp.MustCompile(`/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`)
 var lfnPattern = regexp.MustCompile(`/[a-zA-Z0-9_-]+.*/([a-zA-Z0-9\-_]+).root$`)
+var lfnLen = 499
 
 var unixTimePattern = regexp.MustCompile(`^[1-9][0-9]{9}$`)
 var intPattern = regexp.MustCompile(`^\d+$`)
 var runRangePattern = regexp.MustCompile(`^\d+-\d+$`)
+
+// ObjectPattern represents interface to check different objects
+type ObjectPattern interface {
+	Check(k string, v interface{}) error
+}
+
+// StrPattern represents string object pattern
+type StrPattern struct {
+	Patterns []*regexp.Regexp
+	Len      int
+}
+
+// Check implements ObjectPattern interface for StrPattern objects
+func (o StrPattern) Check(key string, val interface{}) error {
+	var v string
+	switch vvv := val.(type) {
+	case string:
+		v = vvv
+	default:
+		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
+	}
+	if len(v) > o.Len {
+		return errors.New(fmt.Sprintf("length of %s exceed %d charactoers", v, o.Len))
+	}
+	for _, pat := range o.Patterns {
+		if matched := pat.MatchString(v); matched {
+			// if at least one pattern matched we'll return
+			return nil
+		}
+	}
+	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
+	return errors.New(msg)
+}
 
 // helper function to validate string parameters
 func strType(key string, val interface{}) error {
@@ -36,16 +78,15 @@ func strType(key string, val interface{}) error {
 	default:
 		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
 	}
-	errMsg := fmt.Sprintf("unable to match '%s' value '%+v'", key, val)
+	var patterns []*regexp.Regexp
+	var length int
 	if key == "dataset" {
-		if matched := datasetPattern.MatchString(v); !matched {
-			return errors.New(errMsg)
-		}
+		patterns = append(patterns, datasetPattern)
+		length = datasetLen
 	}
 	if key == "block_name" {
-		if matched := blockPattern.MatchString(v); !matched {
-			return errors.New(errMsg)
-		}
+		patterns = append(patterns, blockPattern)
+		length = blockLen
 	}
 	if key == "logical_file_name" {
 		if strings.Contains(v, "[") {
@@ -58,54 +99,48 @@ func strType(key string, val interface{}) error {
 				return err
 			}
 			for _, r := range records {
-				if matched := filePattern.MatchString(r); !matched {
-					if matched := lfnPattern.MatchString(r); !matched {
-						return errors.New(errMsg)
-					}
+				patterns = append(patterns, filePattern)
+				patterns = append(patterns, lfnPattern)
+				length = lfnLen
+				err := StrPattern{Patterns: patterns, Len: length}.Check(key, r)
+				if err != nil {
+					return err
 				}
 			}
-			return nil
 		}
-		if matched := filePattern.MatchString(v); !matched {
-			if matched := lfnPattern.MatchString(v); !matched {
-				return errors.New(errMsg)
-			}
-		}
+		patterns = append(patterns, filePattern)
+		patterns = append(patterns, lfnPattern)
+		length = lfnLen
 	}
 	if key == "primary_ds_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		if matched := primDSPattern.MatchString(v); !matched {
-			return errors.New(errMsg)
-		}
+		patterns = append(patterns, primDSPattern)
+		length = primDSLen
 	}
 	if key == "processed_ds_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		if matched := procDSPattern.MatchString(v); !matched {
-			return errors.New(errMsg)
-		}
+		patterns = append(patterns, procDSPattern)
+		length = procDSLen
 	}
 	if key == "app_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		if matched := appPattern.MatchString(v); !matched {
-			return errors.New(errMsg)
-		}
+		patterns = append(patterns, appPattern)
+		length = appLen
 	}
 	if key == "release_version" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		if matched := releasePattern.MatchString(v); !matched {
-			return errors.New(errMsg)
-		}
+		patterns = append(patterns, releasePattern)
+		length = releaseLen
 	}
-	return nil
-	//     return errors.New(fmt.Sprintf("Invalid type of %s, should be string", k))
+	return StrPattern{Patterns: patterns, Len: length}.Check(key, val)
 }
 
 // helper function to validate int parameters
