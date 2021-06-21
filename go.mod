@@ -19,6 +19,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/vkuznet/x509proxy v0.0.0-20191014143623-163039704c67
+	gitlab.com/tymonx/go-formatter v1.5.1 // indirect
 	golang.org/x/exp/errors v0.0.0-20210220032938-85be41e4509f
 	gopkg.in/rana/ora.v4 v4.1.15
 	gopkg.in/yaml.v2 v2.4.0

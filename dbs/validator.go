@@ -9,29 +9,149 @@ import (
 	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
+	"gitlab.com/tymonx/go-formatter/formatter"
 	"golang.org/x/exp/errors"
 )
 
+// Parts define multiple patterns
+type Parts struct {
+	Era          string
+	PrimDS       string
+	Tier         string
+	Version      string
+	ProcDS       string
+	Counter      string
+	Root         string
+	HnName       string
+	Subdir       string
+	File         string
+	Workflow     string
+	PhysicsGroup string
+}
+
+var parts = Parts{
+	Era:          `([a-zA-Z0-9\-_]+)`,
+	PrimDS:       `([a-zA-Z][a-zA-Z0-9\-_]*)`,
+	Tier:         `([A-Z\-_]+)`,
+	Version:      `([a-zA-Z0-9\-_]+)`,
+	ProcDS:       `([a-zA-Z0-9\-_]+)`,
+	Counter:      `([0-9]+)`,
+	Root:         `([a-zA-Z0-9\-_]+).root`,
+	HnName:       `([a-zA-Z0-9\.]+)`,
+	Subdir:       `([a-zA-Z0-9\-_]+)`,
+	File:         `([a-zA-Z0-9\-\._]+)`,
+	Workflow:     `([a-zA-Z0-9\-_]+)`,
+	PhysicsGroup: `([a-zA-Z0-9\-_]+)`,
+}
+
+// dataset patterns
 var datasetPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}$`)
 var datasetLen = 400
+
+// block patterns
 var blockPattern = regexp.MustCompile(`^/(\*|[a-zA-Z\*][a-zA-Z0-9_\*\-]{0,100})(/(\*|[a-zA-Z0-9_\.\-\*]{1,199})){0,1}(/(\*|[A-Z\-\*]{1,50})){0,1}#[a-zA-Z0-9\.\-_]+`)
 var blockLen = 400
+
+// primary dataset patterns
 var primDSPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]+[*]?$|^[*]$`)
 var primDSLen = 99
+
+// processed dataset patterns
 var procDSPattern = regexp.MustCompile(`[a-zA-Z0-9\.\-_]+`)
 var procDSLen = 199
+
+// data tier patterns
 var tierPattern = regexp.MustCompile(`[A-Z\-_]+`)
 var tierLen = 99
+
+// acquisision era patterns
 var eraPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
 var eraLen = 99
+
+// release patterns
 var releasePattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
 var releaseLen = 99
+
+// application patterns
 var appPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
 var appLen = 99
-var filePattern = regexp.MustCompile(`/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`)
-var lfnPattern = regexp.MustCompile(`/[a-zA-Z0-9_-]+.*/([a-zA-Z0-9\-_]+).root$`)
+
+// physics group patterns
+var physGroupPattern = regexp.MustCompile(`([a-zA-Z0-9\-_]+)`)
+var physGroupLen = 30
+
+// helper function to get user patterns
+func userPatterns() ([]*regexp.Regexp, error) {
+	var out []*regexp.Regexp
+	pat1 := `^/[a-zA-Z][a-zA-Z0-9/\=\s()\']*\=[a-zA-Z0-9/\=\.\-_/#:\s\']*$`
+	pat2 := `^[a-zA-Z0-9/][a-zA-Z0-9/\.\-_\']*$`
+	pat3 := `^[a-zA-Z0-9/][a-zA-Z0-9/\.\-_]*@[a-zA-Z0-9/][a-zA-Z0-9/\.\-_]*$`
+	out = append(out, regexp.MustCompile(pat1))
+	out = append(out, regexp.MustCompile(pat2))
+	out = append(out, regexp.MustCompile(pat3))
+	return out, nil
+}
+
+var userLen = 30
+
+// helper function to get file, lfn patterns
+func lfnPatterns() ([]*regexp.Regexp, error) {
+	var out []*regexp.Regexp
+	regexp1, err := formatter.Format(`/([a-z]+)/([a-z0-9]+)/({.Era})/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root'`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(regexp1))
+	regexp2 := `/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([A-Z\-_]+)/([a-zA-Z0-9\-_]+)((/[0-9]+){3}){0,1}/([0-9]+)/([a-zA-Z0-9\-_]+).root`
+	out = append(out, regexp.MustCompile(regexp2))
+	regexp3, err := formatter.Format(`/store/(temp/)*(user|group)/({.HnName}|{.PhysicsGroup})/{.PrimDS}/{.ProcDS}/{.Version}/{.Counter}/{.Root}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(regexp3))
+	regexp4, err := formatter.Format(`/store/(temp/)*(user|group)/({.HnName}|{.PhysicsGroup})/{.PrimDS/({.Subdir}/)+{.Root}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(regexp4))
+	oldStyleTier0LFN, err := formatter.Format(`/store/data/{.Era}/{.PrimDS}/{.Tier}/{.Version}/{.Counter}/{.Counter}/{.Counter}/{.Root}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(oldStyleTier0LFN))
+	tier0LFN, err := formatter.Format(`/store/(backfill/[0-9]/){0,1}(t0temp/|unmerged/){0,1}(data|express|hidata)/{.Era}/{.PrimDS}/{.Tier}/{.Version}/{.Counter}/{.Counter}/{.Counter}(/{.Counter})?/{.Root}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(tier0LFN))
+	storeMcLFN, err := formatter.Format(`/store/mc/({.Era})/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)/([a-zA-Z0-9\-_]+)(/([a-zA-Z0-9\-_]+))*/([a-zA-Z0-9\-_]+).root`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(storeMcLFN))
+	storeResults2LFN, err := formatter.Format(`/store/results/{.PhysicsGroup}/{.PrimDS}/{.ProcDS}/{.PrimDS}/{.Tier}/{.ProcDS}/{.Counter}/{.Root}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(storeResults2LFN))
+	storeResultsLFN, err := formatter.Format(`/store/results/{.PhysicsGroup}/{.Era}/{.PrimDS}/{.Tier}/{.ProcDS}/{.Counter}/{.Root}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(storeResultsLFN))
+	lheLFN1 := `/store/lhe/([0-9]+)/([a-zA-Z0-9\-_]+).lhe(.xz){0,1}`
+	out = append(out, regexp.MustCompile(lheLFN1))
+	lheLFN2, err := formatter.Format(`/store/lhe/{.Era}/{.PrimDS}/([0-9]+)/([a-zA-Z0-9\-_]+).lhe(.xz){0,1}`, parts)
+	if err != nil {
+		return out, err
+	}
+	out = append(out, regexp.MustCompile(lheLFN2))
+	return out, nil
+}
+
 var lfnLen = 499
 
+// aux patterns
 var unixTimePattern = regexp.MustCompile(`^[1-9][0-9]{9}$`)
 var intPattern = regexp.MustCompile(`^\d+$`)
 var runRangePattern = regexp.MustCompile(`^\d+-\d+$`)
@@ -88,7 +208,20 @@ func strType(key string, val interface{}) error {
 		patterns = append(patterns, blockPattern)
 		length = blockLen
 	}
+	if key == "create_by" || key == "last_modified_by" {
+		uPatterns, err := userPatterns()
+		if err != nil {
+			return err
+		}
+		patterns = uPatterns
+		length = userLen
+	}
 	if key == "logical_file_name" {
+		length = lfnLen
+		filePatterns, err := lfnPatterns()
+		if err != nil {
+			return err
+		}
 		if strings.Contains(v, "[") {
 			if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
 				v = strings.Replace(v, "'", "\"", -1)
@@ -99,18 +232,13 @@ func strType(key string, val interface{}) error {
 				return err
 			}
 			for _, r := range records {
-				patterns = append(patterns, filePattern)
-				patterns = append(patterns, lfnPattern)
-				length = lfnLen
-				err := StrPattern{Patterns: patterns, Len: length}.Check(key, r)
+				err := StrPattern{Patterns: filePatterns, Len: length}.Check(key, r)
 				if err != nil {
 					return err
 				}
 			}
 		}
-		patterns = append(patterns, filePattern)
-		patterns = append(patterns, lfnPattern)
-		length = lfnLen
+		patterns = filePatterns
 	}
 	if key == "primary_ds_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
