@@ -304,7 +304,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 		}
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
-			msg := fmt.Sprintf("unabelt to scan DB results %s", err)
+			msg := fmt.Sprintf("unable to scan DB results %s", err)
 			return 0, errors.New(msg)
 		}
 		if rowCount != 0 && w != nil {

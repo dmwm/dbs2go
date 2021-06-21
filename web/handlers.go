@@ -446,6 +446,10 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.BlockSummaries(params, w)
 	} else if a == "blockorigin" {
 		size, err = api.BlockOrigin(params, w)
+	} else if a == "blockTrio" {
+		size, err = api.BlockFileLumiIds(params, w)
+	} else if a == "parentDSTrio" {
+		size, err = api.ParentDatasetFileLumiIds(params, w)
 	} else if a == "datasetaccesstypes" {
 		size, err = api.DatasetAccessTypes(params, w)
 	} else {
@@ -485,6 +489,12 @@ func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error)
 	return DBSGetHandler(w, r, "datasets")
 }
 
+// ParentDSTrioHandler provides access to ParentDSTrio DBS API.
+// Takes the following arguments: dataset
+func ParentDSTrioHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "parentDSTrio")
+}
+
 // BlocksHandler provides access to Blocks DBS API.
 // Takes the following arguments: dataset, block_name, data_tier_name, origin_site_name, logical_file_name, run_num, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, open_for_writing, detail
 func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
@@ -500,6 +510,12 @@ func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 // Takes the following arguments: block_name
 func BlockChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSGetHandler(w, r, "blockchildren")
+}
+
+// BlockTrioHandler provides access to BlockTrio DBS API.
+// Takes the following arguments: block_name, list of lfns
+func BlockTrioHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "blockTrio")
 }
 
 // BlockSummariesHandler provides access to BlockSummaries DBS API.
@@ -597,12 +613,6 @@ func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) (int, int64,
 // Takes the following arguments: acquisition_era_name
 func AcquisitionErasCiHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return NotImplemnetedHandler(w, r, "acquisitionerasci")
-}
-
-// ParentDSTrioHandler provides access to ParentDSTrio DBS API.
-// Takes the following arguments: acquisition_era_name
-func ParentDSTrioHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return NotImplemnetedHandler(w, r, "parentdstrio")
 }
 
 // PrimaryDatasetsHandler provides access to PrimaryDatasets DBS API.
