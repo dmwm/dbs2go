@@ -3,6 +3,7 @@
     "port": 8989,
     "staticdir": "/Users/vk/Work/Languages/Go/gopath/src/github.com/vkuznet/dbs2go/static",
     "dbfile": "/opt/certs/dbfile",
+    "lexicon_file": "/Users/vk/Work/Languages/Go/gopath/src/github.com/vkuznet/dbs2go/lexicon.json",
     "servercrt": "",
     "serverkey": "",
     "hkey": "",

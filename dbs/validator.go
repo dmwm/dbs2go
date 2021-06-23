@@ -3,6 +3,7 @@ package dbs
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -27,6 +28,34 @@ type Parts struct {
 	File         string
 	Workflow     string
 	PhysicsGroup string
+}
+
+// LexiconPatterns represents CMS Lexicon patterns
+var LexiconPatterns map[string][]*regexp.Regexp
+
+// LoadPatterns loads CMS Lexion patterns from given file
+func LoadPatterns(fname string) (map[string][]*regexp.Regexp, error) {
+	var rec map[string][]string
+	data, err := ioutil.ReadFile(fname)
+	if err != nil {
+		log.Printf("Unable to read, file '%s', error: %v\n", fname, err)
+		return nil, err
+	}
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Printf("Unable to parse, file '%s', error: %v\n", fname, err)
+		return nil, err
+	}
+	// fetch and compile all patterns
+	pmap := make(map[string][]*regexp.Regexp)
+	for key, pats := range rec {
+		var patterns []*regexp.Regexp
+		for _, pat := range pats {
+			patterns = append(patterns, regexp.MustCompile(pat))
+		}
+		pmap[key] = patterns
+	}
+	return pmap, nil
 }
 
 var parts = Parts{
@@ -201,26 +230,43 @@ func strType(key string, val interface{}) error {
 	var patterns []*regexp.Regexp
 	var length int
 	if key == "dataset" {
-		patterns = append(patterns, datasetPattern)
+		if pats, ok := LexiconPatterns["dataset"]; ok {
+			patterns = pats
+		} else {
+			patterns = append(patterns, datasetPattern)
+		}
 		length = datasetLen
 	}
 	if key == "block_name" {
-		patterns = append(patterns, blockPattern)
+		if pats, ok := LexiconPatterns["block"]; ok {
+			patterns = pats
+		} else {
+			patterns = append(patterns, blockPattern)
+		}
 		length = blockLen
 	}
 	if key == "create_by" || key == "last_modified_by" {
-		uPatterns, err := userPatterns()
-		if err != nil {
-			return err
+		if pats, ok := LexiconPatterns["user"]; ok {
+			patterns = pats
+		} else {
+			uPatterns, err := userPatterns()
+			if err != nil {
+				return err
+			}
+			patterns = uPatterns
 		}
-		patterns = uPatterns
 		length = userLen
 	}
 	if key == "logical_file_name" {
 		length = lfnLen
-		filePatterns, err := lfnPatterns()
-		if err != nil {
-			return err
+		if pats, ok := LexiconPatterns["lfn"]; ok {
+			patterns = pats
+		} else {
+			filePatterns, err := lfnPatterns()
+			if err != nil {
+				return err
+			}
+			patterns = filePatterns
 		}
 		if strings.Contains(v, "[") {
 			if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
@@ -232,40 +278,55 @@ func strType(key string, val interface{}) error {
 				return err
 			}
 			for _, r := range records {
-				err := StrPattern{Patterns: filePatterns, Len: length}.Check(key, r)
+				err := StrPattern{Patterns: patterns, Len: length}.Check(key, r)
 				if err != nil {
 					return err
 				}
 			}
 		}
-		patterns = filePatterns
 	}
 	if key == "primary_ds_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		patterns = append(patterns, primDSPattern)
+		if pats, ok := LexiconPatterns["primary_dataset"]; ok {
+			patterns = pats
+		} else {
+			patterns = append(patterns, primDSPattern)
+		}
 		length = primDSLen
 	}
 	if key == "processed_ds_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		patterns = append(patterns, procDSPattern)
+		if pats, ok := LexiconPatterns["processed_dataset"]; ok {
+			patterns = pats
+		} else {
+			patterns = append(patterns, procDSPattern)
+		}
 		length = procDSLen
 	}
 	if key == "app_name" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		patterns = append(patterns, appPattern)
+		if pats, ok := LexiconPatterns["application"]; ok {
+			patterns = pats
+		} else {
+			patterns = append(patterns, appPattern)
+		}
 		length = appLen
 	}
 	if key == "release_version" {
 		if v == "" && val == "*" { // when someone passed wildcard
 			return nil
 		}
-		patterns = append(patterns, releasePattern)
+		if pats, ok := LexiconPatterns["cmssw_version"]; ok {
+			patterns = pats
+		} else {
+			patterns = append(patterns, releasePattern)
+		}
 		length = releaseLen
 	}
 	return StrPattern{Patterns: patterns, Len: length}.Check(key, val)

@@ -27,6 +27,7 @@ type Configuration struct {
 	DBFile             string `json:"dbfile"`               // dbs db file with secrets
 	MaxDBConnections   int    `json:"max_db_connections"`   // maximum number of DB connections
 	MaxIdleConnections int    `json:"max_idle_connections"` // maximum number of idle connections
+	LexiconFile        string `json:"lexicon_file"`         // lexicon json file
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates
