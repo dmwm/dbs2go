@@ -237,11 +237,11 @@ func Server(configFile string) {
 	dbs.DBTYPE = dbtype
 
 	// load Lexicon patterns
-	patterns, err := dbs.LoadPatterns(Config.LexiconFile)
+	lexPatterns, err := dbs.LoadPatterns(Config.LexiconFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbs.LexiconPatterns = patterns
+	dbs.LexiconPatterns = lexPatterns
 
 	// load DBS SQL statements
 	dbsql := dbs.LoadSQL(dbowner)

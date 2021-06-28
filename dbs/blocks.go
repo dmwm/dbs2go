@@ -166,9 +166,8 @@ func (r *Blocks) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
 		return DecodeValidatorError(r, err)
 	}
-	if matched := blockPattern.MatchString(r.BLOCK_NAME); !matched {
-		log.Println("validate Block", r)
-		return errors.New("invalid pattern for block")
+	if err := CheckPattern("block", r.BLOCK_NAME); err != nil {
+		return err
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")

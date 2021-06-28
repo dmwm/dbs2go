@@ -73,9 +73,8 @@ func (r *DataTiers) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
 		return DecodeValidatorError(r, err)
 	}
-	if matched := tierPattern.MatchString(r.DATA_TIER_NAME); !matched {
-		log.Println("validate DataTiers", r)
-		return errors.New("invalid pattern for data tier")
+	if err := CheckPattern("data_tier_name", r.DATA_TIER_NAME); err != nil {
+		return err
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for creation date")

@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -66,9 +65,8 @@ func (r *ProcessedDatasets) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
 		return DecodeValidatorError(r, err)
 	}
-	if matched := procDSPattern.MatchString(r.PROCESSED_DS_NAME); !matched {
-		log.Println("validate ProcessedDatasets", r)
-		return errors.New("invalid pattern for processed dataset name")
+	if err := CheckPattern("processed_ds_name", r.PROCESSED_DS_NAME); err != nil {
+		return err
 	}
 	return nil
 }

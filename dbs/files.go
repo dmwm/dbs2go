@@ -264,15 +264,8 @@ func (r *Files) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
 		return DecodeValidatorError(r, err)
 	}
-	filePatterns, err := lfnPatterns()
-	if err != nil {
+	if err := CheckPattern("logical_file_name", r.LOGICAL_FILE_NAME); err != nil {
 		return err
-	}
-	err = StrPattern{Patterns: filePatterns, Len: lfnLen}.Check("logical_file_name", r.LOGICAL_FILE_NAME)
-	if err != nil {
-		//     if matched := lfnPattern.MatchString(r.LOGICAL_FILE_NAME); !matched {
-		log.Println("files object", r)
-		return errors.New("invalid pattern for file")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")

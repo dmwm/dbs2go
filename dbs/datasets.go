@@ -266,9 +266,8 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 
 // Validate implementation of Datasets
 func (r *Datasets) Validate() error {
-	if matched := datasetPattern.MatchString(r.DATASET); !matched {
-		log.Println("validate Dataset", r)
-		return errors.New("invalid pattern for dataset")
+	if err := CheckPattern("dataset", r.DATASET); err != nil {
+		return err
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return errors.New("invalid pattern for createion date")
