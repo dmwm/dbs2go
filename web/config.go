@@ -22,6 +22,7 @@ type Configuration struct {
 	PrintMonitRecord bool   `json:"print_monit_record"` // print monit record on stdout
 	Hmac             string `json:"hmac"`               // cmsweb hmac file location
 	LimiterPeriod    string `json:"rate"`               // github.com/ulule/limiter rate value
+	MigrationServer  bool   `json:"migration_server"`   // migration server flag
 
 	// db related configuration
 	DBFile             string `json:"dbfile"`               // dbs db file with secrets

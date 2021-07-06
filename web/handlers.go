@@ -368,6 +368,10 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 			return http.StatusInternalServerError, size, err
 		}
 		size, err = api.BlockParents(params, w)
+	} else if a == "submit" {
+		err = api.Submit(body, cby)
+	} else if a == "remove" {
+		err = api.Remove(body, cby)
 	}
 	if err != nil {
 		size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
@@ -452,6 +456,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		size, err = api.ParentDatasetFileLumiIds(params, w)
 	} else if a == "datasetaccesstypes" {
 		size, err = api.DatasetAccessTypes(params, w)
+	} else if a == "status" {
+		size, err = api.Status(params, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
@@ -695,4 +701,23 @@ func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) (int, int6
 // POST API takes no argument, the payload should be supplied as JSON
 func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	return DBSPostHandler(w, r, "bulkblocks")
+}
+
+// Migration server handlers
+
+// MigrateSubmitHandler provides access to Submit DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func MigrateSubmitHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "submit")
+}
+
+// MigrateRemoveHandler provides access to Remove DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func MigrateRemoveHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSPostHandler(w, r, "remove")
+}
+
+// MigrateStatusHandler provides access to Status DBS API
+func MigrateStatusHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+	return DBSGetHandler(w, r, "status")
 }

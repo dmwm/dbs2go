@@ -92,69 +92,76 @@ func handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
 
-	// visible routes
-	router.HandleFunc(basePath("/datatiers"), LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/datasets"), LoggingHandler(DatasetsHandler)).Methods("GET", "POST", "PUT")
-	router.HandleFunc(basePath("/blocks"), LoggingHandler(BlocksHandler)).Methods("GET", "POST", "PUT")
-	router.HandleFunc(basePath("/bulkblocks"), LoggingHandler(BulkBlocksHandler)).Methods("POST")
-	router.HandleFunc(basePath("/blockTrio"), LoggingHandler(BlockTrioHandler)).Methods("GET")
-	router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST", "PUT")
-	router.HandleFunc(basePath("/primarydatasets"), LoggingHandler(PrimaryDatasetsHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/primdstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/parentDSTrio"), LoggingHandler(ParentDSTrioHandler)).Methods("GET")
-	router.HandleFunc(basePath("/acquisitioneras"), LoggingHandler(AcquisitionErasHandler)).Methods("GET", "POST", "PUT")
-	router.HandleFunc(basePath("/releaseversions"), LoggingHandler(ReleaseVersionsHandler)).Methods("GET")
-	router.HandleFunc(basePath("/physicsgroups"), LoggingHandler(PhysicsGroupsHandler)).Methods("GET")
-	router.HandleFunc(basePath("/primarydstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET")
-	router.HandleFunc(basePath("/datatypes"), LoggingHandler(DataTypesHandler)).Methods("GET")
-	router.HandleFunc(basePath("/processingeras"), LoggingHandler(ProcessingErasHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/outputconfigs"), LoggingHandler(OutputConfigsHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/datasetaccesstypes"), LoggingHandler(DatasetAccessTypesHandler)).Methods("GET")
+	if Config.MigrationServer {
+		router.HandleFunc(basePath("/submit"), LoggingHandler(MigrateSubmitHandler)).Methods("POST")
+		router.HandleFunc(basePath("/remove"), LoggingHandler(MigrateRemoveHandler)).Methods("POST")
+		router.HandleFunc(basePath("/status"), LoggingHandler(MigrateStatusHandler)).Methods("GET")
+	} else {
 
-	router.HandleFunc(basePath("/runs"), LoggingHandler(RunsHandler)).Methods("GET")
-	router.HandleFunc(basePath("/runsummaries"), LoggingHandler(RunSummariesHandler)).Methods("GET")
+		// visible routes
+		router.HandleFunc(basePath("/datatiers"), LoggingHandler(DatatiersHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/datasets"), LoggingHandler(DatasetsHandler)).Methods("GET", "POST", "PUT")
+		router.HandleFunc(basePath("/blocks"), LoggingHandler(BlocksHandler)).Methods("GET", "POST", "PUT")
+		router.HandleFunc(basePath("/bulkblocks"), LoggingHandler(BulkBlocksHandler)).Methods("POST")
+		router.HandleFunc(basePath("/blockTrio"), LoggingHandler(BlockTrioHandler)).Methods("GET")
+		router.HandleFunc(basePath("/files"), LoggingHandler(FilesHandler)).Methods("GET", "POST", "PUT")
+		router.HandleFunc(basePath("/primarydatasets"), LoggingHandler(PrimaryDatasetsHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/primdstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/parentDSTrio"), LoggingHandler(ParentDSTrioHandler)).Methods("GET")
+		router.HandleFunc(basePath("/acquisitioneras"), LoggingHandler(AcquisitionErasHandler)).Methods("GET", "POST", "PUT")
+		router.HandleFunc(basePath("/releaseversions"), LoggingHandler(ReleaseVersionsHandler)).Methods("GET")
+		router.HandleFunc(basePath("/physicsgroups"), LoggingHandler(PhysicsGroupsHandler)).Methods("GET")
+		router.HandleFunc(basePath("/primarydstypes"), LoggingHandler(PrimaryDSTypesHandler)).Methods("GET")
+		router.HandleFunc(basePath("/datatypes"), LoggingHandler(DataTypesHandler)).Methods("GET")
+		router.HandleFunc(basePath("/processingeras"), LoggingHandler(ProcessingErasHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/outputconfigs"), LoggingHandler(OutputConfigsHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/datasetaccesstypes"), LoggingHandler(DatasetAccessTypesHandler)).Methods("GET")
 
-	router.HandleFunc(basePath("/blockorigin"), LoggingHandler(BlockOriginHandler)).Methods("GET")
-	router.HandleFunc(basePath("/blockTrio"), LoggingHandler(DummyHandler)).Methods("GET")
-	router.HandleFunc(basePath("/blockdump"), LoggingHandler(DummyHandler)).Methods("GET")
-	router.HandleFunc(basePath("/blockchildren"), LoggingHandler(BlockChildrenHandler)).Methods("GET")
-	router.HandleFunc(basePath("/blockparents"), LoggingHandler(BlockParentsHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/blocksummaries"), LoggingHandler(BlockSummariesHandler)).Methods("GET")
+		router.HandleFunc(basePath("/runs"), LoggingHandler(RunsHandler)).Methods("GET")
+		router.HandleFunc(basePath("/runsummaries"), LoggingHandler(RunSummariesHandler)).Methods("GET")
 
-	router.HandleFunc(basePath("/filechildren"), LoggingHandler(FileChildrenHandler)).Methods("GET")
-	router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/filesummaries"), LoggingHandler(FileSummariesHandler)).Methods("GET")
-	router.HandleFunc(basePath("/filelumis"), LoggingHandler(FileLumisHandler)).Methods("GET", "POST")
-	router.HandleFunc(basePath("/datasetchildren"), LoggingHandler(DatasetChildrenHandler)).Methods("GET")
-	router.HandleFunc(basePath("/datasetparents"), LoggingHandler(DatasetParentsHandler)).Methods("GET")
-	router.HandleFunc(basePath("/parentDSTrio"), LoggingHandler(ParentDSTrioHandler)).Methods("GET")
-	router.HandleFunc(basePath("/acquisitioneras_ci"), LoggingHandler(AcquisitionErasCiHandler)).Methods("GET")
+		router.HandleFunc(basePath("/blockorigin"), LoggingHandler(BlockOriginHandler)).Methods("GET")
+		router.HandleFunc(basePath("/blockTrio"), LoggingHandler(DummyHandler)).Methods("GET")
+		router.HandleFunc(basePath("/blockdump"), LoggingHandler(DummyHandler)).Methods("GET")
+		router.HandleFunc(basePath("/blockchildren"), LoggingHandler(BlockChildrenHandler)).Methods("GET")
+		router.HandleFunc(basePath("/blockparents"), LoggingHandler(BlockParentsHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/blocksummaries"), LoggingHandler(BlockSummariesHandler)).Methods("GET")
 
-	// POST routes
-	router.HandleFunc(basePath("/fileArray"), LoggingHandler(FileArrayHandler)).Methods("POST")
-	router.HandleFunc(basePath("/datasetlist"), LoggingHandler(DatasetListHandler)).Methods("POST")
-	router.HandleFunc(basePath("/fileparentsbylumi"), LoggingHandler(FileParentsByLumiHandler)).Methods("POST")
+		router.HandleFunc(basePath("/filechildren"), LoggingHandler(FileChildrenHandler)).Methods("GET")
+		router.HandleFunc(basePath("/fileparents"), LoggingHandler(FileParentsHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/filesummaries"), LoggingHandler(FileSummariesHandler)).Methods("GET")
+		router.HandleFunc(basePath("/filelumis"), LoggingHandler(FileLumisHandler)).Methods("GET", "POST")
+		router.HandleFunc(basePath("/datasetchildren"), LoggingHandler(DatasetChildrenHandler)).Methods("GET")
+		router.HandleFunc(basePath("/datasetparents"), LoggingHandler(DatasetParentsHandler)).Methods("GET")
+		router.HandleFunc(basePath("/parentDSTrio"), LoggingHandler(ParentDSTrioHandler)).Methods("GET")
+		router.HandleFunc(basePath("/acquisitioneras_ci"), LoggingHandler(AcquisitionErasCiHandler)).Methods("GET")
 
-	// aux APIs
-	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
-	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
-	router.HandleFunc(basePath("/help"), HelpHandler).Methods("GET")
-	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
-	router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
+		// POST routes
+		router.HandleFunc(basePath("/fileArray"), LoggingHandler(FileArrayHandler)).Methods("POST")
+		router.HandleFunc(basePath("/datasetlist"), LoggingHandler(DatasetListHandler)).Methods("POST")
+		router.HandleFunc(basePath("/fileparentsbylumi"), LoggingHandler(FileParentsByLumiHandler)).Methods("POST")
 
-	// load graphql
-	if Config.GraphQLSchema != "" {
-		//         schema := dbsGraphQL.InitSchema(Config.GraphQLSchema, dbs.DB)
-		//         router.Handle("/query", &relay.Handler{Schema: schema})
-		router.HandleFunc(basePath("/query"), LoggingHandler(QueryHandler)).Methods("POST")
+		// aux APIs
+		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
+		router.HandleFunc(basePath("/help"), HelpHandler).Methods("GET")
+		router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
+		router.HandleFunc(basePath("/dummy"), LoggingHandler(DummyHandler)).Methods("GET", "POST")
+
+		// load graphql
+		if Config.GraphQLSchema != "" {
+			//         schema := dbsGraphQL.InitSchema(Config.GraphQLSchema, dbs.DB)
+			//         router.Handle("/query", &relay.Handler{Schema: schema})
+			router.HandleFunc(basePath("/query"), LoggingHandler(QueryHandler)).Methods("POST")
+		}
+
+		// more complex example
+		// https://github.com/gorilla/mux
+		//     router.Path(basePath("/dummy")).
+		//         Queries("bla", "{bla}").
+		//         HandlerFunc(LoggingHandler(DummyHandler)).
+		//         Methods("GET")
 	}
-
-	// more complex example
-	// https://github.com/gorilla/mux
-	//     router.Path(basePath("/dummy")).
-	//         Queries("bla", "{bla}").
-	//         HandlerFunc(LoggingHandler(DummyHandler)).
-	//         Methods("GET")
 
 	// for all requests perform first auth/authz action
 	router.Use(authMiddleware)
