@@ -1,0 +1,3 @@
+UPDATE {{.Owner}}.MIGRATION_REQUESTS
+SET MIGRATION_STATUS=:migration_status
+WHERE MIGRATION_REQUEST_ID=:migration_request_id
