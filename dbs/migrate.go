@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 /*
@@ -34,8 +36,81 @@ type MigrationReport struct {
 	Details string `json:"details"`
 }
 
+// helper function to get blocks from remote DBS server (remote url)
+// the val parameter can be either dataset or block name
+// it return list of blocks obtained from blocks API
+func getBlocks(rurl, val string) ([]string, error) {
+	var out []string
+	client := HttpClient(Ckey, Cert, Timeout)
+	if strings.Contains(val, "#") {
+		rurl = fmt.Sprintf("%s/blocks?block_name=%s&open_for_writing=0", rurl, url.QueryEscape(val))
+	} else {
+		rurl = fmt.Sprintf("%s/blocks?dataset=%s&open_for_writing=0", rurl, val)
+	}
+	req, err := http.NewRequest("GET", rurl, nil)
+	if err != nil {
+		return out, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return out, err
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return out, err
+	}
+	var rec []Blocks
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		return out, err
+	}
+	for _, v := range rec {
+		out = append(out, v.BLOCK_NAME)
+	}
+	return out, nil
+}
+
+// helper function to prepare the ordered lists of blocks based on input BLOCK
+func prepareBlockMigrationList(url, block string) []string {
+	/*
+		1. see if block already exists at dst (no need to migrate),
+		   raise "ALREADY EXISTS"
+		2. see if block exists at src & make sure the block's open_for_writing=0
+		3. see if block has parents
+		4. see if parent blocks are already at dst
+		5. add 'order' to parent and then this block (ascending)
+		6. return the ordered list
+	*/
+	var out []string
+	return out
+}
+
+// helper function to prepare the ordered lists of blocks based on input DATASET
+func prepareDatasetMigrationList(url, dataset string) []string {
+	/*
+		1. Get list of blocks from source
+		   - for a given dataset get list of blocks from local DB and remote url
+		2. Check and see if these blocks are already at DST
+		3. Check if dataset has parents
+		4. Check if parent blocks are already at DST
+	*/
+	var out []string
+	return out
+}
+
 // Submit DBS API
 func (API) Submit(r io.Reader, cby string) error {
+	/* Logic of submit API:
+	- check if migration_input is already queued
+	  - if already queued it should return migration_status
+	  - if not prepare ordered list of dataset or block to migrate
+	- iterate over ordered list of datasets or blocks
+	  - prepare and insert MigrationBlocks object
+	- return MigrationReport object
+	*/
 	// read given input
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
