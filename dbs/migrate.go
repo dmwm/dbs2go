@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 )
 
@@ -61,7 +62,8 @@ func getBlocks(rurl, val string) ([]string, error) {
 }
 
 // helper function to prepare the ordered lists of blocks based on input BLOCK
-func prepareBlockMigrationList(rurl, block string) [][]string {
+// return map of blocks with their parents
+func prepareBlockMigrationList(rurl, block string) map[string][]string {
 	/*
 		1. see if block already exists at dst (no need to migrate),
 		   raise "ALREADY EXISTS"
@@ -71,12 +73,13 @@ func prepareBlockMigrationList(rurl, block string) [][]string {
 		5. add 'order' to parent and then this block (ascending)
 		6. return the ordered list
 	*/
-	var out [][]string
+	var out map[string][]string
 	return out
 }
 
 // helper function to prepare the ordered lists of blocks based on input DATASET
-func prepareDatasetMigrationList(rurl, dataset string) [][]string {
+// return map of blocks with their parents
+func prepareDatasetMigrationList(rurl, dataset string) map[string][]string {
 	/*
 		1. Get list of blocks from source
 		   - for a given dataset get list of blocks from local DB and remote url
@@ -84,7 +87,7 @@ func prepareDatasetMigrationList(rurl, dataset string) [][]string {
 		3. Check if dataset has parents
 		4. Check if parent blocks are already at DST
 	*/
-	var out [][]string
+	var out map[string][]string
 	return out
 }
 
@@ -135,13 +138,19 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	if err := alreadyQueued(input, w); err != nil {
 		return err
 	}
-	var orderedList [][]string
+	var migBlocks map[string][]string
 	rurl := rec.MIGRATION_URL
 	if strings.Contains(input, "#") {
-		orderedList = prepareBlockMigrationList(rurl, input)
+		migBlocks = prepareBlockMigrationList(rurl, input)
 	} else {
-		orderedList = prepareDatasetMigrationList(rurl, input)
+		migBlocks = prepareDatasetMigrationList(rurl, input)
 	}
+
+	var orderedList []string
+	for k, _ := range migBlocks {
+		orderedList = append(orderedList, k)
+	}
+	sort.Sort(sort.Reverse(sort.StringSlice(orderedList)))
 
 	// start transaction
 	tx, err := DB.Begin()
@@ -150,11 +159,17 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	}
 	defer tx.Rollback()
 
+	// insert MigrationRequest object
+	err = rec.Insert(tx)
+	if err != nil {
+		return writeReport("fail to insert MigrationBlocks record", err, w)
+	}
+
 	// loop over orderedList which is [[blocks], [blocks]]
 	// and insert every chunk of blocks as MigrationBlocks objects
 	var totalQueued int
-	for idx, blocks := range orderedList {
-		for _, blk := range blocks {
+	for idx, b := range orderedList {
+		for _, blk := range migBlocks[b] {
 			// set migration record
 			mrec := MigrationBlocks{
 				MIGRATION_STATUS:       rec.MIGRATION_STATUS,
