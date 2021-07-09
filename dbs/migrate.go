@@ -41,24 +41,12 @@ type MigrationReport struct {
 // it return list of blocks obtained from blocks API
 func getBlocks(rurl, val string) ([]string, error) {
 	var out []string
-	client := HttpClient(Ckey, Cert, Timeout)
 	if strings.Contains(val, "#") {
 		rurl = fmt.Sprintf("%s/blocks?block_name=%s&open_for_writing=0", rurl, url.QueryEscape(val))
 	} else {
 		rurl = fmt.Sprintf("%s/blocks?dataset=%s&open_for_writing=0", rurl, val)
 	}
-	req, err := http.NewRequest("GET", rurl, nil)
-	if err != nil {
-		return out, err
-	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		return out, err
-	}
-	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := getData(rurl)
 	if err != nil {
 		return out, err
 	}

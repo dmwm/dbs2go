@@ -3,6 +3,7 @@ package dbs
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -86,4 +87,23 @@ func HttpClient(key, cert string, tout int) *http.Client {
 		return &http.Client{Transport: tr, Timeout: timeout}
 	}
 	return &http.Client{Transport: tr}
+}
+
+// helper function to perform HTTP GET request and return its data
+func getData(rurl string) ([]byte, error) {
+	var out []byte
+	client := HttpClient(Ckey, Cert, Timeout)
+	req, err := http.NewRequest("GET", rurl, nil)
+	if err != nil {
+		return out, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return out, err
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	return data, err
 }
