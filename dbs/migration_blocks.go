@@ -13,7 +13,7 @@ type MigrationBlocks struct {
 	MIGRATION_BLOCK_ID     int64  `json:"migration_block_id"`
 	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id"`
 	MIGRATION_BLOCK_NAME   string `json:"migration_block_name"`
-	MIGRATION_ORDER        string `json:"migration_order"`
+	MIGRATION_ORDER        int64  `json:"migration_order"`
 	MIGRATION_STATUS       int64  `json:"migration_status"`
 	CREATE_BY              string `json:"create_by"`
 	CREATION_DATE          int64  `json:"creation_date"`

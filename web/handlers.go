@@ -369,9 +369,9 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		}
 		size, err = api.BlockParents(params, w)
 	} else if a == "submit" {
-		err = api.Submit(body, cby)
+		err = api.Submit(body, cby, w)
 	} else if a == "remove" {
-		err = api.Remove(body, cby)
+		err = api.Remove(body, cby, w)
 	}
 	if err != nil {
 		size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)

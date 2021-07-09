@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -62,7 +61,7 @@ func getBlocks(rurl, val string) ([]string, error) {
 }
 
 // helper function to prepare the ordered lists of blocks based on input BLOCK
-func prepareBlockMigrationList(url, block string) []string {
+func prepareBlockMigrationList(rurl, block string) [][]string {
 	/*
 		1. see if block already exists at dst (no need to migrate),
 		   raise "ALREADY EXISTS"
@@ -72,12 +71,12 @@ func prepareBlockMigrationList(url, block string) []string {
 		5. add 'order' to parent and then this block (ascending)
 		6. return the ordered list
 	*/
-	var out []string
+	var out [][]string
 	return out
 }
 
 // helper function to prepare the ordered lists of blocks based on input DATASET
-func prepareDatasetMigrationList(url, dataset string) []string {
+func prepareDatasetMigrationList(rurl, dataset string) [][]string {
 	/*
 		1. Get list of blocks from source
 		   - for a given dataset get list of blocks from local DB and remote url
@@ -85,60 +84,109 @@ func prepareDatasetMigrationList(url, dataset string) []string {
 		3. Check if dataset has parents
 		4. Check if parent blocks are already at DST
 	*/
-	var out []string
+	var out [][]string
 	return out
 }
 
+// helper function to check if migration is already queued
+func alreadyQueued(input string, w http.ResponseWriter) error {
+	report := MigrationReport{}
+	data, err := json.Marshal(report)
+	if err == nil {
+		w.Write(data)
+	}
+	return err
+}
+
+// helper function to write Migration Report to http response writer and return its error to upstream caller
+func writeReport(msg string, err error, w http.ResponseWriter) error {
+	report := MigrationReport{Report: msg, Details: fmt.Sprintf("%v", err)}
+	log.Println(msg, err)
+	if data, e := json.Marshal(report); e == nil {
+		w.Write(data)
+	}
+	return err
+}
+
 // Submit DBS API
-func (API) Submit(r io.Reader, cby string) error {
+func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	/* Logic of submit API:
 	- check if migration_input is already queued
 	  - if already queued it should return migration_status
 	  - if not prepare ordered list of dataset or block to migrate
 	- iterate over ordered list of datasets or blocks
 	  - prepare and insert MigrationBlocks object
-	- return MigrationReport object
+	- write MigrationReport object
 	*/
+
 	// read given input
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
-		log.Println("fail to read data", err)
-		return err
+		return writeReport("fail to read data", err, w)
 	}
 	rec := MigrationRequests{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Println("fail to decode data", err)
-		return err
+		return writeReport("fail to decode data", err, w)
 	}
 
-	// set migration record
-	mrec := MigrationRequests{MIGRATION_URL: rec.MIGRATION_URL, MIGRATION_INPUT: rec.MIGRATION_INPUT, MIGRATION_STATUS: rec.MIGRATION_STATUS, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
+	// check if migration input is already queued
+	input := rec.MIGRATION_INPUT
+	if err := alreadyQueued(input, w); err != nil {
+		return err
+	}
+	var orderedList [][]string
+	rurl := rec.MIGRATION_URL
+	if strings.Contains(input, "#") {
+		orderedList = prepareBlockMigrationList(rurl, input)
+	} else {
+		orderedList = prepareDatasetMigrationList(rurl, input)
+	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		return writeReport("unable to get DB transaction", err, w)
 	}
 	defer tx.Rollback()
 
-	err = mrec.Insert(tx)
-	if err != nil {
-		return err
+	// loop over orderedList which is [[blocks], [blocks]]
+	// and insert every chunk of blocks as MigrationBlocks objects
+	var totalQueued int
+	for idx, blocks := range orderedList {
+		for _, blk := range blocks {
+			// set migration record
+			mrec := MigrationBlocks{
+				MIGRATION_STATUS:       rec.MIGRATION_STATUS,
+				MIGRATION_ORDER:        int64(idx),
+				MIGRATION_BLOCK_NAME:   blk,
+				CREATION_DATE:          rec.CREATION_DATE,
+				CREATE_BY:              rec.CREATE_BY,
+				LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
+				LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
+			err = mrec.Insert(tx)
+			if err != nil {
+				return writeReport("fail to insert MigrationBlocks record", err, w)
+			}
+			totalQueued += 1
+		}
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("fail to commit transaction", err)
-		return err
+		return writeReport("fail to commit transaction", err, w)
+	}
+	report := MigrationReport{Report: fmt.Sprintf("REQUEST QUEUED with total %d blocks to be migrated", totalQueued), Details: string(data)}
+	data, err = json.Marshal(report)
+	if err == nil {
+		w.Write(data)
 	}
 	return err
 }
 
 // Remove DBS API
-func (API) Remove(r io.Reader, cby string) error {
+func (API) Remove(r io.Reader, cby string, w http.ResponseWriter) error {
 	return nil
 }
 
