@@ -200,12 +200,94 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	return err
 }
 
+// MigrationRemoveRequest represents migration remove request object
+type MigrationRemoveRequest struct {
+	MIGRATION_REQUEST_ID int64  `json:"migration_rqst_id"`
+	CREATE_BY            string `json:"create_by"`
+}
+
 // Remove DBS API
 func (API) Remove(r io.Reader, cby string, w http.ResponseWriter) error {
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return writeReport("fail to read data", err, w)
+	}
+	rec := MigrationRemoveRequest{CREATE_BY: cby}
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		return writeReport("fail to decode data", err, w)
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		return writeReport("unable to get DB transaction", err, w)
+	}
+	defer tx.Rollback()
+
+	stm := getSQL("count_migration_requests")
+	var tid float64
+	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY).Scan(&tid)
+	if err != nil {
+		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
+		return writeReport(msg, err, w)
+	}
+
+	if tid > 1 {
+		stm = getSQL("remove_migration_requests")
+		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+		err = tx.Commit()
+		if err != nil {
+			return writeReport("fail to commit transaction", err, w)
+		}
+	}
 	return nil
+}
+
+// MigrationStatusRequest defines status request structure
+type MigrationStatusRequest struct {
+	BLOCK_NAME string `json:"block_name"`
+	DATASET    string `json:"dataset"`
+	USER       string `json:"user"`
 }
 
 // Status DBS API
 func (API) Status(params Record, w http.ResponseWriter) (int64, error) {
-	return 0, nil
+	var args []interface{}
+	var conds []string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+
+	oldest, _ := getSingleValue(params, "oldest")
+	if oldest == "true" {
+		tmpl["Oldest"] = true
+	}
+	if _, e := getSingleValue(params, "migration_request_id"); e == nil {
+		conds, args = AddParam("migration_request_id", "MR.MIGRATION_REQUEST_ID", params, conds, args)
+	}
+	if _, e := getSingleValue(params, "migration_input"); e == nil {
+		conds, args = AddParam("migration_input", "MR.MIGRATION_INPUT", params, conds, args)
+	}
+	if _, e := getSingleValue(params, "migration_url"); e == nil {
+		conds, args = AddParam("migration_url", "MR.MIGRATION_URL", params, conds, args)
+	}
+	if _, e := getSingleValue(params, "dataset"); e == nil {
+		conds, args = AddParam("dataset", "MR.DATASET", params, conds, args)
+	}
+	if _, e := getSingleValue(params, "block_name"); e == nil {
+		conds, args = AddParam("block_name", "MR.BLOCK_NAME", params, conds, args)
+	}
+	if _, e := getSingleValue(params, "user"); e == nil {
+		conds, args = AddParam("user", "MR.USER", params, conds, args)
+	}
+	if _, e := getSingleValue(params, "create_by"); e == nil {
+		conds, args = AddParam("create_by", "MR.CREATE_BY", params, conds, args)
+	}
+
+	// get SQL statement from static area
+	stm := getSQL("migration_requests")
+	stm = WhereClause(stm, conds)
+
+	// use generic query API to fetch the results from DB
+	return executeAll(w, stm, args...)
 }
