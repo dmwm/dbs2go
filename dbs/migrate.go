@@ -2,6 +2,7 @@ package dbs
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,6 +11,8 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 /*
@@ -63,7 +66,7 @@ func getBlocks(rurl, val string) ([]string, error) {
 
 // helper function to prepare the ordered lists of blocks based on input BLOCK
 // return map of blocks with their parents
-func prepareBlockMigrationList(rurl, block string) map[string][]string {
+func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	/*
 		1. see if block already exists at dst (no need to migrate),
 		   raise "ALREADY EXISTS"
@@ -73,13 +76,51 @@ func prepareBlockMigrationList(rurl, block string) map[string][]string {
 		5. add 'order' to parent and then this block (ascending)
 		6. return the ordered list
 	*/
-	var out map[string][]string
-	return out
+	var out map[int][]string
+
+	// check if block exists at destination (this server)
+	localhost := utils.BasePath(utils.BASE, "/blocks")
+	dstblocks, err := getBlocks(localhost, block)
+	if err != nil {
+		return out, err
+	}
+	if len(dstblocks) > 0 {
+		msg := fmt.Sprintf("requested blocks %v is already at destination", dstblocks)
+		return out, errors.New(msg)
+	}
+
+	// check if block exists at a source location
+	srcblocks, err := getBlocks(rurl, block)
+	if err != nil {
+		return out, err
+	}
+	if len(srcblocks) == 0 {
+		msg := fmt.Sprintf("requested block %s is not found at %s", block, rurl)
+		return out, errors.New(msg)
+	}
+	// we need to migrate existing block
+	var blocks []string
+	blocks = append(blocks, block)
+	out[0] = blocks
+	parentBlocks, err := getParentBlocksOrderedList(rurl, block)
+	if err != nil {
+		return out, err
+	}
+	for idx, blks := range parentBlocks {
+		out[idx] = blks
+	}
+	return out, nil
+}
+
+// helper function to get parent blocks ordered list for given url and block name
+func getParentBlocksOrderedList(rurl, block string) (map[int][]string, error) {
+	var out map[int][]string
+	return out, nil
 }
 
 // helper function to prepare the ordered lists of blocks based on input DATASET
 // return map of blocks with their parents
-func prepareDatasetMigrationList(rurl, dataset string) map[string][]string {
+func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error) {
 	/*
 		1. Get list of blocks from source
 		   - for a given dataset get list of blocks from local DB and remote url
@@ -87,8 +128,8 @@ func prepareDatasetMigrationList(rurl, dataset string) map[string][]string {
 		3. Check if dataset has parents
 		4. Check if parent blocks are already at DST
 	*/
-	var out map[string][]string
-	return out
+	var out map[int][]string
+	return out, nil
 }
 
 // helper function to check if migration is already queued
@@ -138,19 +179,22 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	if err := alreadyQueued(input, w); err != nil {
 		return err
 	}
-	var migBlocks map[string][]string
+	var migBlocks map[int][]string
 	rurl := rec.MIGRATION_URL
 	if strings.Contains(input, "#") {
-		migBlocks = prepareBlockMigrationList(rurl, input)
+		migBlocks, err = prepareBlockMigrationList(rurl, input)
 	} else {
-		migBlocks = prepareDatasetMigrationList(rurl, input)
+		migBlocks, err = prepareDatasetMigrationList(rurl, input)
+	}
+	if err != nil {
+		return err
 	}
 
-	var orderedList []string
+	var orderedList []int
 	for k, _ := range migBlocks {
 		orderedList = append(orderedList, k)
 	}
-	sort.Sort(sort.Reverse(sort.StringSlice(orderedList)))
+	sort.Sort(sort.Reverse(sort.IntSlice(orderedList)))
 
 	// start transaction
 	tx, err := DB.Begin()

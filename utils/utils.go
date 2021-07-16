@@ -22,6 +22,7 @@ var VERBOSE int
 var STATICDIR string
 var PROFILE bool
 var ORACLE bool
+var BASE string
 
 // GzipReader struct to handle GZip'ed content of HTTP requests
 type GzipReader struct {
@@ -231,4 +232,18 @@ func PrintSQL(stm string, args []interface{}, msg string) {
 	for _, v := range args {
 		fmt.Printf("\t'%v'\n", v)
 	}
+}
+
+// BasePath function provides end-point path for given api string
+func BasePath(base, api string) string {
+	if base != "" {
+		if strings.HasPrefix(api, "/") {
+			api = strings.Replace(api, "/", "", 1)
+		}
+		if strings.HasPrefix(base, "/") {
+			return fmt.Sprintf("%s/%s", base, api)
+		}
+		return fmt.Sprintf("/%s/%s", base, api)
+	}
+	return api
 }

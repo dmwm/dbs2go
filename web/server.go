@@ -74,18 +74,9 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
 
-// helper function to provide end-point path
-func basePath(s string) string {
-	if Config.Base != "" {
-		if strings.HasPrefix(s, "/") {
-			s = strings.Replace(s, "/", "", 1)
-		}
-		if strings.HasPrefix(Config.Base, "/") {
-			return fmt.Sprintf("%s/%s", Config.Base, s)
-		}
-		return fmt.Sprintf("/%s/%s", Config.Base, s)
-	}
-	return s
+// helper function to use utils.BasePath
+func basePath(api string) string {
+	return utils.BasePath(Config.Base, api)
 }
 
 func handlers() *mux.Router {
@@ -183,6 +174,7 @@ func Server(configFile string) {
 	}
 	utils.VERBOSE = Config.Verbose
 	utils.STATICDIR = Config.StaticDir
+	utils.BASE = Config.Base
 	log.SetFlags(0)
 	if Config.Verbose > 0 {
 		log.SetFlags(log.Lshortfile)
