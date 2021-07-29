@@ -4,7 +4,7 @@ SELECT MR.MIGRATION_REQUEST_ID, MR.MIGRATION_URL,
        MR.LAST_MODIFIED_BY, MR.LAST_MODIFICATION_DATE, MR.RETRY_COUNT
 FROM {{.Owner}}.MIGRATION_REQUESTS MR
 
-if {{.Oldest}}
+{{if .Oldest}}
 WHERE MR.MIGRATION_STATUS=0
 or (MR.migration_status=3 and MR.retry_count=0 and MR.last_modification_date <= :current_date-60)
 or (MR.migration_status=3 and MR.retry_count=1 and MR.last_modification_date <= :current_date-120)
