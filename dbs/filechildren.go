@@ -8,7 +8,7 @@ import (
 )
 
 // FileChildren API
-func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
+func (API) FileChildren(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -17,7 +17,7 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	blocks := getValues(params, "block_name")
@@ -29,7 +29,7 @@ func (API) FileChildren(params Record, w http.ResponseWriter) (int64, error) {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("filechildren", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	lfns := getValues(params, "logical_file_name")

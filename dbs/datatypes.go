@@ -6,7 +6,7 @@ import (
 )
 
 // DataTypes DBS API
-func (API) DataTypes(params Record, w http.ResponseWriter) (int64, error) {
+func (API) DataTypes(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 

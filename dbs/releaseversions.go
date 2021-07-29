@@ -13,7 +13,7 @@ import (
 )
 
 // ReleaseVersions DBS API
-func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) {
+func (API) ReleaseVersions(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -21,7 +21,7 @@ func (API) ReleaseVersions(params Record, w http.ResponseWriter) (int64, error) 
 	releaseversions := getValues(params, "release_version")
 	if len(releaseversions) > 1 {
 		msg := "The releaseversions API does not support list of releaseversions"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	} else if len(releaseversions) == 1 {
 		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", params, conds, args)
 	}

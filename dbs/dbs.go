@@ -257,16 +257,15 @@ func CleanStatement(stm string) string {
 // here we use http response writer in order to make encoder
 // then we literally stream data with our encoder (i.e. write records
 // to writer)
-func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, error) {
+func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
-		return 0, nil
+		return nil
 	}
 	if utils.VERBOSE > 1 {
 		utils.PrintSQL(stm, args, "execute")
 	}
-	var size int64
 	var enc *json.Encoder
 	if w != nil {
 		enc = json.NewEncoder(w)
@@ -278,13 +277,13 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer rows.Close()
 
@@ -305,7 +304,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
 			msg := fmt.Sprintf("unable to scan DB results %s", err)
-			return 0, errors.New(msg)
+			return errors.New(msg)
 		}
 		if rowCount != 0 && w != nil {
 			w.Write([]byte(",\n"))
@@ -346,32 +345,27 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) (int64, 
 		if w != nil {
 			err = enc.Encode(rec)
 			if err != nil {
-				return 0, err
+				return err
 			}
-		}
-		s, e := utils.RecordSize(rec)
-		if e == nil {
-			size += s
 		}
 	}
 	if err = rows.Err(); err != nil {
 		msg := fmt.Sprintf("rows error %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
-	return size, nil
+	return nil
 }
 
 // similar to executeAll function but it takes explicit set of columns and values
-func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) (int64, error) {
+func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) error {
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
-		return 0, nil
+		return nil
 	}
 	if utils.VERBOSE > 1 {
 		utils.PrintSQL(stm, args, "execute")
 	}
-	var size int64
 	var enc *json.Encoder
 	if w != nil {
 		enc = json.NewEncoder(w)
@@ -383,13 +377,13 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to obtain transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer rows.Close()
 
@@ -399,7 +393,7 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 		err := rows.Scan(vals...)
 		if err != nil {
 			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
-			return 0, errors.New(msg)
+			return errors.New(msg)
 		}
 		if rowCount != 0 && w != nil {
 			w.Write([]byte(",\n"))
@@ -436,18 +430,14 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 		if w != nil {
 			err = enc.Encode(rec)
 			if err != nil {
-				return 0, err
+				return err
 			}
-		}
-		s, e := utils.RecordSize(rec)
-		if e == nil {
-			size += s
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return 0, err
+		return err
 	}
-	return size, nil
+	return nil
 }
 
 // helper function to execute sessions

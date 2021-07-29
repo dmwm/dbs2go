@@ -5,7 +5,7 @@ import (
 )
 
 // ParentDatasetFileLumiIds API
-func (API) ParentDatasetFileLumiIds(params Record, w http.ResponseWriter) (int64, error) {
+func (API) ParentDatasetFileLumiIds(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -14,7 +14,7 @@ func (API) ParentDatasetFileLumiIds(params Record, w http.ResponseWriter) (int64
 	// create our SQL statement
 	stm, err := LoadTemplateSQL("parentdatasetfilelumiids", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// add dataset condition

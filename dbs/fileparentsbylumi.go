@@ -9,7 +9,7 @@ import (
 )
 
 // FileParentsByLumi DBS API
-func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error) {
+func (API) FileParentsByLumi(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -20,7 +20,7 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 
 	blockNames := getValues(params, "block_name")
 	if len(blockNames) == 0 {
-		return 0, errors.New("Missing block_name for listFileParentssByLumi")
+		return errors.New("Missing block_name for listFileParentssByLumi")
 	}
 	blk := blockNames[0]
 	dataset := strings.Split(blk, "#")[0]
@@ -40,7 +40,7 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) (int64, error
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("fileparentsbylumi", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	stm = WhereClause(stm, conds)
 

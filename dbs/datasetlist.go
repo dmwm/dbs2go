@@ -7,7 +7,7 @@ import (
 )
 
 // DatasetList DBS API
-func (api API) DatasetList(params Record, w http.ResponseWriter) (int64, error) {
+func (api API) DatasetList(params Record, w http.ResponseWriter) error {
 	// perform some data preprocessing on given record
 	log.Printf("DatasetList data %+v", params)
 	return api.Datasets(params, w)

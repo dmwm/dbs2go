@@ -15,7 +15,7 @@ import (
 )
 
 // AcquisitionEras DBS API
-func (API) AcquisitionEras(params Record, w http.ResponseWriter) (int64, error) {
+func (API) AcquisitionEras(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string

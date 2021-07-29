@@ -131,8 +131,13 @@ func (o StrPattern) Check(key string, val interface{}) error {
 	default:
 		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
 	}
+	if len(o.Patterns) == 0 {
+		// nothing to match in patterns
+		return nil
+	}
 	if len(v) > o.Len {
-		return errors.New(fmt.Sprintf("length of %s exceed %d charactoers", v, o.Len))
+		log.Println("lexicon str pattern", o)
+		return errors.New(fmt.Sprintf("length of %s exceed %d characters", v, o.Len))
 	}
 	for _, pat := range o.Patterns {
 		if matched := pat.MatchString(v); matched {

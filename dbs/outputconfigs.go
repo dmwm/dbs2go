@@ -16,7 +16,7 @@ import (
 )
 
 // OutputConfigs DBS API
-func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
+func (API) OutputConfigs(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -26,7 +26,7 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	block_id := getValues(params, "block_id")
 	if len(block_id) > 1 {
 		msg := "The outputconfigs API does not support list of block_id"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	} else if len(block_id) == 1 {
 		_, bid = OperatorValue(block_id[0])
 	}
@@ -52,7 +52,7 @@ func (API) OutputConfigs(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	stm, err := LoadTemplateSQL("outputconfigs", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	stm = WhereClause(stm, conds)
 

@@ -5,7 +5,7 @@ import (
 )
 
 // OutputModules DBS API
-func (API) OutputModules(params Record, w http.ResponseWriter) (int64, error) {
+func (API) OutputModules(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -34,7 +34,7 @@ func (API) OutputModules(params Record, w http.ResponseWriter) (int64, error) {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("outputmodule", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	stm = WhereClause(stm, conds)
 

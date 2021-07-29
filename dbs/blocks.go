@@ -17,7 +17,7 @@ import (
 )
 
 // Blocks DBS API
-func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
+func (API) Blocks(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -38,7 +38,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	// which should contain bind variables
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
-		return 0, err
+		return err
 	}
 	if len(runs) > 0 {
 		tmpl["Runs"] = true
@@ -106,7 +106,7 @@ func (API) Blocks(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	stm, err := LoadTemplateSQL("blocks", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	stm = WhereClause(stm, conds)
 

@@ -16,7 +16,7 @@ import (
 )
 
 // Datasets API
-func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
+func (API) Datasets(params Record, w http.ResponseWriter) error {
 	log.Printf("datasets params %+v", params)
 	var args []interface{}
 	var conds []string
@@ -33,7 +33,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	// whose bind parameters should appear first
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
-		return 0, err
+		return err
 	}
 	if len(runs) > 0 {
 		tmpl["Runs"] = true
@@ -197,7 +197,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) (int64, error) {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("datasets", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	cols := []string{"dataset_id", "dataset", "prep_id", "xtcrosssection", "creation_date", "create_by", "last_modification_date", "last_modified_by", "primary_ds_name", "primary_ds_type", "processed_ds_name", "data_tier_name", "dataset_access_type", "acquisition_era_name", "processing_version", "physics_group_name"}
 	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}

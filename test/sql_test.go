@@ -58,7 +58,8 @@ func TestSQL(t *testing.T) {
 		m := r.MethodByName(rec.Api)
 		args := []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(w)}
 		output := m.Call(args)
-		err := output[1].Interface()
+		// output represents dbs API output (the error)
+		err := output[0].Interface()
 		if err != nil {
 			t.Errorf("Fail to look-up data %v\n", err)
 		}
@@ -132,8 +133,8 @@ func TestInsertSQL(t *testing.T) {
 		m = r.MethodByName(rec.Api)
 		args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(w)}
 		output = m.Call(args)
-		//         log.Println("output of lookup", output[0].Interface(), output[1].Interface())
-		if fmt.Sprintf("%v", output[1].Interface()) != "<nil>" {
+		// output represents dbs API output (the error)
+		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {
 			t.Fatalf("Fail to look-up data %v\n", output[1].Interface())
 		}
 	}

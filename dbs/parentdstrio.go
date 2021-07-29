@@ -3,7 +3,7 @@ package dbs
 import "net/http"
 
 // ParentDSTrio API
-func (API) ParentDSTrio(params Record, w http.ResponseWriter) (int64, error) {
+func (API) ParentDSTrio(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area

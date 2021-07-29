@@ -17,7 +17,7 @@ import (
 )
 
 // Files DBS API
-func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
+func (API) Files(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds, lumis []string
 	var lumigen, rungen, lfngen, runList, lfnList bool
@@ -26,7 +26,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "Files API with empty parameter map"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	tmpl := make(Record)
@@ -50,14 +50,14 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	if _, ok := params["sumOverLumi"]; ok {
 		sumOverLumi, err = getSingleValue(params, "sumOverLumi")
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
 	lumiList := getValues(params, "lumi_list")
 	lumis, err = FlatLumis(lumiList)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	runs := getValues(params, "run_num")
 	if len(runs) > 0 {
@@ -108,7 +108,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// load our SQL statement
 	stm, err := LoadTemplateSQL("files", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// add lfns conditions
@@ -130,13 +130,13 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 	// files API does not support run_num=1 when no lumi and lfns
 	if len(runs) == 1 && len(lumis) == 0 && runs[0] == "1" && len(lfns) == 0 {
 		msg := "files API does not support run_num=1 when no lumi and lfns list provided"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	// add run conditions
 	t, c, a, e := RunsConditions(runs, "FL")
 	if e != nil {
-		return 0, e
+		return e
 	}
 	if t != "" {
 		stm = fmt.Sprintf("%s %s", t, stm)
@@ -178,17 +178,17 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 
 	if (rungen && lfngen) || (lumigen && lfngen) || (rungen && lumigen) {
 		msg := "cannot supply more than one list (lfn, run_num or lumi) at one query"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	// check sumOverLumi conditions
 	if sumOverLumi == "1" && runList {
 		msg := "When sumOverLumi=1, no run_num list is allowed"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	if sumOverLumi == "1" && lfnList {
 		msg := "When sumOverLumi=1, no lfn list list is allowed"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	if len(runs) > 0 && sumOverLumi == "1" {
 		stm = strings.Replace(stm, "F.EVENT_COUNT,", "", -1)
@@ -196,7 +196,7 @@ func (API) Files(params Record, w http.ResponseWriter) (int64, error) {
 		tmpl["Statement"] = stm
 		stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	} else {
 		stm = WhereClause(stm, conds)

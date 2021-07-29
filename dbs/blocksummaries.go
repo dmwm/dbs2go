@@ -7,7 +7,7 @@ import (
 )
 
 // BlockSummaries DBS API
-func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
+func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 	var stm string
 	var args []interface{}
 	var err error
@@ -17,7 +17,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 
 	if len(params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	// parse arguments
@@ -28,7 +28,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		blk := block[0]
 		if strings.Contains(blk, "*") {
 			msg := "wild-card block value is not allowed"
-			return 0, errors.New(msg)
+			return errors.New(msg)
 		}
 		var blocks []string
 		if strings.Contains(blk, "[") {
@@ -53,17 +53,17 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 			stm, err = LoadTemplateSQL("blocksummaries4block_detail", tmpl)
 		}
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 	dataset := getValues(params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	} else if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
-			return 0, errors.New(msg)
+			return errors.New(msg)
 		}
 		_, val := OperatorValue(dataset[0])
 		if detailErr == nil {
@@ -77,7 +77,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) (int64, error) {
 			args = append(args, val)
 		}
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 	// use generic query API to fetch the results from DB

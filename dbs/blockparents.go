@@ -13,7 +13,7 @@ import (
 )
 
 // BlockParents DBS API
-func (API) BlockParents(params Record, w http.ResponseWriter) (int64, error) {
+func (API) BlockParents(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -21,7 +21,7 @@ func (API) BlockParents(params Record, w http.ResponseWriter) (int64, error) {
 	blockparent := getValues(params, "block_name")
 	if len(blockparent) > 1 {
 		msg := "Unsupported list of blockparent"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	} else if len(blockparent) == 1 {
 		conds, args = AddParam("block_name", "BP.BLOCK_NAME", params, conds, args)
 	}

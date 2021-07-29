@@ -13,7 +13,7 @@ import (
 )
 
 // DatasetParents API
-func (API) DatasetParents(params Record, w http.ResponseWriter) (int64, error) {
+func (API) DatasetParents(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 

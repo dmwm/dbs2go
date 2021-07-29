@@ -77,6 +77,52 @@ func (writer logWriter) Write(data []byte) (int, error) {
 	return fmt.Print(utcMsg(data))
 }
 
+type (
+	// struct for holding response details
+	responseData struct {
+		status int
+		size   int
+	}
+
+	// our http.ResponseWriter implementation
+	loggingResponseWriter struct {
+		http.ResponseWriter // compose original http.ResponseWriter
+		responseData        *responseData
+	}
+)
+
+func (r *loggingResponseWriter) Write(b []byte) (int, error) {
+	size, err := r.ResponseWriter.Write(b) // write response using original http.ResponseWriter
+	r.responseData.size += size            // capture size
+	return size, err
+}
+
+func (r *loggingResponseWriter) WriteHeader(statusCode int) {
+	r.ResponseWriter.WriteHeader(statusCode) // write status code using original http.ResponseWriter
+	r.responseData.status = statusCode       // capture status code
+}
+
+func loggingMiddleware(h http.Handler) http.Handler {
+	loggingFn := func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
+
+		// initialize response data struct
+		responseData := &responseData{
+			status: http.StatusOK,
+			size:   0,
+		}
+		lrw := loggingResponseWriter{
+			ResponseWriter: w, // compose original http.ResponseWriter
+			responseData:   responseData,
+		}
+		h.ServeHTTP(&lrw, r) // inject our implementation of http.ResponseWriter
+		logRequest(w, r, start, responseData.status, tstamp, int64(responseData.size))
+
+	}
+	return http.HandlerFunc(loggingFn)
+}
+
 // helper function to log every single user request, here we pass pointer to status code
 // as it may change through the handler while we use defer logRequest
 func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status int, tstamp int64, bytesOut int64) {
@@ -103,7 +149,7 @@ func logRequest(w http.ResponseWriter, r *http.Request, start time.Time, status 
 	log.Printf("%s %d %s %s %s %s %s %s\n", r.Proto, status, addr, r.Method, uri, dataMsg, refMsg, respMsg)
 	rec := LogRecord{
 		Method:         r.Method,
-		URI:            r.RequestURI,
+		URI:            uri,
 		API:            getAPI(r.RequestURI),
 		System:         getSystem(r.RequestURI),
 		BytesIn:        r.ContentLength,

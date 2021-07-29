@@ -14,13 +14,13 @@ import (
 )
 
 // FileParents API
-func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
+func (API) FileParents(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
 	if len(params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	tmpl := make(Record)
@@ -34,7 +34,7 @@ func (API) FileParents(params Record, w http.ResponseWriter) (int64, error) {
 
 	stm, err := LoadTemplateSQL("fileparent", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	lfns := getValues(params, "logical_file_name")

@@ -14,7 +14,7 @@ import (
 )
 
 // PrimaryDatasets DBS API
-func (API) PrimaryDatasets(params Record, w http.ResponseWriter) (int64, error) {
+func (API) PrimaryDatasets(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 

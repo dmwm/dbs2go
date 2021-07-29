@@ -6,7 +6,7 @@ import (
 )
 
 // BlockFileLumiIds API
-func (API) BlockFileLumiIds(params Record, w http.ResponseWriter) (int64, error) {
+func (API) BlockFileLumiIds(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -16,7 +16,7 @@ func (API) BlockFileLumiIds(params Record, w http.ResponseWriter) (int64, error)
 	// create our SQL statement
 	stm, err := LoadTemplateSQL("blockfilelumiids", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// add block condition

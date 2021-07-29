@@ -12,7 +12,7 @@ import (
 )
 
 // DatasetOutputModConfigs DBS API
-func (API) DatasetOutputModConfigs(params Record, w http.ResponseWriter) (int64, error) {
+func (API) DatasetOutputModConfigs(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area

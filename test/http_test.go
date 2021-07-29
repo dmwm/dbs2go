@@ -18,7 +18,7 @@ import (
 
 // helper function to create http test response recorder
 // for given HTTP Method, url, reader and DBS web handler
-func respRecorder(method, url string, reader io.Reader, hdlr web.LoggingHandlerFunc) (*httptest.ResponseRecorder, error) {
+func respRecorder(method, url string, reader io.Reader, hdlr func(http.ResponseWriter, *http.Request)) (*httptest.ResponseRecorder, error) {
 	// setup HTTP request
 	req, err := http.NewRequest(method, url, reader)
 	if err != nil {
@@ -30,7 +30,7 @@ func respRecorder(method, url string, reader io.Reader, hdlr web.LoggingHandlerF
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(web.LoggingHandler(hdlr))
+	handler := http.HandlerFunc(hdlr)
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {

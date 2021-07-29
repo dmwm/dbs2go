@@ -12,7 +12,7 @@ import (
 )
 
 // PhysicsGroups DBS API
-func (API) PhysicsGroups(params Record, w http.ResponseWriter) (int64, error) {
+func (API) PhysicsGroups(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 

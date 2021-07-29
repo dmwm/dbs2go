@@ -7,7 +7,7 @@ import (
 )
 
 // DatasetChildren API
-func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) {
+func (API) DatasetChildren(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -15,7 +15,7 @@ func (API) DatasetChildren(params Record, w http.ResponseWriter) (int64, error) 
 	datasetchildren := getValues(params, "dataset")
 	if len(datasetchildren) > 1 {
 		msg := "The datasetchildren API does not support list of datasetchildren"
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	} else if len(datasetchildren) == 1 {
 		conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
 	}

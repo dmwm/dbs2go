@@ -5,7 +5,7 @@ import (
 )
 
 // BlockChildren DBS API
-func (API) BlockChildren(params Record, w http.ResponseWriter) (int64, error) {
+func (API) BlockChildren(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string

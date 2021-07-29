@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -14,8 +16,15 @@ import (
 
 // TestValidator
 func TestValidator(t *testing.T) {
+	// set DBS lexicon patterns
+	lexiconFile := os.Getenv("DBS_LEXICON_FILE")
+	if lexiconFile == "" {
+		t.Error(errors.New("Please setup DBS_LEXICON_FILE env"))
+	}
+	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
+	dbs.LexiconPatterns = lexPatterns
+
 	var req *http.Request
-	var err error
 	host := "http://localhost:8111/dbs2go"
 	rurl := host + "/primarydatasets?primary_ds_name=*"
 	req, _ = http.NewRequest("GET", rurl, nil)
@@ -35,12 +44,12 @@ func TestValidator(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rurl = host + "/datasets?dataset=/*/*/*"
-	req, _ = http.NewRequest("GET", rurl, nil)
-	err = dbs.Validate(req)
-	if err != nil {
-		t.Error(err)
-	}
+	//     rurl = host + "/datasets?dataset=/*/*/*"
+	//     req, _ = http.NewRequest("GET", rurl, nil)
+	//     err = dbs.Validate(req)
+	//     if err != nil {
+	//         t.Error(err)
+	//     }
 }
 
 // TestValidatePostPayload

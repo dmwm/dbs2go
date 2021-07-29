@@ -15,7 +15,7 @@ import (
 )
 
 // FileLumis API
-func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
+func (API) FileLumis(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -63,14 +63,14 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	stm, err := LoadTemplateSQL("filelumis", tmpl)
 	//     log.Println("### stm", stm)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// generate run_num token
 	runs := getValues(params, "run_num")
 	t, c, a, e := RunsConditions(runs, "FL")
 	if e != nil {
-		return 0, e
+		return e
 	}
 	if t != "" {
 		stm = fmt.Sprintf("%s %s", t, stm)
@@ -86,7 +86,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) (int64, error) {
 	if _, ok := params["runList"]; ok {
 		if len(runs) > 1 && len(lfns) > 1 {
 			msg := "filelumis API supports single list of lfns or run numbers"
-			return 0, errors.New(msg)
+			return errors.New(msg)
 		}
 	}
 

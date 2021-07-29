@@ -8,7 +8,7 @@ import (
 )
 
 // Runs DBS API
-func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
+func (API) Runs(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -21,7 +21,7 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 	dataset := getValues(params, "dataset")
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	if len(lfn) == 1 {
@@ -37,7 +37,7 @@ func (API) Runs(params Record, w http.ResponseWriter) (int64, error) {
 
 	stm, err := LoadTemplateSQL("runs", tmpl)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	if len(runs) > 1 {

@@ -8,7 +8,7 @@ import (
 )
 
 // filesummaries API
-func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
+func (API) FileSummaries(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var stm string
 	//     var conds []string
@@ -26,7 +26,7 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 	}
 	runs, err := ParseRuns(getValues(params, "run_num"))
 	if err != nil {
-		return 0, err
+		return err
 	}
 	if len(runs) > 0 {
 		token, runsCond, runsBinds := runsClause("fl", runs)
@@ -45,14 +45,14 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4block_run", tmpl)
 			if e != nil {
-				return 0, e
+				return e
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4block_run")
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4block_norun", tmpl)
 			if e != nil {
-				return 0, e
+				return e
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4block_norun")
@@ -66,14 +66,14 @@ func (API) FileSummaries(params Record, w http.ResponseWriter) (int64, error) {
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4dataset_run", tmpl)
 			if e != nil {
-				return 0, e
+				return e
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4dataset_run")
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4dataset_norun", tmpl)
 			if e != nil {
-				return 0, e
+				return e
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4dataset_norun")

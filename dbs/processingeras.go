@@ -14,7 +14,7 @@ import (
 )
 
 // ProcessingEras DBS API
-func (API) ProcessingEras(params Record, w http.ResponseWriter) (int64, error) {
+func (API) ProcessingEras(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 

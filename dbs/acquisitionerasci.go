@@ -7,7 +7,7 @@ import (
 )
 
 // AcquisitionErasCI DBS API
-func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) (int64, error) {
+func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds, preSession, postSession []string
@@ -30,16 +30,16 @@ func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) (int64, error
 	tx, err := DB.Begin()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return 0, errors.New(msg)
+		return errors.New(msg)
 	}
 	defer tx.Rollback()
 	if err := executeSessions(tx, preSession); err != nil {
-		return 0, err
+		return err
 	}
 
-	r, e := executeAll(w, stm, args...)
+	e := executeAll(w, stm, args...)
 	if err := executeSessions(tx, postSession); err != nil {
-		return 0, err
+		return err
 	}
-	return r, e
+	return e
 }

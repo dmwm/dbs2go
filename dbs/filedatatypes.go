@@ -12,7 +12,7 @@ import (
 )
 
 // FileDataTypes DBS API
-func (API) FileDataTypes(params Record, w http.ResponseWriter) (int64, error) {
+func (API) FileDataTypes(params Record, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area

@@ -4,7 +4,6 @@ package web
 
 import (
 	"compress/gzip"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,41 +11,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync/atomic"
-	"time"
 
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
 )
-
-// LoggingHandlerFunc declares new handler function type which
-// should return status (int) and error
-type LoggingHandlerFunc func(w http.ResponseWriter, r *http.Request) (int, int64, error)
-
-// LoggingHandler provides wrapper for any passed handler
-// function. It executed given function and log its status and error
-// to common logger
-func LoggingHandler(h LoggingHandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
-			atomic.AddUint64(&TotalPostRequests, 1)
-		} else if r.Method == "GET" {
-			atomic.AddUint64(&TotalGetRequests, 1)
-		}
-		start := time.Now()
-		tstamp := int64(start.UnixNano() / 1000000) // use milliseconds for MONIT
-		status, dataSize, err := h(w, r)
-		if err != nil {
-			uri, e := url.QueryUnescape(r.RequestURI)
-			if e != nil {
-				log.Println("ERROR", err, r)
-			} else {
-				log.Println("ERROR", err, uri)
-			}
-		}
-		logRequest(w, r, start, status, tstamp, dataSize)
-	}
-}
 
 // responseMsg helper function to provide response to end-user
 func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
@@ -88,7 +56,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // QueryHandler provides access to graph ql query
-func QueryHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	var params struct {
 		Query         string                 `json:"query"`
 		OperationName string                 `json:"operationName"`
@@ -96,34 +64,36 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return http.StatusBadRequest, 0, err
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	response := GraphQLSchema.Exec(r.Context(), params.Query, params.OperationName, params.Variables)
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return http.StatusInternalServerError, 0, err
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(responseJSON)
-	return http.StatusOK, int64(binary.Size(responseJSON)), nil
 }
 
 // DummyHandler provides example how to write GET/POST handler
-func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func DummyHandler(w http.ResponseWriter, r *http.Request) {
 	// example of handling POST request
 	if r.Method == "POST" {
 		defer r.Body.Close()
 		decoder := json.NewDecoder(r.Body)
 		rec := make(dbs.Record)
-		status := http.StatusOK
 		err := decoder.Decode(&rec)
 		if err != nil {
-			status = http.StatusInternalServerError
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
-		return status, 0, err
+		return
 	}
 
 	// example of handling GET request
@@ -137,12 +107,12 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
 	records := api.Dummy(params)
 	data, err := json.Marshal(records)
 	if err != nil {
-		return http.StatusInternalServerError, 0, err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(status)
 	w.Write(data)
-	size := int64(binary.Size(data))
-	return status, size, nil
 }
 
 // StatusHandler provides basic functionality of status response
@@ -247,7 +217,7 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 }
 
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
-func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	params := make(dbs.Record)
 	for k, v := range r.URL.Query() {
 		// url query parameters are passed as list, we take first element only
@@ -274,24 +244,22 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 		err = api.UpdateFiles(params)
 	}
 	if err != nil {
-		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-		return http.StatusInternalServerError, size, err
+		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+		return
 	}
-	return http.StatusOK, 0, nil
 }
 
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
-func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
+func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
 		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
-		size := responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
-		return http.StatusUnsupportedMediaType, size, errors.New(msg)
+		responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
+		return
 	}
 	defer r.Body.Close()
 	var api dbs.API
 	var err error
-	var size int64
 	var params dbs.Record
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
@@ -305,8 +273,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 		reader, err := gzip.NewReader(r.Body)
 		if err != nil {
 			log.Println("unable to get gzip reader", err)
-			size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return http.StatusInternalServerError, size, err
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
 		}
 		body = utils.GzipReader{reader, r.Body}
 	}
@@ -333,59 +301,58 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) (int, int6
 	} else if a == "datasetlist" {
 		params, err = parsePayload(r)
 		if err != nil {
-			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return http.StatusInternalServerError, size, err
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
 		}
-		size, err = api.DatasetList(params, w)
+		err = api.DatasetList(params, w)
 	} else if a == "fileArray" {
 		params, err = parsePayload(r)
 		if utils.VERBOSE > 1 {
 			log.Printf("fileArray payload: %+v", params)
 		}
 		if err != nil {
-			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return http.StatusInternalServerError, size, err
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
 		}
-		size, err = api.FileArray(params, w)
+		err = api.FileArray(params, w)
 	} else if a == "fileparentsbylumi" {
 		params, err = parsePayload(r)
 		if err != nil {
-			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return http.StatusInternalServerError, size, err
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
 		}
-		size, err = api.FileParentsByLumi(params, w)
+		err = api.FileParentsByLumi(params, w)
 	} else if a == "filelumis" {
 		params, err = parsePayload(r)
 		if err != nil {
-			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return http.StatusInternalServerError, size, err
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
 		}
-		size, err = api.FileLumis(params, w)
+		err = api.FileLumis(params, w)
 	} else if a == "blockparents" {
 		params, err = parsePayload(r)
 		if err != nil {
-			size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return http.StatusInternalServerError, size, err
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
 		}
-		size, err = api.BlockParents(params, w)
+		err = api.BlockParents(params, w)
 	} else if a == "submit" {
 		err = api.Submit(body, cby, w)
 	} else if a == "remove" {
 		err = api.Remove(body, cby, w)
 	}
 	if err != nil {
-		size = responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
-		return http.StatusBadRequest, size, err
+		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		return
 	}
-	return http.StatusOK, 0, nil
 }
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
-func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64, error) {
-	status := http.StatusOK
+func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	params, err := parseParams(r)
 	if err != nil {
-		return http.StatusBadRequest, 0, err
+		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		return
 	}
 	//     params := make(dbs.Record)
 	//     for k, v := range r.URL.Query() {
@@ -393,331 +360,341 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) (int, int64
 	//     }
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
-		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, r.URL.RequestURI(), params)
+		uri, err := url.QueryUnescape(r.URL.RequestURI())
+		if err != nil {
+			log.Println("unable to unescape request uri", err)
+			uri = r.RequestURI
+		}
+		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, uri, params)
 	}
 	var api dbs.API
-	//     var err error
-	var size int64
 	if a == "datatiers" {
-		size, err = api.DataTiers(params, w)
+		err = api.DataTiers(params, w)
 	} else if a == "datasets" {
-		size, err = api.Datasets(params, w)
+		err = api.Datasets(params, w)
 	} else if a == "blocks" {
-		size, err = api.Blocks(params, w)
+		err = api.Blocks(params, w)
 	} else if a == "files" {
-		size, err = api.Files(params, w)
+		err = api.Files(params, w)
 	} else if a == "primarydatasets" {
-		size, err = api.PrimaryDatasets(params, w)
+		err = api.PrimaryDatasets(params, w)
 	} else if a == "primarydstypes" {
-		size, err = api.PrimaryDSTypes(params, w)
+		err = api.PrimaryDSTypes(params, w)
 	} else if a == "acquisitioneras" {
-		size, err = api.AcquisitionEras(params, w)
+		err = api.AcquisitionEras(params, w)
 	} else if a == "acquisitioneras_ci" {
-		size, err = api.AcquisitionErasCi(params, w)
+		err = api.AcquisitionErasCi(params, w)
 	} else if a == "runsummaries" {
-		size, err = api.RunSummaries(params, w)
+		err = api.RunSummaries(params, w)
 	} else if a == "runs" {
-		size, err = api.Runs(params, w)
+		err = api.Runs(params, w)
 	} else if a == "filechildren" {
-		size, err = api.FileChildren(params, w)
+		err = api.FileChildren(params, w)
 	} else if a == "fileparents" {
-		size, err = api.FileParents(params, w)
+		err = api.FileParents(params, w)
 	} else if a == "outputconfigs" {
-		size, err = api.OutputConfigs(params, w)
+		err = api.OutputConfigs(params, w)
 	} else if a == "datasetchildren" {
-		size, err = api.DatasetChildren(params, w)
+		err = api.DatasetChildren(params, w)
 	} else if a == "releaseversions" {
-		size, err = api.ReleaseVersions(params, w)
+		err = api.ReleaseVersions(params, w)
 	} else if a == "physicsgroups" {
-		size, err = api.PhysicsGroups(params, w)
+		err = api.PhysicsGroups(params, w)
 	} else if a == "filesummaries" {
-		size, err = api.FileSummaries(params, w)
+		err = api.FileSummaries(params, w)
 	} else if a == "filelumis" {
-		size, err = api.FileLumis(params, w)
+		err = api.FileLumis(params, w)
 	} else if a == "primarydstypes" {
-		size, err = api.PrimaryDSTypes(params, w)
+		err = api.PrimaryDSTypes(params, w)
 	} else if a == "datasetparents" {
-		size, err = api.DatasetParents(params, w)
+		err = api.DatasetParents(params, w)
 	} else if a == "datatypes" {
-		size, err = api.DataTypes(params, w)
+		err = api.DataTypes(params, w)
 	} else if a == "processingeras" {
-		size, err = api.ProcessingEras(params, w)
+		err = api.ProcessingEras(params, w)
 	} else if a == "blockchildren" {
-		size, err = api.BlockChildren(params, w)
+		err = api.BlockChildren(params, w)
 	} else if a == "blockparents" {
-		size, err = api.BlockParents(params, w)
+		err = api.BlockParents(params, w)
 	} else if a == "blocksummaries" {
-		size, err = api.BlockSummaries(params, w)
+		err = api.BlockSummaries(params, w)
 	} else if a == "blockorigin" {
-		size, err = api.BlockOrigin(params, w)
+		err = api.BlockOrigin(params, w)
 	} else if a == "blockTrio" {
-		size, err = api.BlockFileLumiIds(params, w)
+		err = api.BlockFileLumiIds(params, w)
 	} else if a == "parentDSTrio" {
-		size, err = api.ParentDatasetFileLumiIds(params, w)
+		err = api.ParentDatasetFileLumiIds(params, w)
 	} else if a == "datasetaccesstypes" {
-		size, err = api.DatasetAccessTypes(params, w)
+		err = api.DatasetAccessTypes(params, w)
 	} else if a == "status" {
-		size, err = api.Status(params, w)
+		err = api.Status(params, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
 	if err != nil {
-		size := responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
-		return http.StatusBadRequest, size, err
+		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		return
 	}
-	return status, size, nil
 }
 
 // NotImplementedHandler returns server status error
-func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) (int, int64, error) {
+func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) {
 	log.Println("NotImplementedAPI", api)
-	size := responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
-	return http.StatusInternalServerError, size, nil
+	responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
 }
 
 // DatatiersHandler provides access to DataTiers DBS API.
 // Takes the following arguments: data_tier_name
-func DatatiersHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func DatatiersHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "datatiers")
+		DBSPostHandler(w, r, "datatiers")
+	} else {
+		DBSGetHandler(w, r, "datatiers")
 	}
-	return DBSGetHandler(w, r, "datatiers")
 }
 
 // DatasetsHandler provides access to Datasets DBS API.
 // Takes the following arguments: dataset, parent_dataset, release_version, pset_hash, app_name, output_module_label, global_tag, processing_version, acquisition_era_name, run_num, physics_group_name, logical_file_name, primary_ds_name, primary_ds_type, processed_ds_name, data_tier_name, dataset_access_type, prep_id, create_by, last_modified_by, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, detail, dataset_id
-func DatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func DatasetsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "datasets")
+		DBSPostHandler(w, r, "datasets")
 	} else if r.Method == "PUT" {
-		return DBSPutHandler(w, r, "datasets")
+		DBSPutHandler(w, r, "datasets")
+	} else {
+		DBSGetHandler(w, r, "datasets")
 	}
-	return DBSGetHandler(w, r, "datasets")
 }
 
 // ParentDSTrioHandler provides access to ParentDSTrio DBS API.
 // Takes the following arguments: dataset
-func ParentDSTrioHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "parentDSTrio")
+func ParentDSTrioHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "parentDSTrio")
 }
 
 // BlocksHandler provides access to Blocks DBS API.
 // Takes the following arguments: dataset, block_name, data_tier_name, origin_site_name, logical_file_name, run_num, min_cdate, max_cdate, min_ldate, max_ldate, cdate, ldate, open_for_writing, detail
-func BlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func BlocksHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "blocks")
+		DBSPostHandler(w, r, "blocks")
 	} else if r.Method == "PUT" {
-		return DBSPutHandler(w, r, "blocks")
+		DBSPutHandler(w, r, "blocks")
+	} else {
+		DBSGetHandler(w, r, "blocks")
 	}
-	return DBSGetHandler(w, r, "blocks")
 }
 
 // BlockChildrenHandler provides access to BlockChildren DBS API.
 // Takes the following arguments: block_name
-func BlockChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "blockchildren")
+func BlockChildrenHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "blockchildren")
 }
 
 // BlockTrioHandler provides access to BlockTrio DBS API.
 // Takes the following arguments: block_name, list of lfns
-func BlockTrioHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "blockTrio")
+func BlockTrioHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "blockTrio")
 }
 
 // BlockSummariesHandler provides access to BlockSummaries DBS API.
 // Takes the following arguments: block_name, dataset, detail
-func BlockSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "blocksummaries")
+func BlockSummariesHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "blocksummaries")
 }
 
 // BlockOriginHandler provides access to BlockOrigin DBS API.
 // Takes the following arguments: origin_site_name, dataset, block_name
-func BlockOriginHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "blockorigin")
+func BlockOriginHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "blockorigin")
 }
 
 // FilesHandler provides access to Files DBS API.
 // Takes the following arguments: dataset, block_name, logical_file_name, release_version, pset_hash, app_name, output_module_label, run_num, origin_site_name, lumi_list, detail, validFileOnly, sumOverLumi
-func FilesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func FilesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "files")
+		DBSPostHandler(w, r, "files")
 	} else if r.Method == "PUT" {
-		return DBSPutHandler(w, r, "files")
+		DBSPutHandler(w, r, "files")
+	} else {
+		DBSGetHandler(w, r, "files")
 	}
-	return DBSGetHandler(w, r, "files")
 }
 
 // FileChildrenHandler provides access to FileChildren DBS API.
 // Takes the following arguments: logical_file_name, block_name, block_id
-func FileChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "filechildren")
+func FileChildrenHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "filechildren")
 }
 
 // FileParentsHandler provides access to FileParent DBS API.
 // Takes the following arguments: logical_file_name, block_id, block_name
-func FileParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "fileparents")
+func FileParentsHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "fileparents")
 }
 
 // FileSummariesHandler provides access to FileSummaries DBS API.
 // Takes the following arguments: block_name, dataset, run_num, validFileOnly, sumOverLumi
-func FileSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "filesummaries")
+func FileSummariesHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "filesummaries")
 }
 
 // RunsHandler provides access to Runs DBS API.
 // Takes the following arguments: run_num, logical_file_name, block_name, dataset
-func RunsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "runs")
+func RunsHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "runs")
 }
 
 // RunSummariesHandler provides access to RunSummaries DBS API.
 // Takes the following arguments: dataset, run_num
-func RunSummariesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "runsummaries")
+func RunSummariesHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "runsummaries")
 }
 
 //ProcessingErasHandler provices access to ProcessingEras DBS API.
 // Takes the following arguments: processing_version
-func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "processingeras")
+		DBSPostHandler(w, r, "processingeras")
+	} else {
+		DBSGetHandler(w, r, "processingeras")
 	}
-	return DBSGetHandler(w, r, "processingeras")
 }
 
 // PrimaryDSTypesHandler provides access to PrimaryDSTypes DBS API.
 // Takes the following arguments: primary_ds_type, dataset
-func PrimaryDSTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "primarydstypes")
+func PrimaryDSTypesHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "primarydstypes")
 }
 
 // DataTypesHandler provides access to DataTypes DBS API.
 // Takes the following arguments: datatype, dataset
-func DataTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "datatypes")
+func DataTypesHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "datatypes")
 }
 
 // ReleaseVersionsHandler provides access to ReleaseVersions DBS API.
 // Takes the following arguments: release_version, dataset, logical_file_name
-func ReleaseVersionsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "releaseversions")
+func ReleaseVersionsHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "releaseversions")
 }
 
 // AcquisitionErasHandler provides access to AcquisitionEras DBS API.
 // Takes the following arguments: acquisition_era_name
-func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "acquisitioneras")
+		DBSPostHandler(w, r, "acquisitioneras")
 	} else if r.Method == "PUT" {
-		return DBSPutHandler(w, r, "acquisitioneras")
+		DBSPutHandler(w, r, "acquisitioneras")
+	} else {
+		DBSGetHandler(w, r, "acquisitioneras")
 	}
-	return DBSGetHandler(w, r, "acquisitioneras")
 }
 
 // AcquisitionErasCiHandler provides access to AcquisitionErasCi DBS API.
 // Takes the following arguments: acquisition_era_name
-func AcquisitionErasCiHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return NotImplemnetedHandler(w, r, "acquisitionerasci")
+func AcquisitionErasCiHandler(w http.ResponseWriter, r *http.Request) {
+	NotImplemnetedHandler(w, r, "acquisitionerasci")
 }
 
 // PrimaryDatasetsHandler provides access to PrimaryDatasets DBS API.
 // Takes the following arguments: primary_ds_name, primary_ds_type
-func PrimaryDatasetsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "primarydatasets")
+func PrimaryDatasetsHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "primarydatasets")
 }
 
 // DatasetParentsHandler provides access to DatasetParents DBS API.
 // Takes the following arguments: dataset
-func DatasetParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "datasetparents")
+func DatasetParentsHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "datasetparents")
 }
 
 // DatasetChildrenHandler provides access to DatasetChildren DBS API.
 // Takes the following arguments: dataset
-func DatasetChildrenHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "datasetchildren")
+func DatasetChildrenHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "datasetchildren")
 }
 
 // DatasetAccessTypesHandler provides access to DatasetAccessTypes DBS API.
 // Takes the following arguments: dataset_access_type
-func DatasetAccessTypesHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "datasetaccesstypes")
+func DatasetAccessTypesHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "datasetaccesstypes")
 }
 
 // PhysicsGroupsHandler provides access to PhysicsGroups DBS API
 // Takes the following arguments: physics_group_name
-func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "physicsgroups")
+func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "physicsgroups")
 }
 
 // OutputConfigsHandler provides access to OutputConfigs DBS API.
 // Takes the following arguments: dataset, logical_file_name, release_version, pset_hash, app_name, output_module_label, block_id, global_tag
-func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func OutputConfigsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "outputconfigs")
+		DBSPostHandler(w, r, "outputconfigs")
+	} else {
+		DBSGetHandler(w, r, "outputconfigs")
 	}
-	return DBSGetHandler(w, r, "outputconfigs")
 }
 
 // BlockParentsHandler provides access to BlockParents DBS API.
 // Takes the following arguments: block_name
-func BlockParentsHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func BlockParentsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "blockparents")
+		DBSPostHandler(w, r, "blockparents")
+	} else {
+		DBSGetHandler(w, r, "blockparents")
 	}
-	return DBSGetHandler(w, r, "blockparents")
 }
 
 // FileLumisHandler provides access to FileLumis DBS API
 // GET API takes the following arguments: logical_file_name, block_name, run_num, validFileOnly
 // POST API takes no argument, the payload should be supplied as JSON
-func FileLumisHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
+func FileLumisHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		return DBSPostHandler(w, r, "filelumis")
+		DBSPostHandler(w, r, "filelumis")
+	} else {
+		DBSGetHandler(w, r, "filelumis")
 	}
-	return DBSGetHandler(w, r, "filelumis")
 }
 
 // FileArrayHandler provides access to FileArray DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func FileArrayHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "fileArray")
+func FileArrayHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "fileArray")
 }
 
 // DatasteListHandler provides access to DatasetList DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func DatasetListHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "datasetlist")
+func DatasetListHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "datasetlist")
 }
 
 // FileParentsByLumiHandler provides access to FileParentsByLumi DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "fileparentsbylumi")
+func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "fileparentsbylumi")
 }
 
 // BulkBlocksHandler provides access to BulkBlocks DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "bulkblocks")
+func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "bulkblocks")
 }
 
 // Migration server handlers
 
 // MigrateSubmitHandler provides access to Submit DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func MigrateSubmitHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "submit")
+func MigrateSubmitHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "submit")
 }
 
 // MigrateRemoveHandler provides access to Remove DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func MigrateRemoveHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSPostHandler(w, r, "remove")
+func MigrateRemoveHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "remove")
 }
 
 // MigrateStatusHandler provides access to Status DBS API
-func MigrateStatusHandler(w http.ResponseWriter, r *http.Request) (int, int64, error) {
-	return DBSGetHandler(w, r, "status")
+func MigrateStatusHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "status")
 }
