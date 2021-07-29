@@ -77,11 +77,13 @@ func (writer logWriter) Write(data []byte) (int, error) {
 	return fmt.Print(utcMsg(data))
 }
 
+// loggingMiddleware is based on this post:
+// https://arunvelsriram.dev/simple-golang-http-logging-middleware
 type (
 	// struct for holding response details
 	responseData struct {
-		status int
-		size   int
+		status int   // represent status of HTTP response code
+		size   int64 // represent size of HTTP response
 	}
 
 	// our http.ResponseWriter implementation
@@ -93,7 +95,7 @@ type (
 
 func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	size, err := r.ResponseWriter.Write(b) // write response using original http.ResponseWriter
-	r.responseData.size += size            // capture size
+	r.responseData.size += int64(size)     // capture size
 	return size, err
 }
 
@@ -102,6 +104,7 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode       // capture status code
 }
 
+// helper function to provide logging middleware to all HTTP requests
 func loggingMiddleware(h http.Handler) http.Handler {
 	loggingFn := func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -109,7 +112,7 @@ func loggingMiddleware(h http.Handler) http.Handler {
 
 		// initialize response data struct
 		responseData := &responseData{
-			status: http.StatusOK,
+			status: http.StatusOK, // by default we should return http status OK
 			size:   0,
 		}
 		lrw := loggingResponseWriter{
@@ -117,7 +120,7 @@ func loggingMiddleware(h http.Handler) http.Handler {
 			responseData:   responseData,
 		}
 		h.ServeHTTP(&lrw, r) // inject our implementation of http.ResponseWriter
-		logRequest(w, r, start, responseData.status, tstamp, int64(responseData.size))
+		logRequest(w, r, start, responseData.status, tstamp, responseData.size)
 
 	}
 	return http.HandlerFunc(loggingFn)
