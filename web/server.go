@@ -48,6 +48,7 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/vkuznet/auth-proxy-server/logging"
 	"github.com/vkuznet/dbs2go/dbs"
 	dbsGraphQL "github.com/vkuznet/dbs2go/graphql"
 	"github.com/vkuznet/dbs2go/utils"
@@ -155,7 +156,7 @@ func handlers() *mux.Router {
 	}
 
 	// for all requests
-	router.Use(loggingMiddleware)
+	router.Use(logging.LoggingMiddleware)
 	// for all requests perform first auth/authz action
 	router.Use(authMiddleware)
 	// validate all input parameters
@@ -181,14 +182,18 @@ func Server(configFile string) {
 	if Config.Verbose > 0 {
 		log.SetFlags(log.Lshortfile)
 	}
-	log.SetOutput(new(logWriter))
+	log.SetOutput(new(logging.LogWriter))
 	if Config.LogFile != "" {
 		rl, err := rotatelogs.New(Config.LogFile + "-%Y%m%d")
 		if err == nil {
-			rotlogs := rotateLogWriter{RotateLogs: rl}
+			rotlogs := logging.RotateLogWriter{RotateLogs: rl}
 			log.SetOutput(rotlogs)
 		}
 	}
+	// initialize logging module
+	logging.CMSMonitType = Config.MonitType
+	logging.CMSMonitProducer = Config.MonitProducer
+
 	if err != nil {
 		log.Printf("Unable to parse, time: %v, config: %v\n", time.Now(), configFile)
 	}

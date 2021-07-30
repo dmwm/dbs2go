@@ -13,16 +13,17 @@ import (
 
 // Configuration stores dbs configuration parameters
 type Configuration struct {
-	Port             int    `json:"port"`               // dbs port number
-	StaticDir        string `json:"staticdir"`          // location of static directory
-	Base             string `json:"base"`               // dbs base path
-	Verbose          int    `json:"verbose"`            // verbosity level
-	LogFile          string `json:"log_file"`           // server log file
-	UTC              bool   `json:"utc"`                // report logger time in UTC
-	PrintMonitRecord bool   `json:"print_monit_record"` // print monit record on stdout
-	Hmac             string `json:"hmac"`               // cmsweb hmac file location
-	LimiterPeriod    string `json:"rate"`               // github.com/ulule/limiter rate value
-	MigrationServer  bool   `json:"migration_server"`   // migration server flag
+	Port            int    `json:"port"`             // dbs port number
+	StaticDir       string `json:"staticdir"`        // location of static directory
+	Base            string `json:"base"`             // dbs base path
+	Verbose         int    `json:"verbose"`          // verbosity level
+	LogFile         string `json:"log_file"`         // server log file
+	UTC             bool   `json:"utc"`              // report logger time in UTC
+	MonitType       string `json:"monit_type"`       // monit record type
+	MonitProducer   string `json:"monit_producer"`   // monit record producer
+	Hmac            string `json:"hmac"`             // cmsweb hmac file location
+	LimiterPeriod   string `json:"rate"`             // github.com/ulule/limiter rate value
+	MigrationServer bool   `json:"migration_server"` // migration server flag
 
 	// db related configuration
 	DBFile             string `json:"dbfile"`               // dbs db file with secrets
