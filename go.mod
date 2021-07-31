@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20210224194228-fe8f1750fd46 // indirect
-	github.com/dmwm/cmsauth v0.0.0-20200227183320-1e78c9119730
+	github.com/dmwm/cmsauth v0.0.0-20210719153116-ae60676e374b
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/gorilla/csrf v1.7.0
@@ -16,7 +16,7 @@ require (
 	github.com/shirou/gopsutil v3.21.2+incompatible
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/ulule/limiter/v3 v3.8.0
-	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210730112749-785f5559039f
+	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210730193807-55347fc142e4
 	github.com/vkuznet/x509proxy v0.0.0-20191014143623-163039704c67
 	golang.org/x/exp/errors v0.0.0-20210220032938-85be41e4509f
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect

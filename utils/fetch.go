@@ -5,79 +5,15 @@ package utils
 
 import (
 	"bytes"
-	"crypto/tls"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"os/user"
 
-	"github.com/vkuznet/x509proxy"
+	"github.com/dmwm/cmsauth"
 )
 
 // global HTTP client
-var _client = HttpClient()
-
-// global client's x509 certificates
-var _certs []tls.Certificate
-
-// client X509 certificates
-func tlsCerts() ([]tls.Certificate, error) {
-	if len(_certs) != 0 {
-		return _certs, nil // use cached certs
-	}
-	uproxy := os.Getenv("X509_USER_PROXY")
-	uckey := os.Getenv("X509_USER_KEY")
-	ucert := os.Getenv("X509_USER_CERT")
-
-	// check if /tmp/x509up_u$UID exists, if so setup X509_USER_PROXY env
-	u, err := user.Current()
-	if err == nil {
-		fname := fmt.Sprintf("/tmp/x509up_u%s", u.Uid)
-		if _, err := os.Stat(fname); err == nil {
-			uproxy = fname
-		}
-	}
-
-	if uproxy == "" && uckey == "" { // user doesn't have neither proxy or user certs
-		log.Println("Neither proxy or user certs are found, to proceed use auth=false option otherwise setup X509 environment")
-		return nil, nil
-	}
-	if uproxy != "" {
-		// use local implementation of LoadX409KeyPair instead of tls one
-		x509cert, err := x509proxy.LoadX509Proxy(uproxy)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse proxy X509 proxy set by X509_USER_PROXY: %v", err)
-		}
-		_certs = []tls.Certificate{x509cert}
-		return _certs, nil
-	}
-	x509cert, err := tls.LoadX509KeyPair(ucert, uckey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse user X509 certificate: %v", err)
-	}
-	_certs = []tls.Certificate{x509cert}
-	return _certs, nil
-}
-
-// HttpClient provides HTTP client
-func HttpClient() *http.Client {
-	// get X509 certs
-	certs, err := tlsCerts()
-	if err != nil {
-		log.Println(err.Error())
-		return &http.Client{}
-	}
-	if len(certs) == 0 {
-		return &http.Client{}
-	}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{Certificates: certs,
-			InsecureSkipVerify: true},
-	}
-	return &http.Client{Transport: tr}
-}
+var _client = cmsauth.HttpClient()
 
 // global URL counter for profile output
 var UrlCounter uint32
