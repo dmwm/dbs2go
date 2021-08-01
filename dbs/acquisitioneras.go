@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -100,7 +99,7 @@ func (r *AcquisitionEras) SetDefaults() {
 // Decode implementation for AcquisitionEras
 func (r *AcquisitionEras) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

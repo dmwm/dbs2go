@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -90,7 +89,7 @@ func (r *PrimaryDatasets) SetDefaults() {
 // Decode implementation for PrimaryDatasets
 func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -124,7 +123,7 @@ func (API) InsertPrimaryDatasets(r io.Reader, cby string) error {
 	// insert primary_ds_name, creation_date, create_by, primary_ds_id
 
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -289,7 +288,7 @@ func (r *Files) SetDefaults() {
 // Decode implementation for Files
 func (r *Files) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -380,7 +379,7 @@ func (API) InsertFiles(r io.Reader, cby string) error {
 	//     return InsertValues("insert_files", values)
 
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

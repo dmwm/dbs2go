@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -164,7 +163,7 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	*/
 
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return writeReport("fail to read data", err, w)
 	}
@@ -252,7 +251,7 @@ type MigrationRemoveRequest struct {
 
 // Remove DBS API
 func (API) Remove(r io.Reader, cby string, w http.ResponseWriter) error {
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return writeReport("fail to read data", err, w)
 	}

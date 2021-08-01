@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -326,7 +325,7 @@ func (r *Datasets) SetDefaults() {
 // Decode implementation for Datasets
 func (r *Datasets) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -381,7 +380,7 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 	//     return InsertTemplateValues("insert_datasets", args, values)
 
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

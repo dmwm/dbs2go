@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -191,7 +190,7 @@ func (r *Blocks) SetDefaults() {
 // Decode implementation for Blocks
 func (r *Blocks) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -230,7 +229,7 @@ func (API) InsertBlocks(r io.Reader, cby string) error {
 	// self.blockin.execute(conn, blkinput, tran)
 
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

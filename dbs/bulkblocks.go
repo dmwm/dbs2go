@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"time"
 
@@ -147,7 +146,7 @@ type DatasetParent struct {
 */
 func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 	// read input data
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("unable to read bulkblock input", err)
 		return err

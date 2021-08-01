@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -64,7 +63,7 @@ func (r *ParameterSetHashes) SetDefaults() {
 // Decode implementation for ParameterSetHashes
 func (r *ParameterSetHashes) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

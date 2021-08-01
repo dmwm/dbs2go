@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -126,7 +125,7 @@ func (r *OutputConfigs) SetDefaults() {
 // Decode implementation for OutputConfigs
 func (r *OutputConfigs) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -172,7 +171,7 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) error {
 	// optional: scenario, pset_name
 
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -152,7 +151,7 @@ func (r *FileLumis) SetDefaults() {
 // Decode implementation for FileLumis
 func (r *FileLumis) Decode(reader io.Reader) error {
 	// init record with given data record
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -171,7 +170,7 @@ func (r *FileLumis) Decode(reader io.Reader) error {
 // InsertFileLumis DBS API
 func (API) InsertFileLumisTx(tx *sql.Tx, r io.Reader, cby string) error {
 	// read given input
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

@@ -5,7 +5,7 @@ package utils
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 
@@ -57,7 +57,7 @@ func FetchResponse(rurl string, args []byte) ResponseType {
 		return response
 	}
 	defer resp.Body.Close()
-	response.Data, err = ioutil.ReadAll(resp.Body)
+	response.Data, err = io.ReadAll(resp.Body)
 	if err != nil {
 		response.Error = err
 	}

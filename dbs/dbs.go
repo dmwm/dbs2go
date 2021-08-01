@@ -12,9 +12,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -210,7 +210,7 @@ func WhereClause(stm string, conds []string) string {
 // function to parse given file name and extract from it dbtype and dburi
 // file should contain the "dbtype dburi" string
 func ParseDBFile(dbfile string) (string, string, string) {
-	dat, err := ioutil.ReadFile(dbfile)
+	dat, err := os.ReadFile(dbfile)
 	if err != nil {
 		log.Fatal(err)
 	}
