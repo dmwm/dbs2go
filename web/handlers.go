@@ -264,7 +264,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
 	sep := ",\n"
 	if r.Header.Get("Accept") == "application/ndjson" {
-		sep = "\n"
+		sep = ""
 	} else {
 		w.Write([]byte("[\n"))
 		defer w.Write([]byte("]\n"))
@@ -371,7 +371,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
 	sep := ",\n"
 	if r.Header.Get("Accept") == "application/ndjson" {
-		sep = "\n"
+		sep = ""
 	} else {
 		w.Write([]byte("[\n"))
 		defer w.Write([]byte("]\n"))
