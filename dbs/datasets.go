@@ -15,7 +15,7 @@ import (
 )
 
 // Datasets API
-func (API) Datasets(params Record, w http.ResponseWriter) error {
+func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 	log.Printf("datasets params %+v", params)
 	var args []interface{}
 	var conds []string
@@ -208,7 +208,7 @@ func (API) Datasets(params Record, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return execute(w, stm, cols, vals, args...)
+	return execute(w, sep, stm, cols, vals, args...)
 }
 
 // Datasets

@@ -56,7 +56,7 @@ func FlatLumis(val interface{}) ([]string, error) {
 }
 
 // FileArray DBS API
-func (api API) FileArray(params Record, w http.ResponseWriter) error {
+func (api API) FileArray(params Record, sep string, w http.ResponseWriter) error {
 	// perform some data preprocessing on given record
 	// flat out lumi_list
 	if lumis, ok := params["lumi_list"]; ok {
@@ -70,7 +70,7 @@ func (api API) FileArray(params Record, w http.ResponseWriter) error {
 		msg := "filearray api requires input parameers"
 		return errors.New(msg)
 	}
-	return api.Files(params, w)
+	return api.Files(params, sep, w)
 }
 
 // InsertFileArray DBS API

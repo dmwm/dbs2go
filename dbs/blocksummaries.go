@@ -7,7 +7,7 @@ import (
 )
 
 // BlockSummaries DBS API
-func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
+func (API) BlockSummaries(params Record, sep string, w http.ResponseWriter) error {
 	var stm string
 	var args []interface{}
 	var err error
@@ -81,5 +81,5 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 		}
 	}
 	// use generic query API to fetch the results from DB
-	return executeAll(w, genSQL+stm, args...)
+	return executeAll(w, sep, genSQL+stm, args...)
 }

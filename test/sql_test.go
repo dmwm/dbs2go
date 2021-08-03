@@ -46,6 +46,7 @@ func TestSQL(t *testing.T) {
 	// or use StdoutWriter instance (defined in test/main.go)
 	var w http.ResponseWriter
 	w = StdoutWriter("")
+	sep := ",\n"
 	for _, rec := range records {
 		params := make(dbs.Record)
 		for _, rmap := range rec.Params {
@@ -56,7 +57,7 @@ func TestSQL(t *testing.T) {
 		log.Printf("SQL test for %s API with params %+v\n", rec.Api, params)
 		r := reflect.ValueOf(dbs.API{})
 		m := r.MethodByName(rec.Api)
-		args := []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(w)}
+		args := []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
 		output := m.Call(args)
 		// output represents dbs API output (the error)
 		err := output[0].Interface()
@@ -86,6 +87,7 @@ func TestInsertSQL(t *testing.T) {
 	}
 
 	utils.VERBOSE = 2 // be verbose
+	sep := ",\n"
 
 	// run insert APIs
 	for _, rec := range records {
@@ -131,7 +133,7 @@ func TestInsertSQL(t *testing.T) {
 		log.Printf("SQL test for %s API with params %+v\n", rec.Api, string(data))
 		r = reflect.ValueOf(dbs.API{})
 		m = r.MethodByName(rec.Api)
-		args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(w)}
+		args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
 		output = m.Call(args)
 		// output represents dbs API output (the error)
 		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {

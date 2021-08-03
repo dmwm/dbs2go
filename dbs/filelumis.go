@@ -14,7 +14,7 @@ import (
 )
 
 // FileLumis API
-func (API) FileLumis(params Record, w http.ResponseWriter) error {
+func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -102,7 +102,7 @@ func (API) FileLumis(params Record, w http.ResponseWriter) error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // FileLumis

@@ -11,14 +11,14 @@ import (
 )
 
 // FileDataTypes DBS API
-func (API) FileDataTypes(params Record, w http.ResponseWriter) error {
+func (API) FileDataTypes(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("file_data_types")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // FileDataTypes

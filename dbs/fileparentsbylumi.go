@@ -9,7 +9,7 @@ import (
 )
 
 // FileParentsByLumi DBS API
-func (API) FileParentsByLumi(params Record, w http.ResponseWriter) error {
+func (API) FileParentsByLumi(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 
@@ -54,7 +54,7 @@ func (API) FileParentsByLumi(params Record, w http.ResponseWriter) error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // InsertFileParentsByLumi DBS API

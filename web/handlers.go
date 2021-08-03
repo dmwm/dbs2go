@@ -220,8 +220,13 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
-	w.Write([]byte("[\n"))
-	defer w.Write([]byte("]\n"))
+	//     sep := ",\n"
+	if r.Header.Get("Accept") == "application/ndjson" {
+		//         sep = "\n"
+	} else {
+		w.Write([]byte("[\n"))
+		defer w.Write([]byte("]\n"))
+	}
 
 	params := make(dbs.Record)
 	for k, v := range r.URL.Query() {
@@ -257,8 +262,13 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
-	w.Write([]byte("[\n"))
-	defer w.Write([]byte("]\n"))
+	sep := ",\n"
+	if r.Header.Get("Accept") == "application/ndjson" {
+		sep = "\n"
+	} else {
+		w.Write([]byte("[\n"))
+		defer w.Write([]byte("]\n"))
+	}
 
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
@@ -313,7 +323,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return
 		}
-		err = api.DatasetList(params, w)
+		err = api.DatasetList(params, sep, w)
 	} else if a == "fileArray" {
 		params, err = parsePayload(r)
 		if utils.VERBOSE > 1 {
@@ -323,28 +333,28 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return
 		}
-		err = api.FileArray(params, w)
+		err = api.FileArray(params, sep, w)
 	} else if a == "fileparentsbylumi" {
 		params, err = parsePayload(r)
 		if err != nil {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return
 		}
-		err = api.FileParentsByLumi(params, w)
+		err = api.FileParentsByLumi(params, sep, w)
 	} else if a == "filelumis" {
 		params, err = parsePayload(r)
 		if err != nil {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return
 		}
-		err = api.FileLumis(params, w)
+		err = api.FileLumis(params, sep, w)
 	} else if a == "blockparents" {
 		params, err = parsePayload(r)
 		if err != nil {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return
 		}
-		err = api.BlockParents(params, w)
+		err = api.BlockParents(params, sep, w)
 	} else if a == "submit" {
 		err = api.Submit(body, cby, w)
 	} else if a == "remove" {
@@ -359,8 +369,13 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
-	w.Write([]byte("[\n"))
-	defer w.Write([]byte("]\n"))
+	sep := ",\n"
+	if r.Header.Get("Accept") == "application/ndjson" {
+		sep = "\n"
+	} else {
+		w.Write([]byte("[\n"))
+		defer w.Write([]byte("]\n"))
+	}
 
 	params, err := parseParams(r)
 	if err != nil {
@@ -382,65 +397,65 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	}
 	var api dbs.API
 	if a == "datatiers" {
-		err = api.DataTiers(params, w)
+		err = api.DataTiers(params, sep, w)
 	} else if a == "datasets" {
-		err = api.Datasets(params, w)
+		err = api.Datasets(params, sep, w)
 	} else if a == "blocks" {
-		err = api.Blocks(params, w)
+		err = api.Blocks(params, sep, w)
 	} else if a == "files" {
-		err = api.Files(params, w)
+		err = api.Files(params, sep, w)
 	} else if a == "primarydatasets" {
-		err = api.PrimaryDatasets(params, w)
+		err = api.PrimaryDatasets(params, sep, w)
 	} else if a == "primarydstypes" {
-		err = api.PrimaryDSTypes(params, w)
+		err = api.PrimaryDSTypes(params, sep, w)
 	} else if a == "acquisitioneras" {
-		err = api.AcquisitionEras(params, w)
+		err = api.AcquisitionEras(params, sep, w)
 	} else if a == "acquisitioneras_ci" {
-		err = api.AcquisitionErasCi(params, w)
+		err = api.AcquisitionErasCi(params, sep, w)
 	} else if a == "runsummaries" {
-		err = api.RunSummaries(params, w)
+		err = api.RunSummaries(params, sep, w)
 	} else if a == "runs" {
-		err = api.Runs(params, w)
+		err = api.Runs(params, sep, w)
 	} else if a == "filechildren" {
-		err = api.FileChildren(params, w)
+		err = api.FileChildren(params, sep, w)
 	} else if a == "fileparents" {
-		err = api.FileParents(params, w)
+		err = api.FileParents(params, sep, w)
 	} else if a == "outputconfigs" {
-		err = api.OutputConfigs(params, w)
+		err = api.OutputConfigs(params, sep, w)
 	} else if a == "datasetchildren" {
-		err = api.DatasetChildren(params, w)
+		err = api.DatasetChildren(params, sep, w)
 	} else if a == "releaseversions" {
-		err = api.ReleaseVersions(params, w)
+		err = api.ReleaseVersions(params, sep, w)
 	} else if a == "physicsgroups" {
-		err = api.PhysicsGroups(params, w)
+		err = api.PhysicsGroups(params, sep, w)
 	} else if a == "filesummaries" {
-		err = api.FileSummaries(params, w)
+		err = api.FileSummaries(params, sep, w)
 	} else if a == "filelumis" {
-		err = api.FileLumis(params, w)
+		err = api.FileLumis(params, sep, w)
 	} else if a == "primarydstypes" {
-		err = api.PrimaryDSTypes(params, w)
+		err = api.PrimaryDSTypes(params, sep, w)
 	} else if a == "datasetparents" {
-		err = api.DatasetParents(params, w)
+		err = api.DatasetParents(params, sep, w)
 	} else if a == "datatypes" {
-		err = api.DataTypes(params, w)
+		err = api.DataTypes(params, sep, w)
 	} else if a == "processingeras" {
-		err = api.ProcessingEras(params, w)
+		err = api.ProcessingEras(params, sep, w)
 	} else if a == "blockchildren" {
-		err = api.BlockChildren(params, w)
+		err = api.BlockChildren(params, sep, w)
 	} else if a == "blockparents" {
-		err = api.BlockParents(params, w)
+		err = api.BlockParents(params, sep, w)
 	} else if a == "blocksummaries" {
-		err = api.BlockSummaries(params, w)
+		err = api.BlockSummaries(params, sep, w)
 	} else if a == "blockorigin" {
-		err = api.BlockOrigin(params, w)
+		err = api.BlockOrigin(params, sep, w)
 	} else if a == "blockTrio" {
-		err = api.BlockFileLumiIds(params, w)
+		err = api.BlockFileLumiIds(params, sep, w)
 	} else if a == "parentDSTrio" {
-		err = api.ParentDatasetFileLumiIds(params, w)
+		err = api.ParentDatasetFileLumiIds(params, sep, w)
 	} else if a == "datasetaccesstypes" {
-		err = api.DatasetAccessTypes(params, w)
+		err = api.DatasetAccessTypes(params, sep, w)
 	} else if a == "status" {
-		err = api.Status(params, w)
+		err = api.Status(params, sep, w)
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}

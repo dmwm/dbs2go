@@ -5,7 +5,7 @@ import (
 )
 
 // ParentDatasetFileLumiIds API
-func (API) ParentDatasetFileLumiIds(params Record, w http.ResponseWriter) error {
+func (API) ParentDatasetFileLumiIds(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -21,5 +21,5 @@ func (API) ParentDatasetFileLumiIds(params Record, w http.ResponseWriter) error 
 	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }

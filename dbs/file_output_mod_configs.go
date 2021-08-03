@@ -11,14 +11,14 @@ import (
 )
 
 // FileOutputModConfigs DBS API
-func (API) FileOutputModConfigs(params Record, w http.ResponseWriter) error {
+func (API) FileOutputModConfigs(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("file_output_mod_configs")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // FileOutputModConfigs

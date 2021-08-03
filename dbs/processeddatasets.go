@@ -11,14 +11,14 @@ import (
 )
 
 // ProcessedDatasets DBS API
-func (API) ProcessedDatasets(params Record, w http.ResponseWriter) error {
+func (API) ProcessedDatasets(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("processed_datasets")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // ProcessedDatasets

@@ -11,14 +11,14 @@ import (
 )
 
 // DatasetOutputModConfigs DBS API
-func (API) DatasetOutputModConfigs(params Record, w http.ResponseWriter) error {
+func (API) DatasetOutputModConfigs(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("dataset_output_mod_configs")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // DatasetOutputModConfigs

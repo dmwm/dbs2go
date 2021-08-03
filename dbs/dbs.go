@@ -260,7 +260,7 @@ func CleanStatement(stm string) string {
 // here we use http response writer in order to make encoder
 // then we literally stream data with our encoder (i.e. write records
 // to writer)
-func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
+func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) error {
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
@@ -272,8 +272,6 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 	var enc *json.Encoder
 	if w != nil {
 		enc = json.NewEncoder(w)
-		//         w.Write([]byte("[\n"))
-		//         defer w.Write([]byte("]\n"))
 	}
 
 	// execute transaction
@@ -310,7 +308,8 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 			return errors.New(msg)
 		}
 		if rowCount != 0 && w != nil {
-			w.Write([]byte(",\n"))
+			// add separator line to our output
+			w.Write([]byte(sep))
 		}
 		rowCount += 1
 		// store results into generic record (a dict)
@@ -360,7 +359,7 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 }
 
 // similar to executeAll function but it takes explicit set of columns and values
-func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{}, args ...interface{}) error {
+func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []interface{}, args ...interface{}) error {
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
@@ -372,8 +371,6 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 	var enc *json.Encoder
 	if w != nil {
 		enc = json.NewEncoder(w)
-		//         w.Write([]byte("[\n"))
-		//         defer w.Write([]byte("]\n"))
 	}
 
 	// execute transaction
@@ -399,7 +396,8 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 			return errors.New(msg)
 		}
 		if rowCount != 0 && w != nil {
-			w.Write([]byte(",\n"))
+			// add separator line to our output
+			w.Write([]byte(sep))
 		}
 		rowCount += 1
 		rec := make(Record)

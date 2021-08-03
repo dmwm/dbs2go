@@ -7,7 +7,7 @@ import (
 )
 
 // AcquisitionErasCI DBS API
-func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) error {
+func (API) AcquisitionErasCi(params Record, sep string, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds, preSession, postSession []string
@@ -37,7 +37,7 @@ func (API) AcquisitionErasCi(params Record, w http.ResponseWriter) error {
 		return err
 	}
 
-	e := executeAll(w, stm, args...)
+	e := executeAll(w, sep, stm, args...)
 	if err := executeSessions(tx, postSession); err != nil {
 		return err
 	}

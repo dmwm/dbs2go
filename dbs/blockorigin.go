@@ -6,7 +6,7 @@ import (
 )
 
 // BlockOrigin DBS API
-func (API) BlockOrigin(params Record, w http.ResponseWriter) error {
+func (API) BlockOrigin(params Record, sep string, w http.ResponseWriter) error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string
@@ -39,5 +39,5 @@ func (API) BlockOrigin(params Record, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }

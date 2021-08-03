@@ -16,7 +16,7 @@ import (
 )
 
 // Files DBS API
-func (API) Files(params Record, w http.ResponseWriter) error {
+func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds, lumis []string
 	var lumigen, rungen, lfngen, runList, lfnList bool
@@ -202,7 +202,7 @@ func (API) Files(params Record, w http.ResponseWriter) error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
 
 // Files

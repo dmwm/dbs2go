@@ -6,7 +6,7 @@ import (
 )
 
 // BlockFileLumiIds API
-func (API) BlockFileLumiIds(params Record, w http.ResponseWriter) error {
+func (API) BlockFileLumiIds(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -38,7 +38,7 @@ func (API) BlockFileLumiIds(params Record, w http.ResponseWriter) error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 
 	/*
 		// if we extract explicitly all info from rows then this API

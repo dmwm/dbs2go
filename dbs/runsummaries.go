@@ -8,7 +8,7 @@ import (
 )
 
 // RunSummaries DBS API
-func (API) RunSummaries(params Record, w http.ResponseWriter) error {
+func (API) RunSummaries(params Record, sep string, w http.ResponseWriter) error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -53,5 +53,5 @@ func (API) RunSummaries(params Record, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, stm, args...)
+	return executeAll(w, sep, stm, args...)
 }
