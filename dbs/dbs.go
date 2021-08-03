@@ -114,6 +114,9 @@ func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	if !strings.HasSuffix(tmpl, ".sql") {
 		tmpl += ".sql"
 	}
+	if utils.VERBOSE > 0 {
+		log.Println("load template", tmpl)
+	}
 	stm, err := utils.ParseTmpl(sdir, tmpl, tmplData)
 	if err != nil {
 		return "", err
@@ -570,7 +573,8 @@ func TokenGeneratorORACLE(runs []string, limit int, name string) (string, []stri
 		vals = append(vals, chunk)
 	}
 	stm += strings.Join(tstm, " UNION ALL ")
-	stm += "\n)\n"
+	stm += "\n)"
+	stm += "\n"
 	return stm, vals
 }
 
