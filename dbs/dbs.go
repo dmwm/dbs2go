@@ -269,8 +269,8 @@ func executeAll(w http.ResponseWriter, stm string, args ...interface{}) error {
 	var enc *json.Encoder
 	if w != nil {
 		enc = json.NewEncoder(w)
-		w.Write([]byte("[\n"))
-		defer w.Write([]byte("]\n"))
+		//         w.Write([]byte("[\n"))
+		//         defer w.Write([]byte("]\n"))
 	}
 
 	// execute transaction
@@ -369,8 +369,8 @@ func execute(w http.ResponseWriter, stm string, cols []string, vals []interface{
 	var enc *json.Encoder
 	if w != nil {
 		enc = json.NewEncoder(w)
-		w.Write([]byte("[\n"))
-		defer w.Write([]byte("]\n"))
+		//         w.Write([]byte("[\n"))
+		//         defer w.Write([]byte("]\n"))
 	}
 
 	// execute transaction

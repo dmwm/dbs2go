@@ -218,6 +218,10 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
+	// all outputs will be added to output list
+	w.Write([]byte("[\n"))
+	defer w.Write([]byte("]\n"))
+
 	params := make(dbs.Record)
 	for k, v := range r.URL.Query() {
 		// url query parameters are passed as list, we take first element only
@@ -251,6 +255,10 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
+	// all outputs will be added to output list
+	w.Write([]byte("[\n"))
+	defer w.Write([]byte("]\n"))
+
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
 		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
@@ -349,6 +357,10 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
+	// all outputs will be added to output list
+	w.Write([]byte("[\n"))
+	defer w.Write([]byte("]\n"))
+
 	params, err := parseParams(r)
 	if err != nil {
 		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
