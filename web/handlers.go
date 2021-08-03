@@ -18,15 +18,16 @@ import (
 
 // responseMsg helper function to provide response to end-user
 func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
-	var out []dbs.Record
+	//     var out []dbs.Record
 	rec := make(dbs.Record)
 	rec["error"] = msg
 	rec["api"] = api
 	rec["method"] = r.Method
 	rec["exception"] = code
 	rec["type"] = "HTTPError"
-	out = append(out, rec)
-	data, _ := json.Marshal(out)
+	//     out = append(out, rec)
+	//     data, _ := json.Marshal(out)
+	data, _ := json.Marshal(rec)
 	w.WriteHeader(code)
 	w.Write(data)
 	return int64(len(data))
