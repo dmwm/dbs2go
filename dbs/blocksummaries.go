@@ -47,7 +47,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 		for _, v := range binds {
 			args = append(args, v)
 		}
-		if detailErr == nil { // no details are required
+		if detailErr != nil { // no details are required
 			stm, err = LoadTemplateSQL("blocksummaries4block", tmpl)
 		} else {
 			stm, err = LoadTemplateSQL("blocksummaries4block_detail", tmpl)
@@ -66,7 +66,7 @@ func (API) BlockSummaries(params Record, w http.ResponseWriter) error {
 			return errors.New(msg)
 		}
 		_, val := OperatorValue(dataset[0])
-		if detailErr == nil {
+		if detailErr != nil {
 			stm, err = LoadTemplateSQL("blocksummaries4dataset", tmpl)
 			// blocksummaries4dataset contains three dataset bindings
 			args = append(args, val)
