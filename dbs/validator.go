@@ -135,7 +135,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		// nothing to match in patterns
 		return nil
 	}
-	if len(v) > o.Len {
+	if o.Len > 0 && len(v) > o.Len {
 		log.Println("lexicon str pattern", o)
 		return errors.New(fmt.Sprintf("length of %s exceed %d characters", v, o.Len))
 	}
