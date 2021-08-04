@@ -5,22 +5,21 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 )
 
 // PrimaryDSTypes DBS API
-func (API) PrimaryDSTypes(params Record, sep string, w http.ResponseWriter) error {
+func (a API) PrimaryDSTypes() error {
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("primary_ds_type", "PDT.PRIMARY_DS_TYPE", params, conds, args)
+	conds, args = AddParam("primary_ds_type", "PDT.PRIMARY_DS_TYPE", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("primarydstypes")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // PrimaryDSTypes
@@ -85,6 +84,6 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) error {
 }
 
 // InsertPrimaryDSTypes DBS API
-func (API) InsertPrimaryDSTypes(r io.Reader, cby string) error {
-	return insertRecord(&PrimaryDSTypes{}, r)
+func (a API) InsertPrimaryDSTypes() error {
+	return insertRecord(&PrimaryDSTypes{}, a.Reader)
 }

@@ -5,20 +5,19 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // FileOutputModConfigs DBS API
-func (API) FileOutputModConfigs(params Record, sep string, w http.ResponseWriter) error {
+func (a API) FileOutputModConfigs() error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("file_output_mod_configs")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // FileOutputModConfigs
@@ -102,9 +101,9 @@ type FileOutputModConfigRecord struct {
 }
 
 // InsertFileOutputModConfigs DBS API
-func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) error {
+func (a API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
@@ -125,16 +124,15 @@ func (API) InsertFileOutputModConfigs(tx *sql.Tx, r io.Reader, cby string) error
 	// find output module config id
 	var args []interface{}
 	var conds []string
-	params := make(Record)
-	params["logical_file_name"] = rec.Lfn
-	params["app_name"] = rec.AppName
-	params["pset_hash"] = rec.PsetHash
-	params["output_module_label"] = rec.OutputModuleLabel
-	params["global_tag"] = rec.GlobalTag
-	conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
-	conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
-	conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", params, conds, args)
-	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", params, conds, args)
+	a.Params["logical_file_name"] = rec.Lfn
+	a.Params["app_name"] = rec.AppName
+	a.Params["pset_hash"] = rec.PsetHash
+	a.Params["output_module_label"] = rec.OutputModuleLabel
+	a.Params["global_tag"] = rec.GlobalTag
+	conds, args = AddParam("app_name", "A.APP_NAME", a.Params, conds, args)
+	conds, args = AddParam("pset_hash", "P.PSET_HASH", a.Params, conds, args)
+	conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", a.Params, conds, args)
+	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", a.Params, conds, args)
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("outputconfigs_id", tmpl)

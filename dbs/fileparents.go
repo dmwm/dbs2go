@@ -7,17 +7,16 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // FileParents API
-func (API) FileParents(params Record, sep string, w http.ResponseWriter) error {
+func (a API) FileParents() error {
 	var args []interface{}
 	var conds []string
 
-	if len(params) == 0 {
+	if len(a.Params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
 		return errors.New(msg)
 	}
@@ -25,10 +24,10 @@ func (API) FileParents(params Record, sep string, w http.ResponseWriter) error {
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 
-	blocks := getValues(params, "block_name")
+	blocks := getValues(a.Params, "block_name")
 	if len(blocks) == 1 {
 		tmpl["BlockName"] = true
-		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
+		conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
 	}
 
 	stm, err := LoadTemplateSQL("fileparent", tmpl)
@@ -36,9 +35,9 @@ func (API) FileParents(params Record, sep string, w http.ResponseWriter) error {
 		return err
 	}
 
-	lfns := getValues(params, "logical_file_name")
+	lfns := getValues(a.Params, "logical_file_name")
 	if len(lfns) == 1 {
-		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
 	} else {
 		token, binds := TokenGenerator(lfns, 30, "lfn_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
@@ -52,7 +51,7 @@ func (API) FileParents(params Record, sep string, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // FileParents
@@ -136,7 +135,7 @@ type FileParentRecord struct {
 }
 
 // InsertFileParents DBS API
-func (api API) InsertFileParents(r io.Reader, cby string) error {
+func (api API) InsertFileParents() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
@@ -144,7 +143,7 @@ func (api API) InsertFileParents(r io.Reader, cby string) error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = api.InsertFileParentsTxt(tx, r, cby)
+	err = api.InsertFileParentsTxt(tx)
 
 	// commit transaction
 	err = tx.Commit()
@@ -156,7 +155,7 @@ func (api API) InsertFileParents(r io.Reader, cby string) error {
 }
 
 // InsertFileParents DBS API
-func (API) InsertFileParentsTxt(tx *sql.Tx, r io.Reader, cby string) error {
+func (a API) InsertFileParentsTxt(tx *sql.Tx) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -168,7 +167,7 @@ func (API) InsertFileParentsTxt(tx *sql.Tx, r io.Reader, cby string) error {
 	   3. The dataset parentage is already in DBS.
 	*/
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

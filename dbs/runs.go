@@ -2,37 +2,35 @@ package dbs
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 )
 
 // Runs DBS API
-func (API) Runs(params Record, sep string, w http.ResponseWriter) error {
+func (a API) Runs() error {
 	var args []interface{}
 	var conds []string
 
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 
-	//     runs := getValues(params, "run_num")
-	lfn := getValues(params, "logical_file_name")
-	block := getValues(params, "block_name")
-	dataset := getValues(params, "dataset")
-	runs, err := ParseRuns(getValues(params, "run_num"))
+	//     runs := getValues(a.Params, "run_num")
+	lfn := getValues(a.Params, "logical_file_name")
+	block := getValues(a.Params, "block_name")
+	dataset := getValues(a.Params, "dataset")
+	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
 		return err
 	}
 
 	if len(lfn) == 1 {
 		tmpl["Lfn"] = true
-		conds, args = AddParam("logical_file_name", "FILES.LOGICAL_FILE_NAME", params, conds, args)
+		conds, args = AddParam("logical_file_name", "FILES.LOGICAL_FILE_NAME", a.Params, conds, args)
 	} else if len(block) == 1 {
 		tmpl["Block"] = true
-		conds, args = AddParam("block_name", "BLOCKS.BLOCK_NAME", params, conds, args)
+		conds, args = AddParam("block_name", "BLOCKS.BLOCK_NAME", a.Params, conds, args)
 	} else if len(dataset) == 1 {
 		tmpl["Dataset"] = true
-		conds, args = AddParam("dataset", "DATASETS.DATASET", params, conds, args)
+		conds, args = AddParam("dataset", "DATASETS.DATASET", a.Params, conds, args)
 	}
 
 	stm, err := LoadTemplateSQL("runs", tmpl)
@@ -59,17 +57,17 @@ func (API) Runs(params Record, sep string, w http.ResponseWriter) error {
 				args = append(args, v)
 			}
 		} else {
-			conds, args = AddParam("run_num", "FL.run_num", params, conds, args)
+			conds, args = AddParam("run_num", "FL.run_num", a.Params, conds, args)
 		}
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // InsertRuns DBS API
-func (API) InsertRuns(r io.Reader, cby string) error {
+func (a API) InsertRuns() error {
 	//     return InsertValues("insert_runs", values)
 	return nil
 }

@@ -7,14 +7,13 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // FileLumis API
-func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
+func (a API) FileLumis() error {
 	var args []interface{}
 	var conds []string
 
@@ -28,7 +27,7 @@ func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 	tmpl["BlockName"] = false
 	tmpl["Migration"] = false
 
-	lfns := getValues(params, "logical_file_name")
+	lfns := getValues(a.Params, "logical_file_name")
 	if len(lfns) > 1 {
 		token, binds := TokenGenerator(lfns, 100, "lfns_token") // 100 is max for # of allowed entries
 		tmpl["TokenGenerator"] = token
@@ -46,17 +45,17 @@ func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 		args = append(args, lfns[0])
 	}
 
-	validFileOnly := getValues(params, "validFileOnly")
+	validFileOnly := getValues(a.Params, "validFileOnly")
 	if len(validFileOnly) == 1 {
 		tmpl["ValidFileOnly"] = true
 		conds = append(conds, "F.IS_FILE_VALID = 1")
 		conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
 	}
 
-	blocks := getValues(params, "block_name")
+	blocks := getValues(a.Params, "block_name")
 	if len(blocks) == 1 {
 		tmpl["BlockName"] = true
-		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
+		conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
 	}
 
 	stm, err := LoadTemplateSQL("filelumis", tmpl)
@@ -66,8 +65,8 @@ func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// generate run_num token
-	runs := getValues(params, "run_num")
-	t, c, a, e := RunsConditions(runs, "FL")
+	runs := getValues(a.Params, "run_num")
+	t, c, na, e := RunsConditions(runs, "FL")
 	if e != nil {
 		return e
 	}
@@ -77,12 +76,12 @@ func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 	for _, v := range c {
 		conds = append(conds, v)
 	}
-	for _, v := range a {
+	for _, v := range na {
 		args = append(args, v)
 	}
 
 	// check if we got both run and lfn lists
-	if _, ok := params["runList"]; ok {
+	if _, ok := a.Params["runList"]; ok {
 		if len(runs) > 1 && len(lfns) > 1 {
 			msg := "filelumis API supports single list of lfns or run numbers"
 			return errors.New(msg)
@@ -93,7 +92,7 @@ func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 
 	// fix binding variables for SQLite
 	if DBOWNER == "sqlite" {
-		for k, _ := range params {
+		for k, _ := range a.Params {
 			key := fmt.Sprintf(":%s", strings.ToLower(k))
 			if strings.Contains(stm, key) {
 				stm = strings.Replace(stm, key, "?", -1)
@@ -102,7 +101,7 @@ func (API) FileLumis(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // FileLumis
@@ -168,9 +167,9 @@ func (r *FileLumis) Decode(reader io.Reader) error {
 }
 
 // InsertFileLumis DBS API
-func (API) InsertFileLumisTx(tx *sql.Tx, r io.Reader, cby string) error {
+func (a API) InsertFileLumisTx(tx *sql.Tx) error {
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err

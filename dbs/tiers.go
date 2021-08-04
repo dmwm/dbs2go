@@ -7,24 +7,23 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // DataTiers DBS API
-func (API) DataTiers(params Record, sep string, w http.ResponseWriter) error {
+func (a API) DataTiers() error {
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("data_tier_name", "DT.DATA_TIER_NAME", params, conds, args)
+	conds, args = AddParam("data_tier_name", "DT.DATA_TIER_NAME", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("tiers")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // DataTiers
@@ -108,6 +107,6 @@ func (r *DataTiers) Decode(reader io.Reader) error {
 }
 
 // InsertDataTiers DBS API
-func (API) InsertDataTiers(r io.Reader, cby string) error {
-	return insertRecord(&DataTiers{CREATE_BY: cby}, r)
+func (a API) InsertDataTiers() error {
+	return insertRecord(&DataTiers{CREATE_BY: a.CreateBy}, a.Reader)
 }

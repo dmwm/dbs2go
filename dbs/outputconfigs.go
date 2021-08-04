@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"time"
 	"unsafe"
 
@@ -15,14 +14,14 @@ import (
 )
 
 // OutputConfigs DBS API
-func (API) OutputConfigs(params Record, sep string, w http.ResponseWriter) error {
+func (a API) OutputConfigs() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 
 	bid := "0"
-	block_id := getValues(params, "block_id")
+	block_id := getValues(a.Params, "block_id")
 	if len(block_id) > 1 {
 		msg := "The outputconfigs API does not support list of block_id"
 		return errors.New(msg)
@@ -31,21 +30,21 @@ func (API) OutputConfigs(params Record, sep string, w http.ResponseWriter) error
 	}
 	if bid == "0" {
 		tmpl["Main"] = true
-		dataset := getValues(params, "dataset")
+		dataset := getValues(a.Params, "dataset")
 		if len(dataset) == 1 {
 			tmpl["Dataset"] = true
-			conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
+			conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
 		}
-		lfn := getValues(params, "logical_file_name")
+		lfn := getValues(a.Params, "logical_file_name")
 		if len(lfn) == 1 {
 			tmpl["Lfn"] = true
-			conds, args = AddParam("logical_file_name", "FS.LOGICAL_FILE_NAME", params, conds, args)
+			conds, args = AddParam("logical_file_name", "FS.LOGICAL_FILE_NAME", a.Params, conds, args)
 		}
-		conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
-		conds, args = AddParam("release_version", "R.RELEASE_VERSION", params, conds, args)
-		conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
-		conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", params, conds, args)
-		conds, args = AddParam("global_tag", "O.GLOBAL_TAG", params, conds, args)
+		conds, args = AddParam("app_name", "A.APP_NAME", a.Params, conds, args)
+		conds, args = AddParam("release_version", "R.RELEASE_VERSION", a.Params, conds, args)
+		conds, args = AddParam("pset_hash", "P.PSET_HASH", a.Params, conds, args)
+		conds, args = AddParam("output_module_label", "O.OUTPUT_MODULE_LABEL", a.Params, conds, args)
+		conds, args = AddParam("global_tag", "O.GLOBAL_TAG", a.Params, conds, args)
 	} else {
 		tmpl["Main"] = false
 	}
@@ -56,7 +55,7 @@ func (API) OutputConfigs(params Record, sep string, w http.ResponseWriter) error
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // OutputConfigs
@@ -163,7 +162,7 @@ type OutputConfigRecord struct {
 }
 
 // InsertOutputConfigsTx DBS API
-func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) error {
+func (a API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -171,12 +170,12 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) error {
 	// optional: scenario, pset_name
 
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
 	}
-	rec := OutputConfigRecord{CREATE_BY: cby}
+	rec := OutputConfigRecord{CREATE_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
@@ -214,7 +213,7 @@ func (API) InsertOutputConfigsTx(tx *sql.Tx, r io.Reader, cby string) error {
 }
 
 // InsertOutputConfigs DBS API
-func (api API) InsertOutputConfigs(r io.Reader, cby string) error {
+func (api API) InsertOutputConfigs() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -229,7 +228,7 @@ func (api API) InsertOutputConfigs(r io.Reader, cby string) error {
 	}
 	defer tx.Rollback()
 
-	err = api.InsertOutputConfigsTx(tx, r, cby)
+	err = api.InsertOutputConfigsTx(tx)
 
 	// commit transaction
 	err = tx.Commit()

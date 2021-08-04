@@ -5,24 +5,23 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // DatasetAccessTypes DBS API
-func (API) DatasetAccessTypes(params Record, sep string, w http.ResponseWriter) error {
+func (a API) DatasetAccessTypes() error {
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("dataset_access_type", "DT.DATASET_ACCESS_TYPE", params, conds, args)
+	conds, args = AddParam("dataset_access_type", "DT.DATASET_ACCESS_TYPE", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("datasetaccesstypes")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // DatasetAccessTypes
@@ -95,6 +94,6 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 }
 
 // InsertDatasetAccessTypes DBS API
-func (API) InsertDatasetAccessTypes(r io.Reader, cby string) error {
-	return insertRecord(&DatasetAccessTypes{}, r)
+func (a API) InsertDatasetAccessTypes() error {
+	return insertRecord(&DatasetAccessTypes{}, a.Reader)
 }

@@ -6,23 +6,22 @@ import (
 	"errors"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // ReleaseVersions DBS API
-func (API) ReleaseVersions(params Record, sep string, w http.ResponseWriter) error {
+func (a API) ReleaseVersions() error {
 	var args []interface{}
 	var conds []string
 
 	// parse dataset argument
-	releaseversions := getValues(params, "release_version")
+	releaseversions := getValues(a.Params, "release_version")
 	if len(releaseversions) > 1 {
 		msg := "The releaseversions API does not support list of releaseversions"
 		return errors.New(msg)
 	} else if len(releaseversions) == 1 {
-		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", params, conds, args)
+		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", a.Params, conds, args)
 	}
 
 	// get SQL statement from static area
@@ -30,7 +29,7 @@ func (API) ReleaseVersions(params Record, sep string, w http.ResponseWriter) err
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // ReleaseVersions
@@ -103,6 +102,6 @@ func (r *ReleaseVersions) Decode(reader io.Reader) error {
 }
 
 // InsertReleaseVersions DBS API
-func (API) InsertReleaseVersions(r io.Reader, cby string) error {
-	return insertRecord(&ReleaseVersions{}, r)
+func (a API) InsertReleaseVersions() error {
+	return insertRecord(&ReleaseVersions{}, a.Reader)
 }

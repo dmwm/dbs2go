@@ -7,24 +7,23 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // ProcessingEras DBS API
-func (API) ProcessingEras(params Record, sep string, w http.ResponseWriter) error {
+func (a API) ProcessingEras() error {
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("processing_version", "PE.PROCESSING_VERSION", params, conds, args)
+	conds, args = AddParam("processing_version", "PE.PROCESSING_VERSION", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("processingeras")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // ProcessingEras
@@ -106,6 +105,6 @@ func (r *ProcessingEras) Decode(reader io.Reader) error {
 }
 
 // InsertProcessingEras DBS API
-func (API) InsertProcessingEras(r io.Reader, cby string) error {
-	return insertRecord(&ProcessingEras{CREATE_BY: cby}, r)
+func (a API) InsertProcessingEras() error {
+	return insertRecord(&ProcessingEras{CREATE_BY: a.CreateBy}, a.Reader)
 }

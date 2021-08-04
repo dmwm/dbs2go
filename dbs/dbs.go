@@ -24,7 +24,13 @@ import (
 )
 
 // use API struct for reflection
-type API struct{}
+type API struct {
+	Reader    io.Reader
+	Writer    http.ResponseWriter
+	Params    Record
+	Separator string
+	CreateBy  string
+}
 
 // use a single instance of Validate, it caches struct info
 var RecordValidator *validator.Validate

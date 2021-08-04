@@ -57,8 +57,12 @@ func TestHTTPGet(t *testing.T) {
 	reader := bytes.NewReader(data)
 
 	// insert new record
-	var api dbs.API
-	err := api.InsertDataTiers(reader, createBy)
+	//     var api dbs.API
+	api := dbs.API{
+		Reader:   reader,
+		CreateBy: createBy,
+	}
+	err := api.InsertDataTiers()
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}
@@ -152,8 +156,12 @@ func TestHTTPPut(t *testing.T) {
 	reader := bytes.NewReader(data)
 
 	// insert new record
-	var api dbs.API
-	err := api.InsertAcquisitionEras(reader, createBy)
+	//     var api dbs.API
+	api := dbs.API{
+		Reader:   reader,
+		CreateBy: createBy,
+	}
+	err := api.InsertAcquisitionEras()
 	if err != nil {
 		t.Errorf("Fail in insert record %+v, error %v\n", rec, err)
 	}

@@ -5,20 +5,19 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // FileDataTypes DBS API
-func (API) FileDataTypes(params Record, sep string, w http.ResponseWriter) error {
+func (a API) FileDataTypes() error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("file_data_types")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // FileDataTypes
@@ -91,6 +90,6 @@ func (r *FileDataTypes) Decode(reader io.Reader) error {
 }
 
 // InsertFileDataTypes DBS API
-func (API) InsertFileDataTypes(r io.Reader, cby string) error {
-	return insertRecord(&FileDataTypes{}, r)
+func (a API) InsertFileDataTypes() error {
+	return insertRecord(&FileDataTypes{}, a.Reader)
 }

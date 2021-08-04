@@ -2,12 +2,11 @@ package dbs
 
 import (
 	"errors"
-	"net/http"
 	"strings"
 )
 
 // BlockSummaries DBS API
-func (API) BlockSummaries(params Record, sep string, w http.ResponseWriter) error {
+func (a API) BlockSummaries() error {
 	var stm string
 	var args []interface{}
 	var err error
@@ -15,14 +14,14 @@ func (API) BlockSummaries(params Record, sep string, w http.ResponseWriter) erro
 	tmpl["TokenCondition"] = TokenCondition()
 	tmpl["Owner"] = DBOWNER
 
-	if len(params) == 0 {
+	if len(a.Params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
 		return errors.New(msg)
 	}
 
 	// parse arguments
-	_, detailErr := getSingleValue(params, "detail")
-	block := getValues(params, "block_name")
+	_, detailErr := getSingleValue(a.Params, "detail")
+	block := getValues(a.Params, "block_name")
 	genSQL := ""
 	if len(block) > 0 {
 		blk := block[0]
@@ -56,7 +55,7 @@ func (API) BlockSummaries(params Record, sep string, w http.ResponseWriter) erro
 			return err
 		}
 	}
-	dataset := getValues(params, "dataset")
+	dataset := getValues(a.Params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
 		return errors.New(msg)
@@ -81,5 +80,5 @@ func (API) BlockSummaries(params Record, sep string, w http.ResponseWriter) erro
 		}
 	}
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, genSQL+stm, args...)
+	return executeAll(a.Writer, a.Separator, genSQL+stm, args...)
 }

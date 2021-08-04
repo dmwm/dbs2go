@@ -6,30 +6,29 @@ import (
 	"errors"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // BlockParents DBS API
-func (API) BlockParents(params Record, sep string, w http.ResponseWriter) error {
+func (a API) BlockParents() error {
 	var args []interface{}
 	var conds []string
 
 	// parse dataset argument
-	blockparent := getValues(params, "block_name")
+	blockparent := getValues(a.Params, "block_name")
 	if len(blockparent) > 1 {
 		msg := "Unsupported list of blockparent"
 		return errors.New(msg)
 	} else if len(blockparent) == 1 {
-		conds, args = AddParam("block_name", "BP.BLOCK_NAME", params, conds, args)
+		conds, args = AddParam("block_name", "BP.BLOCK_NAME", a.Params, conds, args)
 	}
 	// get SQL statement from static area
 	stm := getSQL("blockparent")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // BlockParents

@@ -5,20 +5,19 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // DatasetOutputModConfigs DBS API
-func (API) DatasetOutputModConfigs(params Record, sep string, w http.ResponseWriter) error {
+func (a API) DatasetOutputModConfigs() error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("dataset_output_mod_configs")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // DatasetOutputModConfigs
@@ -92,6 +91,6 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 }
 
 // InsertDatasetOutputModConfigs DBS API
-func (API) InsertDatasetOutputModConfigs(r io.Reader, cby string) error {
-	return insertRecord(&DatasetOutputModConfigs{}, r)
+func (a API) InsertDatasetOutputModConfigs() error {
+	return insertRecord(&DatasetOutputModConfigs{}, a.Reader)
 }

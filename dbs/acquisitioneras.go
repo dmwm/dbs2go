@@ -7,26 +7,25 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // AcquisitionEras DBS API
-func (API) AcquisitionEras(params Record, sep string, w http.ResponseWriter) error {
+func (a API) AcquisitionEras() error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("acquisitionEra", "AE.ACQUISITION_ERA_NAME", params, conds, args)
+	conds, args = AddParam("acquisitionEra", "AE.ACQUISITION_ERA_NAME", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("acquisitioneras")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // AcquisitionEras
@@ -116,29 +115,29 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 }
 
 // InsertAcquisitionEras DBS API
-func (API) InsertAcquisitionEras(r io.Reader, cby string) error {
+func (a API) InsertAcquisitionEras() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
 
 	//     return InsertValues("insert_acquisition_eras", values)
-	return insertRecord(&AcquisitionEras{CREATE_BY: cby}, r)
+	return insertRecord(&AcquisitionEras{CREATE_BY: a.CreateBy}, a.Reader)
 }
 
 // UpdateAcquisitionEras DBS API
-func (API) UpdateAcquisitionEras(params Record) error {
+func (a API) UpdateAcquisitionEras() error {
 
 	var aera string
 	var endDate int
-	if v, ok := params["end_date"]; ok {
+	if v, ok := a.Params["end_date"]; ok {
 		val, err := strconv.Atoi(v.(string))
 		if err != nil {
 			log.Println("invalid input parameter", err)
 		}
 		endDate = val
 	}
-	if v, ok := params["acquisition_era_name"]; ok {
+	if v, ok := a.Params["acquisition_era_name"]; ok {
 		aera = v.(string)
 	}
 
@@ -153,7 +152,7 @@ func (API) UpdateAcquisitionEras(params Record) error {
 	// get SQL statement from static area
 	stm := getSQL("update_acquisition_eras")
 	if utils.VERBOSE > 0 {
-		log.Printf("update AcquisitionEras\n%s\n%+v", stm, params)
+		log.Printf("update AcquisitionEras\n%s\n%+v", stm, a.Params)
 	}
 
 	// start transaction

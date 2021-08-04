@@ -5,25 +5,24 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // PhysicsGroups DBS API
-func (API) PhysicsGroups(params Record, sep string, w http.ResponseWriter) error {
+func (a API) PhysicsGroups() error {
 	var args []interface{}
 	var conds []string
 
 	// parse dataset argument
-	conds, args = AddParam("physics_group_name", "pg.PHYSICS_GROUP_NAME", params, conds, args)
+	conds, args = AddParam("physics_group_name", "pg.PHYSICS_GROUP_NAME", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("physicsgroups")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // PhysicsGroups
@@ -96,6 +95,6 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 }
 
 // InsertPhysicsGroups DBS API
-func (API) InsertPhysicsGroups(r io.Reader, cby string) error {
-	return insertRecord(&PhysicsGroups{}, r)
+func (a API) InsertPhysicsGroups() error {
+	return insertRecord(&PhysicsGroups{}, a.Reader)
 }

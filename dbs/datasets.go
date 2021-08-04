@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
@@ -15,8 +14,8 @@ import (
 )
 
 // Datasets API
-func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
-	log.Printf("datasets params %+v", params)
+func (a API) Datasets() error {
+	log.Printf("datasets params %+v", a.Params)
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -30,7 +29,7 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 
 	// run_num shouhld come first since it may produce TokenGenerator
 	// whose bind parameters should appear first
-	runs, err := ParseRuns(getValues(params, "run_num"))
+	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// parse detail arugment
-	detail, _ := getSingleValue(params, "detail")
+	detail, _ := getSingleValue(a.Params, "detail")
 	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
 		detail = "true"
 		tmpl["Detail"] = true
@@ -55,7 +54,7 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// parse dataset argument
-	datasets := getValues(params, "dataset")
+	datasets := getValues(a.Params, "dataset")
 	if len(datasets) > 1 {
 		cond := fmt.Sprintf("D.DATASET in %s", TokenCondition())
 		token, binds := TokenGenerator(datasets, 100, "dataset_token") // 100 is max for # of allowed datasets
@@ -64,11 +63,11 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 			args = append(args, v)
 		}
 	} else if len(datasets) == 1 {
-		conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
+		conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 	}
 
 	// parse is_dataset_valid argument
-	isValid, _ := getSingleValue(params, "is_dataset_valid")
+	isValid, _ := getSingleValue(a.Params, "is_dataset_valid")
 	if isValid == "" {
 		isValid = "1"
 	}
@@ -77,7 +76,7 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 	args = append(args, isValid)
 
 	// parse dataset_id argument
-	dataset_access_type, _ := getSingleValue(params, "dataset_access_type")
+	dataset_access_type, _ := getSingleValue(a.Params, "dataset_access_type")
 	//     if dataset_access_type != "" {
 	oper := "="
 	if dataset_access_type == "" {
@@ -92,41 +91,41 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 	//     }
 
 	// optional arguments
-	if _, e := getSingleValue(params, "parent_dataset"); e == nil {
+	if _, e := getSingleValue(a.Params, "parent_dataset"); e == nil {
 		tmpl["ParentDataset"] = true
-		conds, args = AddParam("parent_dataset", "PDS.DATASET PARENT_DATASET", params, conds, args)
+		conds, args = AddParam("parent_dataset", "PDS.DATASET PARENT_DATASET", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "release_version"); e == nil {
+	if _, e := getSingleValue(a.Params, "release_version"); e == nil {
 		tmpl["Version"] = true
-		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", params, conds, args)
+		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "pset_hash"); e == nil {
+	if _, e := getSingleValue(a.Params, "pset_hash"); e == nil {
 		tmpl["Version"] = true
-		conds, args = AddParam("pset_hash", "PSH.PSET_HASH", params, conds, args)
+		conds, args = AddParam("pset_hash", "PSH.PSET_HASH", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "app_name"); e == nil {
+	if _, e := getSingleValue(a.Params, "app_name"); e == nil {
 		tmpl["Version"] = true
-		conds, args = AddParam("app_name", "AEX.APP_NAME", params, conds, args)
+		conds, args = AddParam("app_name", "AEX.APP_NAME", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "output_module_label"); e == nil {
+	if _, e := getSingleValue(a.Params, "output_module_label"); e == nil {
 		tmpl["Version"] = true
-		conds, args = AddParam("output_module_label", "OMC.OUTPUT_MODULE_LABEL", params, conds, args)
+		conds, args = AddParam("output_module_label", "OMC.OUTPUT_MODULE_LABEL", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "logical_file_name"); e == nil {
+	if _, e := getSingleValue(a.Params, "logical_file_name"); e == nil {
 		tmpl["Lfns"] = true
-		conds, args = AddParam("logical_file_name", "FL.LOGICAL_FILE_NAME", params, conds, args)
+		conds, args = AddParam("logical_file_name", "FL.LOGICAL_FILE_NAME", a.Params, conds, args)
 	}
-	conds, args = AddParam("primary_ds_name", "P.PRIMARY_DS_NAME", params, conds, args)
-	conds, args = AddParam("processed_ds_name", "PD.PROCESSED_DS_NAME", params, conds, args)
-	conds, args = AddParam("data_tier_name", "DT.DATA_TIER_NAME", params, conds, args)
-	conds, args = AddParam("primary_ds_type", "PDT.PRIMARY_DS_TYPE", params, conds, args)
-	conds, args = AddParam("physics_group_name", "PH.PHYSICS_GROUP_NAME", params, conds, args)
-	conds, args = AddParam("global_tag", "OMC.GLOBAL_TAG", params, conds, args)
-	conds, args = AddParam("processing_version", "PE.PROCESSING_VERSION", params, conds, args)
-	conds, args = AddParam("acqusition_era", "AE.ACQUISITION_ERA_NAME", params, conds, args)
-	conds, args = AddParam("cdate", "D.CREATION_DATE", params, conds, args)
-	minDate := getValues(params, "min_cdate")
-	maxDate := getValues(params, "max_cdate")
+	conds, args = AddParam("primary_ds_name", "P.PRIMARY_DS_NAME", a.Params, conds, args)
+	conds, args = AddParam("processed_ds_name", "PD.PROCESSED_DS_NAME", a.Params, conds, args)
+	conds, args = AddParam("data_tier_name", "DT.DATA_TIER_NAME", a.Params, conds, args)
+	conds, args = AddParam("primary_ds_type", "PDT.PRIMARY_DS_TYPE", a.Params, conds, args)
+	conds, args = AddParam("physics_group_name", "PH.PHYSICS_GROUP_NAME", a.Params, conds, args)
+	conds, args = AddParam("global_tag", "OMC.GLOBAL_TAG", a.Params, conds, args)
+	conds, args = AddParam("processing_version", "PE.PROCESSING_VERSION", a.Params, conds, args)
+	conds, args = AddParam("acqusition_era", "AE.ACQUISITION_ERA_NAME", a.Params, conds, args)
+	conds, args = AddParam("cdate", "D.CREATION_DATE", a.Params, conds, args)
+	minDate := getValues(a.Params, "min_cdate")
+	maxDate := getValues(a.Params, "max_cdate")
 	if len(minDate) == 1 && len(maxDate) == 1 {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
@@ -145,9 +144,9 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 			args = append(args, maxval)
 		}
 	}
-	conds, args = AddParam("ldate", "D.LAST_MODIFICATION_DATE", params, conds, args)
-	minDate = getValues(params, "min_ldate")
-	maxDate = getValues(params, "max_ldate")
+	conds, args = AddParam("ldate", "D.LAST_MODIFICATION_DATE", a.Params, conds, args)
+	minDate = getValues(a.Params, "min_ldate")
+	maxDate = getValues(a.Params, "max_ldate")
 	if len(minDate) == 1 && len(maxDate) == 1 {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
@@ -166,11 +165,11 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 			args = append(args, maxval)
 		}
 	}
-	conds, args = AddParam("create_by", "D.CREATE_BY", params, conds, args)
-	conds, args = AddParam("last_modified_by", "D.LAST_MODIFIED_BY", params, conds, args)
-	conds, args = AddParam("prep_id", "D.PREP_ID", params, conds, args)
+	conds, args = AddParam("create_by", "D.CREATE_BY", a.Params, conds, args)
+	conds, args = AddParam("last_modified_by", "D.LAST_MODIFIED_BY", a.Params, conds, args)
+	conds, args = AddParam("prep_id", "D.PREP_ID", a.Params, conds, args)
 
-	dids := getValues(params, "dataset_id")
+	dids := getValues(a.Params, "dataset_id")
 	if len(dids) == 1 {
 		if !strings.Contains(dids[0], "[") {
 			cond := fmt.Sprintf("D.DATASET_ID = %s", placeholder("dataset_id"))
@@ -208,7 +207,7 @@ func (API) Datasets(params Record, sep string, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return execute(w, sep, stm, cols, vals, args...)
+	return execute(a.Writer, a.Separator, stm, cols, vals, args...)
 }
 
 // Datasets
@@ -359,7 +358,7 @@ type DatasetRecord struct {
 }
 
 // InsertDatasets DBS API
-func (API) InsertDatasets(r io.Reader, cby string) error {
+func (a API) InsertDatasets() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
 	// input values: dataset, primary_ds_name(name), processed_ds(name), data_tier(name),
@@ -380,12 +379,12 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 	//     return InsertTemplateValues("insert_datasets", args, values)
 
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
 	}
-	rec := DatasetRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
+	rec := DatasetRecord{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
@@ -462,19 +461,19 @@ func (API) InsertDatasets(r io.Reader, cby string) error {
 }
 
 // UpdateDatasets DBS API
-func (API) UpdateDatasets(params Record) error {
+func (a API) UpdateDatasets() error {
 
 	// get accessTypeID from Access dataset types table
 	var create_by string
-	if v, ok := params["create_by"]; ok {
+	if v, ok := a.Params["create_by"]; ok {
 		create_by = v.(string)
 	}
 	var dataset string
 	var datasetAccessType string
-	if v, ok := params["dataset"]; ok {
+	if v, ok := a.Params["dataset"]; ok {
 		dataset = v.(string)
 	}
-	if v, ok := params["dataset_access_type"]; ok {
+	if v, ok := a.Params["dataset_access_type"]; ok {
 		datasetAccessType = v.(string)
 	}
 	date := time.Now().Unix()

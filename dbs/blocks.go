@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +15,7 @@ import (
 )
 
 // Blocks DBS API
-func (API) Blocks(params Record, sep string, w http.ResponseWriter) error {
+func (a API) Blocks() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -25,7 +24,7 @@ func (API) Blocks(params Record, sep string, w http.ResponseWriter) error {
 	tmpl["Detail"] = false
 
 	// parse detail arugment
-	detail, _ := getSingleValue(params, "detail")
+	detail, _ := getSingleValue(a.Params, "detail")
 	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
 		detail = "true"
 	}
@@ -35,7 +34,7 @@ func (API) Blocks(params Record, sep string, w http.ResponseWriter) error {
 
 	// use run_num first since it may produce TokenGenerator
 	// which should contain bind variables
-	runs, err := ParseRuns(getValues(params, "run_num"))
+	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
 		return err
 	}
@@ -49,19 +48,19 @@ func (API) Blocks(params Record, sep string, w http.ResponseWriter) error {
 		}
 	}
 	// parse arguments
-	lfns := getValues(params, "logical_file_name")
+	lfns := getValues(a.Params, "logical_file_name")
 	if len(lfns) == 1 {
 		tmpl["Lfns"] = true
-		conds, args = AddParam("logical_file_name", "FL.LOGICAL_FILE_NAME", params, conds, args)
+		conds, args = AddParam("logical_file_name", "FL.LOGICAL_FILE_NAME", a.Params, conds, args)
 	}
 
-	conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
-	conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
-	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
-	conds, args = AddParam("cdate", "B.CREATION_DATE", params, conds, args)
+	conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
+	conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
+	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", a.Params, conds, args)
+	conds, args = AddParam("cdate", "B.CREATION_DATE", a.Params, conds, args)
 
-	minDate := getValues(params, "min_cdate")
-	maxDate := getValues(params, "max_cdate")
+	minDate := getValues(a.Params, "min_cdate")
+	maxDate := getValues(a.Params, "max_cdate")
 	if len(minDate) == 1 && len(maxDate) == 1 {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
@@ -81,10 +80,10 @@ func (API) Blocks(params Record, sep string, w http.ResponseWriter) error {
 		}
 	}
 
-	conds, args = AddParam("ldate", "B.LAST_MODIFICATION_DATE", params, conds, args)
+	conds, args = AddParam("ldate", "B.LAST_MODIFICATION_DATE", a.Params, conds, args)
 
-	minDate = getValues(params, "min_ldate")
-	maxDate = getValues(params, "max_ldate")
+	minDate = getValues(a.Params, "min_ldate")
+	maxDate = getValues(a.Params, "max_ldate")
 	if len(minDate) == 1 && len(maxDate) == 1 {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
@@ -110,7 +109,7 @@ func (API) Blocks(params Record, sep string, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // Blocks
@@ -220,7 +219,7 @@ type BlockRecord struct {
 }
 
 // InsertBlocks DBS API
-func (API) InsertBlocks(r io.Reader, cby string) error {
+func (a API) InsertBlocks() error {
 	// implement the following logic
 	// input values: blockname
 	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
@@ -229,12 +228,12 @@ func (API) InsertBlocks(r io.Reader, cby string) error {
 	// self.blockin.execute(conn, blkinput, tran)
 
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
 	}
-	rec := BlockRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
+	rec := BlockRecord{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
@@ -276,7 +275,7 @@ func (API) InsertBlocks(r io.Reader, cby string) error {
 }
 
 // UpdateBlocks DBS API
-func (API) UpdateBlocks(params Record) error {
+func (a API) UpdateBlocks() error {
 	// get input parameters
 	date := time.Now().Unix()
 	var create_by string
@@ -284,22 +283,22 @@ func (API) UpdateBlocks(params Record) error {
 	var origSiteName string
 	var openForWriting int
 
-	if v, ok := params["block_name"]; ok {
+	if v, ok := a.Params["block_name"]; ok {
 		blockName = v.(string)
 	}
 	site := false
-	if v, ok := params["origin_site_name"]; ok {
+	if v, ok := a.Params["origin_site_name"]; ok {
 		origSiteName = v.(string)
 		site = true
 	}
-	if v, ok := params["open_for_writing"]; ok {
+	if v, ok := a.Params["open_for_writing"]; ok {
 		val, err := strconv.Atoi(v.(string))
 		if err != nil {
 			log.Println("invalid input parameter", err)
 		}
 		openForWriting = val
 	}
-	if v, ok := params["create_by"]; ok {
+	if v, ok := a.Params["create_by"]; ok {
 		create_by = v.(string)
 	}
 

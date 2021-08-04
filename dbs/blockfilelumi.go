@@ -2,11 +2,10 @@ package dbs
 
 import (
 	"fmt"
-	"net/http"
 )
 
 // BlockFileLumiIds API
-func (API) BlockFileLumiIds(params Record, sep string, w http.ResponseWriter) error {
+func (a API) BlockFileLumiIds() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -20,12 +19,12 @@ func (API) BlockFileLumiIds(params Record, sep string, w http.ResponseWriter) er
 	}
 
 	// add block condition
-	if v, _ := getSingleValue(params, "block_name"); v != "" {
+	if v, _ := getSingleValue(a.Params, "block_name"); v != "" {
 		args = append(args, v)
 	}
 
 	// add child_lfn_list condition
-	lfns := getValues(params, "child_lfn_list")
+	lfns := getValues(a.Params, "child_lfn_list")
 	if len(lfns) > 1 {
 		tmpl["ChildLfnList"] = true
 		token, binds := TokenGenerator(lfns, 30, "lfn_token")
@@ -38,7 +37,7 @@ func (API) BlockFileLumiIds(params Record, sep string, w http.ResponseWriter) er
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 
 	/*
 		// if we extract explicitly all info from rows then this API

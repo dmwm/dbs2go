@@ -3,32 +3,31 @@ package dbs
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 )
 
 // RunSummaries DBS API
-func (API) RunSummaries(params Record, sep string, w http.ResponseWriter) error {
+func (a API) RunSummaries() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 
 	// parse arguments
-	//     runs := getValues(params, "run_num")
-	runs, err := ParseRuns(getValues(params, "run_num"))
+	//     runs := getValues(a.Params, "run_num")
+	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
 		return err
 	}
 
-	dataset := getValues(params, "dataset")
+	dataset := getValues(a.Params, "dataset")
 	if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
 			return errors.New(msg)
 		}
 		tmpl["Dataset"] = true
-		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
+		conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
 	}
 	stm, err := LoadTemplateSQL("runsummaries", tmpl)
 	if err != nil {
@@ -45,7 +44,7 @@ func (API) RunSummaries(params Record, sep string, w http.ResponseWriter) error 
 			args = append(args, v)
 		}
 	} else if len(runs) == 1 {
-		conds, args = AddParam("run_num", "FL.RUN_NUM", params, conds, args)
+		conds, args = AddParam("run_num", "FL.RUN_NUM", a.Params, conds, args)
 	} else {
 		msg := fmt.Sprintf("No arguments for runsummaries API")
 		return errors.New(msg)
@@ -53,5 +52,5 @@ func (API) RunSummaries(params Record, sep string, w http.ResponseWriter) error 
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }

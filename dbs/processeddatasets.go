@@ -5,20 +5,19 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // ProcessedDatasets DBS API
-func (API) ProcessedDatasets(params Record, sep string, w http.ResponseWriter) error {
+func (a API) ProcessedDatasets() error {
 	var args []interface{}
 
 	// get SQL statement from static area
 	stm := getSQL("processed_datasets")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // ProcessedDatasets
@@ -94,6 +93,6 @@ func (r *ProcessedDatasets) Decode(reader io.Reader) error {
 }
 
 // InsertProcessedDatasets DBS API
-func (API) InsertProcessedDatasets(r io.Reader, cby string) error {
-	return insertRecord(&ProcessedDatasets{}, r)
+func (a API) InsertProcessedDatasets() error {
+	return insertRecord(&ProcessedDatasets{}, a.Reader)
 }
