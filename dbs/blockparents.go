@@ -21,7 +21,7 @@ func (a API) BlockParents() error {
 		msg := "Unsupported list of blockparent"
 		return errors.New(msg)
 	} else if len(blockparent) == 1 {
-		conds, args = AddParam("block_name", "BP.BLOCK_NAME", a.Params, conds, args)
+		conds, args = AddParam("block_name", "BC.BLOCK_NAME", a.Params, conds, args)
 	}
 	// get SQL statement from static area
 	stm := getSQL("blockparent")
