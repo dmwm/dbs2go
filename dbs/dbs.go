@@ -307,6 +307,7 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
 	rowCount := 0
+	writtenResults := false
 	for rows.Next() {
 		if rowCount == 0 {
 			// initialize value pointers
@@ -358,6 +359,7 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 		if w != nil {
 			if rowCount == 0 {
 				if sep != "" {
+					writtenResults = true
 					w.Write([]byte("[\n"))
 					defer w.Write([]byte("]\n"))
 				}
@@ -372,6 +374,10 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 	if err = rows.Err(); err != nil {
 		msg := fmt.Sprintf("rows error %v", err)
 		return errors.New(msg)
+	}
+	// make sure we write proper response if no result written
+	if sep != "" && !writtenResults {
+		w.Write([]byte("[]"))
 	}
 	return nil
 }
@@ -407,6 +413,7 @@ func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []inter
 
 	// loop over rows
 	rowCount := 0
+	writtenResults := false
 	for rows.Next() {
 		err := rows.Scan(vals...)
 		if err != nil {
@@ -448,6 +455,7 @@ func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []inter
 		if w != nil {
 			if rowCount == 0 {
 				if sep != "" {
+					writtenResults = true
 					w.Write([]byte("[\n"))
 					defer w.Write([]byte("]\n"))
 				}
@@ -461,6 +469,10 @@ func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []inter
 	}
 	if err = rows.Err(); err != nil {
 		return err
+	}
+	// make sure we write proper response if no result written
+	if sep != "" && !writtenResults {
+		w.Write([]byte("[]"))
 	}
 	return nil
 }
