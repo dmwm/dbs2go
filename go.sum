@@ -124,6 +124,8 @@ github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210801185242-f43234225c85 
 github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210801185242-f43234225c85/go.mod h1:rEHBafUXWUWp8o4zkvTooUDTHDhV4oj4trnO1fI2l4k=
 github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210802115209-6c40520fa435 h1:2X4STKu9QseMolDlpNGiSk4av/ehXPbF4PguQp9UedA=
 github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210802115209-6c40520fa435/go.mod h1:rEHBafUXWUWp8o4zkvTooUDTHDhV4oj4trnO1fI2l4k=
+github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210805190744-bb502b49c1ec h1:sJQWCeCVYG2KI/7fBklE+okYUMXnPKY/RcyAlqAk7Fg=
+github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210805190744-bb502b49c1ec/go.mod h1:rEHBafUXWUWp8o4zkvTooUDTHDhV4oj4trnO1fI2l4k=
 github.com/vkuznet/x509proxy v0.0.0-20191014143623-163039704c67/go.mod h1:n8gnqWgHpPWW+DyA66Zam8qQshAmDxVVmSmObyR6M8g=
 github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6 h1:Y5LCuH9nfTZ6srI5NaoKKbcDb01zqTHw8678++4fw0c=
 github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6/go.mod h1:gfEPE3azFe+K/nMLezta3+kTiumttEYDawGAE72IYfM=

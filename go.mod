@@ -17,7 +17,7 @@ require (
 	github.com/shirou/gopsutil v3.21.7+incompatible
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
 	github.com/ulule/limiter/v3 v3.8.0
-	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210802115209-6c40520fa435
+	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210805190744-bb502b49c1ec
 	github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6
 	golang.org/x/exp/errors v0.0.0-20210729172720-737cce5152fc
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
