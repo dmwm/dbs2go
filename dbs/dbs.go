@@ -30,6 +30,12 @@ type API struct {
 	Params    Record
 	Separator string
 	CreateBy  string
+	Api       string
+}
+
+// String provides string representation of API struct
+func (a *API) String() string {
+	return fmt.Sprintf("API=%s params=%+v createBy=%s", a.Api, a.Params, a.CreateBy)
 }
 
 // use a single instance of Validate, it caches struct info
