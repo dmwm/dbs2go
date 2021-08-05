@@ -143,8 +143,11 @@ func (a API) Files() error {
 		conds = append(conds, v)
 	}
 	for _, v := range na {
-		//         args = append(args, v)
-		args = utils.Insert(args, v)
+		if t != "" { // we got token, therefore need to insert args
+			args = utils.Insert(args, v)
+		} else {
+			args = append(args, v)
+		}
 	}
 	if len(na) > 1 { // if we have more then one run arguments
 		rungen = true
