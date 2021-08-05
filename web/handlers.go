@@ -106,6 +106,10 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	api := dbs.API{
 		Params: params,
+		Api:    "dummy",
+	}
+	if utils.VERBOSE > 0 {
+		log.Println(api.String())
 	}
 	records := api.Dummy()
 	data, err := json.Marshal(records)
@@ -244,6 +248,10 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	api := dbs.API{
 		Params:   params,
 		CreateBy: cby,
+		Api:      a,
+	}
+	if utils.VERBOSE > 0 {
+		log.Println(api.String())
 	}
 	var err error
 	if utils.VERBOSE > 0 {
@@ -308,6 +316,18 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		Params:    params,
 		Separator: sep,
 		CreateBy:  cby,
+		Api:       a,
+	}
+	if a == "fileArray" || a == "datasetlist" || a == "fileparentsbylumi" || a == "filelumis" || a == "blockparents" {
+		params, err = parsePayload(r)
+		if err != nil {
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
+		}
+		api.Params = params
+	}
+	if utils.VERBOSE > 0 {
+		log.Println(api.String())
 	}
 	if a == "datatiers" {
 		err = api.InsertDataTiers()
@@ -330,42 +350,14 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "fileparents" {
 		err = api.InsertFileParents()
 	} else if a == "datasetlist" {
-		params, err = parsePayload(r)
-		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return
-		}
 		err = api.DatasetList()
 	} else if a == "fileArray" {
-		params, err = parsePayload(r)
-		if utils.VERBOSE > 1 {
-			log.Printf("fileArray payload: %+v", params)
-		}
-		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return
-		}
 		err = api.FileArray()
 	} else if a == "fileparentsbylumi" {
-		params, err = parsePayload(r)
-		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return
-		}
 		err = api.FileParentsByLumi()
 	} else if a == "filelumis" {
-		params, err = parsePayload(r)
-		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return
-		}
 		err = api.FileLumis()
 	} else if a == "blockparents" {
-		params, err = parsePayload(r)
-		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
-			return
-		}
 		err = api.BlockParents()
 	} else if a == "submit" {
 		err = api.Submit()
@@ -407,6 +399,10 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 		Writer:    w,
 		Params:    params,
 		Separator: sep,
+		Api:       a,
+	}
+	if utils.VERBOSE > 0 {
+		log.Println(api.String())
 	}
 	if a == "datatiers" {
 		err = api.DataTiers()
