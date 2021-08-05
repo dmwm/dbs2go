@@ -21,16 +21,12 @@ func (a API) Runs() error {
 	if err != nil {
 		return err
 	}
-
 	if len(lfn) == 1 {
 		tmpl["Lfn"] = true
-		conds, args = AddParam("logical_file_name", "FILES.LOGICAL_FILE_NAME", a.Params, conds, args)
 	} else if len(block) == 1 {
 		tmpl["Block"] = true
-		conds, args = AddParam("block_name", "BLOCKS.BLOCK_NAME", a.Params, conds, args)
 	} else if len(dataset) == 1 {
 		tmpl["Dataset"] = true
-		conds, args = AddParam("dataset", "DATASETS.DATASET", a.Params, conds, args)
 	}
 
 	stm, err := LoadTemplateSQL("runs", tmpl)
@@ -60,6 +56,15 @@ func (a API) Runs() error {
 			conds, args = AddParam("run_num", "FL.run_num", a.Params, conds, args)
 		}
 	}
+	// we need to provide conditions after runs since runs will generate token
+	if len(lfn) == 1 {
+		conds, args = AddParam("logical_file_name", "FILES.LOGICAL_FILE_NAME", a.Params, conds, args)
+	} else if len(block) == 1 {
+		conds, args = AddParam("block_name", "BLOCKS.BLOCK_NAME", a.Params, conds, args)
+	} else if len(dataset) == 1 {
+		conds, args = AddParam("dataset", "DATASETS.DATASET", a.Params, conds, args)
+	}
+
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
