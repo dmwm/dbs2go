@@ -18,16 +18,16 @@ import (
 
 // responseMsg helper function to provide response to end-user
 func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
-	//     var out []dbs.Record
 	rec := make(dbs.Record)
 	rec["error"] = msg
 	rec["api"] = api
 	rec["method"] = r.Method
 	rec["exception"] = code
 	rec["type"] = "HTTPError"
-	//     out = append(out, rec)
-	//     data, _ := json.Marshal(out)
-	data, _ := json.Marshal(rec)
+	//     data, _ := json.Marshal(rec)
+	var out []dbs.Record
+	out = append(out, rec)
+	data, _ := json.Marshal(out)
 	w.WriteHeader(code)
 	w.Write(data)
 	return int64(len(data))
@@ -226,12 +226,9 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
-	//     sep := ",\n"
+	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
-		//         sep = "\n"
-	} else {
-		w.Write([]byte("[\n"))
-		defer w.Write([]byte("]\n"))
+		sep = ""
 	}
 
 	params := make(dbs.Record)
@@ -246,9 +243,10 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	cby := createBy(r)
 	params["create_by"] = cby
 	api := dbs.API{
-		Params:   params,
-		CreateBy: cby,
-		Api:      a,
+		Params:    params,
+		CreateBy:  cby,
+		Api:       a,
+		Separator: sep,
 	}
 	if utils.VERBOSE > 0 {
 		log.Println(api.String())
@@ -276,12 +274,9 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
-	sep := ",\n"
+	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
 		sep = ""
-	} else {
-		w.Write([]byte("[\n"))
-		defer w.Write([]byte("]\n"))
 	}
 
 	headerContentType := r.Header.Get("Content-Type")
@@ -373,12 +368,9 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
-	sep := ",\n"
+	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
 		sep = ""
-	} else {
-		w.Write([]byte("[\n"))
-		defer w.Write([]byte("]\n"))
 	}
 
 	params, err := parseParams(r)
