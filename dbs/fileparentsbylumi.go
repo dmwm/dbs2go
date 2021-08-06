@@ -3,13 +3,11 @@ package dbs
 import (
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 )
 
 // FileParentsByLumi DBS API
-func (API) FileParentsByLumi(params Record, sep string, w http.ResponseWriter) error {
+func (a API) FileParentsByLumi() error {
 	var args []interface{}
 	var conds []string
 
@@ -18,7 +16,7 @@ func (API) FileParentsByLumi(params Record, sep string, w http.ResponseWriter) e
 	tmpl["ChildLfnList"] = false
 	tmpl["TokenCondition"] = TokenCondition()
 
-	blockNames := getValues(params, "block_name")
+	blockNames := getValues(a.Params, "block_name")
 	if len(blockNames) == 0 {
 		return errors.New("Missing block_name for listFileParentssByLumi")
 	}
@@ -27,7 +25,7 @@ func (API) FileParentsByLumi(params Record, sep string, w http.ResponseWriter) e
 	args = append(args, dataset)
 	args = append(args, blk)
 
-	lfns := getValues(params, "logical_file_name")
+	lfns := getValues(a.Params, "logical_file_name")
 	if len(lfns) > 1 {
 		tmpl["ChildLfnList"] = true
 		token, binds := TokenGenerator(lfns, 30, "lfn_token") // 100 is max for # of allowed entries
@@ -45,7 +43,7 @@ func (API) FileParentsByLumi(params Record, sep string, w http.ResponseWriter) e
 	stm = WhereClause(stm, conds)
 
 	// fix binding variables
-	for k, v := range params {
+	for k, v := range a.Params {
 		key := fmt.Sprintf(":%s", strings.ToLower(k))
 		if strings.Contains(stm, key) {
 			stm = strings.Replace(stm, key, "?", -1)
@@ -54,10 +52,10 @@ func (API) FileParentsByLumi(params Record, sep string, w http.ResponseWriter) e
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // InsertFileParentsByLumi DBS API
-func (API) InsertFileParentsByLumi(r io.Reader, cby string) error {
+func (a API) InsertFileParentsByLumi() error {
 	return nil
 }

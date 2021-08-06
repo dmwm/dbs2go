@@ -83,6 +83,6 @@ func (r *BranchHashes) Decode(reader io.Reader) error {
 }
 
 // InsertBranchHashes DBS API
-func (API) InsertBranchHashes(r io.Reader, cby string) error {
-	return insertRecord(&BranchHashes{}, r)
+func (a API) InsertBranchHashes() error {
+	return insertRecord(&BranchHashes{}, a.Reader)
 }

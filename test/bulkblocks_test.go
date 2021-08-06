@@ -20,40 +20,43 @@ func TestBulkBlocks(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	var api dbs.API
+	//     var api dbs.API
 	var err error
 	var data []byte
-	var reader *bytes.Reader
+	//     var reader *bytes.Reader
 	ts := time.Now().Unix()
 	createBy := "tester"
+	api := dbs.API{
+		CreateBy: createBy,
+	}
 
 	// to insert bulkblock.json we need to have certain data in place
 	// below we list attributes we use in bulkblock.json
 	tier := dbs.DataTiers{DATA_TIER_NAME: "GEN-SIM-RAW", CREATION_DATE: ts, CREATE_BY: createBy}
 	data, _ = json.Marshal(tier)
-	reader = bytes.NewReader(data)
-	err = api.InsertDataTiers(reader, createBy)
+	api.Reader = bytes.NewReader(data)
+	err = api.InsertDataTiers()
 	if err != nil {
 		t.Errorf("Fail to insert data tier %v\n", err)
 	}
 	physGrp := dbs.PhysicsGroups{PHYSICS_GROUP_NAME: "Tracker"}
 	data, _ = json.Marshal(physGrp)
-	reader = bytes.NewReader(data)
-	err = api.InsertPhysicsGroups(reader, createBy)
+	api.Reader = bytes.NewReader(data)
+	err = api.InsertPhysicsGroups()
 	if err != nil {
 		t.Errorf("Fail to insert physics group %v\n", err)
 	}
 	dacc := dbs.DatasetAccessTypes{DATASET_ACCESS_TYPE: "PRODUCTION"}
 	data, _ = json.Marshal(dacc)
-	reader = bytes.NewReader(data)
-	err = api.InsertDatasetAccessTypes(reader, createBy)
+	api.Reader = bytes.NewReader(data)
+	err = api.InsertDatasetAccessTypes()
 	if err != nil {
 		t.Errorf("Fail to insert dataset access type %v\n", err)
 	}
 	procDS := dbs.ProcessedDatasets{PROCESSED_DS_NAME: "Summer2011-pstr-v10"}
 	data, _ = json.Marshal(procDS)
-	reader = bytes.NewReader(data)
-	err = api.InsertProcessedDatasets(reader, createBy)
+	api.Reader = bytes.NewReader(data)
+	err = api.InsertProcessedDatasets()
 	if err != nil {
 		t.Errorf("Fail to insert dataset access type %v\n", err)
 	}
@@ -97,8 +100,8 @@ func TestBulkBlocks(t *testing.T) {
 	if err != nil {
 		t.Errorf("Fail to read file %s, error %v\n", fname, err)
 	}
-	reader = bytes.NewReader(data)
-	err = api.InsertBulkBlocks(reader, createBy)
+	api.Reader = bytes.NewReader(data)
+	err = api.InsertBulkBlocks()
 	if err != nil {
 		t.Errorf("Fail to process bulkblocks data %v\n", err)
 	}

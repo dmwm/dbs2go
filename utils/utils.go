@@ -247,3 +247,11 @@ func BasePath(base, api string) string {
 	}
 	return api
 }
+
+// Insert inserts value into array at zero position
+func Insert(arr []interface{}, val interface{}) []interface{} {
+	arr = append(arr, val)
+	copy(arr[1:], arr[0:])
+	arr[0] = val
+	return arr
+}

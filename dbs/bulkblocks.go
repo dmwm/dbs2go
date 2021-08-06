@@ -144,9 +144,9 @@ type DatasetParent struct {
    #3 insert block & files
    self.insertBlockFile(blockcontent, datasetId, migration)
 */
-func (API) InsertBulkBlocks(r io.Reader, cby string) error {
+func (a API) InsertBulkBlocks() error {
 	// read input data
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("unable to read bulkblock input", err)
 		return err
@@ -169,7 +169,12 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 	defer tx.Rollback()
 
 	var reader *bytes.Reader
-	var api API
+	//     var api API
+	api := API{
+		Reader:   reader,
+		CreateBy: a.CreateBy,
+		Params:   make(Record),
+	}
 	var isFileValid, datasetID, blockID, fileID, fileTypeID, branchHashID int64
 	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
 	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
@@ -185,8 +190,8 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 			log.Println("unable to marshal dataset config list", err)
 			return err
 		}
-		reader = bytes.NewReader(data)
-		err = api.InsertOutputConfigsTx(tx, reader, cby)
+		api.Reader = bytes.NewReader(data)
+		err = api.InsertOutputConfigsTx(tx)
 		if err != nil {
 			return err
 		}
@@ -210,7 +215,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 		log.Println("get primary dataset ID")
 	}
 	if rec.PrimaryDataset.CreateBy == "" {
-		rec.PrimaryDataset.CreateBy = cby
+		rec.PrimaryDataset.CreateBy = a.CreateBy
 	}
 	primDS := PrimaryDatasets{
 		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
@@ -229,7 +234,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 		log.Println("get processing era ID")
 	}
 	if rec.ProcessingEra.CreateBy == "" {
-		rec.ProcessingEra.CreateBy = cby
+		rec.ProcessingEra.CreateBy = a.CreateBy
 	}
 	pera := ProcessingEras{
 		PROCESSING_VERSION: rec.ProcessingEra.ProcessingVersion,
@@ -248,7 +253,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 		log.Println("get acquisition era ID")
 	}
 	if rec.AcquisitionEra.CreateBy == "" {
-		rec.AcquisitionEra.CreateBy = cby
+		rec.AcquisitionEra.CreateBy = a.CreateBy
 	}
 	aera := AcquisitionEras{
 		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
@@ -304,7 +309,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 		log.Println("insert dataset")
 	}
 	if rec.Dataset.CreateBy == "" {
-		rec.Dataset.CreateBy = cby
+		rec.Dataset.CreateBy = a.CreateBy
 	}
 	dataset := Datasets{
 		DATASET:                rec.Dataset.Dataset,
@@ -342,7 +347,7 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 		log.Println("insert block")
 	}
 	if rec.Block.CreateBy == "" {
-		rec.Block.CreateBy = cby
+		rec.Block.CreateBy = a.CreateBy
 	}
 	blk := Blocks{
 		BLOCK_NAME:             rec.Block.BlockName,
@@ -429,8 +434,8 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 				log.Println("unable to marshal dataset file lumi list", err)
 				return err
 			}
-			reader = bytes.NewReader(data)
-			err = api.InsertFileLumisTx(tx, reader, cby)
+			api.Reader = bytes.NewReader(data)
+			err = api.InsertFileLumisTx(tx)
 			if err != nil {
 				log.Println("unable to insert FileLumis record", err)
 				return err
@@ -445,8 +450,8 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 			log.Println("unable to marshal file config list", err)
 			return err
 		}
-		reader = bytes.NewReader(data)
-		err = api.InsertFileOutputModConfigs(tx, reader, cby)
+		api.Reader = bytes.NewReader(data)
+		err = api.InsertFileOutputModConfigs(tx)
 		if err != nil {
 			return err
 		}
@@ -459,8 +464,8 @@ func (API) InsertBulkBlocks(r io.Reader, cby string) error {
 			log.Println("unable to marshal file parent list", err)
 			return err
 		}
-		reader = bytes.NewReader(data)
-		err = api.InsertFileParentsTxt(tx, reader, cby)
+		api.Reader = bytes.NewReader(data)
+		err = api.InsertFileParentsTxt(tx)
 		if err != nil {
 			return err
 		}

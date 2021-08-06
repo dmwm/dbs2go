@@ -2,36 +2,35 @@ package dbs
 
 import (
 	"errors"
-	"net/http"
 )
 
 // BlockOrigin DBS API
-func (API) BlockOrigin(params Record, sep string, w http.ResponseWriter) error {
+func (a API) BlockOrigin() error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string
 
 	// parse given parameters
-	site := getValues(params, "origin_site_name")
+	site := getValues(a.Params, "origin_site_name")
 	if len(site) > 1 {
 		msg := "Unsupported list of sites"
 		return errors.New(msg)
 	} else if len(site) == 1 {
-		conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
+		conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", a.Params, conds, args)
 	}
-	block := getValues(params, "block_name")
+	block := getValues(a.Params, "block_name")
 	if len(block) > 1 {
 		msg := "Unsupported list of block"
 		return errors.New(msg)
 	} else if len(block) == 1 {
-		conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
+		conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
 	}
-	dataset := getValues(params, "dataset")
+	dataset := getValues(a.Params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
 		return errors.New(msg)
 	} else if len(dataset) == 1 {
-		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
+		conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
 	}
 
 	// get SQL statement from static area
@@ -39,5 +38,5 @@ func (API) BlockOrigin(params Record, sep string, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }

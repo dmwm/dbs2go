@@ -51,3 +51,16 @@ func TestReplaceBinds(t *testing.T) {
 		t.Error("unable to replace binds")
 	}
 }
+
+// TestInsert
+func TestInsert(t *testing.T) {
+	var arr []interface{}
+	arr = append(arr, 1)
+	arr = append(arr, 2)
+	arr = utils.Insert(arr, 0)
+	for i, v := range arr {
+		if i != v {
+			t.Error("invalid insert", arr)
+		}
+	}
+}

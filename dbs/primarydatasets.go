@@ -7,24 +7,23 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // PrimaryDatasets DBS API
-func (API) PrimaryDatasets(params Record, sep string, w http.ResponseWriter) error {
+func (a API) PrimaryDatasets() error {
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("primary_ds_name", "P.PRIMARY_DS_NAME", params, conds, args)
+	conds, args = AddParam("primary_ds_name", "P.PRIMARY_DS_NAME", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("primarydatasets")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // PrimaryDatasets
@@ -114,7 +113,7 @@ type PrimaryDatasetRecord struct {
 }
 
 // InsertPrimaryDatasets DBS API
-func (API) InsertPrimaryDatasets(r io.Reader, cby string) error {
+func (a API) InsertPrimaryDatasets() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
 	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by
@@ -123,12 +122,12 @@ func (API) InsertPrimaryDatasets(r io.Reader, cby string) error {
 	// insert primary_ds_name, creation_date, create_by, primary_ds_id
 
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
 	}
-	rec := PrimaryDatasetRecord{CREATE_BY: cby}
+	rec := PrimaryDatasetRecord{CREATE_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)

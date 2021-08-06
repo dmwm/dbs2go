@@ -1,20 +1,18 @@
 package dbs
 
 import (
-	"io"
 	"log"
-	"net/http"
 )
 
 // DatasetList DBS API
-func (api API) DatasetList(params Record, sep string, w http.ResponseWriter) error {
+func (a API) DatasetList() error {
 	// perform some data preprocessing on given record
-	log.Printf("DatasetList data %+v", params)
-	return api.Datasets(params, sep, w)
+	log.Printf("DatasetList data %+v", a.Params)
+	return a.Datasets()
 }
 
 // InsertDatasetList DBS API
-func (API) InsertDatasetList(r io.Reader, cby string) error {
+func (a API) InsertDatasetList() error {
 	//     return InsertValues("insert_dataset_list", values)
 	return nil
 }

@@ -55,9 +55,10 @@ func TestSQL(t *testing.T) {
 			}
 		}
 		log.Printf("SQL test for %s API with params %+v\n", rec.Api, params)
-		r := reflect.ValueOf(dbs.API{})
+		r := reflect.ValueOf(dbs.API{Params: params, Separator: sep, Writer: w})
 		m := r.MethodByName(rec.Api)
-		args := []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
+		//         args := []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
+		args := []reflect.Value{}
 		output := m.Call(args)
 		// output represents dbs API output (the error)
 		err := output[0].Interface()
@@ -103,9 +104,10 @@ func TestInsertSQL(t *testing.T) {
 		// insert some info in DBS
 		dbs.DRYRUN = true
 		log.Printf("SQL test for %s API with params %+v\n", rec.InsertApi, string(data))
-		r := reflect.ValueOf(dbs.API{})
+		r := reflect.ValueOf(dbs.API{Reader: reader, CreateBy: cby})
 		m := r.MethodByName(rec.InsertApi)
-		args := []reflect.Value{reflect.ValueOf(reader), reflect.ValueOf(cby)}
+		//         args := []reflect.Value{reflect.ValueOf(reader), reflect.ValueOf(cby)}
+		args := []reflect.Value{}
 		// call to InsertXXX DBS API, it returns output which consists
 		// of two values, the size of inserted record and the error
 		output := m.Call(args)
@@ -131,9 +133,10 @@ func TestInsertSQL(t *testing.T) {
 		}
 		data, _ = json.Marshal(params)
 		log.Printf("SQL test for %s API with params %+v\n", rec.Api, string(data))
-		r = reflect.ValueOf(dbs.API{})
+		r = reflect.ValueOf(dbs.API{Params: params, Separator: sep, Writer: w})
 		m = r.MethodByName(rec.Api)
-		args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
+		//         args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
+		args = []reflect.Value{}
 		output = m.Call(args)
 		// output represents dbs API output (the error)
 		if fmt.Sprintf("%v", output[0].Interface()) != "<nil>" {

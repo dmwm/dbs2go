@@ -1,11 +1,7 @@
 package dbs
 
-import (
-	"net/http"
-)
-
 // ParentDatasetFileLumiIds API
-func (API) ParentDatasetFileLumiIds(params Record, sep string, w http.ResponseWriter) error {
+func (a API) ParentDatasetFileLumiIds() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -18,8 +14,8 @@ func (API) ParentDatasetFileLumiIds(params Record, sep string, w http.ResponseWr
 	}
 
 	// add dataset condition
-	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
+	conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }

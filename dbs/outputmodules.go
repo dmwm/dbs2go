@@ -1,11 +1,7 @@
 package dbs
 
-import (
-	"net/http"
-)
-
 // OutputModules DBS API
-func (API) OutputModules(params Record, sep string, w http.ResponseWriter) error {
+func (a API) OutputModules() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -13,23 +9,23 @@ func (API) OutputModules(params Record, sep string, w http.ResponseWriter) error
 	tmpl["Dataset"] = false
 	tmpl["Lfn"] = false
 
-	if v, _ := getSingleValue(params, "block_id"); v != "" {
-		conds, args = AddParam("block_id", "FS.BLOCK_ID", params, conds, args)
+	if v, _ := getSingleValue(a.Params, "block_id"); v != "" {
+		conds, args = AddParam("block_id", "FS.BLOCK_ID", a.Params, conds, args)
 		tmpl["BlockId"] = true
 	}
-	if v, _ := getSingleValue(params, "dataset"); v != "" {
-		conds, args = AddParam("dataset", "DS.DATASET", params, conds, args)
+	if v, _ := getSingleValue(a.Params, "dataset"); v != "" {
+		conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
 		tmpl["Dataset"] = true
 	}
-	if v, _ := getSingleValue(params, "logical_file_name"); v != "" {
-		conds, args = AddParam("logical_file_name", "FS.LOGICAL_FILE_NAME", params, conds, args)
+	if v, _ := getSingleValue(a.Params, "logical_file_name"); v != "" {
+		conds, args = AddParam("logical_file_name", "FS.LOGICAL_FILE_NAME", a.Params, conds, args)
 		tmpl["Lfn"] = true
 	}
-	conds, args = AddParam("app_name", "A.APP_NAME", params, conds, args)
-	conds, args = AddParam("pset_hash", "P.PSET_HASH", params, conds, args)
-	conds, args = AddParam("release_version", "R.RELEASE_VERSION", params, conds, args)
-	conds, args = AddParam("output_label", "O.OUTPUT_MODULE_LABEL", params, conds, args)
-	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", params, conds, args)
+	conds, args = AddParam("app_name", "A.APP_NAME", a.Params, conds, args)
+	conds, args = AddParam("pset_hash", "P.PSET_HASH", a.Params, conds, args)
+	conds, args = AddParam("release_version", "R.RELEASE_VERSION", a.Params, conds, args)
+	conds, args = AddParam("output_label", "O.OUTPUT_MODULE_LABEL", a.Params, conds, args)
+	conds, args = AddParam("global_tag", "O.GLOBAL_TAG", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("outputmodule", tmpl)
@@ -39,11 +35,11 @@ func (API) OutputModules(params Record, sep string, w http.ResponseWriter) error
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // InsertOutputModules DBS API
-// func (API) InsertOutputModules(values Record) error {
+// func (a API) InsertOutputModules(values Record) error {
 //     args := make(Record)
 //     args["Owner"] = DBOWNER
 //     return InsertTemplateValues("insert_outputmodule", args, values)

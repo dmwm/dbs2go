@@ -24,7 +24,19 @@ import (
 )
 
 // use API struct for reflection
-type API struct{}
+type API struct {
+	Reader    io.Reader
+	Writer    http.ResponseWriter
+	Params    Record
+	Separator string
+	CreateBy  string
+	Api       string
+}
+
+// String provides string representation of API struct
+func (a *API) String() string {
+	return fmt.Sprintf("API=%s params=%+v createBy=%s separator='%s'", a.Api, a.Params, a.CreateBy, a.Separator)
+}
 
 // use a single instance of Validate, it caches struct info
 var RecordValidator *validator.Validate
@@ -295,6 +307,7 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
 	rowCount := 0
+	writtenResults := false
 	for rows.Next() {
 		if rowCount == 0 {
 			// initialize value pointers
@@ -311,7 +324,6 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 			// add separator line to our output
 			w.Write([]byte(sep))
 		}
-		rowCount += 1
 		// store results into generic record (a dict)
 		rec := make(Record)
 		for i, col := range columns {
@@ -345,15 +357,27 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 			}
 		}
 		if w != nil {
+			if rowCount == 0 {
+				if sep != "" {
+					writtenResults = true
+					w.Write([]byte("[\n"))
+					defer w.Write([]byte("]\n"))
+				}
+			}
 			err = enc.Encode(rec)
 			if err != nil {
 				return err
 			}
 		}
+		rowCount += 1
 	}
 	if err = rows.Err(); err != nil {
 		msg := fmt.Sprintf("rows error %v", err)
 		return errors.New(msg)
+	}
+	// make sure we write proper response if no result written
+	if sep != "" && !writtenResults {
+		w.Write([]byte("[]"))
 	}
 	return nil
 }
@@ -389,6 +413,7 @@ func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []inter
 
 	// loop over rows
 	rowCount := 0
+	writtenResults := false
 	for rows.Next() {
 		err := rows.Scan(vals...)
 		if err != nil {
@@ -399,7 +424,6 @@ func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []inter
 			// add separator line to our output
 			w.Write([]byte(sep))
 		}
-		rowCount += 1
 		rec := make(Record)
 		for i, _ := range cols {
 			vvv := vals[i]
@@ -429,14 +453,26 @@ func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []inter
 			}
 		}
 		if w != nil {
+			if rowCount == 0 {
+				if sep != "" {
+					writtenResults = true
+					w.Write([]byte("[\n"))
+					defer w.Write([]byte("]\n"))
+				}
+			}
 			err = enc.Encode(rec)
 			if err != nil {
 				return err
 			}
 		}
+		rowCount += 1
 	}
 	if err = rows.Err(); err != nil {
 		return err
+	}
+	// make sure we write proper response if no result written
+	if sep != "" && !writtenResults {
+		w.Write([]byte("[]"))
 	}
 	return nil
 }

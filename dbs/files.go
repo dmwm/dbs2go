@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -16,14 +15,14 @@ import (
 )
 
 // Files DBS API
-func (API) Files(params Record, sep string, w http.ResponseWriter) error {
+func (a API) Files() error {
 	var args []interface{}
 	var conds, lumis []string
 	var lumigen, rungen, lfngen, runList, lfnList bool
 	var sumOverLumi string
 	var err error
 
-	if len(params) == 0 {
+	if len(a.Params) == 0 {
 		msg := "Files API with empty parameter map"
 		return errors.New(msg)
 	}
@@ -37,7 +36,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	tmpl["Detail"] = false
 
 	// parse detail arugment
-	detail, _ := getSingleValue(params, "detail")
+	detail, _ := getSingleValue(a.Params, "detail")
 	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
 		detail = "true"
 	}
@@ -46,19 +45,19 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// parse sumOverLumi
-	if _, ok := params["sumOverLumi"]; ok {
-		sumOverLumi, err = getSingleValue(params, "sumOverLumi")
+	if _, ok := a.Params["sumOverLumi"]; ok {
+		sumOverLumi, err = getSingleValue(a.Params, "sumOverLumi")
 		if err != nil {
 			return err
 		}
 	}
 
-	lumiList := getValues(params, "lumi_list")
+	lumiList := getValues(a.Params, "lumi_list")
 	lumis, err = FlatLumis(lumiList)
 	if err != nil {
 		return err
 	}
-	runs := getValues(params, "run_num")
+	runs := getValues(a.Params, "run_num")
 	if len(runs) > 0 {
 		tmpl["RunNumber"] = true
 	}
@@ -67,7 +66,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 		tmpl["LumiList"] = true
 	}
 
-	validFileOnly := getValues(params, "validFileOnly")
+	validFileOnly := getValues(a.Params, "validFileOnly")
 	if len(validFileOnly) == 1 {
 		_, val := OperatorValue(validFileOnly[0])
 		if val == "1" {
@@ -84,25 +83,25 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 		conds = append(conds, cond)
 	}
 
-	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
-	conds, args = AddParam("block_name", "B.BLOCK_NAME", params, conds, args)
-	if _, e := getSingleValue(params, "release_version"); e == nil {
-		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", params, conds, args)
+	conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
+	conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
+	if _, e := getSingleValue(a.Params, "release_version"); e == nil {
+		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", a.Params, conds, args)
 		tmpl["Addition"] = true
 	}
-	if _, e := getSingleValue(params, "pset_hash"); e == nil {
-		conds, args = AddParam("pset_hash", "PSH.PSET_HASH", params, conds, args)
+	if _, e := getSingleValue(a.Params, "pset_hash"); e == nil {
+		conds, args = AddParam("pset_hash", "PSH.PSET_HASH", a.Params, conds, args)
 		tmpl["Addition"] = true
 	}
-	if _, e := getSingleValue(params, "app_name"); e == nil {
-		conds, args = AddParam("app_name", "AEX.APP_NAME", params, conds, args)
+	if _, e := getSingleValue(a.Params, "app_name"); e == nil {
+		conds, args = AddParam("app_name", "AEX.APP_NAME", a.Params, conds, args)
 		tmpl["Addition"] = true
 	}
-	if _, e := getSingleValue(params, "output_module_label"); e == nil {
-		conds, args = AddParam("output_module_label", "OMC.OUTPUT_MODULE_LABEL", params, conds, args)
+	if _, e := getSingleValue(a.Params, "output_module_label"); e == nil {
+		conds, args = AddParam("output_module_label", "OMC.OUTPUT_MODULE_LABEL", a.Params, conds, args)
 		tmpl["Addition"] = true
 	}
-	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", params, conds, args)
+	conds, args = AddParam("origin_site_name", "B.ORIGIN_SITE_NAME", a.Params, conds, args)
 
 	// load our SQL statement
 	stm, err := LoadTemplateSQL("files", tmpl)
@@ -111,7 +110,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// add lfns conditions
-	lfns := getValues(params, "logical_file_name")
+	lfns := getValues(a.Params, "logical_file_name")
 	if len(lfns) > 1 {
 		lfngen = true
 		lfnList = true
@@ -123,7 +122,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 			args = append(args, v)
 		}
 	} else if len(lfns) == 1 {
-		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", params, conds, args)
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
 	}
 
 	// files API does not support run_num=1 when no lumi and lfns
@@ -133,7 +132,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// add run conditions
-	t, c, a, e := RunsConditions(runs, "FL")
+	t, c, na, e := RunsConditions(runs, "FL")
 	if e != nil {
 		return e
 	}
@@ -143,13 +142,17 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	for _, v := range c {
 		conds = append(conds, v)
 	}
-	for _, v := range a {
-		args = append(args, v)
+	for _, v := range na {
+		if t != "" { // we got token, therefore need to insert args
+			args = utils.Insert(args, v)
+		} else {
+			args = append(args, v)
+		}
 	}
-	if len(a) > 1 { // if we have more then one run arguments
+	if len(na) > 1 { // if we have more then one run arguments
 		rungen = true
 	}
-	if _, ok := params["runList"]; ok {
+	if _, ok := a.Params["runList"]; ok {
 		// if our run value was send via POST payload as [97], then it is a rungen
 		// and not single run value like 97
 		if sumOverLumi == "1" {
@@ -172,7 +175,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 		}
 		tmpl["LumiGenerator"] = token
 	} else if len(lumis) == 1 {
-		conds, args = AddParam("lumi_list", "FL.LUMI_SECTION_NUM", params, conds, args)
+		conds, args = AddParam("lumi_list", "FL.LUMI_SECTION_NUM", a.Params, conds, args)
 	}
 
 	if (rungen && lfngen) || (lumigen && lfngen) || (rungen && lumigen) {
@@ -202,7 +205,7 @@ func (API) Files(params Record, sep string, w http.ResponseWriter) error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // Files
@@ -337,7 +340,7 @@ type FileRecord struct {
 }
 
 // InsertFiles DBS API
-func (API) InsertFiles(r io.Reader, cby string) error {
+func (a API) InsertFiles() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -379,12 +382,12 @@ func (API) InsertFiles(r io.Reader, cby string) error {
 	//     return InsertValues("insert_files", values)
 
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
 		return err
 	}
-	rec := FileRecord{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
+	rec := FileRecord{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
@@ -437,19 +440,19 @@ func (API) InsertFiles(r io.Reader, cby string) error {
 }
 
 // UpdateFiles DBS API
-func (API) UpdateFiles(params Record) error {
+func (a API) UpdateFiles() error {
 
 	// read input parameters
 	var create_by string
 	var isFileValid int
-	if v, ok := params["is_file_valid"]; ok {
+	if v, ok := a.Params["is_file_valid"]; ok {
 		val, err := strconv.Atoi(v.(string))
 		if err != nil {
 			log.Println("invalid input parameter", err)
 		}
 		isFileValid = val
 	}
-	if v, ok := params["create_by"]; ok {
+	if v, ok := a.Params["create_by"]; ok {
 		create_by = v.(string)
 	}
 	date := time.Now().Unix()

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 )
 
@@ -56,25 +54,25 @@ func FlatLumis(val interface{}) ([]string, error) {
 }
 
 // FileArray DBS API
-func (api API) FileArray(params Record, sep string, w http.ResponseWriter) error {
+func (a API) FileArray() error {
 	// perform some data preprocessing on given record
 	// flat out lumi_list
-	if lumis, ok := params["lumi_list"]; ok {
+	if lumis, ok := a.Params["lumi_list"]; ok {
 		lumiList, err := FlatLumis(lumis)
 		if err != nil {
 			return err
 		}
-		params["lumi_list"] = lumiList
+		a.Params["lumi_list"] = lumiList
 	}
-	if len(params) == 0 {
+	if len(a.Params) == 0 {
 		msg := "filearray api requires input parameers"
 		return errors.New(msg)
 	}
-	return api.Files(params, sep, w)
+	return a.Files()
 }
 
 // InsertFileArray DBS API
-func (API) InsertFileArray(r io.Reader, cby string) error {
+func (a API) InsertFileArray() error {
 	//     return InsertValues("insert_file_array", values)
 	return nil
 }

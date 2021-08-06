@@ -6,24 +6,23 @@ import (
 	"errors"
 	"io"
 	"log"
-	"net/http"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
 
 // DatasetParents API
-func (API) DatasetParents(params Record, sep string, w http.ResponseWriter) error {
+func (a API) DatasetParents() error {
 	var args []interface{}
 	var conds []string
 
-	conds, args = AddParam("dataset", "D.DATASET", params, conds, args)
+	conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("datasetparent")
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
 // DatasetParents

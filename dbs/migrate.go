@@ -152,7 +152,7 @@ func writeReport(msg string, err error, w http.ResponseWriter) error {
 }
 
 // Submit DBS API
-func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
+func (a API) Submit() error {
 	/* Logic of submit API:
 	- check if migration_input is already queued
 	  - if already queued it should return migration_status
@@ -163,19 +163,19 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	*/
 
 	// read given input
-	data, err := io.ReadAll(r)
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		return writeReport("fail to read data", err, w)
+		return writeReport("fail to read data", err, a.Writer)
 	}
-	rec := MigrationRequests{CREATE_BY: cby, LAST_MODIFIED_BY: cby}
+	rec := MigrationRequests{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		return writeReport("fail to decode data", err, w)
+		return writeReport("fail to decode data", err, a.Writer)
 	}
 
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
-	if err := alreadyQueued(input, w); err != nil {
+	if err := alreadyQueued(input, a.Writer); err != nil {
 		return err
 	}
 	var migBlocks map[int][]string
@@ -198,14 +198,14 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return writeReport("unable to get DB transaction", err, w)
+		return writeReport("unable to get DB transaction", err, a.Writer)
 	}
 	defer tx.Rollback()
 
 	// insert MigrationRequest object
 	err = rec.Insert(tx)
 	if err != nil {
-		return writeReport("fail to insert MigrationBlocks record", err, w)
+		return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
 	}
 
 	// loop over orderedList which is [[blocks], [blocks]]
@@ -224,7 +224,7 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 				LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
 			err = mrec.Insert(tx)
 			if err != nil {
-				return writeReport("fail to insert MigrationBlocks record", err, w)
+				return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
 			}
 			totalQueued += 1
 		}
@@ -233,12 +233,12 @@ func (API) Submit(r io.Reader, cby string, w http.ResponseWriter) error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		return writeReport("fail to commit transaction", err, w)
+		return writeReport("fail to commit transaction", err, a.Writer)
 	}
 	report := MigrationReport{Report: fmt.Sprintf("REQUEST QUEUED with total %d blocks to be migrated", totalQueued), Details: string(data)}
 	data, err = json.Marshal(report)
 	if err == nil {
-		w.Write(data)
+		a.Writer.Write(data)
 	}
 	return err
 }
@@ -250,21 +250,21 @@ type MigrationRemoveRequest struct {
 }
 
 // Remove DBS API
-func (API) Remove(r io.Reader, cby string, w http.ResponseWriter) error {
-	data, err := io.ReadAll(r)
+func (a API) Remove() error {
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		return writeReport("fail to read data", err, w)
+		return writeReport("fail to read data", err, a.Writer)
 	}
-	rec := MigrationRemoveRequest{CREATE_BY: cby}
+	rec := MigrationRemoveRequest{CREATE_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		return writeReport("fail to decode data", err, w)
+		return writeReport("fail to decode data", err, a.Writer)
 	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return writeReport("unable to get DB transaction", err, w)
+		return writeReport("unable to get DB transaction", err, a.Writer)
 	}
 	defer tx.Rollback()
 
@@ -273,7 +273,7 @@ func (API) Remove(r io.Reader, cby string, w http.ResponseWriter) error {
 	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY).Scan(&tid)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
-		return writeReport(msg, err, w)
+		return writeReport(msg, err, a.Writer)
 	}
 
 	if tid > 1 {
@@ -281,7 +281,7 @@ func (API) Remove(r io.Reader, cby string, w http.ResponseWriter) error {
 		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
 		err = tx.Commit()
 		if err != nil {
-			return writeReport("fail to commit transaction", err, w)
+			return writeReport("fail to commit transaction", err, a.Writer)
 		}
 	}
 	return nil
@@ -295,36 +295,36 @@ type MigrationStatusRequest struct {
 }
 
 // Status DBS API
-func (API) Status(params Record, sep string, w http.ResponseWriter) error {
+func (a API) Status() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 
-	oldest, _ := getSingleValue(params, "oldest")
+	oldest, _ := getSingleValue(a.Params, "oldest")
 	if oldest == "true" {
 		tmpl["Oldest"] = true
 	}
-	if _, e := getSingleValue(params, "migration_request_id"); e == nil {
-		conds, args = AddParam("migration_request_id", "MR.MIGRATION_REQUEST_ID", params, conds, args)
+	if _, e := getSingleValue(a.Params, "migration_request_id"); e == nil {
+		conds, args = AddParam("migration_request_id", "MR.MIGRATION_REQUEST_ID", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "migration_input"); e == nil {
-		conds, args = AddParam("migration_input", "MR.MIGRATION_INPUT", params, conds, args)
+	if _, e := getSingleValue(a.Params, "migration_input"); e == nil {
+		conds, args = AddParam("migration_input", "MR.MIGRATION_INPUT", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "migration_url"); e == nil {
-		conds, args = AddParam("migration_url", "MR.MIGRATION_URL", params, conds, args)
+	if _, e := getSingleValue(a.Params, "migration_url"); e == nil {
+		conds, args = AddParam("migration_url", "MR.MIGRATION_URL", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "dataset"); e == nil {
-		conds, args = AddParam("dataset", "MR.DATASET", params, conds, args)
+	if _, e := getSingleValue(a.Params, "dataset"); e == nil {
+		conds, args = AddParam("dataset", "MR.DATASET", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "block_name"); e == nil {
-		conds, args = AddParam("block_name", "MR.BLOCK_NAME", params, conds, args)
+	if _, e := getSingleValue(a.Params, "block_name"); e == nil {
+		conds, args = AddParam("block_name", "MR.BLOCK_NAME", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "user"); e == nil {
-		conds, args = AddParam("user", "MR.USER", params, conds, args)
+	if _, e := getSingleValue(a.Params, "user"); e == nil {
+		conds, args = AddParam("user", "MR.USER", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(params, "create_by"); e == nil {
-		conds, args = AddParam("create_by", "MR.CREATE_BY", params, conds, args)
+	if _, e := getSingleValue(a.Params, "create_by"); e == nil {
+		conds, args = AddParam("create_by", "MR.CREATE_BY", a.Params, conds, args)
 	}
 
 	// get SQL statement from static area
@@ -332,5 +332,5 @@ func (API) Status(params Record, sep string, w http.ResponseWriter) error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(w, sep, stm, args...)
+	return executeAll(a.Writer, a.Separator, stm, args...)
 }
