@@ -23,3 +23,9 @@ _testmain.go
 *.test
 *.prof
 *benchmark*
+oci8.pc
+dbfile*
+dbs2go
+c.json
+setup.sh
+dbs.db
