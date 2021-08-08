@@ -17,10 +17,11 @@ require (
 	github.com/shirou/gopsutil v3.21.7+incompatible
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
 	github.com/ulule/limiter/v3 v3.8.0
-	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210805190744-bb502b49c1ec
+	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20210808181353-05338c73b51d
 	github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6
 	golang.org/x/exp/errors v0.0.0-20210729172720-737cce5152fc
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
 	gopkg.in/rana/ora.v4 v4.1.15
 	gopkg.in/yaml.v2 v2.4.0
 )

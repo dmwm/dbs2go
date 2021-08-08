@@ -33,7 +33,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
@@ -60,6 +59,12 @@ import (
 
 // global variables
 var _top, _bottom, _search string
+
+// GitVersion defines git version of the server
+var GitVersion string
+
+// ServerInfo defines dbs server info
+var ServerInfo string
 
 // StartTime represents initial time when we started the server
 var StartTime time.Time
@@ -305,14 +310,4 @@ func Server(configFile string) {
 	if err != nil {
 		log.Printf("Fail to start server %v", err)
 	}
-}
-
-// version of the code
-var version string
-
-// Info function returns version string of the server
-func Info() string {
-	goVersion := runtime.Version()
-	tstamp := time.Now().Format("2006-02-01")
-	return fmt.Sprintf("dbs2go git=%s go=%s date=%s", version, goVersion, tstamp)
 }

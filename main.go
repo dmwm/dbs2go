@@ -8,9 +8,21 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
+	"time"
 
 	"github.com/vkuznet/dbs2go/web"
 )
+
+// version of the code
+var gitVersion string
+
+// Info function returns version string of the server
+func info() string {
+	goVersion := runtime.Version()
+	tstamp := time.Now().Format("2006-02-01")
+	return fmt.Sprintf("dbs2go git=%s go=%s date=%s", gitVersion, goVersion, tstamp)
+}
 
 func main() {
 	var config string
@@ -19,9 +31,11 @@ func main() {
 	flag.BoolVar(&version, "version", false, "Show version")
 	flag.Parse()
 	if version {
-		fmt.Println(web.Info())
+		fmt.Println(info())
 		os.Exit(0)
 
 	}
+	web.GitVersion = gitVersion
+	web.ServerInfo = info()
 	web.Server(config)
 }

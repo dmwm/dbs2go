@@ -1,5 +1,5 @@
-VERSION=`git rev-parse --short HEAD`
-flags=-ldflags="-s -w -X web.version=${VERSION}"
+VERSION=`git describe --tags`
+flags=-ldflags="-s -w -X main.gitVersion=${VERSION}"
 odir=`cat ${PKG_CONFIG_PATH}/oci8.pc | grep "libdir=" | sed -e "s,libdir=,,"`
 
 all: build
