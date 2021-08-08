@@ -1,7 +1,7 @@
 package dbs
 
 // OutputModules DBS API
-func (a API) OutputModules() error {
+func (a *API) OutputModules() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -39,7 +39,7 @@ func (a API) OutputModules() error {
 }
 
 // InsertOutputModules DBS API
-// func (a API) InsertOutputModules(values Record) error {
+// func (a *API) InsertOutputModules(values Record) error {
 //     args := make(Record)
 //     args["Owner"] = DBOWNER
 //     return InsertTemplateValues("insert_outputmodule", args, values)

@@ -10,7 +10,7 @@ import (
 )
 
 // FileDataTypes DBS API
-func (a API) FileDataTypes() error {
+func (a *API) FileDataTypes() error {
 	var args []interface{}
 
 	// get SQL statement from static area
@@ -90,6 +90,6 @@ func (r *FileDataTypes) Decode(reader io.Reader) error {
 }
 
 // InsertFileDataTypes DBS API
-func (a API) InsertFileDataTypes() error {
+func (a *API) InsertFileDataTypes() error {
 	return insertRecord(&FileDataTypes{}, a.Reader)
 }

@@ -1,7 +1,7 @@
 package dbs
 
 // BlockChildren DBS API
-func (a API) BlockChildren() error {
+func (a *API) BlockChildren() error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string

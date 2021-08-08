@@ -11,7 +11,7 @@ import (
 )
 
 // ReleaseVersions DBS API
-func (a API) ReleaseVersions() error {
+func (a *API) ReleaseVersions() error {
 	var args []interface{}
 	var conds []string
 
@@ -102,6 +102,6 @@ func (r *ReleaseVersions) Decode(reader io.Reader) error {
 }
 
 // InsertReleaseVersions DBS API
-func (a API) InsertReleaseVersions() error {
+func (a *API) InsertReleaseVersions() error {
 	return insertRecord(&ReleaseVersions{}, a.Reader)
 }

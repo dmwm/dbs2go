@@ -5,7 +5,7 @@ import (
 )
 
 // DatasetChildren API
-func (a API) DatasetChildren() error {
+func (a *API) DatasetChildren() error {
 	var args []interface{}
 	var conds []string
 
@@ -27,7 +27,7 @@ func (a API) DatasetChildren() error {
 }
 
 // InsertDatasetChildren DBS API
-func (a API) InsertDatasetChildren() error {
+func (a *API) InsertDatasetChildren() error {
 	//     return InsertValues("insert_dataset_children", values)
 	return nil
 }

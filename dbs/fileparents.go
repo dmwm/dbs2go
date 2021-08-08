@@ -12,7 +12,7 @@ import (
 )
 
 // FileParents API
-func (a API) FileParents() error {
+func (a *API) FileParents() error {
 	var args []interface{}
 	var conds []string
 
@@ -135,7 +135,7 @@ type FileParentRecord struct {
 }
 
 // InsertFileParents DBS API
-func (api API) InsertFileParents() error {
+func (a *API) InsertFileParents() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
@@ -143,7 +143,7 @@ func (api API) InsertFileParents() error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = api.InsertFileParentsTxt(tx)
+	err = a.InsertFileParentsTxt(tx)
 
 	// commit transaction
 	err = tx.Commit()
@@ -155,7 +155,7 @@ func (api API) InsertFileParents() error {
 }
 
 // InsertFileParents DBS API
-func (a API) InsertFileParentsTxt(tx *sql.Tx) error {
+func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*

@@ -1,7 +1,7 @@
 package dbs
 
 // DataTypes DBS API
-func (a API) DataTypes() error {
+func (a *API) DataTypes() error {
 	var args []interface{}
 	var conds []string
 
@@ -16,7 +16,7 @@ func (a API) DataTypes() error {
 }
 
 // InsertDataTypes DBS API
-func (a API) InsertDataTypes() error {
+func (a *API) InsertDataTypes() error {
 	//     return InsertValues("insert_data_types", values)
 	return nil
 }

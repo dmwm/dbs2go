@@ -5,7 +5,7 @@ import (
 )
 
 // BlockFileLumiIds API
-func (a API) BlockFileLumiIds() error {
+func (a *API) BlockFileLumiIds() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)

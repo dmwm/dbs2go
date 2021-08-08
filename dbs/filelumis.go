@@ -13,7 +13,7 @@ import (
 )
 
 // FileLumis API
-func (a API) FileLumis() error {
+func (a *API) FileLumis() error {
 	var args []interface{}
 	var conds []string
 
@@ -167,7 +167,7 @@ func (r *FileLumis) Decode(reader io.Reader) error {
 }
 
 // InsertFileLumis DBS API
-func (a API) InsertFileLumisTx(tx *sql.Tx) error {
+func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {

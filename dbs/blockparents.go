@@ -11,7 +11,7 @@ import (
 )
 
 // BlockParents DBS API
-func (a API) BlockParents() error {
+func (a *API) BlockParents() error {
 	var args []interface{}
 	var conds []string
 

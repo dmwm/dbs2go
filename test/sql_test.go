@@ -55,7 +55,7 @@ func TestSQL(t *testing.T) {
 			}
 		}
 		log.Printf("SQL test for %s API with params %+v\n", rec.Api, params)
-		r := reflect.ValueOf(dbs.API{Params: params, Separator: sep, Writer: w})
+		r := reflect.ValueOf(&dbs.API{Params: params, Separator: sep, Writer: w})
 		m := r.MethodByName(rec.Api)
 		//         args := []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
 		args := []reflect.Value{}
@@ -104,7 +104,7 @@ func TestInsertSQL(t *testing.T) {
 		// insert some info in DBS
 		dbs.DRYRUN = true
 		log.Printf("SQL test for %s API with params %+v\n", rec.InsertApi, string(data))
-		r := reflect.ValueOf(dbs.API{Reader: reader, CreateBy: cby})
+		r := reflect.ValueOf(&dbs.API{Reader: reader, CreateBy: cby})
 		m := r.MethodByName(rec.InsertApi)
 		//         args := []reflect.Value{reflect.ValueOf(reader), reflect.ValueOf(cby)}
 		args := []reflect.Value{}
@@ -133,7 +133,7 @@ func TestInsertSQL(t *testing.T) {
 		}
 		data, _ = json.Marshal(params)
 		log.Printf("SQL test for %s API with params %+v\n", rec.Api, string(data))
-		r = reflect.ValueOf(dbs.API{Params: params, Separator: sep, Writer: w})
+		r = reflect.ValueOf(&dbs.API{Params: params, Separator: sep, Writer: w})
 		m = r.MethodByName(rec.Api)
 		//         args = []reflect.Value{reflect.ValueOf(params), reflect.ValueOf(sep), reflect.ValueOf(w)}
 		args = []reflect.Value{}

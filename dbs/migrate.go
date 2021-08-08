@@ -152,7 +152,7 @@ func writeReport(msg string, err error, w http.ResponseWriter) error {
 }
 
 // Submit DBS API
-func (a API) Submit() error {
+func (a *API) Submit() error {
 	/* Logic of submit API:
 	- check if migration_input is already queued
 	  - if already queued it should return migration_status
@@ -250,7 +250,7 @@ type MigrationRemoveRequest struct {
 }
 
 // Remove DBS API
-func (a API) Remove() error {
+func (a *API) Remove() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		return writeReport("fail to read data", err, a.Writer)
@@ -295,7 +295,7 @@ type MigrationStatusRequest struct {
 }
 
 // Status DBS API
-func (a API) Status() error {
+func (a *API) Status() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)

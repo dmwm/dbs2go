@@ -14,7 +14,7 @@ import (
 )
 
 // Datasets API
-func (a API) Datasets() error {
+func (a *API) Datasets() error {
 	log.Printf("datasets params %+v", a.Params)
 	var args []interface{}
 	var conds []string
@@ -358,7 +358,7 @@ type DatasetRecord struct {
 }
 
 // InsertDatasets DBS API
-func (a API) InsertDatasets() error {
+func (a *API) InsertDatasets() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
 	// input values: dataset, primary_ds_name(name), processed_ds(name), data_tier(name),
@@ -461,7 +461,7 @@ func (a API) InsertDatasets() error {
 }
 
 // UpdateDatasets DBS API
-func (a API) UpdateDatasets() error {
+func (a *API) UpdateDatasets() error {
 
 	// get accessTypeID from Access dataset types table
 	var create_by string

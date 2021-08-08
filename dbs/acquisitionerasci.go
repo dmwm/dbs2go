@@ -6,7 +6,7 @@ import (
 )
 
 // AcquisitionErasCI DBS API
-func (a API) AcquisitionErasCi() error {
+func (a *API) AcquisitionErasCi() error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds, preSession, postSession []string

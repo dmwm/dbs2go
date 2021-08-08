@@ -15,7 +15,7 @@ import (
 )
 
 // Blocks DBS API
-func (a API) Blocks() error {
+func (a *API) Blocks() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -219,7 +219,7 @@ type BlockRecord struct {
 }
 
 // InsertBlocks DBS API
-func (a API) InsertBlocks() error {
+func (a *API) InsertBlocks() error {
 	// implement the following logic
 	// input values: blockname
 	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
@@ -275,7 +275,7 @@ func (a API) InsertBlocks() error {
 }
 
 // UpdateBlocks DBS API
-func (a API) UpdateBlocks() error {
+func (a *API) UpdateBlocks() error {
 	// get input parameters
 	date := time.Now().Unix()
 	var create_by string

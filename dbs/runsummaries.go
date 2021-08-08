@@ -7,7 +7,7 @@ import (
 )
 
 // RunSummaries DBS API
-func (a API) RunSummaries() error {
+func (a *API) RunSummaries() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)

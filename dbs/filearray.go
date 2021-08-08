@@ -54,7 +54,7 @@ func FlatLumis(val interface{}) ([]string, error) {
 }
 
 // FileArray DBS API
-func (a API) FileArray() error {
+func (a *API) FileArray() error {
 	// perform some data preprocessing on given record
 	// flat out lumi_list
 	if lumis, ok := a.Params["lumi_list"]; ok {
@@ -72,7 +72,7 @@ func (a API) FileArray() error {
 }
 
 // InsertFileArray DBS API
-func (a API) InsertFileArray() error {
+func (a *API) InsertFileArray() error {
 	//     return InsertValues("insert_file_array", values)
 	return nil
 }

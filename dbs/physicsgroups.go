@@ -10,7 +10,7 @@ import (
 )
 
 // PhysicsGroups DBS API
-func (a API) PhysicsGroups() error {
+func (a *API) PhysicsGroups() error {
 	var args []interface{}
 	var conds []string
 
@@ -95,6 +95,6 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 }
 
 // InsertPhysicsGroups DBS API
-func (a API) InsertPhysicsGroups() error {
+func (a *API) InsertPhysicsGroups() error {
 	return insertRecord(&PhysicsGroups{}, a.Reader)
 }

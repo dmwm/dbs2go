@@ -13,7 +13,7 @@ import (
 )
 
 // AcquisitionEras DBS API
-func (a API) AcquisitionEras() error {
+func (a *API) AcquisitionEras() error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string
@@ -115,7 +115,7 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 }
 
 // InsertAcquisitionEras DBS API
-func (a API) InsertAcquisitionEras() error {
+func (a *API) InsertAcquisitionEras() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSAcquisitionEra.py
 	// input values: acquisition_era_name, creation_date, start_date, end_date, create_by
@@ -126,7 +126,7 @@ func (a API) InsertAcquisitionEras() error {
 }
 
 // UpdateAcquisitionEras DBS API
-func (a API) UpdateAcquisitionEras() error {
+func (a *API) UpdateAcquisitionEras() error {
 
 	var aera string
 	var endDate int

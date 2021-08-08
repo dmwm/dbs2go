@@ -12,7 +12,7 @@ import (
 )
 
 // PrimaryDatasets DBS API
-func (a API) PrimaryDatasets() error {
+func (a *API) PrimaryDatasets() error {
 	var args []interface{}
 	var conds []string
 
@@ -113,7 +113,7 @@ type PrimaryDatasetRecord struct {
 }
 
 // InsertPrimaryDatasets DBS API
-func (a API) InsertPrimaryDatasets() error {
+func (a *API) InsertPrimaryDatasets() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
 	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by

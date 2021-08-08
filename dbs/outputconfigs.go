@@ -14,7 +14,7 @@ import (
 )
 
 // OutputConfigs DBS API
-func (a API) OutputConfigs() error {
+func (a *API) OutputConfigs() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -162,7 +162,7 @@ type OutputConfigRecord struct {
 }
 
 // InsertOutputConfigsTx DBS API
-func (a API) InsertOutputConfigsTx(tx *sql.Tx) error {
+func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -213,7 +213,7 @@ func (a API) InsertOutputConfigsTx(tx *sql.Tx) error {
 }
 
 // InsertOutputConfigs DBS API
-func (api API) InsertOutputConfigs() error {
+func (a *API) InsertOutputConfigs() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py
 	// intput values: app_name, release_version, pset_hash, global_tag and output_module_label
@@ -228,7 +228,7 @@ func (api API) InsertOutputConfigs() error {
 	}
 	defer tx.Rollback()
 
-	err = api.InsertOutputConfigsTx(tx)
+	err = a.InsertOutputConfigsTx(tx)
 
 	// commit transaction
 	err = tx.Commit()

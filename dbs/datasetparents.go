@@ -11,7 +11,7 @@ import (
 )
 
 // DatasetParents API
-func (a API) DatasetParents() error {
+func (a *API) DatasetParents() error {
 	var args []interface{}
 	var conds []string
 

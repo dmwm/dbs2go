@@ -1,7 +1,7 @@
 package dbs
 
 // ParentDatasetFileLumiIds API
-func (a API) ParentDatasetFileLumiIds() error {
+func (a *API) ParentDatasetFileLumiIds() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)

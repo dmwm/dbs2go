@@ -10,7 +10,7 @@ import (
 )
 
 // DatasetAccessTypes DBS API
-func (a API) DatasetAccessTypes() error {
+func (a *API) DatasetAccessTypes() error {
 	var args []interface{}
 	var conds []string
 
@@ -94,6 +94,6 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 }
 
 // InsertDatasetAccessTypes DBS API
-func (a API) InsertDatasetAccessTypes() error {
+func (a *API) InsertDatasetAccessTypes() error {
 	return insertRecord(&DatasetAccessTypes{}, a.Reader)
 }

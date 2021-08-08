@@ -10,7 +10,7 @@ import (
 )
 
 // DatasetOutputModConfigs DBS API
-func (a API) DatasetOutputModConfigs() error {
+func (a *API) DatasetOutputModConfigs() error {
 	var args []interface{}
 
 	// get SQL statement from static area
@@ -91,6 +91,6 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 }
 
 // InsertDatasetOutputModConfigs DBS API
-func (a API) InsertDatasetOutputModConfigs() error {
+func (a *API) InsertDatasetOutputModConfigs() error {
 	return insertRecord(&DatasetOutputModConfigs{}, a.Reader)
 }

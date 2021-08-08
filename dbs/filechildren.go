@@ -6,7 +6,7 @@ import (
 )
 
 // FileChildren API
-func (a API) FileChildren() error {
+func (a *API) FileChildren() error {
 	var args []interface{}
 	var conds []string
 
@@ -55,6 +55,6 @@ func (a API) FileChildren() error {
 }
 
 // InsertFileChildren DBS API
-func (a API) InsertFileChildren() error {
+func (a *API) InsertFileChildren() error {
 	return nil
 }

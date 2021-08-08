@@ -7,7 +7,7 @@ import (
 )
 
 // FileParentsByLumi DBS API
-func (a API) FileParentsByLumi() error {
+func (a *API) FileParentsByLumi() error {
 	var args []interface{}
 	var conds []string
 
@@ -56,6 +56,6 @@ func (a API) FileParentsByLumi() error {
 }
 
 // InsertFileParentsByLumi DBS API
-func (a API) InsertFileParentsByLumi() error {
+func (a *API) InsertFileParentsByLumi() error {
 	return nil
 }

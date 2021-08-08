@@ -6,7 +6,7 @@ import (
 )
 
 // filesummaries API
-func (a API) FileSummaries() error {
+func (a *API) FileSummaries() error {
 	var args []interface{}
 	var stm string
 	//     var conds []string
@@ -87,7 +87,7 @@ func (a API) FileSummaries() error {
 }
 
 // InsertFileSummaries DBS API
-func (a API) InsertFileSummaries() error {
+func (a *API) InsertFileSummaries() error {
 	//     return InsertValues("insert_file_summaries", values)
 	return nil
 }

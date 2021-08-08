@@ -10,7 +10,7 @@ import (
 )
 
 // ProcessedDatasets DBS API
-func (a API) ProcessedDatasets() error {
+func (a *API) ProcessedDatasets() error {
 	var args []interface{}
 
 	// get SQL statement from static area
@@ -93,6 +93,6 @@ func (r *ProcessedDatasets) Decode(reader io.Reader) error {
 }
 
 // InsertProcessedDatasets DBS API
-func (a API) InsertProcessedDatasets() error {
+func (a *API) InsertProcessedDatasets() error {
 	return insertRecord(&ProcessedDatasets{}, a.Reader)
 }

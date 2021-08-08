@@ -6,7 +6,7 @@ import (
 )
 
 // BlockSummaries DBS API
-func (a API) BlockSummaries() error {
+func (a *API) BlockSummaries() error {
 	var stm string
 	var args []interface{}
 	var err error

@@ -144,7 +144,7 @@ type DatasetParent struct {
    #3 insert block & files
    self.insertBlockFile(blockcontent, datasetId, migration)
 */
-func (a API) InsertBulkBlocks() error {
+func (a *API) InsertBulkBlocks() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
@@ -169,8 +169,7 @@ func (a API) InsertBulkBlocks() error {
 	defer tx.Rollback()
 
 	var reader *bytes.Reader
-	//     var api API
-	api := API{
+	api := &API{
 		Reader:   reader,
 		CreateBy: a.CreateBy,
 		Params:   make(Record),

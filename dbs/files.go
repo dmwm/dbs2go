@@ -15,7 +15,7 @@ import (
 )
 
 // Files DBS API
-func (a API) Files() error {
+func (a *API) Files() error {
 	var args []interface{}
 	var conds, lumis []string
 	var lumigen, rungen, lfngen, runList, lfnList bool
@@ -340,7 +340,7 @@ type FileRecord struct {
 }
 
 // InsertFiles DBS API
-func (a API) InsertFiles() error {
+func (a *API) InsertFiles() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
 	/*
@@ -440,7 +440,7 @@ func (a API) InsertFiles() error {
 }
 
 // UpdateFiles DBS API
-func (a API) UpdateFiles() error {
+func (a *API) UpdateFiles() error {
 
 	// read input parameters
 	var create_by string

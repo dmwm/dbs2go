@@ -12,7 +12,7 @@ import (
 )
 
 // DataTiers DBS API
-func (a API) DataTiers() error {
+func (a *API) DataTiers() error {
 	var args []interface{}
 	var conds []string
 
@@ -107,6 +107,6 @@ func (r *DataTiers) Decode(reader io.Reader) error {
 }
 
 // InsertDataTiers DBS API
-func (a API) InsertDataTiers() error {
+func (a *API) InsertDataTiers() error {
 	return insertRecord(&DataTiers{CREATE_BY: a.CreateBy}, a.Reader)
 }

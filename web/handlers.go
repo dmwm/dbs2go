@@ -104,7 +104,7 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 		responseMsg(w, r, fmt.Sprintf("%v", err), "dummy", http.StatusBadRequest)
 		return
 	}
-	api := dbs.API{
+	api := &dbs.API{
 		Params: params,
 		Api:    "dummy",
 	}
@@ -241,7 +241,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	}
 	cby := createBy(r)
 	params["create_by"] = cby
-	api := dbs.API{
+	api := &dbs.API{
 		Params:    params,
 		CreateBy:  cby,
 		Api:       a,
@@ -304,7 +304,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		}
 		body = utils.GzipReader{reader, r.Body}
 	}
-	api := dbs.API{
+	api := &dbs.API{
 		Reader:    body,
 		Writer:    w,
 		Params:    params,
@@ -386,7 +386,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 		}
 		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, uri, params)
 	}
-	api := dbs.API{
+	api := &dbs.API{
 		Writer:    w,
 		Params:    params,
 		Separator: sep,

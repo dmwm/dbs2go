@@ -8,7 +8,7 @@ import (
 )
 
 // PrimaryDSTypes DBS API
-func (a API) PrimaryDSTypes() error {
+func (a *API) PrimaryDSTypes() error {
 	var args []interface{}
 	var conds []string
 
@@ -84,6 +84,6 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) error {
 }
 
 // InsertPrimaryDSTypes DBS API
-func (a API) InsertPrimaryDSTypes() error {
+func (a *API) InsertPrimaryDSTypes() error {
 	return insertRecord(&PrimaryDSTypes{}, a.Reader)
 }

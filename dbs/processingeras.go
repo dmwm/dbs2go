@@ -12,7 +12,7 @@ import (
 )
 
 // ProcessingEras DBS API
-func (a API) ProcessingEras() error {
+func (a *API) ProcessingEras() error {
 	var args []interface{}
 	var conds []string
 
@@ -105,6 +105,6 @@ func (r *ProcessingEras) Decode(reader io.Reader) error {
 }
 
 // InsertProcessingEras DBS API
-func (a API) InsertProcessingEras() error {
+func (a *API) InsertProcessingEras() error {
 	return insertRecord(&ProcessingEras{CREATE_BY: a.CreateBy}, a.Reader)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 // FileOutputModConfigs DBS API
-func (a API) FileOutputModConfigs() error {
+func (a *API) FileOutputModConfigs() error {
 	var args []interface{}
 
 	// get SQL statement from static area
@@ -101,7 +101,7 @@ type FileOutputModConfigRecord struct {
 }
 
 // InsertFileOutputModConfigs DBS API
-func (a API) InsertFileOutputModConfigs(tx *sql.Tx) error {
+func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {

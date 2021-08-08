@@ -6,7 +6,7 @@ import (
 )
 
 // Runs DBS API
-func (a API) Runs() error {
+func (a *API) Runs() error {
 	var args []interface{}
 	var conds []string
 
@@ -72,7 +72,7 @@ func (a API) Runs() error {
 }
 
 // InsertRuns DBS API
-func (a API) InsertRuns() error {
+func (a *API) InsertRuns() error {
 	//     return InsertValues("insert_runs", values)
 	return nil
 }

@@ -1,7 +1,7 @@
 package dbs
 
 // ParentDSTrio API
-func (a API) ParentDSTrio() error {
+func (a *API) ParentDSTrio() error {
 	var args []interface{}
 
 	// get SQL statement from static area

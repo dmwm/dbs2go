@@ -5,7 +5,7 @@ import (
 )
 
 // BlockOrigin DBS API
-func (a API) BlockOrigin() error {
+func (a *API) BlockOrigin() error {
 	// variables we'll use in where clause
 	var args []interface{}
 	var conds []string
