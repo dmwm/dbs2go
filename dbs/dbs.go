@@ -147,7 +147,9 @@ func LoadSQL(owner string) Record {
 	tmplData := make(Record)
 	tmplData["Owner"] = owner
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
-	log.Println("sql area", sdir)
+	if utils.VERBOSE > 0 {
+		log.Println("sql area", sdir)
+	}
 	dbsql := make(Record)
 	for _, f := range utils.Listfiles(sdir) {
 		k := strings.Split(f, ".")[0]
