@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -100,8 +101,9 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	// we need to migrate existing block
 	var blocks []string
 	blocks = append(blocks, block)
-	out[0] = blocks
-	parentBlocks, err := getParentBlocksOrderedList(rurl, block)
+	orderCounter := 0
+	out[orderCounter] = blocks
+	parentBlocks, err := getParentBlocksOrderedList(rurl, block, orderCounter)
 	if err != nil {
 		return out, err
 	}
@@ -111,10 +113,98 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	return out, nil
 }
 
+// BlockResponse represents block response structure used in getBlocksFromDataset function
+type BlockResponse struct {
+	Dataset string
+	Blocks  []string
+	Error   error
+}
+
+// helper function to get list of blocks for a given dataset and send results to given channel
+func getBlocksFromDataset(rurl, dataset string, ch chan<- BlockResponse) {
+	blks, err := getBlocks(rurl, dataset)
+	ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
+}
+
 // helper function to get parent blocks ordered list for given url and block name
-func getParentBlocksOrderedList(rurl, block string) (map[int][]string, error) {
-	var out map[int][]string
+func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][]string, error) {
+	out := make(map[int][]string)
+	// get list of blocks from the source (remote url)
+	srcblocks, err := getBlocks(rurl, block)
+	if err != nil {
+		log.Println("unable to get list of blocks at remote url", rurl, err)
+		return out, err
+	}
+	// get list of parent blocks at destination (this server)
+	parentBlocksInDst := make(map[string]bool)
+	localhost := utils.BasePath(utils.BASE, "/blocks")
+	ch := make(chan BlockResponse)
+	umap := map[string]int{}
+	for _, blk := range srcblocks {
+		dataset := strings.Split(blk, "#")[0]
+		umap[dataset] = 1
+		go getBlocksFromDataset(localhost, dataset, ch)
+	}
+	// collect results from goroutines
+	for {
+		select {
+		case r := <-ch:
+			if r.Error != nil {
+				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", localhost, r.Dataset, r.Error)
+			} else {
+				for _, blk := range r.Blocks {
+					parentBlocksInDst[blk] = true
+				}
+			}
+			delete(umap, r.Dataset)
+		default:
+			if len(umap) == 0 {
+				break
+			}
+			time.Sleep(time.Duration(1) * time.Millisecond) // wait for response
+		}
+	}
+
+	// loop over source blocks
+	for _, blk := range srcblocks {
+		if _, ok := parentBlocksInDst[blk]; !ok {
+			// block is not at destination
+			if list, ok := out[orderCounter]; ok {
+				list = append(list, blk)
+				out[orderCounter] = list
+			} else {
+				out[orderCounter] = []string{blk}
+			}
+			omap, err := getParentBlocksOrderedList(rurl, blk, orderCounter+1)
+			if err != nil {
+				log.Printf("fail to get url=%s block=%s error=%v", rurl, blk, err)
+				continue
+			}
+			for idx, blks := range omap {
+				if eblks, ok := out[idx]; ok {
+					eblks = append(eblks, blks...)
+					out[idx] = eblks
+				} else {
+					out[idx] = eblks
+				}
+			}
+		}
+	}
 	return out, nil
+}
+
+// helper function to get list of dataset from list of blocks
+func datasetList(blocks []string) []string {
+	var out []string
+	dmap := make(map[string]bool)
+	for _, blk := range blocks {
+		dataset := strings.Split(blk, "#")[0]
+		dmap[dataset] = true
+	}
+	for dataset, _ := range dmap {
+		out = append(out, dataset)
+	}
+	return out
 }
 
 // helper function to prepare the ordered lists of blocks based on input DATASET
