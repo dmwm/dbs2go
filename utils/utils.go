@@ -255,3 +255,16 @@ func Insert(arr []interface{}, val interface{}) []interface{} {
 	arr[0] = val
 	return arr
 }
+
+// UpdateOrderedDict returns new ordered list from given ordered dicts
+func UpdateOrderedDict(omap, nmap map[int][]string) map[int][]string {
+	for idx, list := range nmap {
+		if entries, ok := omap[idx]; ok {
+			entries = append(entries, list...)
+			omap[idx] = entries
+		} else {
+			omap[idx] = list
+		}
+	}
+	return omap
+}
