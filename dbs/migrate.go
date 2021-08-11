@@ -120,12 +120,6 @@ type BlockResponse struct {
 	Error   error
 }
 
-// helper function to get list of blocks for a given dataset and send results to given channel
-func getBlocksFromDataset(rurl, dataset string, ch chan<- BlockResponse) {
-	blks, err := getBlocks(rurl, dataset)
-	ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
-}
-
 // helper function to get parent blocks ordered list for given url and block name
 func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][]string, error) {
 	out := make(map[int][]string)
@@ -139,11 +133,14 @@ func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][
 	parentBlocksInDst := make(map[string]bool)
 	localhost := utils.BasePath(utils.BASE, "/blocks")
 	ch := make(chan BlockResponse)
-	umap := map[string]int{}
+	umap := make(map[string]struct{})
 	for _, blk := range srcblocks {
 		dataset := strings.Split(blk, "#")[0]
-		umap[dataset] = 1
-		go getBlocksFromDataset(localhost, dataset, ch)
+		umap[dataset] = struct{}{}
+		go func() {
+			blks, err := getBlocks(localhost, dataset)
+			ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
+		}()
 	}
 	// collect results from goroutines
 	for {
@@ -191,20 +188,6 @@ func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][
 		}
 	}
 	return out, nil
-}
-
-// helper function to get list of dataset from list of blocks
-func datasetList(blocks []string) []string {
-	var out []string
-	dmap := make(map[string]bool)
-	for _, blk := range blocks {
-		dataset := strings.Split(blk, "#")[0]
-		dmap[dataset] = true
-	}
-	for dataset, _ := range dmap {
-		out = append(out, dataset)
-	}
-	return out
 }
 
 // helper function to prepare the ordered lists of blocks based on input DATASET
