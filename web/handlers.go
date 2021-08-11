@@ -325,6 +325,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	}
 	if a == "datatiers" {
 		err = api.InsertDataTiers()
+	} else if a == "blockdump" {
+		err = api.BlockDump()
 	} else if a == "outputconfigs" {
 		err = api.InsertOutputConfigs()
 	} else if a == "primarydatasets" {
@@ -705,6 +707,11 @@ func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) {
 // POST API takes no argument, the payload should be supplied as JSON
 func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "bulkblocks")
+}
+
+// BlockDumpHandler provides access to BlockDump DBS API
+func BlockDumpHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "blockdump")
 }
 
 // Migration server handlers
