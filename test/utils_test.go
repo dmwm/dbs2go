@@ -7,8 +7,8 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// TestInList
-func TestInList(t *testing.T) {
+// TestUtilsInList
+func TestUtilsInList(t *testing.T) {
 	vals := []string{"1", "2", "3"}
 	res := utils.InList("1", vals)
 	if res == false {
@@ -20,8 +20,8 @@ func TestInList(t *testing.T) {
 	}
 }
 
-// TestRecordSize
-func TestRecordSize(t *testing.T) {
+// TestUtilsRecordSize
+func TestUtilsRecordSize(t *testing.T) {
 	rec := make(map[string]int)
 	rec["a"] = 1
 	rec["b"] = 2
@@ -32,8 +32,8 @@ func TestRecordSize(t *testing.T) {
 	fmt.Println("record", rec, "size", size)
 }
 
-// TestReplaceBinds
-func TestReplaceBinds(t *testing.T) {
+// TestUtilsReplaceBinds
+func TestUtilsReplaceBinds(t *testing.T) {
 	str := `
 	INSERT INTO {{.Owner}}.FILES
     (file_id,logical_file_name,is_file_valid)
@@ -52,8 +52,8 @@ func TestReplaceBinds(t *testing.T) {
 	}
 }
 
-// TestInsert
-func TestInsert(t *testing.T) {
+// TestUtilsInsert
+func TestUtilsInsert(t *testing.T) {
 	var arr []interface{}
 	arr = append(arr, 1)
 	arr = append(arr, 2)
@@ -62,5 +62,32 @@ func TestInsert(t *testing.T) {
 		if i != v {
 			t.Error("invalid insert", arr)
 		}
+	}
+}
+
+// TestUtilsUpdateOrderedDict
+func TestUtilsUpdateOrderedDict(t *testing.T) {
+	omap := make(map[int][]string)
+	omap[1] = []string{"a", "b"}
+	fmt.Printf("input omap %+v\n", omap)
+	nmap := make(map[int][]string)
+	nmap[1] = []string{"c"}
+	nmap[2] = []string{"x"}
+	fmt.Printf("input nmap %+v\n", nmap)
+	out := utils.UpdateOrderedDict(omap, nmap)
+	fmt.Printf("output map %+v\n", out)
+	if list, ok := out[1]; ok {
+		if len(list) != 3 {
+			t.Error("wrong number of entries")
+		}
+	} else {
+		t.Error("no entries for index 1")
+	}
+	if list, ok := out[2]; ok {
+		if len(list) != 1 {
+			t.Error("wrong number of entries")
+		}
+	} else {
+		t.Error("no entries for index 2")
 	}
 }

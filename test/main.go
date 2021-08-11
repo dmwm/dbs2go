@@ -44,7 +44,7 @@ func initDB(dryRun bool) *sql.DB {
 		log.Fatal("unable to get current working dir")
 	}
 	utils.STATICDIR = fmt.Sprintf("%s/../static", dir)
-	utils.VERBOSE = 1
+	utils.VERBOSE = 0
 	dbtype := "sqlite3"
 	dburi := "/tmp/dbs-test.db"
 	dbowner := "sqlite"
