@@ -39,10 +39,8 @@ type MigrationReport struct {
 	Details string `json:"details"`
 }
 
-// helper function to get blocks from remote DBS server (remote url)
-// the val parameter can be either dataset or block name
-// it return list of blocks obtained from blocks API
-func getBlocks(rurl, val string) ([]string, error) {
+// GetBlocks returns list of blocks for a given url and block/dataset input
+func GetBlocks(rurl, val string) ([]string, error) {
 	var out []string
 	if strings.Contains(val, "#") {
 		rurl = fmt.Sprintf("%s/blocks?block_name=%s&open_for_writing=0", rurl, url.QueryEscape(val))
@@ -64,8 +62,8 @@ func getBlocks(rurl, val string) ([]string, error) {
 	return out, nil
 }
 
-// helper function to get list of parents
-func getParents(rurl, val string) ([]string, error) {
+// GetParents returns list of parents for given block or dataset
+func GetParents(rurl, val string) ([]string, error) {
 	var out []string
 	if strings.Contains(val, "#") {
 		rurl = fmt.Sprintf("%s/blockparents?block_name=%s", rurl, val)
@@ -109,7 +107,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 
 	// check if block exists at destination (this server)
 	localhost := utils.BasePath(utils.BASE, "/blocks")
-	dstblocks, err := getBlocks(localhost, block)
+	dstblocks, err := GetBlocks(localhost, block)
 	if err != nil {
 		return out, err
 	}
@@ -119,7 +117,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	}
 
 	// check if block exists at a source location
-	srcblocks, err := getBlocks(rurl, block)
+	srcblocks, err := GetBlocks(rurl, block)
 	if err != nil {
 		return out, err
 	}
@@ -132,7 +130,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	blocks = append(blocks, block)
 	orderCounter := 0
 	out[orderCounter] = blocks
-	parentBlocks, err := getParentBlocksOrderedList(rurl, block, orderCounter)
+	parentBlocks, err := GetParentBlocks(rurl, block, orderCounter)
 	if err != nil {
 		return out, err
 	}
@@ -142,18 +140,18 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	return out, nil
 }
 
-// BlockResponse represents block response structure used in getBlocksFromDataset function
+// BlockResponse represents block response structure used in GetParentBlocks
 type BlockResponse struct {
 	Dataset string
 	Blocks  []string
 	Error   error
 }
 
-// helper function to get parent blocks ordered list for given url and block name
-func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][]string, error) {
+// GetParentBlocks returns parent blocks ordered list for given url and block name
+func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, error) {
 	out := make(map[int][]string)
 	// get list of blocks from the source (remote url)
-	srcblocks, err := getBlocks(rurl, block)
+	srcblocks, err := GetBlocks(rurl, block)
 	if err != nil {
 		log.Println("unable to get list of blocks at remote url", rurl, err)
 		return out, err
@@ -167,7 +165,7 @@ func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][
 		dataset := strings.Split(blk, "#")[0]
 		umap[dataset] = struct{}{}
 		go func() {
-			blks, err := getBlocks(localhost, dataset)
+			blks, err := GetBlocks(localhost, dataset)
 			ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
 		}()
 	}
@@ -201,7 +199,7 @@ func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][
 			} else {
 				out[orderCounter] = []string{blk}
 			}
-			omap, err := getParentBlocksOrderedList(rurl, blk, orderCounter+1)
+			omap, err := GetParentBlocks(rurl, blk, orderCounter+1)
 			if err != nil {
 				log.Printf("fail to get url=%s block=%s error=%v", rurl, blk, err)
 				continue
@@ -231,7 +229,7 @@ func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error)
 		msg := fmt.Sprintf("requested dataset %s is already at destination", dataset)
 		return out, errors.New(msg)
 	}
-	pdict, err := getParentDatasetsOrderedList(rurl, dataset, orderCounter+1)
+	pdict, err := GetParentDatasets(rurl, dataset, orderCounter+1)
 	if err != nil {
 		return out, err
 	}
@@ -246,7 +244,7 @@ func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error)
 // and returns an ordered list of blocks not already at dst for migration
 func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]string, error) {
 	out := make(map[int][]string)
-	srcblks, err := getBlocks(rurl, dataset)
+	srcblks, err := GetBlocks(rurl, dataset)
 	if err != nil {
 		return out, err
 	}
@@ -255,7 +253,7 @@ func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]str
 		return out, errors.New(msg)
 	}
 	localhost := utils.BasePath(utils.BASE, "/blocks")
-	dstblks, err := getBlocks(localhost, dataset)
+	dstblks, err := GetBlocks(localhost, dataset)
 	if err != nil {
 		return out, err
 	}
@@ -283,9 +281,10 @@ type DatasetResponse struct {
 	Error      error
 }
 
-func getParentDatasetsOrderedList(rurl, dataset string, orderCounter int) (map[int][]string, error) {
+// GetParentDatasets return ordered dict of parent datasets
+func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string, error) {
 	out := make(map[int][]string)
-	parentDatasets, err := getParents(rurl, dataset)
+	parentDatasets, err := GetParents(rurl, dataset)
 	if err != nil {
 		return out, err
 	}
@@ -296,7 +295,7 @@ func getParentDatasetsOrderedList(rurl, dataset string, orderCounter int) (map[i
 		go func() {
 			omap, err := processDatasetBlocks(rurl, dataset, orderCounter)
 			// get ordered map of parents
-			pmap, err := getParentDatasetsOrderedList(rurl, dataset, orderCounter+1)
+			pmap, err := GetParentDatasets(rurl, dataset, orderCounter+1)
 			if err == nil && len(pmap) > 0 {
 				omap = utils.UpdateOrderedDict(omap, pmap)
 			}
