@@ -64,6 +64,35 @@ func getBlocks(rurl, val string) ([]string, error) {
 	return out, nil
 }
 
+// helper function to get list of parents
+func getParents(rurl, val string) ([]string, error) {
+	var out []string
+	if strings.Contains(val, "#") {
+		rurl = fmt.Sprintf("%s/blockparents?block_name=%s", rurl, val)
+	} else {
+		rurl = fmt.Sprintf("%s/datasetparents?dataset=%s", rurl, val)
+	}
+	data, err := getData(rurl)
+	if err != nil {
+		return out, err
+	}
+	var rec []map[string]interface{}
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		return out, err
+	}
+	for _, v := range rec {
+		if strings.Contains(val, "#") {
+			block := fmt.Sprintf("%v", v["parent_block_name"])
+			out = append(out, block)
+		} else {
+			dataset := fmt.Sprintf("%v", v["parent_dataset"])
+			out = append(out, dataset)
+		}
+	}
+	return out, nil
+}
+
 // helper function to prepare the ordered lists of blocks based on input BLOCK
 // return map of blocks with their parents
 func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
@@ -177,14 +206,7 @@ func getParentBlocksOrderedList(rurl, block string, orderCounter int) (map[int][
 				log.Printf("fail to get url=%s block=%s error=%v", rurl, blk, err)
 				continue
 			}
-			for idx, blks := range omap {
-				if eblks, ok := out[idx]; ok {
-					eblks = append(eblks, blks...)
-					out[idx] = eblks
-				} else {
-					out[idx] = eblks
-				}
-			}
+			out = utils.UpdateOrderedDict(out, omap)
 		}
 	}
 	return out, nil
@@ -200,7 +222,105 @@ func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error)
 		3. Check if dataset has parents
 		4. Check if parent blocks are already at DST
 	*/
-	var out map[int][]string
+	orderCounter := 0
+	out, err := processDatasetBlocks(rurl, dataset, orderCounter)
+	if err != nil {
+		return out, err
+	}
+	if len(out) == 0 {
+		msg := fmt.Sprintf("requested dataset %s is already at destination", dataset)
+		return out, errors.New(msg)
+	}
+	pdict, err := getParentDatasetsOrderedList(rurl, dataset, orderCounter+1)
+	if err != nil {
+		return out, err
+	}
+	if len(pdict) != 0 {
+		// update out
+		out = utils.UpdateOrderedDict(out, pdict)
+	}
+	return out, nil
+}
+
+// helper function, that comapares blocks of a dataset at source and dst
+// and returns an ordered list of blocks not already at dst for migration
+func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]string, error) {
+	out := make(map[int][]string)
+	srcblks, err := getBlocks(rurl, dataset)
+	if err != nil {
+		return out, err
+	}
+	if len(srcblks) == 0 {
+		msg := fmt.Sprintf("No blocks in the required dataset %s found at source %s", dataset, rurl)
+		return out, errors.New(msg)
+	}
+	localhost := utils.BasePath(utils.BASE, "/blocks")
+	dstblks, err := getBlocks(localhost, dataset)
+	if err != nil {
+		return out, err
+	}
+	dstBlocksMap := make(map[string]struct{})
+	for _, blk := range dstblks {
+		dstBlocksMap[blk] = struct{}{}
+	}
+	for idx, blk := range srcblks {
+		if _, ok := dstBlocksMap[blk]; !ok {
+			if eblks, ok := out[idx]; ok {
+				eblks = append(eblks, blk)
+				out[idx] = eblks
+			} else {
+				out[idx] = []string{blk}
+			}
+		}
+	}
+	return out, nil
+}
+
+// DatasetResponse represents response of processDatasetBlocks API
+type DatasetResponse struct {
+	Dataset    string
+	OrderedMap map[int][]string
+	Error      error
+}
+
+func getParentDatasetsOrderedList(rurl, dataset string, orderCounter int) (map[int][]string, error) {
+	out := make(map[int][]string)
+	parentDatasets, err := getParents(rurl, dataset)
+	if err != nil {
+		return out, err
+	}
+	ch := make(chan DatasetResponse)
+	umap := make(map[string]struct{})
+	for _, dataset := range parentDatasets {
+		umap[dataset] = struct{}{}
+		go func() {
+			omap, err := processDatasetBlocks(rurl, dataset, orderCounter)
+			// get ordered map of parents
+			pmap, err := getParentDatasetsOrderedList(rurl, dataset, orderCounter+1)
+			if err == nil && len(pmap) > 0 {
+				omap = utils.UpdateOrderedDict(omap, pmap)
+			}
+			ch <- DatasetResponse{Dataset: dataset, OrderedMap: omap, Error: err}
+		}()
+	}
+	// collect results from goroutines
+	for {
+		select {
+		case r := <-ch:
+			if r.Error != nil {
+				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", rurl, r.Dataset, r.Error)
+			} else {
+				out = utils.UpdateOrderedDict(out, r.OrderedMap)
+			}
+			delete(umap, r.Dataset)
+		default:
+			if len(umap) == 0 {
+				break
+			}
+			time.Sleep(time.Duration(1) * time.Millisecond) // wait for response
+		}
+	}
+
 	return out, nil
 }
 
