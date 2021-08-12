@@ -276,7 +276,7 @@ func CleanStatement(stm string) string {
 // here we use http response writer in order to make encoder
 // then we literally stream data with our encoder (i.e. write records
 // to writer)
-func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) error {
+func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
@@ -387,7 +387,7 @@ func executeAll(w http.ResponseWriter, sep, stm string, args ...interface{}) err
 }
 
 // similar to executeAll function but it takes explicit set of columns and values
-func execute(w http.ResponseWriter, sep, stm string, cols []string, vals []interface{}, args ...interface{}) error {
+func execute(w io.Writer, sep, stm string, cols []string, vals []interface{}, args ...interface{}) error {
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
