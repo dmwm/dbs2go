@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -352,6 +353,7 @@ func (a *API) Submit() error {
 	- iterate over ordered list of datasets or blocks
 	  - prepare and insert MigrationBlocks object
 	- write MigrationReport object
+	- spawn goroutine to process migration report
 	*/
 
 	// read given input
@@ -427,12 +429,53 @@ func (a *API) Submit() error {
 	if err != nil {
 		return writeReport("fail to commit transaction", err, a.Writer)
 	}
+
 	report := MigrationReport{Report: fmt.Sprintf("REQUEST QUEUED with total %d blocks to be migrated", totalQueued), Details: string(data)}
 	data, err = json.Marshal(report)
 	if err == nil {
 		a.Writer.Write(data)
 	}
+
+	// once migration report is ready we'll process it asynchronously
+	go a.ProcessMigrationReport(rurl, report)
+
 	return err
+}
+
+// ProcessMigrationReport will process given migration report
+// and inject data to source DBS
+func (a *API) ProcessMigrationReport(rurl string, report MigrationReport) error {
+	// get context from API and setup timeout of entire operation to 5min (default on frontends)
+	ctx, cancel := context.WithTimeout(a.Context, 5*time.Minute)
+	log.Println("ProcessMigrationReport", ctx)
+	defer cancel()
+
+	// obtain block details from destination DBS
+	rurl = fmt.Sprintf("%s/blockdump", rurl)
+	data, err := getData(rurl)
+	if err != nil {
+		return err
+	}
+	var rec BlockDumpRecord
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		return err
+	}
+
+	// update migration status
+	a.UpdateMigrationStatus(report)
+
+	// insert block dump record into source DBS
+	err = rec.InsertBlockDump()
+	if err != nil {
+		log.Println("insert block dump record failed with", err)
+		return err
+	}
+	return nil
+}
+
+// UpdateMigrationStatus updates migration status
+func (a *API) UpdateMigrationStatus(report MigrationReport) {
 }
 
 // MigrationRemoveRequest represents migration remove request object

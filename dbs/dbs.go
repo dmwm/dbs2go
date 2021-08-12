@@ -7,6 +7,7 @@
 package dbs
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -27,6 +28,7 @@ import (
 type API struct {
 	Reader    io.Reader
 	Writer    http.ResponseWriter
+	Context   context.Context
 	Params    Record
 	Separator string
 	CreateBy  string
