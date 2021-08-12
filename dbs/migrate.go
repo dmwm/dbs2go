@@ -1,5 +1,18 @@
 package dbs
 
+// DBS Migrate APIS
+// Copyright (c) 2021 - Valentin Kuznetsov <vkuznet@gmail.com>
+//
+// DBS Migration service is responsible to migrate blocks from one
+// DBS to another. This module provides the following APIs:
+// - Submit to submit migration request, internall it prepare the request
+// and calls via goroutine process request
+// - Process to proces migration request explicitly
+// - Remove to remove migration request
+// - Status to obtain status of migration request
+// Internally the migration process injects all request details into
+// MigrationRequests table. The request details resides in MigrationBlocks table.
+
 import (
 	"context"
 	"encoding/json"
@@ -17,6 +30,7 @@ import (
 )
 
 /*
+
 DBS Migration APIs, see Python counterpart here:
 Server/Python/src/dbs/web/DBSMigrateModel.py
 Server/Python/src/dbs/business/DBSMigrate.py
@@ -472,6 +486,7 @@ func (a *API) SubmitMigration() error {
 
 // ProcessMigration will process given migration request
 // and inject data to source DBS
+// It expects that client will provide migration_request_url and migration id
 func (a *API) ProcessMigration(writeReport bool) error {
 
 	// setup context with timeout
@@ -512,15 +527,47 @@ func (a *API) ProcessMigration(writeReport bool) error {
 // processMigration will process given migration report
 // and inject data to source DBS
 func (a *API) processMigration(ch chan<- bool) {
-	murl, ok := a.Params["migration_request_url"]
-	if !ok {
-		log.Println("unable to get migration_request_url")
+	// report on channel that we are done with this workflow
+	defer func() {
 		ch <- true
+	}()
+
+	// update migration status
+	updateMigrationStatus(IN_PROGRESS)
+
+	// obtain migration request record
+	var args []interface{}
+	var conds []string
+	stm := getSQL("migration_requests")
+	conds, args = AddParam("migration_request_id", "MR.MIGRATION_REQUEST_ID", a.Params, conds, args)
+	stm = WhereClause(stm, conds)
+
+	// define in-memory pipe for writing and reading our data from the server
+	pr, pw := io.Pipe()
+	defer pr.Close()
+	defer pw.Close()
+
+	// execute our SQL statement and write results to our pipe writer
+	// please note: here we use empty separator to get single JSON record
+	executeAll(pw, "", stm, args...)
+
+	// read from our pipe reader
+	data, err := io.ReadAll(pr)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return
+	}
+	// unmarshal our data from byte string
+	var mrec MigrationRequests
+	err = json.Unmarshal(data, &mrec)
+	if err != nil {
+		log.Println("fail to unmarshal data", err)
+		return
 	}
 
 	// obtain block details from destination DBS
-	rurl := fmt.Sprintf("%s/blockdump", murl)
-	data, err := getData(rurl)
+	rurl := fmt.Sprintf("%s/blockdump", mrec.MIGRATION_URL)
+	data, err = getData(rurl)
 	if err != nil {
 		log.Printf("unable to query %s/blockdump, error %v", rurl, err)
 	}
@@ -530,20 +577,18 @@ func (a *API) processMigration(ch chan<- bool) {
 		log.Printf("unable to unmarshal BlockDumpRecord, error %v", err)
 	}
 
-	// update migration status
-	a.UpdateMigrationStatus()
-
 	// insert block dump record into source DBS
 	err = rec.InsertBlockDump()
 	if err != nil {
 		log.Println("insert block dump record failed with", err)
+		updateMigrationStatus(FAILED)
+	} else {
+		updateMigrationStatus(COMPLETED)
 	}
-	// report when we done
-	ch <- true
 }
 
-// UpdateMigrationStatus updates migration status
-func (a *API) UpdateMigrationStatus() {
+// updateMigrationStatus updates migration status
+func updateMigrationStatus(status int) {
 }
 
 // MigrationRemoveRequest represents migration remove request object
