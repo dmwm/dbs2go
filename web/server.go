@@ -90,9 +90,10 @@ func handlers() *mux.Router {
 	router.StrictSlash(true) // to allow /route and /route/ end-points
 
 	if Config.MigrationServer {
-		router.HandleFunc(basePath("/submit"), MigrateSubmitHandler).Methods("POST")
-		router.HandleFunc(basePath("/remove"), MigrateRemoveHandler).Methods("POST")
-		router.HandleFunc(basePath("/status"), MigrateStatusHandler).Methods("GET")
+		router.HandleFunc(basePath("/submit"), MigrationSubmitHandler).Methods("POST")
+		router.HandleFunc(basePath("/process"), MigrationProcessHandler).Methods("POST")
+		router.HandleFunc(basePath("/remove"), MigrationRemoveHandler).Methods("POST")
+		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 	} else {
 
 		// visible routes
@@ -258,6 +259,9 @@ func Server(configFile string) {
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql
 	dbs.DBOWNER = dbowner
+
+	// migration settings
+	dbs.MigrationProcessTimeout = Config.MigrationProcessTimeout
 
 	// init graphql
 	if Config.GraphQLSchema != "" {

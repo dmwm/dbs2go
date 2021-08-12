@@ -354,9 +354,11 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "blockparents" {
 		err = api.BlockParents()
 	} else if a == "submit" {
-		err = api.Submit()
+		err = api.SubmitMigration()
+	} else if a == "process" {
+		err = api.ProcessMigration(true) // write process report
 	} else if a == "remove" {
-		err = api.Remove()
+		err = api.RemoveMigration()
 	}
 	if err != nil {
 		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
@@ -456,7 +458,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "datasetaccesstypes" {
 		err = api.DatasetAccessTypes()
 	} else if a == "status" {
-		err = api.Status()
+		err = api.StatusMigration()
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
@@ -716,19 +718,25 @@ func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) {
 
 // Migration server handlers
 
-// MigrateSubmitHandler provides access to Submit DBS API
+// MigrationSubmitHandler provides access to Submit DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func MigrateSubmitHandler(w http.ResponseWriter, r *http.Request) {
+func MigrationSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "submit")
 }
 
-// MigrateRemoveHandler provides access to Remove DBS API
+// MigrationProcessHandler provides access to Process DBS API
 // POST API takes no argument, the payload should be supplied as JSON
-func MigrateRemoveHandler(w http.ResponseWriter, r *http.Request) {
+func MigrationProcessHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "process")
+}
+
+// MigrationRemoveHandler provides access to Remove DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func MigrationRemoveHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "remove")
 }
 
-// MigrateStatusHandler provides access to Status DBS API
-func MigrateStatusHandler(w http.ResponseWriter, r *http.Request) {
+// MigrationStatusHandler provides access to Status DBS API
+func MigrationStatusHandler(w http.ResponseWriter, r *http.Request) {
 	DBSGetHandler(w, r, "status")
 }

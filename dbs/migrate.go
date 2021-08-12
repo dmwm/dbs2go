@@ -31,7 +31,34 @@ Status checks migration request
 
 Remove removes migration request
 (see removeMigrationRequest API)
+
+DBS migration status codes:
+        migration_status:
+        0=PENDING
+        1=IN PROGRESS
+        2=COMPLETED
+        3=FAILED (will be retried)
+        9=Terminally FAILED
+        status change:
+        0 -> 1
+        1 -> 2
+        1 -> 3
+        1 -> 9
+        are only allowed changes for working through migration.
+        3 -> 1 is allowed for retrying and retry count +1.
 */
+
+// MigrationCodes represents all migration codes
+const (
+	PENDING = iota
+	IN_PROGRESS
+	COMPLETED
+	FAILED
+	TERM_FAILED
+)
+
+// MigrationProcessTimeout defines migration process timeout
+var MigrationProcessTimeout int
 
 // MigrationReport represents migration report returned by the migration API
 type MigrationReport struct {
@@ -344,8 +371,8 @@ func writeReport(msg string, err error, w http.ResponseWriter) error {
 	return err
 }
 
-// Submit DBS API
-func (a *API) Submit() error {
+// SubmitMigration DBS API
+func (a *API) SubmitMigration() error {
 	/* Logic of submit API:
 	- check if migration_input is already queued
 	  - if already queued it should return migration_status
@@ -437,45 +464,86 @@ func (a *API) Submit() error {
 	}
 
 	// once migration report is ready we'll process it asynchronously
-	go a.ProcessMigrationReport(rurl, report)
+	a.Params["migration_request_url"] = rurl
+	go a.ProcessMigration(false) // do not write process report
 
 	return err
 }
 
-// ProcessMigrationReport will process given migration report
+// ProcessMigration will process given migration request
 // and inject data to source DBS
-func (a *API) ProcessMigrationReport(rurl string, report MigrationReport) error {
-	// get context from API and setup timeout of entire operation to 5min (default on frontends)
-	ctx, cancel := context.WithTimeout(a.Context, 5*time.Minute)
-	log.Println("ProcessMigrationReport", ctx)
+func (a *API) ProcessMigration(writeReport bool) error {
+
+	// setup context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(MigrationProcessTimeout)*time.Second)
 	defer cancel()
 
+	// create channel to report when operation will be completed
+	ch := make(chan bool)
+
+	// execute slow operation in background
+	go a.processMigration(ch)
+
+	// the slow operation will either finish or timeout
+	var status int
+	var err error
+	var msg string
+	select {
+	case <-ctx.Done():
+		msg = fmt.Sprintf("Process migration function timeout")
+		err = errors.New(msg)
+		status = FAILED
+	case <-ch:
+		msg = fmt.Sprintf("Process migration successful")
+		status = COMPLETED
+	}
+	report := MigrationReport{Report: msg, Status: status}
+	log.Println(report.Report)
+	if writeReport {
+		data, err := json.Marshal(report)
+		if err == nil {
+			a.Writer.Write(data)
+		}
+		return err
+	}
+	return err
+}
+
+// processMigration will process given migration report
+// and inject data to source DBS
+func (a *API) processMigration(ch chan<- bool) {
+	murl, ok := a.Params["migration_request_url"]
+	if !ok {
+		log.Println("unable to get migration_request_url")
+		ch <- true
+	}
+
 	// obtain block details from destination DBS
-	rurl = fmt.Sprintf("%s/blockdump", rurl)
+	rurl := fmt.Sprintf("%s/blockdump", murl)
 	data, err := getData(rurl)
 	if err != nil {
-		return err
+		log.Printf("unable to query %s/blockdump, error %v", rurl, err)
 	}
 	var rec BlockDumpRecord
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		return err
+		log.Printf("unable to unmarshal BlockDumpRecord, error %v", err)
 	}
 
 	// update migration status
-	a.UpdateMigrationStatus(report)
+	a.UpdateMigrationStatus()
 
 	// insert block dump record into source DBS
 	err = rec.InsertBlockDump()
 	if err != nil {
 		log.Println("insert block dump record failed with", err)
-		return err
 	}
-	return nil
+	// report when we done
+	ch <- true
 }
 
 // UpdateMigrationStatus updates migration status
-func (a *API) UpdateMigrationStatus(report MigrationReport) {
+func (a *API) UpdateMigrationStatus() {
 }
 
 // MigrationRemoveRequest represents migration remove request object
@@ -484,8 +552,8 @@ type MigrationRemoveRequest struct {
 	CREATE_BY            string `json:"create_by"`
 }
 
-// Remove DBS API
-func (a *API) Remove() error {
+// RemoveMigration DBS API
+func (a *API) RemoveMigration() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		return writeReport("fail to read data", err, a.Writer)
@@ -529,8 +597,8 @@ type MigrationStatusRequest struct {
 	USER       string `json:"user"`
 }
 
-// Status DBS API
-func (a *API) Status() error {
+// StatusMigration DBS API
+func (a *API) StatusMigration() error {
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
