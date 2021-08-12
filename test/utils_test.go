@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -89,5 +90,30 @@ func TestUtilsUpdateOrderedDict(t *testing.T) {
 		}
 	} else {
 		t.Error("no entries for index 2")
+	}
+}
+
+// TestUtilsPipe tests pipe logic used in dbs/migrate.go
+func TestUtilsPipe(t *testing.T) {
+	pr, pw := io.Pipe()
+	defer pr.Close()
+	msg := "test"
+
+	go func() {
+		defer pw.Close()
+		size, err := pw.Write([]byte(msg))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		fmt.Printf("wrote '%s' size %d\n", msg, size)
+	}()
+
+	data, err := io.ReadAll(pr)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	fmt.Printf("read '%s'\n", string(data))
+	if string(data) != msg {
+		t.Errorf("written data %s, read data %s", msg, string(data))
 	}
 }

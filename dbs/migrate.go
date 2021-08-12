@@ -543,13 +543,16 @@ func (a *API) processMigration(ch chan<- bool) {
 	stm = WhereClause(stm, conds)
 
 	// define in-memory pipe for writing and reading our data from the server
+	// see working example of pipe usage in test/utils_test.go
 	pr, pw := io.Pipe()
 	defer pr.Close()
-	defer pw.Close()
 
-	// execute our SQL statement and write results to our pipe writer
-	// please note: here we use empty separator to get single JSON record
-	executeAll(pw, "", stm, args...)
+	// execute SQL call within goroutine to allow it to write via pipe writer
+	// the pipe reader will be blocked until writer will write the data
+	go func() {
+		defer pw.Close()
+		executeAll(pw, "", stm, args...)
+	}()
 
 	// read from our pipe reader
 	data, err := io.ReadAll(pr)
