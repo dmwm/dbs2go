@@ -25,6 +25,7 @@
 package web
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"database/sql"
@@ -33,7 +34,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	//     _ "github.com/go-sql-driver/mysql"
@@ -287,31 +290,68 @@ func Server(configFile string) {
 	} else {
 		http.Handle("/", handlers())
 	}
-
-	// Start server
+	// define our HTTP server
 	addr := fmt.Sprintf(":%d", Config.Port)
-	_, e1 := os.Stat(Config.ServerCrt)
-	_, e2 := os.Stat(Config.ServerKey)
-	if e1 == nil && e2 == nil {
-		//start HTTPS server which require user certificates
-		rootCA := x509.NewCertPool()
-		caCert, _ := ioutil.ReadFile(Config.RootCA)
-		rootCA.AppendCertsFromPEM(caCert)
-		server := &http.Server{
-			Addr: addr,
-			TLSConfig: &tls.Config{
-				//                 ClientAuth: tls.RequestClientCert,
-				RootCAs: rootCA,
-			},
+	server := &http.Server{
+		Addr: addr,
+	}
+
+	// make extra channel for graceful shutdown
+	// https://medium.com/honestbee-tw-engineer/gracefully-shutdown-in-go-http-server-5f5e6b83da5a
+	httpDone := make(chan os.Signal, 1)
+	signal.Notify(httpDone, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		// Start either HTTPs or HTTP web server
+		_, e1 := os.Stat(Config.ServerCrt)
+		_, e2 := os.Stat(Config.ServerKey)
+		if e1 == nil && e2 == nil {
+			//start HTTPS server which require user certificates
+			rootCA := x509.NewCertPool()
+			caCert, _ := ioutil.ReadFile(Config.RootCA)
+			rootCA.AppendCertsFromPEM(caCert)
+			server = &http.Server{
+				Addr: addr,
+				TLSConfig: &tls.Config{
+					//                 ClientAuth: tls.RequestClientCert,
+					RootCAs: rootCA,
+				},
+			}
+			log.Println("Starting HTTPs server", addr)
+			err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
+		} else {
+			// Start server without user certificates
+			log.Println("Starting HTTP server", addr)
+			err = server.ListenAndServe()
 		}
-		log.Println("Starting HTTPs server", addr)
-		err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
-	} else {
-		// Start server without user certificates
-		log.Println("Starting HTTP server", addr)
-		err = http.ListenAndServe(addr, nil)
+		if err != nil {
+			log.Printf("Fail to start server %v", err)
+		}
+	}()
+
+	// start migration server if necessary
+	migDone := make(chan bool)
+	if Config.MigrationServer {
+		go dbs.MigrationServer(dbs.MigrationProcessTimeout, migDone)
 	}
-	if err != nil {
-		log.Printf("Fail to start server %v", err)
+
+	// properly stop our HTTP and Migration Servers
+	<-httpDone
+	log.Print("Server Stopped")
+
+	// send notification to stop migration server
+	if Config.MigrationServer {
+		migDone <- true
 	}
+
+	// add extra timeout for shutdown service stuff
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		cancel()
+	}()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown Failed:%+v", err)
+	}
+	log.Print("Server Exited Properly")
 }
