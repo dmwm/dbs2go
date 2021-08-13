@@ -24,6 +24,7 @@ type Configuration struct {
 	Hmac                    string `json:"hmac"`                      // cmsweb hmac file location
 	LimiterPeriod           string `json:"rate"`                      // limiter rate value
 	MigrationServer         bool   `json:"migration_server"`          // migration server flag
+	MigrationServerInterval int    `json:"migration_server_interval"` // migration process interval
 	MigrationProcessTimeout int    `json:"migration_process_timeout"` // migration process timeout
 
 	// db related configuration
@@ -84,6 +85,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MigrationProcessTimeout == 0 {
 		Config.MigrationProcessTimeout = 300 // in seconds
+	}
+	if Config.MigrationServerInterval == 0 {
+		Config.MigrationServerInterval = 60 // in seconds
 	}
 	return nil
 }
