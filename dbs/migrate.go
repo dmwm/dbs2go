@@ -11,7 +11,7 @@ package dbs
 // - Remove to remove migration request
 // - Status to obtain status of migration request
 // Internally the migration process injects all request details into
-// MigrationRequests table. The request details resides in MigrationBlocks table.
+// MigrationRequest table. The request details resides in MigrationBlocks table.
 
 import (
 	"context"
@@ -402,7 +402,7 @@ func (a *API) SubmitMigration() error {
 	if err != nil {
 		return writeReport("fail to read data", err, a.Writer)
 	}
-	rec := MigrationRequests{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
+	rec := MigrationRequest{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		return writeReport("fail to decode data", err, a.Writer)
@@ -479,7 +479,7 @@ func (a *API) SubmitMigration() error {
 
 	// once migration report is ready we'll process it asynchronously
 	a.Params["migration_request_url"] = rurl
-	go a.ProcessMigration(false) // do not write process report
+	go a.ProcessMigration(MigrationProcessTimeout, false)
 
 	return err
 }
@@ -487,10 +487,10 @@ func (a *API) SubmitMigration() error {
 // ProcessMigration will process given migration request
 // and inject data to source DBS
 // It expects that client will provide migration_request_url and migration id
-func (a *API) ProcessMigration(writeReport bool) error {
+func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 
 	// setup context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(MigrationProcessTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 
 	// create channel to report when operation will be completed
@@ -561,7 +561,7 @@ func (a *API) processMigration(ch chan<- bool) {
 		return
 	}
 	// unmarshal our data from byte string
-	var mrec MigrationRequests
+	var mrec MigrationRequest
 	err = json.Unmarshal(data, &mrec)
 	if err != nil {
 		log.Println("fail to unmarshal data", err)

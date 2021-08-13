@@ -356,7 +356,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "submit" {
 		err = api.SubmitMigration()
 	} else if a == "process" {
-		err = api.ProcessMigration(true) // write process report
+		err = api.ProcessMigration(dbs.MigrationProcessTimeout, true) // write process report
 	} else if a == "remove" {
 		err = api.RemoveMigration()
 	}
