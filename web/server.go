@@ -123,7 +123,7 @@ func handlers() *mux.Router {
 
 		router.HandleFunc(basePath("/blockorigin"), BlockOriginHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockTrio"), BlockTrioHandler).Methods("GET")
-		router.HandleFunc(basePath("/blockdump"), BlockDumpHandler).Methods("POST")
+		router.HandleFunc(basePath("/blockdump"), BlockDumpHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockchildren"), BlockChildrenHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockparents"), BlockParentsHandler).Methods("GET", "POST")
 		router.HandleFunc(basePath("/blocksummaries"), BlockSummariesHandler).Methods("GET")
