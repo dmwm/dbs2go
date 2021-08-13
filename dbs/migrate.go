@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -73,6 +74,9 @@ const (
 
 // MigrationProcessTimeout defines migration process timeout
 var MigrationProcessTimeout int
+
+// MigrationServerInterval defines migration process timeout
+var MigrationServerInterval int
 
 // MigrationReport represents migration report returned by the migration API
 type MigrationReport struct {
@@ -532,45 +536,33 @@ func (a *API) processMigration(ch chan<- bool) {
 		ch <- true
 	}()
 
-	// update migration status
-	updateMigrationStatus(IN_PROGRESS)
-
 	// obtain migration request record
-	var args []interface{}
-	var conds []string
-	stm := getSQL("migration_requests")
-	conds, args = AddParam("migration_request_id", "MR.MIGRATION_REQUEST_ID", a.Params, conds, args)
-	stm = WhereClause(stm, conds)
-
-	// define in-memory pipe for writing and reading our data from the server
-	// see working example of pipe usage in test/utils_test.go
-	pr, pw := io.Pipe()
-	defer pr.Close()
-
-	// execute SQL call within goroutine to allow it to write via pipe writer
-	// the pipe reader will be blocked until writer will write the data
-	go func() {
-		defer pw.Close()
-		executeAll(pw, "", stm, args...)
-	}()
-
-	// read from our pipe reader
-	data, err := io.ReadAll(pr)
-	if err != nil {
-		log.Println("fail to read data", err)
+	val, ok := a.Params["migration_request_id"]
+	if !ok {
+		log.Println("API=%s does not provide migration_request_id", a.Api)
 		return
 	}
-	// unmarshal our data from byte string
-	var mrec MigrationRequest
-	err = json.Unmarshal(data, &mrec)
+	midint, err := strconv.Atoi(fmt.Sprintf("%d", val))
 	if err != nil {
-		log.Println("fail to unmarshal data", err)
+		log.Println("unable to convert mid", err)
+	}
+	mid := int64(midint)
+	records, err := MigrationRequests(mid)
+	if err != nil {
+		log.Printf("fail to fetch migration request %d, error", mid, err)
 		return
 	}
+	if len(records) != 1 {
+		log.Printf("found more than %d requests for mid=%d, stop processing", len(records), mid)
+		return
+	}
+	mrec := records[0]
+	// update migration status
+	updateMigrationStatus(mid, IN_PROGRESS)
 
 	// obtain block details from destination DBS
 	rurl := fmt.Sprintf("%s/blockdump", mrec.MIGRATION_URL)
-	data, err = getData(rurl)
+	data, err := getData(rurl)
 	if err != nil {
 		log.Printf("unable to query %s/blockdump, error %v", rurl, err)
 	}
@@ -584,14 +576,43 @@ func (a *API) processMigration(ch chan<- bool) {
 	err = rec.InsertBlockDump()
 	if err != nil {
 		log.Println("insert block dump record failed with", err)
-		updateMigrationStatus(FAILED)
+		updateMigrationStatus(mid, FAILED)
 	} else {
-		updateMigrationStatus(COMPLETED)
+		updateMigrationStatus(mid, COMPLETED)
 	}
 }
 
 // updateMigrationStatus updates migration status
-func updateMigrationStatus(status int) {
+func updateMigrationStatus(mid int64, status int) error {
+	tmplData := make(Record)
+	tmplData["Owner"] = DBOWNER
+	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
+	if err != nil {
+		log.Println("unable to load update_migration_status template", err)
+		return err
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(stm, status, mid)
+	if err != nil {
+		log.Printf("unable to update %v", err)
+		return err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
+		return err
+	}
+	return nil
 }
 
 // MigrationRemoveRequest represents migration remove request object
