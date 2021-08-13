@@ -7,8 +7,8 @@ import (
 	"log"
 )
 
-// MigrationRequests represent MigrationRequests table
-type MigrationRequests struct {
+// MigrationRequest represent MigrationRequest table
+type MigrationRequest struct {
 	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id"`
 	MIGRATION_URL          string `json:"migration_url"`
 	MIGRATION_INPUT        string `json:"migration_input"`
@@ -20,8 +20,8 @@ type MigrationRequests struct {
 	RETRY_COUNT            int64  `json:"retry_count"`
 }
 
-// Insert implementation of MigrationRequests
-func (r *MigrationRequests) Insert(tx *sql.Tx) error {
+// Insert implementation of MigrationRequest
+func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 	var tid int64
 	var err error
 	if r.MIGRATION_REQUEST_ID == 0 {
@@ -52,20 +52,20 @@ func (r *MigrationRequests) Insert(tx *sql.Tx) error {
 	return err
 }
 
-// Validate implementation of MigrationRequests
-func (r *MigrationRequests) Validate() error {
+// Validate implementation of MigrationRequest
+func (r *MigrationRequest) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
 		return DecodeValidatorError(r, err)
 	}
 	return nil
 }
 
-// SetDefaults implements set defaults for MigrationRequests
-func (r *MigrationRequests) SetDefaults() {
+// SetDefaults implements set defaults for MigrationRequest
+func (r *MigrationRequest) SetDefaults() {
 }
 
-// Decode implementation for MigrationRequests
-func (r *MigrationRequests) Decode(reader io.Reader) error {
+// Decode implementation for MigrationRequest
+func (r *MigrationRequest) Decode(reader io.Reader) error {
 	// init record with given data record
 	data, err := io.ReadAll(reader)
 	if err != nil {
