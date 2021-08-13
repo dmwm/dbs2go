@@ -265,6 +265,7 @@ func Server(configFile string) {
 
 	// migration settings
 	dbs.MigrationProcessTimeout = Config.MigrationProcessTimeout
+	dbs.MigrationServerInterval = Config.MigrationServerInterval
 
 	// init graphql
 	if Config.GraphQLSchema != "" {
@@ -332,12 +333,12 @@ func Server(configFile string) {
 	// start migration server if necessary
 	migDone := make(chan bool)
 	if Config.MigrationServer {
-		go dbs.MigrationServer(dbs.MigrationProcessTimeout, migDone)
+		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
 	}
 
 	// properly stop our HTTP and Migration Servers
 	<-httpDone
-	log.Print("Server Stopped")
+	log.Print("HTTP server stopped")
 
 	// send notification to stop migration server
 	if Config.MigrationServer {
@@ -353,5 +354,5 @@ func Server(configFile string) {
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-	log.Print("Server Exited Properly")
+	log.Print("HTTP server exited properly")
 }
