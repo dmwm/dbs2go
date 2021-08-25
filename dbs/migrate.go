@@ -706,3 +706,13 @@ func (a *API) StatusMigration() error {
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
+
+// ServerMigration DBS API
+func (a *API) ServerMigration() error {
+	var args []interface{}
+	// get SQL statement from static area
+	stm := getSQL("migration_total_count")
+
+	// use generic query API to fetch the results from DB
+	return executeAll(a.Writer, a.Separator, stm, args...)
+}

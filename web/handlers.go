@@ -459,6 +459,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 		err = api.DatasetAccessTypes()
 	} else if a == "status" {
 		err = api.StatusMigration()
+	} else if a == "server" {
+		err = api.ServerMigration()
 	} else {
 		err = errors.New(fmt.Sprintf("not implemented API %s", api))
 	}
@@ -739,4 +741,9 @@ func MigrationRemoveHandler(w http.ResponseWriter, r *http.Request) {
 // MigrationStatusHandler provides access to Status DBS API
 func MigrationStatusHandler(w http.ResponseWriter, r *http.Request) {
 	DBSGetHandler(w, r, "status")
+}
+
+// MigrationServerHandler provides access to Status DBS API
+func MigrationServerHandler(w http.ResponseWriter, r *http.Request) {
+	DBSGetHandler(w, r, "server")
 }
