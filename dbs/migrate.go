@@ -707,8 +707,8 @@ func (a *API) StatusMigration() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// ServerMigration DBS API
-func (a *API) ServerMigration() error {
+// TotalMigration DBS API
+func (a *API) TotalMigration() error {
 	var args []interface{}
 	// get SQL statement from static area
 	stm := getSQL("migration_total_count")

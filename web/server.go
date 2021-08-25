@@ -97,7 +97,8 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/process"), MigrationProcessHandler).Methods("POST")
 		router.HandleFunc(basePath("/remove"), MigrationRemoveHandler).Methods("POST")
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
-		router.HandleFunc(basePath("/server"), MigrationServerHandler).Methods("GET")
+		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
+		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	} else {
 
 		// visible routes
