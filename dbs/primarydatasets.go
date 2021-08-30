@@ -17,6 +17,7 @@ func (a *API) PrimaryDatasets() error {
 	var conds []string
 
 	conds, args = AddParam("primary_ds_name", "P.PRIMARY_DS_NAME", a.Params, conds, args)
+	conds, args = AddParam("primary_ds_type", "PT.PRIMARY_DS_TYPE", a.Params, conds, args)
 
 	// get SQL statement from static area
 	stm := getSQL("primarydatasets")
