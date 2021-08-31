@@ -4,11 +4,22 @@ package dbs
 func (a *API) DataTypes() error {
 	var args []interface{}
 	var conds []string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	tmpl["Dataset"] = false
 
-	conds, args = AddParam("datatype", "DT.DATATYPE", a.Params, conds, args)
+	conds, args = AddParam("datatype", "PDT.PRIMARY_DS_TYPE", a.Params, conds, args)
+	datasets := getValues(a.Params, "dataset")
+	if len(datasets) == 1 {
+		tmpl["Dataset"] = true
+		conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
+	}
 
 	// get SQL statement from static area
-	stm := getSQL("datatypes")
+	stm, err := LoadTemplateSQL("datatypes", tmpl)
+	if err != nil {
+		return err
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
