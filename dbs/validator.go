@@ -149,14 +149,6 @@ func (o StrPattern) Check(key string, val interface{}) error {
 	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
 	for _, pat := range o.Patterns {
 		if matched := pat.MatchString(v); matched {
-			// check that block ID does not contains only numbers
-			//             if key == "block_name" {
-			//                 arr := strings.Split(v, "#")
-			//                 bid := arr[len(arr)-1]
-			//                 if m := intPattern.MatchString(bid); m {
-			//                     return errors.New(msg)
-			//                 }
-			//             }
 			// if at least one pattern matched we'll return
 			return nil
 		}
