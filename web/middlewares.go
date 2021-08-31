@@ -57,8 +57,12 @@ func validateMiddleware(next http.Handler) http.Handler {
 		// perform validation of input parameters
 		err := dbs.Validate(r)
 		if err != nil {
-			uri, _ := url.QueryUnescape(r.RequestURI)
-			log.Printf("HTTP %s %s validation error %v\n", r.Method, uri, err)
+			uri, e := url.QueryUnescape(r.RequestURI)
+			if e == nil {
+				log.Printf("HTTP %s %s validation error %v\n", r.Method, uri, err)
+			} else {
+				log.Printf("HTTP %s %v validation error %v\n", r.Method, r.RequestURI, err)
+			}
 			w.WriteHeader(http.StatusBadRequest)
 			rec := make(dbs.Record)
 			rec["error"] = fmt.Sprintf("Validation error %v", err)
