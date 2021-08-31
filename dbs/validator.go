@@ -124,6 +124,10 @@ type StrPattern struct {
 
 // Check implements ObjectPattern interface for StrPattern objects
 func (o StrPattern) Check(key string, val interface{}) error {
+	if utils.VERBOSE > 0 {
+		log.Printf("StrPatern check key=%s val=%v", key, val)
+		log.Printf("patterns %v max length %v", o.Patterns, o.Len)
+	}
 	var v string
 	switch vvv := val.(type) {
 	case string:
@@ -133,19 +137,30 @@ func (o StrPattern) Check(key string, val interface{}) error {
 	}
 	if len(o.Patterns) == 0 {
 		// nothing to match in patterns
+		if utils.VERBOSE > 0 {
+			log.Println("nothing to match since we do not have patterns")
+		}
 		return nil
 	}
 	if o.Len > 0 && len(v) > o.Len {
 		log.Println("lexicon str pattern", o)
 		return errors.New(fmt.Sprintf("length of %s exceed %d characters", v, o.Len))
 	}
+	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
 	for _, pat := range o.Patterns {
 		if matched := pat.MatchString(v); matched {
+			if key == "block_name" {
+				// check that block ID does not contains only numbers
+				arr := strings.Split(v, "#")
+				bid := arr[len(arr)-1]
+				if m := intPattern.MatchString(bid); m {
+					return errors.New(msg)
+				}
+			}
 			// if at least one pattern matched we'll return
 			return nil
 		}
 	}
-	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
 	return errors.New(msg)
 }
 
@@ -167,7 +182,7 @@ func strType(key string, val interface{}) error {
 		}
 	}
 	if key == "block_name" {
-		if p, ok := LexiconPatterns["block"]; ok {
+		if p, ok := LexiconPatterns["block_name"]; ok {
 			patterns = p.Patterns
 			length = p.Lexicon.Length
 		}
