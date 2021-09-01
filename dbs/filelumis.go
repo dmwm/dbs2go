@@ -77,7 +77,11 @@ func (a *API) FileLumis() error {
 		conds = append(conds, v)
 	}
 	for _, v := range na {
-		args = append(args, v)
+		if t != "" { // we got token, therefore need to insert args
+			args = utils.Insert(args, v)
+		} else {
+			args = append(args, v)
+		}
 	}
 
 	// check if we got both run and lfn lists
