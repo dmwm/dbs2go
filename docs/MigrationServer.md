@@ -1,0 +1,6 @@
+### DBS Migration Server
+
+The architecture of DBS Migration server can be found in the
+followin diagram:
+
+![DBS Migration server](images/DBS_MigrationServer.png)
