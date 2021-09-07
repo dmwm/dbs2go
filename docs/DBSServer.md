@@ -12,8 +12,8 @@ file, e.g.
 # to start DBS Reader server
 ./dbs2go -config dbs-reader.json
 ```
-Each configuration file represents `Configuration` struct located in
-`web/config.go` file.
+Please refer to `Configuration` struct located in `web/config.go` file for more
+details of each DBS server configuration option.
 
 Here is architecture of the DBS server:
 ![DBS Server Architecture](images/DBSServer.png)
