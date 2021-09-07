@@ -16,7 +16,7 @@ Each configuration file represents `Configuration` struct located in
 `web/config.go` file.
 
 Here is architecture of the DBS server:
-!{DBS Server Architecture](images/DBSServer.png)
+![DBS Server Architecture](images/DBSServer.png)
 
 ### Repository structure and code logic
 [dns2go](https://github.com/vkuznet/dbs2go) has the following structure:
