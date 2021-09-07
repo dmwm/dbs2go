@@ -11,15 +11,12 @@ file, e.g.
 ```
 # to start DBS Reader server
 ./dbs2go -config dbs-reader.json
-
-# to start DBS Reader server
-./dbs2go -config dbs-writer.json
-
-# to start DBS Reader server
-./dbs2go -config dbs-migration.json
 ```
 Each configuration file represents `Configuration` struct located in
 `web/config.go` file.
+
+Here is architecture of the DBS server:
+!{DBS Server Architecture](images/DBSServer.png)
 
 ### Repository structure and code logic
 [dns2go](https://github.com/vkuznet/dbs2go) has the following structure:
