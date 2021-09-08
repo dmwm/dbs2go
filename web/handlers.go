@@ -366,6 +366,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 }
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
+//gocyclo:ignore
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	// all outputs will be added to output list
 	sep := ","

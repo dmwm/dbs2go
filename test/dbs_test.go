@@ -194,6 +194,7 @@ func TestDBSUtilAddParam(t *testing.T) {
 }
 
 // TestDBSUtilFlatLumis
+//gocyclo:ignore
 func TestDBSUtilFlatLumis(t *testing.T) {
 	input := "[[1, 3], [5, 7]]"
 	lumis, err := dbs.FlatLumis(input)

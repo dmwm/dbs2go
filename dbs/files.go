@@ -15,6 +15,7 @@ import (
 )
 
 // Files DBS API
+//gocyclo:ignore
 func (a *API) Files() error {
 	var args []interface{}
 	var conds, lumis []string

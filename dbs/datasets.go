@@ -14,6 +14,7 @@ import (
 )
 
 // Datasets API
+//gocyclo:ignore
 func (a *API) Datasets() error {
 	log.Printf("datasets params %+v", a.Params)
 	var args []interface{}
@@ -262,6 +263,7 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 }
 
 // Validate implementation of Datasets
+//gocyclo:ignore
 func (r *Datasets) Validate() error {
 	if err := CheckPattern("dataset", r.DATASET); err != nil {
 		return err
