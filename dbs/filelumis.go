@@ -96,7 +96,7 @@ func (a *API) FileLumis() error {
 
 	// fix binding variables for SQLite
 	if DBOWNER == "sqlite" {
-		for k, _ := range a.Params {
+		for k := range a.Params {
 			key := fmt.Sprintf(":%s", strings.ToLower(k))
 			if strings.Contains(stm, key) {
 				stm = strings.Replace(stm, key, "?", -1)
