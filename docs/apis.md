@@ -1,5 +1,9 @@
 ### DBS APIs
-Here we list all available client RESTful APIs for DBS server:
+Here we list all available DBS server APIs. Please note,
+the DBS servers work with either [JSON](https://www.json.org/json-en.html)
+or [ndJSON](http://ndjson.org/). The latter data-format is more
+suitable for data-streaming (as it does not require open/close
+list brackets and commas across JSON records).
 
 #### GET APIs
 DBS GET APIS provide infomration about DBS entities.
@@ -134,7 +138,7 @@ You can use them as following:
 # inject data tier info into DBS server
 # the Content-Type header instructs api that input is in JSON data-format
 # the Accept HTTP header requests information in JSON data-format
-curl -X POST -H "Content-Type: applicatin/json" \
+curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
      -d@/path/datatiers.json https://some-host.com/dbs2go/datatiers
 ```
 ##### data injection APIs used by DBS Writer server
