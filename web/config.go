@@ -23,6 +23,7 @@ type Configuration struct {
 	MonitProducer           string `json:"monit_producer"`            // monit record producer
 	Hmac                    string `json:"hmac"`                      // cmsweb hmac file location
 	LimiterPeriod           string `json:"rate"`                      // limiter rate value
+	DBSWriterServer         bool   `json:"dbswriter_server"`          // dbswriter server flag
 	MigrationServer         bool   `json:"migration_server"`          // migration server flag
 	MigrationServerInterval int    `json:"migration_server_interval"` // migration process interval
 	MigrationProcessTimeout int    `json:"migration_process_timeout"` // migration process timeout
