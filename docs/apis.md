@@ -144,7 +144,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ##### data injection APIs used by DBS Writer server
 - `/datatiers`
   - injects data tier information to DBS
-  - inputs, for exact defition see [DataTiers](dbs/tiers.go) struct, e.g.
+  - inputs, for exact defition see [DataTiers](../dbs/tiers.go) struct, e.g.
 ```
 {
     "data_tier_id": 123,
@@ -155,7 +155,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/datasets`
   - injects dataset information to DBS
-  - inputs, for exact defition see [DatasetRecord](dbs/datasets.go) struct, e.g.
+  - inputs, for exact defition see [DatasetRecord](../dbs/datasets.go) struct, e.g.
 ```
 {
     "dataset": "/a/c/RAW",
@@ -175,7 +175,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/blocks`
   - injects blocks information to DBS
-  - inputs, for exact defition see [BlockRecord](dbs/blocks.go) struct, e.g.
+  - inputs, for exact defition see [BlockRecord](../dbs/blocks.go) struct, e.g.
 ```
 {
     "block_name": "/a/b/RAW#123",
@@ -191,7 +191,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/bulkblocks`
   - injects blocks information in bulk request to DBS
-  - inputs, for exact defition see [BulkBlocks](dbs/bulkblocks.go) struct, e.g.
+  - inputs, for exact defition see [BulkBlocks](../dbs/bulkblocks.go) struct, e.g.
 ```
 {
   "dataset_conf_list": [
@@ -284,7 +284,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/files`
   - injects file information to DBS
-  - inputs, for exact defition see [FileRecord](dbs/files.go) struct, e.g.
+  - inputs, for exact defition see [FileRecord](../dbs/files.go) struct, e.g.
 ```
 {
     "logical_file_name": "/path/lfn.root",
@@ -331,7 +331,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/primarydatasets`
   - injects primary datasets information to DBS
-  - inputs, for exact defition see [PrimaryDatasetRecord](dbs/primarydatasets.go) struct, e.g.
+  - inputs, for exact defition see [PrimaryDatasetRecord](../dbs/primarydatasets.go) struct, e.g.
 ```
 {
     "primary_ds_name": "primary",
@@ -342,7 +342,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/acquisitioneras`
   - injects acquisition eras information to DBS
-  - inputs, for exact defition see [AcquisitionEras](dbs/acquisitioneras.go) struct, e.g.
+  - inputs, for exact defition see [AcquisitionEras](../dbs/acquisitioneras.go) struct, e.g.
 ```
 {
     "acquisition_era_id": 123,
@@ -356,7 +356,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/processingeras`
   - injects processing eras information to DBS
-  - inputs, for exact defition see [ProcessingEras](dbs/processingeras.go) struct, e.g.
+  - inputs, for exact defition see [ProcessingEras](../dbs/processingeras.go) struct, e.g.
 ```
 {
     "processing_era_id": 123,
@@ -368,7 +368,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/outputconfigs`
   - injects output configs information to DBS
-  - inputs, for exact defition see [OutputConfigRecord](dbs/outputconfigs.go) struct, e.g.
+  - inputs, for exact defition see [OutputConfigRecord](../dbs/outputconfigs.go) struct, e.g.
 ```
 {
     "app_name": "application",
@@ -384,7 +384,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ```
 - `/fileparents`
   - injects file paretage information to DBS
-  - inputs, for exact defition see [FileParentRecord](dbs/fileparents.go) struct, e.g.
+  - inputs, for exact defition see [FileParentRecord](../dbs/fileparents.go) struct, e.g.
 ```
 {
     "logical_file_name": "/a/g/file.root",
