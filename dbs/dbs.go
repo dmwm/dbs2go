@@ -315,7 +315,7 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 	for rows.Next() {
 		if rowCount == 0 {
 			// initialize value pointers
-			for i, _ := range columns {
+			for i := range columns {
 				valuePtrs[i] = &values[i]
 			}
 		}
@@ -429,7 +429,7 @@ func execute(w io.Writer, sep, stm string, cols []string, vals []interface{}, ar
 			w.Write([]byte(sep))
 		}
 		rec := make(Record)
-		for i, _ := range cols {
+		for i := range cols {
 			vvv := vals[i]
 			switch val := vvv.(type) {
 			case *sql.NullString:
