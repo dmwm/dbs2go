@@ -153,9 +153,9 @@ func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-// HelpHandler provides basic functionality of status response
-func HelpHandler(w http.ResponseWriter, r *http.Request) {
-	apis := []string{"blocksummaries", "help", "runsummaries", "parentDSTrio", "datatiers", "blockorigin", "blockTrio", "blockdump", "acquisitioneras", "filechildren", "fileparents", "serverinfo", "outputconfigs", "datasetchildren", "releaseversions", "files", "blocks", "physicsgroups", "filesummaries", "filelumis", "primarydstypes", "datasetparents", "datatypes", "processingeras", "runs", "datasets", "blockchildren", "primarydatasets", "acquisitioneras_ci", "blockparents", "datasetaccesstypes"}
+// ApisHandler provides list of supporter apis by the DBS server
+func ApisHandler(w http.ResponseWriter, r *http.Request) {
+	apis := []string{"blocksummaries", "apis", "runsummaries", "parentDSTrio", "datatiers", "blockorigin", "blockTrio", "blockdump", "acquisitioneras", "filechildren", "fileparents", "serverinfo", "outputconfigs", "datasetchildren", "releaseversions", "files", "blocks", "physicsgroups", "filesummaries", "filelumis", "primarydstypes", "datasetparents", "datatypes", "processingeras", "runs", "datasets", "blockchildren", "primarydatasets", "acquisitioneras_ci", "blockparents", "datasetaccesstypes"}
 	data, err := json.Marshal(apis)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)

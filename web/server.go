@@ -152,7 +152,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/datasetlist"), DatasetListHandler).Methods("POST")
 		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
 
-		router.HandleFunc(basePath("/help"), HelpHandler).Methods("GET")
+		router.HandleFunc(basePath("/apis"), ApisHandler).Methods("GET")
 		router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
 
 		// load graphql
