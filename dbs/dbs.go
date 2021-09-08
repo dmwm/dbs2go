@@ -159,7 +159,7 @@ func LoadSQL(owner string) Record {
 		log.Println("sql area", sdir)
 	}
 	dbsql := make(Record)
-	for _, f := range utils.Listfiles(sdir) {
+	for _, f := range utils.ListFiles(sdir) {
 		k := strings.Split(f, ".")[0]
 		stm, err := utils.ParseTmpl(sdir, f, tmplData)
 		if err != nil {

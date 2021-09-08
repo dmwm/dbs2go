@@ -34,7 +34,7 @@ type GzipReader struct {
 	io.Closer
 }
 
-// CLose function closes gzip reader
+// Close function closes gzip reader
 func (gz GzipReader) Close() error {
 	return gz.Closer.Close()
 }
@@ -146,7 +146,7 @@ func (s StringList) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s StringList) Less(i, j int) bool { return s[i] < s[j] }
 
 // ListFiles lists files in a given directory
-func Listfiles(dir string) []string {
+func ListFiles(dir string) []string {
 	var out []string
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -215,7 +215,7 @@ func ReplaceBinds(stm string) string {
 	return match
 }
 
-// ConverFloat converts string representation of float scientific number to string int
+// ConvertFloat converts string representation of float scientific number to string int
 func ConvertFloat(val string) string {
 	if strings.Contains(val, "e+") || strings.Contains(val, "E+") {
 		// we got float number, should be converted to int
@@ -229,7 +229,7 @@ func ConvertFloat(val string) string {
 	return val
 }
 
-// PrinSQL prints SQL/args
+// PrintSQL prints SQL/args
 func PrintSQL(stm string, args []interface{}, msg string) {
 	if msg != "" {
 		log.Println(msg)

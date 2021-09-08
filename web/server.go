@@ -49,13 +49,17 @@ import (
 	"github.com/gorilla/mux"
 	graphql "github.com/graph-gophers/graphql-go"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	_ "github.com/mattn/go-oci8"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/auth-proxy-server/logging"
 	"github.com/vkuznet/dbs2go/dbs"
 	dbsGraphQL "github.com/vkuznet/dbs2go/graphql"
 	"github.com/vkuznet/dbs2go/utils"
 
+	// imports for supported DB drivers
+	// go-oci8 oracle driver
+	_ "github.com/mattn/go-oci8"
+	// go-sqlite driver
+	_ "github.com/mattn/go-sqlite3"
+	// ora oracle driver
 	_ "gopkg.in/rana/ora.v4"
 )
 

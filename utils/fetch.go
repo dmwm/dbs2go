@@ -65,7 +65,7 @@ func FetchResponse(rurl string, args []byte) ResponseType {
 	return response
 }
 
-// Repsonse represents final response in a form of JSON structure
+// Response represents final response in a form of JSON structure
 // we use custorm representation
 func Response(rurl string, data []byte) []byte {
 	b := []byte(`{"url":`)
