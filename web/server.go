@@ -99,53 +99,55 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
 		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
-	} else {
-
-		// visible routes
-		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("GET", "POST")
-		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("GET", "POST", "PUT")
-		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("GET", "POST", "PUT")
+	if Config.DBSWriterServer {
+		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST")
+		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
+		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("POST")
+		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST")
+		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("POST")
+		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST")
+	} else {
+		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("GET")
+		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("GET")
+		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockTrio"), BlockTrioHandler).Methods("GET")
-		router.HandleFunc(basePath("/files"), FilesHandler).Methods("GET", "POST", "PUT")
-		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("GET", "POST")
+		router.HandleFunc(basePath("/files"), FilesHandler).Methods("GET")
+		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("GET")
 		router.HandleFunc(basePath("/parentDSTrio"), ParentDSTrioHandler).Methods("GET")
-		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("GET", "POST", "PUT")
+		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("GET")
 		router.HandleFunc(basePath("/releaseversions"), ReleaseVersionsHandler).Methods("GET")
 		router.HandleFunc(basePath("/physicsgroups"), PhysicsGroupsHandler).Methods("GET")
 		router.HandleFunc(basePath("/primarydstypes"), PrimaryDSTypesHandler).Methods("GET")
 		router.HandleFunc(basePath("/datatypes"), DataTypesHandler).Methods("GET")
-		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("GET", "POST")
-		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("GET", "POST")
+		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("GET")
+		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasetaccesstypes"), DatasetAccessTypesHandler).Methods("GET")
-
 		router.HandleFunc(basePath("/runs"), RunsHandler).Methods("GET")
 		router.HandleFunc(basePath("/runsummaries"), RunSummariesHandler).Methods("GET")
-
 		router.HandleFunc(basePath("/blockorigin"), BlockOriginHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockdump"), BlockDumpHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockchildren"), BlockChildrenHandler).Methods("GET")
-		router.HandleFunc(basePath("/blockparents"), BlockParentsHandler).Methods("GET", "POST")
+		router.HandleFunc(basePath("/blockparents"), BlockParentsHandler).Methods("GET")
 		router.HandleFunc(basePath("/blocksummaries"), BlockSummariesHandler).Methods("GET")
-
 		router.HandleFunc(basePath("/filechildren"), FileChildrenHandler).Methods("GET")
-		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("GET", "POST")
+		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("GET")
 		router.HandleFunc(basePath("/filesummaries"), FileSummariesHandler).Methods("GET")
-		router.HandleFunc(basePath("/filelumis"), FileLumisHandler).Methods("GET", "POST")
+		router.HandleFunc(basePath("/filelumis"), FileLumisHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasetchildren"), DatasetChildrenHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasetparents"), DatasetParentsHandler).Methods("GET")
 		router.HandleFunc(basePath("/acquisitioneras_ci"), AcquisitionErasCiHandler).Methods("GET")
 
-		// POST routes
+		router.HandleFunc(basePath("/blockparents"), BlockParentsHandler).Methods("POST")
 		router.HandleFunc(basePath("/fileArray"), FileArrayHandler).Methods("POST")
+		router.HandleFunc(basePath("/filelumis"), FileLumisHandler).Methods("POST")
 		router.HandleFunc(basePath("/datasetlist"), DatasetListHandler).Methods("POST")
 		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
 
-		// aux APIs
-		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
-		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 		router.HandleFunc(basePath("/help"), HelpHandler).Methods("GET")
-		router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 		router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
 
 		// load graphql
@@ -162,6 +164,10 @@ func handlers() *mux.Router {
 		//         HandlerFunc(DummyHandler).
 		//         Methods("GET")
 	}
+		// aux APIs used by all DBS servers
+		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
+		router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 
 	// for all requests
 	router.Use(logging.LoggingMiddleware)
