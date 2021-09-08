@@ -205,7 +205,7 @@ func (r *Blocks) Decode(reader io.Reader) error {
 	return nil
 }
 
-// BlockRecord represent input recor for insert blocks API
+// BlockRecord represents input record for insert blocks API
 type BlockRecord struct {
 	BLOCK_NAME             string `json:"block_name"`
 	OPEN_FOR_WRITING       int64  `json:"open_for_writing"`
