@@ -2,7 +2,7 @@
 Here we list all available client RESTful APIs for DBS server:
 
 #### GET APIs
-##### data APIs
+##### data APIs provide infomration about DBS entities
 - `/datatiers`
   - return DBS data tiers
   - arguments: `data_tier_name`
@@ -102,7 +102,7 @@ Here we list all available client RESTful APIs for DBS server:
   - returns list of acquisition eras
   - arguments: `acquisition_era_name`
 
-##### information APIs
+##### informative APIs provides additional information about DBS server
 - `/status`
   - returns HTTP status of DBS server, can be used by liveness probe
   - arguments: None
@@ -116,7 +116,11 @@ Here we list all available client RESTful APIs for DBS server:
   - return DBS server metrics suitable for Prometheus
   - arguments: None
 
-#### POST APIs 
+#### POST APIs
+The POST APIs are used both by DBS Reader and DBS Writer servers. In former
+case, they are used to request information from DBS by providing input in JSON
+data-format. In latter case, they are used to inject data into DBS Writer
+server.
 
 ##### data injection APIs used by DBS Writer server
 - `/datatiers`
@@ -150,7 +154,7 @@ Here we list all available client RESTful APIs for DBS server:
   - injects file paretage information to DBS
   - inputs:
 
-##### data look-up APIs
+##### data look-up APIs by DBS Reader server
 - `/datasetlist`
   - injects 
   - inputs:
@@ -168,6 +172,8 @@ Here we list all available client RESTful APIs for DBS server:
   - inputs:
 
 ### PUT DBS APIs
+The PUT APIs are used to update some information in DBS entities.
+
 ##### data update APIs used by DBS Writer server
 - `/datasets`
   - updates dataset information to DBS
@@ -183,6 +189,7 @@ Here we list all available client RESTful APIs for DBS server:
   - inputs:
 
 #### DBS Migration server APIs
+The DBS Migration server has its own set of APIs. They are listed below:
 - `/submit`
   - submits migration request to DBS server
   - arguments:
