@@ -2,7 +2,14 @@
 Here we list all available client RESTful APIs for DBS server:
 
 #### GET APIs
-##### data APIs provide infomration about DBS entities
+DBS GET APIS provide infomration about DBS entities.
+You can use them as following:
+```
+# get list of datasets
+# the Accept HTTP header request response in JSON data-format
+curl -H "Accept: application/json" \ 
+     https://some-host.com/dbs2go/datasets?dataset=/ZMM*/*/*
+```
 - `/datatiers`
   - return DBS data tiers
   - arguments: `data_tier_name`
@@ -122,6 +129,14 @@ case, they are used to request information from DBS by providing input in JSON
 data-format. In latter case, they are used to inject data into DBS Writer
 server.
 
+You can use them as following:
+```
+# inject data tier info into DBS server
+# the Content-Type header instructs api that input is in JSON data-format
+# the Accept HTTP header requests information in JSON data-format
+curl -X POST -H "Content-Type: applicatin/json" \
+     -d@/path/datatiers.json https://some-host.com/dbs2go/datatiers
+```
 ##### data injection APIs used by DBS Writer server
 - `/datatiers`
   - injects data tier information to DBS
@@ -174,6 +189,14 @@ server.
 ### PUT DBS APIs
 The PUT APIs are used to update some information in DBS entities.
 
+You can use them as following:
+```
+# update dataset information in DBS
+# the Content-Type header instructs api that input is in JSON data-format
+# the Accept HTTP header request response in JSON data-format
+curl -X PUT -H "Content-Type: applicatin/json" -H "Accept: application/json" \
+     -d@/path/datasets.json https://some-host.com/dbs2go/datasets
+```
 ##### data update APIs used by DBS Writer server
 - `/datasets`
   - updates dataset information to DBS
