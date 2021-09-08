@@ -144,34 +144,253 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 ##### data injection APIs used by DBS Writer server
 - `/datatiers`
   - injects data tier information to DBS
-  - inputs:
+  - inputs, for exact defition see [DataTiers](dbs/tiers.go) struct, e.g.
+```
+{
+    "data_tier_id": 123,
+    "data_tier_name": "RAW",
+    "creation_date": 1631118749,
+    "create_by": "tester"
+}
+```
 - `/datasets`
   - injects dataset information to DBS
-  - inputs:
+  - inputs, for exact defition see [DatasetRecord](dbs/datasets.go) struct, e.g.
+```
+{
+    "dataset": "/a/c/RAW",
+    "primary_ds_name": "primary",
+    "processed_ds": "processed_dataset",
+    "data_tier": "RAW",
+    "acquisition_era": "era",
+    "dataset_access_type": "access-type",
+    "processing_version": "version",
+    "physics_group": "group",
+    "xtcrosssection": 1.2,
+    "creation_date": 1631118749,
+    "create_by": "tester",
+    "last_modification_date": 1631118749,
+    "last_modified_by": "tester"
+}
+```
 - `/blocks`
   - injects blocks information to DBS
-  - inputs:
+  - inputs, for exact defition see [BlockRecord](dbs/blocks.go) struct, e.g.
+```
+{
+    "block_name": "/a/b/RAW#123",
+    "open_for_writing": 1,
+    "origin_site_name": "site",
+    "block_size": 123,
+    "file_count": 111,
+    "creation_date": 1631118749,
+    "create_by": "tester",
+    "last_modification_date": 1631118749,
+    "last_modified_by": "tester
+}
+```
 - `/bulkblocks`
   - injects blocks information in bulk request to DBS
-  - inputs:
+  - inputs, for exact defition see [BulkBlocks](dbs/bulkblocks.go) struct, e.g.
+```
+{
+  "dataset_conf_list": [
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    }
+  ],
+  "file_conf_list": [
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd0.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    }
+  ],
+  "files": [
+    {
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd9.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "auto_cross_section": 0
+    }
+  ],
+  "processing_era": {
+    "create_by": "Yuyi",
+    "processing_version": 10,
+    "description": "this_is_a_test"
+  },
+  "primds": {
+    "create_by": "Yuyi",
+    "primary_ds_type": "test",
+    "primary_ds_name": "unittest_web_primary_ds_name_14144",
+    "creation_date": 1279912078
+  },
+  "dataset": {
+    "physics_group_name": "Tracker",
+    "create_by": "Yuyi",
+    "dataset_access_type": "PRODUCTION",
+    "data_tier_name": "GEN-SIM-RAW",
+    "last_modified_by": "Yuyi",
+    "creation_date": 1279912078,
+    "processed_ds_name": "Summer2011-pstr-v10",
+    "xtcrosssection": 123,
+    "last_modification_date": 1279912078,
+    "dataset": "/unittest_web_primary_ds_name_14144/Summer2011-pstr-v10/GEN-SIM-RAW"
+  },
+  "acquisition_era": {
+    "acquisition_era_name": "Summer2011",
+    "start_date": 1978
+  },
+  "block": {
+    "create_by": "Yuyi",
+    "creation_date": 1279912079,
+    "open_for_writing": 1,
+    "block_name": "/unittest_web_primary_ds_name_14144/Summer2011-pstr-v10/GEN-SIM-RAW#141444",
+    "file_count": 10,
+    "origin_site_name": "my_site",
+    "block_size": 20122119010
+  },
+  "file_parent_list": [
+    {
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd4.root",
+      "parent_logical_file_name": "/store/data/a/b/A/a/1/abcd3.root_15825"
+    }
+  ]
+}
+```
 - `/files`
   - injects file information to DBS
-  - inputs:
+  - inputs, for exact defition see [FileRecord](dbs/files.go) struct, e.g.
+```
+{
+    "logical_file_name": "/path/lfn.root",
+    "is_file_valid": 1,
+    "dataset": "/a/b/RAW",
+    "block": "a/b/RAW#123",
+    "file_type": "EDM",
+    "check_sum": "1123ljsdkfjsd",
+    "file_size": 123,
+    "event_count": 111,
+    "adler32", "adler",
+    "md5": "md5",
+    "auto_cross_section": 1.1,
+    "createion_date": 1631118749,
+    "create_by": "tester",
+    "last_modification_date": 1631118749,
+    "last_modified_by": "tester",
+    "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        }
+    ],
+    "file_parent_list": [
+        {
+          "logical_file_name": "/store/data/a/b/A/a/1/abcd4.root",
+          "parent_logical_file_name": "/store/data/a/b/A/a/1/abcd3.root_15825"
+        }
+    ],
+    "file_output_config_list": [
+        {
+          "app_name": "application",
+          "release_version": "version",
+          "pset_hash": "hash",
+          "pset_name": "pset",
+          "global_tag": "global_tag",
+          "output_module_label": "label",
+          "creation_date": 1631118749,
+          "create_by": "tester",
+          "scenario": "scenario"
+        }
+    ]
+}
+```
 - `/primarydatasets`
   - injects primary datasets information to DBS
-  - inputs:
+  - inputs, for exact defition see [PrimaryDatasetRecord](dbs/primarydatasets.go) struct, e.g.
+```
+{
+    "primary_ds_name": "primary",
+    "primary_ds_type": "primary-type",
+    "createion_date": 1631118749,
+    "create_by": "tester"
+}
+```
 - `/acquisitioneras`
   - injects acquisition eras information to DBS
-  - inputs:
+  - inputs, for exact defition see [AcquisitionEras](dbs/acquisitioneras.go) struct, e.g.
+```
+{
+    "acquisition_era_id": 123,
+    "acquisition_era_name": "era",
+    "start_date": 1631118749,
+    "end_date": 1631118749,
+    "create_date": 1631118749,
+    "create_by": "tester",
+    "description": "note"
+}
+```
 - `/processingeras`
   - injects processing eras information to DBS
-  - inputs:
+  - inputs, for exact defition see [ProcessingEras](dbs/processingeras.go) struct, e.g.
+```
+{
+    "processing_era_id": 123,
+    "processing_version": 12345,
+    "creation_date": 1631118749,
+    "create_by": "tester",
+    "description": "note"
+}
+```
 - `/outputconfigs`
   - injects output configs information to DBS
-  - inputs:
+  - inputs, for exact defition see [OutputConfigRecord](dbs/outputconfigs.go) struct, e.g.
+```
+{
+    "app_name": "application",
+    "release_version": "release",
+    "pset_hash": "hash",
+    "pset_name": "name",
+    "global_tag": "tag",
+    "output_module_label": "label",
+    "creation_date": 1631118749,
+    "create_by": "tester",
+    "scenario": "note"
+}
+```
 - `/fileparents`
   - injects file paretage information to DBS
-  - inputs:
+  - inputs, for exact defition see [FileParentRecord](dbs/fileparents.go) struct, e.g.
+```
+{
+    "logical_file_name": "/a/g/file.root",
+    "parent_logical_file_name": "/a/b/file.root"
+}
+```
 
 ##### data look-up APIs by DBS Reader server
 - `/datasetlist`
