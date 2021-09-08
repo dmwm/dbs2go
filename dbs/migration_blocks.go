@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-// Migration_Blocks represents migratino blocks table
+// MigrationBlocks represents migration blocks table
 type MigrationBlocks struct {
 	MIGRATION_BLOCK_ID     int64  `json:"migration_block_id"`
 	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id"`

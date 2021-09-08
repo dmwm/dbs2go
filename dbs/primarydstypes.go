@@ -22,7 +22,7 @@ func (a *API) PrimaryDSTypes() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// PrimaryDSTypes
+// PrimaryDSTypes represents primary ds types DBS DB table
 type PrimaryDSTypes struct {
 	PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id"`
 	PRIMARY_DS_TYPE    string `json:"primary_ds_type" validate:"required"`

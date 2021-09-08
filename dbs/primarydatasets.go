@@ -27,7 +27,7 @@ func (a *API) PrimaryDatasets() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// PrimaryDatasets
+// PrimaryDatasets represents Primary Datasets DBS DB table
 type PrimaryDatasets struct {
 	PRIMARY_DS_ID      int64  `json:"primary_ds_id"`
 	PRIMARY_DS_NAME    string `json:"primary_ds_name" validate:"required"`
@@ -105,7 +105,7 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	return nil
 }
 
-// PrimaryDatasetRecord
+// PrimaryDatasetRecord represents primary dataset record
 type PrimaryDatasetRecord struct {
 	PRIMARY_DS_NAME string `json:"primary_ds_name"`
 	PRIMARY_DS_TYPE string `json:"primary_ds_type"`

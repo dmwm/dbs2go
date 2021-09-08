@@ -32,7 +32,7 @@ func (a *API) ReleaseVersions() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// ReleaseVersions
+// ReleaseVersions represents Relases Versions DBS DB table
 type ReleaseVersions struct {
 	RELEASE_VERSION_ID int64  `json:"release_version_id"`
 	RELEASE_VERSION    string `json:"release_version" validate:"required"`

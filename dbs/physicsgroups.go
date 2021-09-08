@@ -25,7 +25,7 @@ func (a *API) PhysicsGroups() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// PhysicsGroups
+// PhysicsGroups represents Physics Groups DBS DB table
 type PhysicsGroups struct {
 	PHYSICS_GROUP_ID   int64  `json:"physics_group_id"`
 	PHYSICS_GROUP_NAME string `json:"physics_group_name" validate:"required"`

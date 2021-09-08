@@ -112,7 +112,7 @@ func (a *API) Blocks() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// Blocks
+// Blocks represents Blocks DBS DB table
 type Blocks struct {
 	BLOCK_ID               int64  `json:"block_id"`
 	BLOCK_NAME             string `json:"block_name" validate:"required"`
@@ -278,7 +278,7 @@ func (a *API) InsertBlocks() error {
 func (a *API) UpdateBlocks() error {
 	// get input parameters
 	date := time.Now().Unix()
-	var create_by string
+	var createBy string
 	var blockName string
 	var origSiteName string
 	var openForWriting int
@@ -299,14 +299,14 @@ func (a *API) UpdateBlocks() error {
 		openForWriting = val
 	}
 	if v, ok := a.Params["create_by"]; ok {
-		create_by = v.(string)
+		createBy = v.(string)
 	}
 
 	// validate input parameters
 	if blockName == "" {
 		return errors.New("invalid block_name parameter")
 	}
-	if create_by == "" {
+	if createBy == "" {
 		return errors.New("invalid create_by parameter")
 	}
 	if site {
@@ -340,9 +340,9 @@ func (a *API) UpdateBlocks() error {
 	defer tx.Rollback()
 
 	if site {
-		_, err = tx.Exec(stm, origSiteName, create_by, date, blockName)
+		_, err = tx.Exec(stm, origSiteName, createBy, date, blockName)
 	} else {
-		_, err = tx.Exec(stm, openForWriting, create_by, date, blockName)
+		_, err = tx.Exec(stm, openForWriting, createBy, date, blockName)
 	}
 	if err != nil {
 		log.Printf("unable to update %v", err)

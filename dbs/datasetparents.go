@@ -25,7 +25,7 @@ func (a *API) DatasetParents() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// DatasetParents
+// DatasetParents represents Dataset Parents DBS DB table
 type DatasetParents struct {
 	THIS_DATASET_ID   int64 `json:"this_dataset_id" validate:"required,number,gt=0"`
 	PARENT_DATASET_ID int64 `json:"parent_dataset_id" validate:"required,number,gt=0"`

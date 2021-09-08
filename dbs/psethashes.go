@@ -9,7 +9,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// ParameterSetHashes
+// ParameterSetHashes represents Parameter Set Hashes DBS DB table
 type ParameterSetHashes struct {
 	PARAMETER_SET_HASH_ID int64  `json:"parameter_set_hash_id"`
 	PSET_NAME             string `json:"pset_name"`

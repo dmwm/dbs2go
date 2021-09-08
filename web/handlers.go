@@ -462,7 +462,8 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "total" {
 		err = api.TotalMigration()
 	} else {
-		err = errors.New(fmt.Sprintf("not implemented API %s", api))
+		msg := fmt.Sprintf("not implemented API %s", api)
+		err = errors.New(msg)
 	}
 	if err != nil {
 		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
@@ -471,7 +472,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 }
 
 // NotImplementedHandler returns server status error
-func NotImplemnetedHandler(w http.ResponseWriter, r *http.Request, api string) {
+func NotImplementedHandler(w http.ResponseWriter, r *http.Request, api string) {
 	log.Println("NotImplementedAPI", api)
 	responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
 }
@@ -630,7 +631,7 @@ func AcquisitionErasHandler(w http.ResponseWriter, r *http.Request) {
 // AcquisitionErasCiHandler provides access to AcquisitionErasCi DBS API.
 // Takes the following arguments: acquisition_era_name
 func AcquisitionErasCiHandler(w http.ResponseWriter, r *http.Request) {
-	NotImplemnetedHandler(w, r, "acquisitionerasci")
+	NotImplementedHandler(w, r, "acquisitionerasci")
 }
 
 // PrimaryDatasetsHandler provides access to PrimaryDatasets DBS API.
@@ -700,7 +701,7 @@ func FileArrayHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "fileArray")
 }
 
-// DatasteListHandler provides access to DatasetList DBS API
+// DatasetListHandler provides access to DatasetList DBS API
 // POST API takes no argument, the payload should be supplied as JSON
 func DatasetListHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "datasetlist")

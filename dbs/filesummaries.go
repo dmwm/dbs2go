@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// filesummaries API
+// FileSummaries API
 func (a *API) FileSummaries() error {
 	var args []interface{}
 	var stm string
@@ -13,12 +13,12 @@ func (a *API) FileSummaries() error {
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
 	tmpl["Valid"] = false
-	var wheresql_isFileValid, whererun string
+	var wheresqlIsFileValid, whererun string
 
 	validFileOnly := getValues(a.Params, "validFileOnly")
 	if len(validFileOnly) == 1 {
 		tmpl["Valid"] = true
-		wheresql_isFileValid = " and f.is_file_valid = 1 and DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION')"
+		wheresqlIsFileValid = " and f.is_file_valid = 1 and DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION')"
 		//         conds = append(conds, "f.is_file_valid = 1")
 		//         conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
 	}
@@ -36,9 +36,9 @@ func (a *API) FileSummaries() error {
 		whererun = runsCond
 	}
 
-	block_name := getValues(a.Params, "block_name")
-	if len(block_name) == 1 {
-		_, b := OperatorValue(block_name[0])
+	blockName := getValues(a.Params, "block_name")
+	if len(blockName) == 1 {
+		_, b := OperatorValue(blockName[0])
 		args = append(args, b, b, b, b, b) // pass 5 block values
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4block_run", tmpl)
@@ -79,7 +79,7 @@ func (a *API) FileSummaries() error {
 	}
 	// replace whererun in stm
 	stm = strings.Replace(stm, "whererun", whererun, -1)
-	stm = strings.Replace(stm, "wheresql_isFileValid", wheresql_isFileValid, -1)
+	stm = strings.Replace(stm, "wheresqlIsFileValid", wheresqlIsFileValid, -1)
 	//     stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB

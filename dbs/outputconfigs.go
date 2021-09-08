@@ -21,12 +21,12 @@ func (a *API) OutputConfigs() error {
 	tmpl["Owner"] = DBOWNER
 
 	bid := "0"
-	block_id := getValues(a.Params, "block_id")
-	if len(block_id) > 1 {
+	blockID := getValues(a.Params, "block_id")
+	if len(blockID) > 1 {
 		msg := "The outputconfigs API does not support list of block_id"
 		return errors.New(msg)
-	} else if len(block_id) == 1 {
-		_, bid = OperatorValue(block_id[0])
+	} else if len(blockID) == 1 {
+		_, bid = OperatorValue(blockID[0])
 	}
 	if bid == "0" {
 		tmpl["Main"] = true
@@ -58,7 +58,7 @@ func (a *API) OutputConfigs() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// OutputConfigs
+// OutputConfigs represents Output Configs DBS DB table
 type OutputConfigs struct {
 	OUTPUT_MOD_CONFIG_ID  int64  `json:"output_mod_config_id"`
 	APP_EXEC_ID           int64  `json:"app_exec_id" validate:"required,number,gt=0"`

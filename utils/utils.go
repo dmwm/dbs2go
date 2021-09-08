@@ -16,12 +16,16 @@ import (
 	"strings"
 )
 
-// global variable for this module which we're going to use across
-// many modules
+// VERBOSE controls verbosity level of the package
 var VERBOSE int
+
+// STATICDIR holds location of static directory for dbs2go
 var STATICDIR string
-var PROFILE bool
+
+// ORACLE represents a flag that underlying DB is oracle
 var ORACLE bool
+
+// BASE represents /base path of dbs2go end-point
 var BASE string
 
 // GzipReader struct to handle GZip'ed content of HTTP requests
@@ -30,12 +34,12 @@ type GzipReader struct {
 	io.Closer
 }
 
-// helper function to close gzip reader
+// CLose function closes gzip reader
 func (gz GzipReader) Close() error {
 	return gz.Closer.Close()
 }
 
-// RecordSize
+// RecordSize returns actual record size of given interface object
 func RecordSize(v interface{}) (int64, error) {
 	data, err := json.Marshal(v)
 	if err == nil {
@@ -44,14 +48,14 @@ func RecordSize(v interface{}) (int64, error) {
 	return 0, err
 }
 
-// helper function to return Stack
+// Stack returns full runtime stack
 func Stack() string {
 	trace := make([]byte, 2048)
 	count := runtime.Stack(trace, false)
 	return fmt.Sprintf("\nStack of %d bytes: %s\n", count, trace)
 }
 
-// error helper function which can be used in defer ErrPropagate()
+// ErrPropagate helper function which can be used in defer ErrPropagate()
 func ErrPropagate(api string) {
 	if err := recover(); err != nil {
 		log.Println("ERROR", api, "error", err, Stack())
@@ -59,7 +63,7 @@ func ErrPropagate(api string) {
 	}
 }
 
-// error helper function which can be used in goroutines as
+// ErrPropagate2Channel helper function which can be used in goroutines as
 // ch := make(chan interface{})
 // go func() {
 //    defer ErrPropagate2Channel(api, ch)
@@ -72,7 +76,7 @@ func ErrPropagate2Channel(api string, ch chan interface{}) {
 	}
 }
 
-// Helper function to run any given function in defered go routine
+// GoDeferFunc runs any given function in defered go routine
 func GoDeferFunc(api string, f func()) {
 	ch := make(chan interface{})
 	go func() {
@@ -86,7 +90,7 @@ func GoDeferFunc(api string, f func()) {
 	}
 }
 
-// helper function to check item in a list
+// InList checks item in a list
 func InList(a string, list []string) bool {
 	check := 0
 	for _, b := range list {
@@ -100,7 +104,7 @@ func InList(a string, list []string) bool {
 	return false
 }
 
-// helper function to return keys from a map
+// MapKeys returns string keys from a map
 func MapKeys(rec map[string]interface{}) []string {
 	keys := make([]string, 0, len(rec))
 	for k := range rec {
@@ -109,7 +113,7 @@ func MapKeys(rec map[string]interface{}) []string {
 	return keys
 }
 
-// helper function to return keys from a map
+// MapIntKeys returns int keys from a map
 func MapIntKeys(rec map[int]interface{}) []int {
 	keys := make([]int, 0, len(rec))
 	for k := range rec {
@@ -118,7 +122,7 @@ func MapIntKeys(rec map[int]interface{}) []int {
 	return keys
 }
 
-// helper function to convert input list into set
+// List2Set converts input list into set
 func List2Set(arr []string) []string {
 	var out []string
 	for _, key := range arr {
@@ -129,14 +133,19 @@ func List2Set(arr []string) []string {
 	return out
 }
 
-// implement sort for []string type
+// StringList implements sort for []string type
 type StringList []string
 
-func (s StringList) Len() int           { return len(s) }
-func (s StringList) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+// Len provide length method of StringList
+func (s StringList) Len() int { return len(s) }
+
+// Swap provide swap method of StringList
+func (s StringList) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
+// Less provide less method of StringList
 func (s StringList) Less(i, j int) bool { return s[i] < s[j] }
 
-// helper function to list files in given directory
+// ListFiles lists files in a given directory
 func Listfiles(dir string) []string {
 	var out []string
 	entries, err := ioutil.ReadDir(dir)
@@ -196,7 +205,7 @@ func CastFloat(val interface{}) (float64, error) {
 	return 0, errors.New(msg)
 }
 
-// ReplacePattern replaces given pattern in string
+// ReplaceBinds replaces given pattern in string
 func ReplaceBinds(stm string) string {
 	regexp, err := regexp.Compile(`:[a-zA-Z_0-9]+`)
 	if err != nil {
@@ -206,7 +215,7 @@ func ReplaceBinds(stm string) string {
 	return match
 }
 
-// helper function to convert string representation of float scientific number to string int
+// ConverFloat converts string representation of float scientific number to string int
 func ConvertFloat(val string) string {
 	if strings.Contains(val, "e+") || strings.Contains(val, "E+") {
 		// we got float number, should be converted to int
@@ -220,7 +229,7 @@ func ConvertFloat(val string) string {
 	return val
 }
 
-// helper function to print SQL/args
+// PrinSQL prints SQL/args
 func PrintSQL(stm string, args []interface{}, msg string) {
 	if msg != "" {
 		log.Println(msg)

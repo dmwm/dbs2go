@@ -28,7 +28,7 @@ func (a *API) AcquisitionEras() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// AcquisitionEras
+// AcquisitionEras represents Acquisition Eras DBS DB table
 type AcquisitionEras struct {
 	ACQUISITION_ERA_ID   int64  `json:"acquisition_era_id"`
 	ACQUISITION_ERA_NAME string `json:"acquisition_era_name" validate:"required"`

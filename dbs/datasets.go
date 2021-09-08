@@ -76,18 +76,17 @@ func (a *API) Datasets() error {
 	args = append(args, isValid)
 
 	// parse dataset_id argument
-	dataset_access_type, _ := getSingleValue(a.Params, "dataset_access_type")
-	//     if dataset_access_type != "" {
+	datasetAccessType, _ := getSingleValue(a.Params, "dataset_access_type")
 	oper := "="
-	if dataset_access_type == "" {
-		dataset_access_type = "VALID"
-	} else if dataset_access_type == "*" {
-		dataset_access_type = "%"
+	if datasetAccessType == "" {
+		datasetAccessType = "VALID"
+	} else if datasetAccessType == "*" {
+		datasetAccessType = "%"
 		oper = "like"
 	}
 	cond = fmt.Sprintf("DP.DATASET_ACCESS_TYPE %s %s", oper, placeholder("dataset_access_type"))
 	conds = append(conds, cond)
-	args = append(args, dataset_access_type)
+	args = append(args, datasetAccessType)
 	//     }
 
 	// optional arguments
@@ -210,7 +209,7 @@ func (a *API) Datasets() error {
 	return execute(a.Writer, a.Separator, stm, cols, vals, args...)
 }
 
-// Datasets
+// Datasets represents Datasets DBS DB table
 type Datasets struct {
 	DATASET_ID             int64   `json:"dataset_id"`
 	DATASET                string  `json:"datset" validate:"required"`
@@ -464,9 +463,9 @@ func (a *API) InsertDatasets() error {
 func (a *API) UpdateDatasets() error {
 
 	// get accessTypeID from Access dataset types table
-	var create_by string
+	var createBy string
 	if v, ok := a.Params["create_by"]; ok {
-		create_by = v.(string)
+		createBy = v.(string)
 	}
 	var dataset string
 	var datasetAccessType string
@@ -482,7 +481,7 @@ func (a *API) UpdateDatasets() error {
 	if dataset == "" {
 		return errors.New("invalid dataset parameter")
 	}
-	if create_by == "" {
+	if createBy == "" {
 		return errors.New("invalid create_by parameter")
 	}
 	if datasetAccessType == "" {
@@ -507,7 +506,7 @@ func (a *API) UpdateDatasets() error {
 		log.Println("unable to find dataset_access_type_id for", datasetAccessType)
 		return err
 	}
-	_, err = tx.Exec(stm, create_by, date, accessTypeID, dataset)
+	_, err = tx.Exec(stm, createBy, date, accessTypeID, dataset)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err

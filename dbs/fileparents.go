@@ -54,7 +54,7 @@ func (a *API) FileParents() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// FileParents
+// FileParents represents file parents DBS DB table
 type FileParents struct {
 	THIS_FILE_ID   int64 `json:"this_file_id"`
 	PARENT_FILE_ID int64 `json:"parent_file_id" validate:"required,number,gt=0"`
@@ -129,6 +129,7 @@ func (r *FileParents) Decode(reader io.Reader) error {
 	return nil
 }
 
+// FileParentRecord represents file parent DBS record
 type FileParentRecord struct {
 	LogicalFileName       string `json:"logical_file_name"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
@@ -154,7 +155,7 @@ func (a *API) InsertFileParents() error {
 	return err
 }
 
-// InsertFileParents DBS API
+// InsertFileParentsTxt DBS API
 func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py

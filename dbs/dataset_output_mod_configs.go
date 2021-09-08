@@ -20,7 +20,7 @@ func (a *API) DatasetOutputModConfigs() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// DatasetOutputModConfigs
+// DatasetOutputModConfigs represents dataset output mod configs DBS DB table
 type DatasetOutputModConfigs struct {
 	DS_OUTPUT_MOD_CONF_ID int64 `json:"ds_output_mod_conf_id"`
 	DATASET_ID            int64 `json:"dataset_id" validate:"required,number,gt=0"`

@@ -24,7 +24,7 @@ func (a *API) DatasetAccessTypes() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// DatasetAccessTypes
+// DatasetAccessTypes represents Dataset Access Types DBS DB table
 type DatasetAccessTypes struct {
 	DATASET_ACCESS_TYPE_ID int64  `json:"dataset_access_type_id"`
 	DATASET_ACCESS_TYPE    string `json:"dataset_access_type" validate:"required"`

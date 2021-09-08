@@ -9,7 +9,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// BranchHashes
+// BranchHashes represents Branch Hashes DBS DB table
 type BranchHashes struct {
 	BRANCH_HASH_ID int64  `json:"branch_hash_id"`
 	BRANCH_HASH    string `json:"branch_hash"`

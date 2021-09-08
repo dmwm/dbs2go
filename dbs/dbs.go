@@ -24,7 +24,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// use API struct for reflection
+// API structure represents DBS API
 type API struct {
 	Reader    io.Reader
 	Writer    http.ResponseWriter
@@ -40,16 +40,22 @@ func (a *API) String() string {
 	return fmt.Sprintf("API=%s params=%+v createBy=%s separator='%s'", a.Api, a.Params, a.CreateBy, a.Separator)
 }
 
-// use a single instance of Validate, it caches struct info
+// RecordValidator pointer to validator Validate method
 var RecordValidator *validator.Validate
 
-// main record we work with
+// Record represents DBS record
 type Record map[string]interface{}
 
-// global variable to keep pointer to DB
+// DB represents sql DB pointer
 var DB *sql.DB
+
+// DBTYPE represents DBS DB type, e.g. ORACLE or SQLite
 var DBTYPE string
+
+// DBSQL represents DBS SQL record
 var DBSQL Record
+
+// DBOWNER represents DBS DB owner
 var DBOWNER string
 
 // DRYRUN allows to skip query execution and printout DB statements along with passed parameters
@@ -122,7 +128,7 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	return nil
 }
 
-// helper function to load DBS SQL templated statements
+// LoadTemplateSQL function loads DBS SQL templated statements
 func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
 	if !strings.HasSuffix(tmpl, ".sql") {
@@ -144,7 +150,7 @@ func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	return stm, nil
 }
 
-// helper function to load DBS SQL statements with Owner
+// LoadSQL function loads DBS SQL statements with Owner
 func LoadSQL(owner string) Record {
 	tmplData := make(Record)
 	tmplData["Owner"] = owner
@@ -210,7 +216,8 @@ func getSingleValue(params Record, key string) (string, error) {
 	if len(values) > 0 {
 		return values[0], nil
 	}
-	return "", errors.New(fmt.Sprintf("no list is allowed for provided key: %s", key))
+	msg := fmt.Sprintf("no list is allowed for provided key: %s", key)
+	return "", errors.New(msg)
 }
 
 // WhereClause function construct proper SQL statement from given statement and list of conditions
@@ -226,7 +233,7 @@ func WhereClause(stm string, conds []string) string {
 	return strings.Trim(stm, " ")
 }
 
-// function to parse given file name and extract from it dbtype and dburi
+// ParseDBFile function parses given file name and extracts from it dbtype and dburi
 // file should contain the "dbtype dburi" string
 func ParseDBFile(dbfile string) (string, string, string) {
 	dat, err := os.ReadFile(dbfile)
@@ -497,7 +504,7 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 	return nil
 }
 
-// helper function to get table primary id for a given value
+// GetID function fetches table primary id for a given value
 func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error) {
 	var stm string
 	if DBOWNER == "sqlite" {
@@ -516,7 +523,7 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 	return int64(tid), err
 }
 
-// helper function to get table primary id for a given value and insert it if necessary
+// GetRecID function fetches table primary id for a given value and insert it if necessary
 func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface{}) (int64, error) {
 	rid, err := GetID(tx, table, id, attr, val...)
 	if err != nil {
@@ -533,7 +540,7 @@ func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface
 	return rid, err
 }
 
-// helper function to generate operator, value pair for given argument
+// OperatorValue function generates operator and value pair for a given argument
 func OperatorValue(arg string) (string, string) {
 	op := "="
 	val := arg
@@ -578,7 +585,8 @@ func ParseRuns(runs []string) ([]string, error) {
 				out = append(out, run)
 			}
 		} else {
-			err := errors.New(fmt.Sprintf("invalid run input parameter %s", v))
+			msg := fmt.Sprintf("invalid run input parameter %s", v)
+			err := errors.New(msg)
 			return out, err
 		}
 	}
@@ -749,7 +757,7 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	return int64(pid), nil
 }
 
-// LastInsertId should return last insert id of given table and idname parameter
+// LastInsertID returns last insert id of given table and idname parameter
 func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 	stm := fmt.Sprintf("select MAX(%s) from %s.%s", idName, DBOWNER, table)
 	if DBOWNER == "sqlite" {

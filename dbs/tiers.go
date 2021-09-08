@@ -26,7 +26,7 @@ func (a *API) DataTiers() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// DataTiers
+// DataTiers represents data tiers DBS DB table
 type DataTiers struct {
 	DATA_TIER_ID   int64  `json:"data_tier_id"`
 	DATA_TIER_NAME string `json:"data_tier_name" validate:"required,uppercase"`

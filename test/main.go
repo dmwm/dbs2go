@@ -13,7 +13,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// StdoutWrite provides the same functionality as http.ResponseWriter
+// StdoutWriter provides the same functionality as http.ResponseWriter
 // to cover unit tests of DBS APIs. It prints given data directly to stdout.
 type StdoutWriter string
 

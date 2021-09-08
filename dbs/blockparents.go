@@ -31,7 +31,7 @@ func (a *API) BlockParents() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// BlockParents
+// BlockParents structure represents block parents table in DBS DB
 type BlockParents struct {
 	THIS_BLOCK_ID   int64 `json:"this_block_id" validate:"required,number,gt=0"`
 	PARENT_BLOCK_ID int64 `json:"parent_block_id" validate:"required,number,gt=0"`

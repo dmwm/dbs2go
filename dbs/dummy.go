@@ -2,7 +2,7 @@ package dbs
 
 import "log"
 
-// dummy API
+// Dummy API
 func (a *API) Dummy() []Record {
 	datasets := getValues(a.Params, "dataset")
 	log.Printf("input args: %+v, datasets: %+v", a.Params, datasets)

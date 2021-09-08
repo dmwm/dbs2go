@@ -9,7 +9,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// ApplicationExecutables
+// ApplicationExecutables structure describe associative table in DBS DB
 type ApplicationExecutables struct {
 	APP_EXEC_ID int64  `json:"app_exec_id"`
 	APP_NAME    string `json:"app_name" validate:"required"`

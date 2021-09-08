@@ -132,7 +132,7 @@ type DatasetParent struct {
 	ParentDataset string `json:"parent_dataset"`
 }
 
-// BulkBlocks DBS API
+// InsertBulkBlocks DBS API
 // /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
 // /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
 /*

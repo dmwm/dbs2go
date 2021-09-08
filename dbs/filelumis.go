@@ -108,7 +108,7 @@ func (a *API) FileLumis() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// FileLumis
+// FileLumis represents File Lumis DBS DB table
 type FileLumis struct {
 	FILE_ID          int64 `json:"file_id validate:"required,number""`
 	LUMI_SECTION_NUM int64 `json:"lumi_section_num" validate:"required,number"`
@@ -170,7 +170,7 @@ func (r *FileLumis) Decode(reader io.Reader) error {
 	return nil
 }
 
-// InsertFileLumis DBS API
+// InsertFileLumisTx DBS API
 func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 	// read given input
 	data, err := io.ReadAll(a.Reader)

@@ -20,7 +20,7 @@ func (a *API) FileOutputModConfigs() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// FileOutputModConfigs
+// FileOutputModConfigs represents file output mod config DBS DB table
 type FileOutputModConfigs struct {
 	FILE_OUTPUT_CONFIG_ID int64 `json:"file_output_config_id"`
 	FILE_ID               int64 `json:"file_id" validate:"required,number,gt=0"`
@@ -90,7 +90,7 @@ func (r *FileOutputModConfigs) Decode(reader io.Reader) error {
 	return nil
 }
 
-// FileOutputModConfigRecord
+// FileOutputModConfigRecord represents file output mod config input record
 type FileOutputModConfigRecord struct {
 	ReleaseVersion    string `json:"release_version"`
 	PsetHash          string `json:"pset_hash"`

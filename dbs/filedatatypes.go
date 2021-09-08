@@ -20,7 +20,7 @@ func (a *API) FileDataTypes() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// FileDataTypes
+// FileDataTypes represents File Data Types DBS DB table
 type FileDataTypes struct {
 	FILE_TYPE_ID int64  `json:"file_type_id"`
 	FILE_TYPE    string `json:"file_type" validate:"required"`

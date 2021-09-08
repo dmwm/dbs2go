@@ -15,7 +15,7 @@ func fileNames(tdir string, filenames ...string) []string {
 	return flist
 }
 
-// parse template with given data
+// ParseTmpl parses template with given data
 func ParseTmpl(tdir, tmpl string, data interface{}) (string, error) {
 	buf := new(bytes.Buffer)
 	filenames := fileNames(tdir, tmpl)

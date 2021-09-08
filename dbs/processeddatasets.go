@@ -20,7 +20,7 @@ func (a *API) ProcessedDatasets() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// ProcessedDatasets
+// ProcessedDatasets represents Processed Datasets DBS DB table
 type ProcessedDatasets struct {
 	PROCESSED_DS_ID   int64  `json:"processed_ds_id"`
 	PROCESSED_DS_NAME string `json:"processed_ds_name" validate:"required"`

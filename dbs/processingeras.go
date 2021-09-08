@@ -26,7 +26,7 @@ func (a *API) ProcessingEras() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// ProcessingEras
+// ProcessingEras represents Processing Eras DBS DB table
 type ProcessingEras struct {
 	PROCESSING_ERA_ID  int64  `json:"processing_era_id"`
 	PROCESSING_VERSION int64  `json:"processing_version" validate:"required,number,gt=0"`

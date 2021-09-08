@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// AcquisitionErasCI DBS API
+// AcquisitionErasCi DBS API
 func (a *API) AcquisitionErasCi() error {
 	// variables we'll use in where clause
 	var args []interface{}

@@ -51,7 +51,7 @@ type Configuration struct {
 	GraphQLSchema string `json:"graphqlSchema"` // graph ql schema file name
 }
 
-// global variables
+// Config represents global configuration object
 var Config Configuration
 
 // String returns string representation of dbs Config
@@ -64,6 +64,7 @@ func (c *Configuration) String() string {
 	return string(data)
 }
 
+// ParseConfig parses given configuration file and initialize Config object
 func ParseConfig(configFile string) error {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {

@@ -208,7 +208,7 @@ func (a *API) Files() error {
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
 
-// Files
+// Files represents Files DBS DB table
 type Files struct {
 	FILE_ID                int64   `json:"file_id"`
 	LOGICAL_FILE_NAME      string  `json:"logical_file_name" validate:"required"`
@@ -307,6 +307,7 @@ func (r *Files) Decode(reader io.Reader) error {
 	return nil
 }
 
+// RunLumi represents run lumi record
 type RunLumi struct {
 	RunNumber    int64 `json:"run_num"`
 	LumitSection int64 `json:"lumi_section_num"`
@@ -443,7 +444,7 @@ func (a *API) InsertFiles() error {
 func (a *API) UpdateFiles() error {
 
 	// read input parameters
-	var create_by string
+	var createBy string
 	var isFileValid int
 	if v, ok := a.Params["is_file_valid"]; ok {
 		val, err := strconv.Atoi(v.(string))
@@ -453,12 +454,12 @@ func (a *API) UpdateFiles() error {
 		isFileValid = val
 	}
 	if v, ok := a.Params["create_by"]; ok {
-		create_by = v.(string)
+		createBy = v.(string)
 	}
 	date := time.Now().Unix()
 
 	// validate input parameters
-	if create_by == "" {
+	if createBy == "" {
 		return errors.New("invalid create_by parameter")
 	}
 	if isFileValid < 0 || isFileValid > 1 {
@@ -478,7 +479,7 @@ func (a *API) UpdateFiles() error {
 		return err
 	}
 	defer tx.Rollback()
-	_, err = tx.Exec(stm, create_by, date, isFileValid)
+	_, err = tx.Exec(stm, createBy, date, isFileValid)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err

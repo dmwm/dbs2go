@@ -16,10 +16,10 @@ import (
 // Ckey represents DBS X509 key used by HttpClient
 var Ckey string
 
-// Ckey represents DBS X509 cert used by HttpClient
+// Cert represents DBS X509 cert used by HttpClient
 var Cert string
 
-// Ckey represents DBS timeout used by HttpClient
+// Timeout represents DBS timeout used by HttpClient
 var Timeout int
 
 // client X509 certificates

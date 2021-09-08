@@ -1,7 +1,8 @@
+package utils
+
 // module to handle URL requests
 // Copyright (c) 2015-2017 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
-package utils
 
 import (
 	"bytes"
@@ -15,7 +16,7 @@ import (
 // global HTTP client
 var _client = cmsauth.HttpClient()
 
-// global URL counter for profile output
+// UrlCounter for profile output
 var UrlCounter uint32
 
 // ResponseType structure is what we expect to get for our URL call.
@@ -64,7 +65,7 @@ func FetchResponse(rurl string, args []byte) ResponseType {
 	return response
 }
 
-// represent final response in a form of JSON structure
+// Repsonse represents final response in a form of JSON structure
 // we use custorm representation
 func Response(rurl string, data []byte) []byte {
 	b := []byte(`{"url":`)

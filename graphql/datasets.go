@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-// User is the base user model to be used throughout the app
+// Dataset represents data model struct
 type Dataset struct {
 	Name string
 }
