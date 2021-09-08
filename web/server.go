@@ -1,3 +1,5 @@
+package web
+
 // DBS web server
 // Copyright (c) 2015-2016 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
@@ -22,7 +24,6 @@
 // or generate png plots
 // go tool pprof -png http://localhost:<port>/debug/pprof/heap > /tmp/heap.png
 // go tool pprof -png http://localhost:<port>/debug/pprof/profile > /tmp/profile.png
-package web
 
 import (
 	"context"
@@ -99,7 +100,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
 		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
-	if Config.DBSWriterServer {
+	} else if Config.DBSWriterServer {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
@@ -164,10 +165,10 @@ func handlers() *mux.Router {
 		//         HandlerFunc(DummyHandler).
 		//         Methods("GET")
 	}
-		// aux APIs used by all DBS servers
-		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
-		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
-		router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
+	// aux APIs used by all DBS servers
+	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
+	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 
 	// for all requests
 	router.Use(logging.LoggingMiddleware)
