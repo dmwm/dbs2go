@@ -14,8 +14,8 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// Files DBS API
 //gocyclo:ignore
+// Files DBS API
 func (a *API) Files() error {
 	var args []interface{}
 	var conds, lumis []string

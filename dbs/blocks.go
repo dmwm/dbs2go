@@ -15,6 +15,7 @@ import (
 )
 
 // Blocks DBS API
+//gocyclo:ignore
 func (a *API) Blocks() error {
 	var args []interface{}
 	var conds []string
@@ -275,6 +276,7 @@ func (a *API) InsertBlocks() error {
 }
 
 // UpdateBlocks DBS API
+//gocyclo:ignore
 func (a *API) UpdateBlocks() error {
 	// get input parameters
 	date := time.Now().Unix()

@@ -133,9 +133,11 @@ type DatasetParent struct {
 }
 
 // InsertBulkBlocks DBS API
-// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
-// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
 /*
+   for details see:
+   /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
+   /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
+
    #1 insert configuration
    configList = self.insertOutputModuleConfig(
                    blockcontent['dataset_conf_list'], migration)
@@ -144,6 +146,7 @@ type DatasetParent struct {
    #3 insert block & files
    self.insertBlockFile(blockcontent, datasetId, migration)
 */
+//gocyclo:ignore
 func (a *API) InsertBulkBlocks() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)

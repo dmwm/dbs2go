@@ -201,6 +201,7 @@ func walkFunction(route *mux.Route, router *mux.Router, ancestors []*mux.Route) 
 }
 
 // Server represents main web server for DBS service
+//gocyclo:ignore
 func Server(configFile string) {
 	StartTime = time.Now()
 	err := ParseConfig(configFile)
