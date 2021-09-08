@@ -109,7 +109,6 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/blockTrio"), BlockTrioHandler).Methods("GET")
 		router.HandleFunc(basePath("/files"), FilesHandler).Methods("GET", "POST", "PUT")
 		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("GET", "POST")
-		router.HandleFunc(basePath("/primdstypes"), PrimaryDSTypesHandler).Methods("GET", "POST")
 		router.HandleFunc(basePath("/parentDSTrio"), ParentDSTrioHandler).Methods("GET")
 		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("GET", "POST", "PUT")
 		router.HandleFunc(basePath("/releaseversions"), ReleaseVersionsHandler).Methods("GET")
@@ -124,7 +123,6 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/runsummaries"), RunSummariesHandler).Methods("GET")
 
 		router.HandleFunc(basePath("/blockorigin"), BlockOriginHandler).Methods("GET")
-		router.HandleFunc(basePath("/blockTrio"), BlockTrioHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockdump"), BlockDumpHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockchildren"), BlockChildrenHandler).Methods("GET")
 		router.HandleFunc(basePath("/blockparents"), BlockParentsHandler).Methods("GET", "POST")
@@ -136,7 +134,6 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/filelumis"), FileLumisHandler).Methods("GET", "POST")
 		router.HandleFunc(basePath("/datasetchildren"), DatasetChildrenHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasetparents"), DatasetParentsHandler).Methods("GET")
-		router.HandleFunc(basePath("/parentDSTrio"), ParentDSTrioHandler).Methods("GET")
 		router.HandleFunc(basePath("/acquisitioneras_ci"), AcquisitionErasCiHandler).Methods("GET")
 
 		// POST routes
