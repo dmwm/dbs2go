@@ -157,7 +157,7 @@ func LoadSQL(owner string) Record {
 		k := strings.Split(f, ".")[0]
 		stm, err := utils.ParseTmpl(sdir, f, tmplData)
 		if err != nil {
-			log.Fatal("unable to parse tempalte", err)
+			log.Fatal("unable to parse template", err)
 		}
 		if owner, ok := tmplData["Owner"]; ok && owner == "sqlite" {
 			stm = strings.Replace(stm, "sqlite.", "", -1)
@@ -749,7 +749,7 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	return int64(pid), nil
 }
 
-// LastInsertId shoudl return last insert id of given table and idname parameter
+// LastInsertId should return last insert id of given table and idname parameter
 func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 	stm := fmt.Sprintf("select MAX(%s) from %s.%s", idName, DBOWNER, table)
 	if DBOWNER == "sqlite" {

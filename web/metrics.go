@@ -58,7 +58,7 @@ type Mem struct {
 // Metrics provide various metrics about our server
 type Metrics struct {
 	CPU               []float64               `json:"cpu"`               // cpu metrics from gopsutils
-	Connections       []net.ConnectionStat    `json:"conenctions"`       // connections metrics from gopsutils
+	Connections       []net.ConnectionStat    `json:"connections"`       // connections metrics from gopsutils
 	Load              load.AvgStat            `json:"load"`              // load metrics from gopsutils
 	Memory            Mem                     `json:"memory"`            // memory metrics from gopsutils
 	OpenFiles         []process.OpenFilesStat `json:"openFiles"`         // open files metrics from gopsutils

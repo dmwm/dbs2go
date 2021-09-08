@@ -23,7 +23,7 @@ func (a *API) Blocks() error {
 	tmpl["TokenGenerator"] = ""
 	tmpl["Detail"] = false
 
-	// parse detail arugment
+	// parse detail argument
 	detail, _ := getSingleValue(a.Params, "detail")
 	if detail == "1" { // for backward compatibility with Python detail=1 and detail=True
 		detail = "true"

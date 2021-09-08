@@ -161,7 +161,7 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	/*
 	   input block_name: is a child block name.
 	   input chils_parent_id_list: is a list of file id of child, parent  pair: [[cid1, pid1],[cid2,pid2],[cid3,pid3],...]
-	   The requirment for this API is
+	   The requirement for this API is
 	   1. All the child files belong to the block.
 	   2. All the child-parent pairs are not already in DBS.
 	   3. The dataset parentage is already in DBS.

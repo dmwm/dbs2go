@@ -63,7 +63,7 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 		select {
 		case v := <-ch:
 			if v == true {
-				log.Println("Recieved notification to stop migration server")
+				log.Println("Received notification to stop migration server")
 				return
 			}
 		default:

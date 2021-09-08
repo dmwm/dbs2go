@@ -7,7 +7,7 @@ package dbs
 // DBS to another. This module provides the following APIs:
 // - Submit to submit migration request, internall it prepare the request
 // and calls via goroutine process request
-// - Process to proces migration request explicitly
+// - Process to process migration request explicitly
 // - Remove to remove migration request
 // - Status to obtain status of migration request
 // Internally the migration process injects all request details into
