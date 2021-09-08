@@ -1,5 +1,7 @@
 package dbs
 
+// nolint: gocyclo
+
 import (
 	"database/sql"
 	"encoding/json"
