@@ -429,7 +429,7 @@ func (a *API) SubmitMigration() error {
 	}
 
 	var orderedList []int
-	for k, _ := range migBlocks {
+	for k := range migBlocks {
 		orderedList = append(orderedList, k)
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(orderedList)))
