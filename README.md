@@ -1,6 +1,7 @@
 ### dbs2go package
 
 [![Build Status](https://travis-ci.org/vkuznet/dbs2go.svg?branch=master)](https://travis-ci.org/vkuznet/dbs2go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vkuznet/dbs2go)](https://goreportcard.com/report/github.com/vkuznet/dbs2go)
 [![GoDoc](https://godoc.org/github.com/vkuznet/dbs2go?status.svg)](https://godoc.org/github.com/vkuznet/dbs2go)
 
 The `dbs2go` package represents Data Bookkeeping Server (DBS) used
