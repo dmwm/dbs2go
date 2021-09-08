@@ -1,6 +1,6 @@
 ### DBS client
-The `dbs2go` is a full featured RESTful HTTP service. Therefore, it follows
-HTTP standard and allow access from any client via HTTP requests. Here we
+The `dbs2go` is a fully featured HTTP service. Therefore, it 
+allows access from any client via HTTP requests. Here we
 outline access via `curl` tool:
 
 ```
@@ -8,10 +8,12 @@ outline access via `curl` tool:
 # below we'll use https://xxx.cern.ch/dbs2go as an example of
 # DBS server
 curl -L -k --key ~/.globus/userkey.pem --cert ~/.globus/usercert.pem \
+    -H "Accept: application/json" \
      https://xxx.cern.ch/dbs2go/datasets?dataset=/ZMM*/*/*
 
 # example of POST API, to upload upload.json file to fileArray API
 curl -L -k --key ~/.globus/userkey.pem --cert ~/.globus/usercert.pem \
+    -H "Content-type: application/json" -H "Accept: application/json" \
     -d@/tmp/upload.json \
      https://xxx.cern.ch/dbs2go/fileArray
 
