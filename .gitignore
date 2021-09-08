@@ -27,5 +27,9 @@ oci8.pc
 dbfile*
 dbs2go
 c.json
+m.json
+w.json
 setup.sh
 dbs.db
+TODO.md
+tmp
