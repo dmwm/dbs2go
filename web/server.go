@@ -93,6 +93,7 @@ func basePath(api string) string {
 	return utils.BasePath(Config.Base, api)
 }
 
+// helper cuntion to setup all HTTP routes
 func handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
@@ -152,9 +153,6 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/datasetlist"), DatasetListHandler).Methods("POST")
 		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
 
-		router.HandleFunc(basePath("/apis"), ApisHandler).Methods("GET")
-		router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
-
 		// load graphql
 		if Config.GraphQLSchema != "" {
 			//         schema := dbsGraphQL.InitSchema(Config.GraphQLSchema, dbs.DB)
@@ -173,6 +171,8 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
 	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
+	router.HandleFunc(basePath("/apis"), ApisHandler).Methods("GET")
+	router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
 
 	// for all requests
 	router.Use(logging.LoggingMiddleware)
@@ -184,7 +184,20 @@ func handlers() *mux.Router {
 	// use limiter middleware to slow down clients
 	router.Use(limitMiddleware)
 
+	// get list of defined routes
+	router.Walk(walkFunction)
+
 	return router
+}
+
+// webRoutes will hold list of defined HTTP routes
+var webRoutes []string
+
+// helper function which walk through mux router and collect all available routes
+func walkFunction(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+	path, err := route.GetPathTemplate()
+	webRoutes = append(webRoutes, path)
+	return err
 }
 
 // Server represents main web server for DBS service

@@ -155,8 +155,7 @@ func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 // ApisHandler provides list of supporter apis by the DBS server
 func ApisHandler(w http.ResponseWriter, r *http.Request) {
-	apis := []string{"blocksummaries", "apis", "runsummaries", "parentDSTrio", "datatiers", "blockorigin", "blockTrio", "blockdump", "acquisitioneras", "filechildren", "fileparents", "serverinfo", "outputconfigs", "datasetchildren", "releaseversions", "files", "blocks", "physicsgroups", "filesummaries", "filelumis", "primarydstypes", "datasetparents", "datatypes", "processingeras", "runs", "datasets", "blockchildren", "primarydatasets", "acquisitioneras_ci", "blockparents", "datasetaccesstypes"}
-	data, err := json.Marshal(apis)
+	data, err := json.Marshal(webRoutes)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)
 	}
