@@ -120,7 +120,7 @@ curl -H "Accept: application/json" \
 - `/serverinfo`
   - returns server information about DBS server
   - arguments: None
-- `/help`
+- `/apis`
   - returns list of DBS APIs supported by DBS server
   - arguments: None
 - `/metrics`
@@ -394,20 +394,43 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 
 ##### data look-up APIs by DBS Reader server
 - `/datasetlist`
-  - injects 
+  - provides list of dataset for given JSON record 
   - inputs:
 - `/fileparentsbylumi`
-  - injects 
+  - provides file parents for given set of lumis
   - inputs:
 - `/fileArray`
-  - injects file information to DBS
-  - inputs:
+  - provides list of file and their details for given JSON record
+  - inputs: JSON record containing the following parameters:
+  `dataset`, `block_name`, `lumi_list`, `run_num`, `detail`, `validFileOnly`,
+  `sumOverLumi`, e.g
+```
+{
+    "block_name": "/a/b/GEN-SIM-RAW#52787",
+    "lumi_list": [1, 2, 3, 4, 5, 6],
+    "run_num": 97,
+    "detail": 1
+}
+```
 - `/filelumis`
-  - injects file lumis information to DBS
-  - inputs:
+  - provides list of file lumis for given JSON record
+  - inputs: JSON record containing the following parameters:
+  `logical_file_name`, `block_name`, `run_num`, `validFileOnly`, e.g.
+```
+{
+    "logical_file_name": ["/path/file.root", /path2/file.root"],
+    "run_num": [97,98],
+    'validFileOnly": 0
+}
+```
 - `/blockparents`
-  - injects block parents information to DBS
-  - inputs:
+  - provides block parents for given JSON record
+  - inputs: JSON record with possible list of `block_name` values, e.g.
+```
+{
+    "block_name": ["/a/b/RAW#123", "/a/b/RAW@234"]
+}
+```
 
 ### PUT DBS APIs
 The PUT APIs are used to update some information in DBS entities.
