@@ -319,13 +319,14 @@ func (a *API) UpdateBlocks() error {
 		}
 	}
 
-	var err error
-	var stm string
-
 	// load teamplte
 	tmplData := make(Record)
 	tmplData["Site"] = site
-	stm, err = LoadTemplateSQL("update_blocks", tmplData)
+	stm, err := LoadTemplateSQL("update_blocks", tmplData)
+	if err != nil {
+		log.Println("unable to load update_blocks template", err)
+		return err
+	}
 
 	if utils.VERBOSE > 0 {
 		log.Printf("update Blocks\n%s\n%+v", stm)

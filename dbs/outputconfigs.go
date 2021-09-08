@@ -229,6 +229,10 @@ func (a *API) InsertOutputConfigs() error {
 	defer tx.Rollback()
 
 	err = a.InsertOutputConfigsTx(tx)
+	if err != nil {
+		log.Println("unable to insert output configs", err)
+		return err
+	}
 
 	// commit transaction
 	err = tx.Commit()

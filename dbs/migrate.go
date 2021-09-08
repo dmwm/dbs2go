@@ -340,6 +340,10 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 		umap[dataset] = struct{}{}
 		go func() {
 			omap, err := processDatasetBlocks(rurl, dataset, orderCounter)
+			if err != nil {
+				log.Println("unable to process dataset blocks", err)
+				return
+			}
 			// get ordered map of parents
 			pmap, err := GetParentDatasets(rurl, dataset, orderCounter+1)
 			if err == nil && len(pmap) > 0 {
@@ -651,6 +655,10 @@ func (a *API) RemoveMigration() error {
 	if tid > 1 {
 		stm = getSQL("remove_migration_requests")
 		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+		if err != nil {
+			msg := fmt.Sprintf("fail to execute SQL statment '%s'", stm)
+			return writeReport(msg, err, a.Writer)
+		}
 		err = tx.Commit()
 		if err != nil {
 			return writeReport("fail to commit transaction", err, a.Writer)

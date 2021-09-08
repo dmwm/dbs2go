@@ -35,6 +35,8 @@ func (a *API) BlockFileLumiIds() error {
 			args = append(args, v)
 		}
 	}
+	// add conditions
+	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)

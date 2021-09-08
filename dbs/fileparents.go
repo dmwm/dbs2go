@@ -145,6 +145,10 @@ func (a *API) InsertFileParents() error {
 	}
 	defer tx.Rollback()
 	err = a.InsertFileParentsTxt(tx)
+	if err != nil {
+		log.Println("unable to insert file parents", err)
+		return err
+	}
 
 	// commit transaction
 	err = tx.Commit()
