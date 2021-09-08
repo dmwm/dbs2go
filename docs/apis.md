@@ -2,6 +2,7 @@
 Here we list all available client RESTful APIs for DBS server:
 
 #### GET APIs
+##### data APIs
 - `/datatiers`
   - return DBS data tiers
   - arguments: `data_tier_name`
@@ -101,36 +102,102 @@ Here we list all available client RESTful APIs for DBS server:
   - returns list of acquisition eras
   - arguments: `acquisition_era_name`
 
-#### POST APIs 
-- /bulkblocks
-  - allows to inject block information about DBS blocks
-  - inputs:
-- /fileArray
-- /datasetlist
-- /fileparentsbylumi
-- /datatiers
-- /datasets
-- /blocks
-- /bulkblocks
-- /files
-- /primarydatasets
-- /acquisitioneras
-- /processingeras
-- /outputconfigs
-- /blockparents
-- /fileparents
-- /filelumis
+##### information APIs
+- `/status`
+  - returns HTTP status of DBS server, can be used by liveness probe
+  - arguments: None
+- `/serverinfo`
+  - returns server information about DBS server
+  - arguments: None
+- `/help`
+  - returns list of DBS APIs supported by DBS server
+  - arguments: None
+- `/metrics`
+  - return DBS server metrics suitable for Prometheus
+  - arguments: None
 
-#### Server aux APIs
-- /status
-- /serverinfo
-- /help
-- /metrics
+#### POST APIs 
+
+##### data injection APIs used by DBS Writer server
+- `/datatiers`
+  - injects data tier information to DBS
+  - inputs:
+- `/datasets`
+  - injects dataset information to DBS
+  - inputs:
+- `/blocks`
+  - injects blocks information to DBS
+  - inputs:
+- `/bulkblocks`
+  - injects blocks information in bulk request to DBS
+  - inputs:
+- `/files`
+  - injects file information to DBS
+  - inputs:
+- `/primarydatasets`
+  - injects primary datasets information to DBS
+  - inputs:
+- `/acquisitioneras`
+  - injects acquisition eras information to DBS
+  - inputs:
+- `/processingeras`
+  - injects processing eras information to DBS
+  - inputs:
+- `/outputconfigs`
+  - injects output configs information to DBS
+  - inputs:
+- `/fileparents`
+  - injects file paretage information to DBS
+  - inputs:
+
+##### data look-up APIs
+- `/datasetlist`
+  - injects 
+  - inputs:
+- `/fileparentsbylumi`
+  - injects 
+  - inputs:
+- `/fileArray`
+  - injects file information to DBS
+  - inputs:
+- `/filelumis`
+  - injects file lumis information to DBS
+  - inputs:
+- `/blockparents`
+  - injects block parents information to DBS
+  - inputs:
+
+### PUT DBS APIs
+##### data update APIs used by DBS Writer server
+- `/datasets`
+  - updates dataset information to DBS
+  - inputs:
+- `/blocks`
+  - updates blocks information to DBS
+  - inputs:
+- `/files`
+  - updates file information to DBS
+  - inputs:
+- `/acquisitioneras`
+  - updates acquisition eras information to DBS
+  - inputs:
 
 #### DBS Migration server APIs
-- /submit
-- /process
-- /remove
-- /status
-- /total
-- /serverinfo
+- `/submit`
+  - submits migration request to DBS server
+  - arguments:
+- `/process`
+  - invoke process request
+  - arguments:
+- `/remove`
+  - retmove given request from DBS server
+  - arguments:
+- `/status`
+  - returns status of DBS migration requests
+  - arguments: None
+- `/total`
+  - returns total number of migration requests in DBS
+  - arguments: None
+- `/serverinfo`
+  - returns server information about DBS server
+  - arguments: None
