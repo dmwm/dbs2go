@@ -656,7 +656,7 @@ func (a *API) RemoveMigration() error {
 		stm = getSQL("remove_migration_requests")
 		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
 		if err != nil {
-			msg := fmt.Sprintf("fail to execute SQL statment '%s'", stm)
+			msg := fmt.Sprintf("fail to execute SQL statement '%s'", stm)
 			return writeReport(msg, err, a.Writer)
 		}
 		err = tx.Commit()

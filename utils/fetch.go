@@ -37,6 +37,9 @@ func FetchResponse(rurl string, args []byte) ResponseType {
 	var e error
 	if len(args) > 0 {
 		req, e = http.NewRequest("POST", rurl, bytes.NewBuffer(args))
+		if e != nil {
+			log.Println("Unable to make POST request", e)
+		}
 		req.Header.Set("Content-Type", "application/json")
 	} else {
 		req, e = http.NewRequest("GET", rurl, nil)
