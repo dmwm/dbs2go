@@ -763,7 +763,7 @@ func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 	if DBOWNER == "sqlite" {
 		stm = fmt.Sprintf("select MAX(%s) from %s", idName, table)
 	}
-	var pid sql.NullInt64
+	var pid sql.NullFloat64
 	if utils.VERBOSE > 0 {
 		log.Println("execute", stm)
 	}
@@ -772,7 +772,7 @@ func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
 		return 0, errors.New(msg)
 	}
-	return pid.Int64, nil
+	return int64(pid.Float64), nil
 }
 
 // RunsConditions function to handle runs conditions
