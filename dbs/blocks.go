@@ -324,6 +324,7 @@ func (a *API) UpdateBlocks() error {
 	// load teamplte
 	tmplData := make(Record)
 	tmplData["Site"] = site
+	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_blocks", tmplData)
 	if err != nil {
 		log.Println("unable to load update_blocks template", err)

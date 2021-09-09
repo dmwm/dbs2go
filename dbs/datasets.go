@@ -493,7 +493,8 @@ func (a *API) UpdateDatasets() error {
 	// get SQL statement from static area
 	stm := getSQL("update_datasets")
 	if utils.VERBOSE > 0 {
-		log.Printf("update Datasets\n%s\n%+v", stm)
+		params := []string{dataset, datasetAccessType}
+		log.Printf("update Datasets\n%s\n%+v", stm, params)
 	}
 
 	// start transaction

@@ -159,7 +159,7 @@ func (a *API) InsertBulkBlocks() error {
 	var rec BulkBlocks
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Println("unable to unmarshal bulkblock record", err)
+		log.Printf("unable to unmarshal bulkblock record %s, error %v", string(data), err)
 		return err
 	}
 
