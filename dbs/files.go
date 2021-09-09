@@ -476,7 +476,7 @@ func (a *API) UpdateFiles() error {
 	stm := getSQL("update_files")
 	if utils.VERBOSE > 0 {
 		mydate := fmt.Sprintf("%d", date)
-		valid := fmt.Sprintf("%", isFileValid)
+		valid := fmt.Sprintf("%d", isFileValid)
 		params := []string{createBy, mydate, valid}
 		log.Printf("update Files\n%s\n%+v", stm, params)
 	}
