@@ -572,7 +572,11 @@ func FileChildrenHandler(w http.ResponseWriter, r *http.Request) {
 // FileParentsHandler provides access to FileParent DBS API.
 // Takes the following arguments: logical_file_name, block_id, block_name
 func FileParentsHandler(w http.ResponseWriter, r *http.Request) {
-	DBSGetHandler(w, r, "fileparents")
+	if r.Method == "POST" {
+		DBSPostHandler(w, r, "fileparents")
+	} else {
+		DBSGetHandler(w, r, "fileparents")
+	}
 }
 
 // FileSummariesHandler provides access to FileSummaries DBS API.
@@ -642,7 +646,11 @@ func AcquisitionErasCiHandler(w http.ResponseWriter, r *http.Request) {
 // PrimaryDatasetsHandler provides access to PrimaryDatasets DBS API.
 // Takes the following arguments: primary_ds_name, primary_ds_type
 func PrimaryDatasetsHandler(w http.ResponseWriter, r *http.Request) {
-	DBSGetHandler(w, r, "primarydatasets")
+	if r.Method == "POST" {
+		DBSPostHandler(w, r, "primarydatasets")
+	} else {
+		DBSGetHandler(w, r, "primarydatasets")
+	}
 }
 
 // DatasetParentsHandler provides access to DatasetParents DBS API.
@@ -721,7 +729,11 @@ func FileParentsByLumiHandler(w http.ResponseWriter, r *http.Request) {
 // BulkBlocksHandler provides access to BulkBlocks DBS API
 // POST API takes no argument, the payload should be supplied as JSON
 func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) {
-	DBSPostHandler(w, r, "bulkblocks")
+	if r.Method == "POST" {
+		DBSPostHandler(w, r, "bulkblocks")
+	} else {
+		DBSGetHandler(w, r, "bulkblocks")
+	}
 }
 
 // Migration server handlers
