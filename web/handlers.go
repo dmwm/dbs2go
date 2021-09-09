@@ -16,6 +16,16 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
+// helper function to get request URI
+func requestURI(r *http.Request) string {
+	uri, err := url.QueryUnescape(r.RequestURI)
+	if err != nil {
+		log.Println("unable to unescape request uri", r.RequestURI, "error", err)
+		uri = r.RequestURI
+	}
+	return uri
+}
+
 // responseMsg helper function to provide response to end-user
 func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
 	rec := make(dbs.Record)
@@ -236,7 +246,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	}
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
-		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, r.URL.RequestURI(), params)
+		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%s, params: %+v", a, dn, requestURI(r), params)
 	}
 	cby := createBy(r)
 	params["create_by"] = cby
@@ -252,7 +262,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	var err error
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
-		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
+		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%s", a, dn, requestURI(r))
 	}
 	if a == "acquisitioneras" {
 		err = api.UpdateAcquisitionEras()
@@ -288,7 +298,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	var params dbs.Record
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
-		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%+v", a, dn, r.URL.RequestURI())
+		log.Printf("DBSPostHandler: API=%s, dn=%s, uri=%s", a, dn, requestURI(r))
 	}
 	cby := createBy(r)
 	body := r.Body
@@ -381,12 +391,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	}
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
-		uri, err := url.QueryUnescape(r.URL.RequestURI())
-		if err != nil {
-			log.Println("unable to unescape request uri", err)
-			uri = r.RequestURI
-		}
-		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, uri, params)
+		log.Printf("DBSGetHandler: API=%s, dn=%s, uri=%+v, params: %+v", a, dn, requestURI(r), params)
 	}
 	api := &dbs.API{
 		Writer:    w,

@@ -122,7 +122,14 @@ func (a *API) InsertAcquisitionEras() error {
 	// businput["acquisition_era_id"] = self.sm.increment(conn, "SEQ_AQE", tran)
 
 	//     return InsertValues("insert_acquisition_eras", values)
-	return insertRecord(&AcquisitionEras{CREATE_BY: a.CreateBy}, a.Reader)
+	err := insertRecord(&AcquisitionEras{CREATE_BY: a.CreateBy}, a.Reader)
+	if err != nil {
+		return err
+	}
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
 
 // UpdateAcquisitionEras DBS API
@@ -174,5 +181,8 @@ func (a *API) UpdateAcquisitionEras() error {
 		log.Println("unable to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

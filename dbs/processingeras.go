@@ -106,5 +106,12 @@ func (r *ProcessingEras) Decode(reader io.Reader) error {
 
 // InsertProcessingEras DBS API
 func (a *API) InsertProcessingEras() error {
-	return insertRecord(&ProcessingEras{CREATE_BY: a.CreateBy}, a.Reader)
+	err := insertRecord(&ProcessingEras{CREATE_BY: a.CreateBy}, a.Reader)
+	if err != nil {
+		return err
+	}
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

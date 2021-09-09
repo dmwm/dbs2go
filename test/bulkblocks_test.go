@@ -26,7 +26,9 @@ func TestBulkBlocks(t *testing.T) {
 	//     var reader *bytes.Reader
 	ts := time.Now().Unix()
 	createBy := "tester"
+	w := StdoutWriter("")
 	api := dbs.API{
+		Writer:   w,
 		CreateBy: createBy,
 	}
 

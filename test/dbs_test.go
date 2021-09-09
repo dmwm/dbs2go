@@ -85,11 +85,13 @@ func TestDBSGetID(t *testing.T) {
 	rec["create_by"] = createBy
 	data, _ := json.Marshal(rec)
 	reader := bytes.NewReader(data)
+	writer := StdoutWriter("")
 
 	// insert new record
 	//     var api dbs.API
 	api := dbs.API{
 		Reader:   reader,
+		Writer:   writer,
 		CreateBy: createBy,
 	}
 	utils.VERBOSE = 1

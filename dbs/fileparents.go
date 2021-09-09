@@ -156,7 +156,10 @@ func (a *API) InsertFileParents() error {
 		log.Println("fail to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
 
 // InsertFileParentsTxt DBS API

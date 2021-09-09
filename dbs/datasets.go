@@ -458,7 +458,10 @@ func (a *API) InsertDatasets() error {
 		log.Println("fail to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
 
 // UpdateDatasets DBS API
@@ -521,5 +524,8 @@ func (a *API) UpdateDatasets() error {
 		log.Println("unable to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

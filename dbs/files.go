@@ -440,7 +440,10 @@ func (a *API) InsertFiles() error {
 		log.Println("fail to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
 
 // UpdateFiles DBS API
@@ -472,7 +475,10 @@ func (a *API) UpdateFiles() error {
 	// get SQL statement from static area
 	stm := getSQL("update_files")
 	if utils.VERBOSE > 0 {
-		log.Printf("update Files\n%s\n%+v", stm)
+		mydate := fmt.Sprintf("%d", date)
+		valid := fmt.Sprintf("%", isFileValid)
+		params := []string{createBy, mydate, valid}
+		log.Printf("update Files\n%s\n%+v", stm, params)
 	}
 
 	// start transaction
@@ -494,5 +500,8 @@ func (a *API) UpdateFiles() error {
 		log.Println("unable to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

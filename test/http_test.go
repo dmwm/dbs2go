@@ -55,11 +55,13 @@ func TestHTTPGet(t *testing.T) {
 	rec["create_by"] = createBy
 	data, _ := json.Marshal(rec)
 	reader := bytes.NewReader(data)
+	writer := StdoutWriter("")
 
 	// insert new record
 	//     var api dbs.API
 	api := dbs.API{
 		Reader:   reader,
+		Writer:   writer,
 		CreateBy: createBy,
 	}
 	err := api.InsertDataTiers()
@@ -154,11 +156,13 @@ func TestHTTPPut(t *testing.T) {
 	rec["start_date"] = float64(date)
 	data, _ := json.Marshal(rec)
 	reader := bytes.NewReader(data)
+	writer := StdoutWriter("")
 
 	// insert new record
 	//     var api dbs.API
 	api := dbs.API{
 		Reader:   reader,
+		Writer:   writer,
 		CreateBy: createBy,
 	}
 	err := api.InsertAcquisitionEras()

@@ -104,7 +104,7 @@ func TestInsertSQL(t *testing.T) {
 		// insert some info in DBS
 		dbs.DRYRUN = true
 		log.Printf("SQL test for %s API with params %+v\n", rec.InsertApi, string(data))
-		r := reflect.ValueOf(&dbs.API{Reader: reader, CreateBy: cby})
+		r := reflect.ValueOf(&dbs.API{Reader: reader, CreateBy: cby, Writer: w})
 		m := r.MethodByName(rec.InsertApi)
 		//         args := []reflect.Value{reflect.ValueOf(reader), reflect.ValueOf(cby)}
 		args := []reflect.Value{}

@@ -482,5 +482,8 @@ func (a *API) InsertBulkBlocks() error {
 		return err
 	}
 
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
 	return nil
 }

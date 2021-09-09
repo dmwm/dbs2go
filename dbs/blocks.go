@@ -272,7 +272,10 @@ func (a *API) InsertBlocks() error {
 		log.Println("fail to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
 
 // UpdateBlocks DBS API
@@ -359,5 +362,8 @@ func (a *API) UpdateBlocks() error {
 		log.Println("unable to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

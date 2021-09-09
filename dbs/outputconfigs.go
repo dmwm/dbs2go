@@ -240,5 +240,8 @@ func (a *API) InsertOutputConfigs() error {
 		log.Println("unable to commit transaction", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

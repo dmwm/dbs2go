@@ -108,5 +108,12 @@ func (r *DataTiers) Decode(reader io.Reader) error {
 
 // InsertDataTiers DBS API
 func (a *API) InsertDataTiers() error {
-	return insertRecord(&DataTiers{CREATE_BY: a.CreateBy}, a.Reader)
+	err := insertRecord(&DataTiers{CREATE_BY: a.CreateBy}, a.Reader)
+	if err != nil {
+		return err
+	}
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

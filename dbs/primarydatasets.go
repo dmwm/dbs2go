@@ -162,5 +162,8 @@ func (a *API) InsertPrimaryDatasets() error {
 		log.Println("faile to insert_outputconfigs_sqlite", err)
 		return err
 	}
-	return err
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
