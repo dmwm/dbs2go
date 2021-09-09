@@ -325,7 +325,7 @@ type FileRecord struct {
 	LOGICAL_FILE_NAME      string  `json:"logical_file_name"`
 	IS_FILE_VALID          int64   `json:"is_file_valid"`
 	DATASET                string  `json:"dataset"`
-	BLOCK                  string  `json:"block"`
+	BLOCK_NAME             string  `json:"block_name"`
 	FILE_TYPE              string  `json:"file_type"`
 	CHECK_SUM              string  `json:"check_sum"`
 	FILE_SIZE              int64   `json:"file_size"`
@@ -409,9 +409,9 @@ func (a *API) InsertFiles() error {
 	defer tx.Rollback()
 
 	// get all necessary IDs from different tables
-	blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK)
+	blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME)
 	if err != nil {
-		log.Println("unable to find block_id for", rec.BLOCK)
+		log.Println("unable to find block_id for", rec.BLOCK_NAME)
 		return err
 	}
 	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
