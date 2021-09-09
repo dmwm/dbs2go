@@ -141,7 +141,7 @@
     logical_file_name: "/store/mc/Summer11/ZMM/GEN-SIM/DESIGN42_V11_428_SLHC1-v1/0003/02ACAA1A-9F32-E111-BB31-0002C90B743A.root"
     is_file_valid: 0
     dataset: "/AAAbbb/XXXyyy/TEST-RAW-TIER"
-    block: "/AAAbbb/XXXyyy/TEST-RAW-TIER#123"
+    block_name: "/AAAbbb/XXXyyy/TEST-RAW-TIER#123"
     check_sum: "123"
     file_type: "EDM"
     auto_cross_section: 1.1
