@@ -135,8 +135,13 @@ func (a *API) InsertPrimaryDatasets() error {
 		return err
 	}
 	pdst := rec.PRIMARY_DS_TYPE
+	pdsname := rec.PRIMARY_DS_NAME
 	trec := PrimaryDSTypes{PRIMARY_DS_TYPE: pdst}
-	prec := PrimaryDatasets{PRIMARY_DS_NAME: rec.PRIMARY_DS_NAME, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY}
+	prec := PrimaryDatasets{
+		PRIMARY_DS_NAME: pdsname,
+		CREATION_DATE:   rec.CREATION_DATE,
+		CREATE_BY:       rec.CREATE_BY,
+	}
 
 	// start transaction
 	tx, err := DB.Begin()
@@ -146,10 +151,26 @@ func (a *API) InsertPrimaryDatasets() error {
 	}
 	defer tx.Rollback()
 
+	// check if our data already exist in DB
+	pdsID, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", pdsname)
+	if err == nil {
+		if pdsID > 0 {
+			if utils.VERBOSE > 0 {
+				log.Printf("primary dataset %s is found in DB with id=%v", pdsname, pdsID)
+			}
+			if a.Writer != nil {
+				a.Writer.Write([]byte(`[]`))
+			}
+			return nil
+		}
+	}
+
 	// check if PrimaryDSType exists in DB
 	pdstID, err := GetID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", pdst)
 	if err != nil {
-		log.Println("unable to look-up primary_ds_type_id for", pdst, "error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to look-up primary_ds_type_id for", pdst, "error", err, "will insert...")
+		}
 		// insert PrimaryDSType record
 		err = trec.Insert(tx)
 		if err != nil {
@@ -168,7 +189,7 @@ func (a *API) InsertPrimaryDatasets() error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("faile to insert_primarydatasets_sqlite", err)
+		log.Println("fail to insert primarydatasets", err)
 		return err
 	}
 	if a.Writer != nil {
