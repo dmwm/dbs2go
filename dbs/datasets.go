@@ -402,6 +402,14 @@ func (a *API) InsertDatasets() error {
 	}
 	defer tx.Rollback()
 
+	// check if our data already exist in DB
+	if IfExist(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET) {
+		if a.Writer != nil {
+			a.Writer.Write([]byte(`[]`))
+		}
+		return nil
+	}
+
 	// get all necessary IDs from different tables
 	primId, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
 	if err != nil {

@@ -152,17 +152,11 @@ func (a *API) InsertPrimaryDatasets() error {
 	defer tx.Rollback()
 
 	// check if our data already exist in DB
-	pdsID, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", pdsname)
-	if err == nil {
-		if pdsID > 0 {
-			if utils.VERBOSE > 0 {
-				log.Printf("primary dataset %s is found in DB with id=%v", pdsname, pdsID)
-			}
-			if a.Writer != nil {
-				a.Writer.Write([]byte(`[]`))
-			}
-			return nil
+	if IfExist(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", pdsname) {
+		if a.Writer != nil {
+			a.Writer.Write([]byte(`[]`))
 		}
+		return nil
 	}
 
 	// check if PrimaryDSType exists in DB

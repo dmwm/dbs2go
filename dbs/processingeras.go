@@ -58,6 +58,12 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 		log.Println("unable to validate record", err)
 		return err
 	}
+
+	// check if our data already exist in DB
+	if IfExist(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", r.PROCESSING_VERSION) {
+		return nil
+	}
+
 	// get SQL statement from static area
 	stm := getSQL("insert_processing_eras")
 	if utils.VERBOSE > 0 {

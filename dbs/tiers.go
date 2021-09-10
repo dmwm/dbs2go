@@ -57,6 +57,11 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 		log.Println("unable to validate record", err)
 		return err
 	}
+	// check if our data already exist in DB
+	if IfExist(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", r.DATA_TIER_NAME) {
+		return nil
+	}
+
 	// get SQL statement from static area
 	stm := getSQL("insert_tiers")
 	if utils.VERBOSE > 0 {

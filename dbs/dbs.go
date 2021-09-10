@@ -540,6 +540,24 @@ func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface
 	return rid, err
 }
 
+// IfExist check if given rid, attr exists in given table for provided value conditions
+func IfExist(tx *sql.Tx, table, rid, attr string, val ...interface{}) bool {
+	// check if our data already exist in DB
+	fid, err := GetID(tx, table, rid, attr, val)
+	if err == nil {
+		if fid > 0 {
+			if utils.VERBOSE > 0 {
+				log.Printf("%s found in %s with id=%v", attr, table, fid)
+			}
+			return true
+		}
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("fail to get ID from table %s %s for %s=%v", table, rid, attr, val)
+	}
+	return false
+}
+
 // OperatorValue function generates operator and value pair for a given argument
 func OperatorValue(arg string) (string, string) {
 	op := "="

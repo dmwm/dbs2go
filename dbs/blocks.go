@@ -251,6 +251,14 @@ func (a *API) InsertBlocks() error {
 	}
 	defer tx.Rollback()
 
+	// check if our data already exist in DB
+	if IfExist(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME) {
+		if a.Writer != nil {
+			a.Writer.Write([]byte(`[]`))
+		}
+		return nil
+	}
+
 	// get all necessary IDs from different tables
 	dataset := strings.Split(rec.BLOCK_NAME, "#")[0]
 	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", dataset)

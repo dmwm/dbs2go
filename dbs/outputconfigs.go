@@ -181,6 +181,15 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 		log.Println("fail to decode data", err)
 		return err
 	}
+
+	// check if our data already exist in DB
+	if IfExist(tx, "OUTPUT_CONFIGS", "output_mod_config_id", "output_module_label", rec.OUTPUT_MODULE_LABEL) {
+		if a.Writer != nil {
+			a.Writer.Write([]byte(`[]`))
+		}
+		return nil
+	}
+
 	if rec.CREATION_DATE == 0 {
 		rec.CREATION_DATE = time.Now().Unix()
 	}

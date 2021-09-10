@@ -408,6 +408,14 @@ func (a *API) InsertFiles() error {
 	}
 	defer tx.Rollback()
 
+	// check if our data already exist in DB
+	if IfExist(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME) {
+		if a.Writer != nil {
+			a.Writer.Write([]byte(`[]`))
+		}
+		return nil
+	}
+
 	// get all necessary IDs from different tables
 	blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME)
 	if err != nil {
