@@ -183,7 +183,7 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	}
 
 	// check if our data already exist in DB
-	if IfExist(tx, "OUTPUT_CONFIGS", "output_mod_config_id", "output_module_label", rec.OUTPUT_MODULE_LABEL) {
+	if IfExist(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", rec.OUTPUT_MODULE_LABEL) {
 		if a.Writer != nil {
 			a.Writer.Write([]byte(`[]`))
 		}
