@@ -170,14 +170,6 @@ func (a *API) UpdateAcquisitionEras() error {
 	}
 	defer tx.Rollback()
 
-	// check if our data already exist in DB
-	if IfExist(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", aera) {
-		if a.Writer != nil {
-			a.Writer.Write([]byte(`[]`))
-		}
-		return nil
-	}
-
 	_, err = tx.Exec(stm, endDate, aera)
 	if err != nil {
 		log.Printf("unable to update %v", err)
