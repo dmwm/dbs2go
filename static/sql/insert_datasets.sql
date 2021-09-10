@@ -1,4 +1,4 @@
-INSERT INTO DATASETS
+INSERT INTO {{.Owner}}.DATASETS
     (dataset_id,dataset,is_dataset_valid,primary_ds_id,
      processed_ds_id,data_tier_id,dataset_access_type_id,
      acquisition_era_id,processing_era_id,physics_group_id,
