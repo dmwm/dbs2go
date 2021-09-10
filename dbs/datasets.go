@@ -419,7 +419,11 @@ func (a *API) InsertDatasets() error {
 	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS_NAME)
-		return err
+		prec := ProcessedDatasets{PROCESSED_DS_NAME: rec.PROCESSED_DS_NAME}
+		err := prec.Insert(tx)
+		if err != nil {
+			return err
+		}
 	}
 	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER)
 	if err != nil {
