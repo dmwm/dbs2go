@@ -134,7 +134,8 @@ func (a *API) InsertPrimaryDatasets() error {
 		log.Println("fail to decode data", err)
 		return err
 	}
-	trec := PrimaryDSTypes{PRIMARY_DS_TYPE: rec.PRIMARY_DS_TYPE}
+	pdst := rec.PRIMARY_DS_TYPE
+	trec := PrimaryDSTypes{PRIMARY_DS_TYPE: pdst}
 	prec := PrimaryDatasets{PRIMARY_DS_NAME: rec.PRIMARY_DS_NAME, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY}
 
 	// start transaction
@@ -144,13 +145,21 @@ func (a *API) InsertPrimaryDatasets() error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = trec.Insert(tx)
+
+	// check if PrimaryDSType exists in DB
+	pdstID, err := GetID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", pdst)
 	if err != nil {
-		return err
+		log.Println("unable to look-up primary_ds_type_id for", pdst, "error", err)
+		// insert PrimaryDSType record
+		err = trec.Insert(tx)
+		if err != nil {
+			return err
+		}
+		pdstID = trec.PRIMARY_DS_TYPE_ID
 	}
 
 	// init all foreign Id's in output config record
-	prec.PRIMARY_DS_TYPE_ID = trec.PRIMARY_DS_TYPE_ID
+	prec.PRIMARY_DS_TYPE_ID = pdstID
 	err = prec.Insert(tx)
 	if err != nil {
 		return err
@@ -159,7 +168,7 @@ func (a *API) InsertPrimaryDatasets() error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("faile to insert_outputconfigs_sqlite", err)
+		log.Println("faile to insert_primarydatasets_sqlite", err)
 		return err
 	}
 	if a.Writer != nil {
