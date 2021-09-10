@@ -343,19 +343,19 @@ func (r *Datasets) Decode(reader io.Reader) error {
 
 // DatasetRecord we receive for InsertDatasets API
 type DatasetRecord struct {
-	DATASET                string  `json:"dataset"`
-	PRIMARY_DS_NAME        string  `json:"primary_ds_name"`
-	PROCESSED_DS_NAME      string  `json:"processed_ds_name"`
-	DATA_TIER              string  `json:"data_tier"`
-	ACQUISITION_ERA        string  `json:"acquisition_era"`
-	DATASET_ACCESS_TYPE    string  `json:"dataset_access_type"`
-	PROCESSING_VERSION     int64   `json:"processing_version"`
-	PHYSICS_GROUP          string  `json:"physics_group"`
-	XTCROSSSECTION         float64 `json:"xtcrosssection"`
-	CREATION_DATE          int64   `json:"creation_date"`
-	CREATE_BY              string  `json:"create_by"`
-	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
-	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
+	DATASET                string  `json:"dataset" validate:"required"`
+	PRIMARY_DS_NAME        string  `json:"primary_ds_name" validate:"required"`
+	PROCESSED_DS_NAME      string  `json:"processed_ds_name" validate:"required"`
+	DATA_TIER              string  `json:"data_tier" validate:"required"`
+	ACQUISITION_ERA        string  `json:"acquisition_era" validate:"required"`
+	DATASET_ACCESS_TYPE    string  `json:"dataset_access_type" validate:"required"`
+	PROCESSING_VERSION     int64   `json:"processing_version" validate:"required,number,gt=0"`
+	PHYSICS_GROUP          string  `json:"physics_group" validate:"required"`
+	XTCROSSSECTION         float64 `json:"xtcrosssection" validate:"required,number"`
+	CREATION_DATE          int64   `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY              string  `json:"create_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64   `json:"last_modification_date" validate:"required,number,gt=0"`
+	LAST_MODIFIED_BY       string  `json:"last_modified_by" validate:"required"`
 }
 
 // InsertDatasets DBS API
