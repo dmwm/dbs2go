@@ -106,7 +106,7 @@
   insertParams:
     dataset: "/AAAbbb/XXXyyy/TEST-RAW-TIER"
     primary_ds_name: "primds"
-    processed_ds: "ps_ds_name"
+    processed_ds_name: "ps_ds_name"
     data_tier: "TEST-RAW-TIER"
     acquisition_era: "era"
     dataset_access_type: "VALID"
