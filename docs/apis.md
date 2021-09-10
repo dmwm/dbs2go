@@ -298,7 +298,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
     "adler32", "adler",
     "md5": "md5",
     "auto_cross_section": 1.1,
-    "createion_date": 1631118749,
+    "creation_date": 1631118749,
     "create_by": "tester",
     "last_modification_date": 1631118749,
     "last_modified_by": "tester",
@@ -336,7 +336,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
 {
     "primary_ds_name": "primary",
     "primary_ds_type": "primary-type",
-    "createion_date": 1631118749,
+    "creation_date": 1631118749,
     "create_by": "tester"
 }
 ```

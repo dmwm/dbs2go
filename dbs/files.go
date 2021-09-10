@@ -273,7 +273,7 @@ func (r *Files) Validate() error {
 		return err
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return errors.New("invalid pattern for createion date")
+		return errors.New("invalid pattern for creation date")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.LAST_MODIFICATION_DATE)); !matched {
 		return errors.New("invalid pattern for last modification date")
