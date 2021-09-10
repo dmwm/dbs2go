@@ -343,14 +343,15 @@ func (r *Datasets) Decode(reader io.Reader) error {
 
 // DatasetRecord we receive for InsertDatasets API
 type DatasetRecord struct {
-	DATASET                string  `json:"dataset" validate:"required"`
-	PRIMARY_DS_NAME        string  `json:"primary_ds_name" validate:"required"`
+	DATASET         string `json:"dataset" validate:"required"`
+	PRIMARY_DS_NAME string `json:"primary_ds_name" validate:"required"`
+	//     PRIMARY_DS_TYPE        string  `json:"primary_ds_type" validate:"required"`
 	PROCESSED_DS_NAME      string  `json:"processed_ds_name" validate:"required"`
-	DATA_TIER              string  `json:"data_tier" validate:"required"`
-	ACQUISITION_ERA        string  `json:"acquisition_era" validate:"required"`
+	DATA_TIER_NAME         string  `json:"data_tier_name" validate:"required"`
+	ACQUISITION_ERA_NAME   string  `json:"acquisition_era_name" validate:"required"`
 	DATASET_ACCESS_TYPE    string  `json:"dataset_access_type" validate:"required"`
 	PROCESSING_VERSION     int64   `json:"processing_version" validate:"required,number,gt=0"`
-	PHYSICS_GROUP          string  `json:"physics_group" validate:"required"`
+	PHYSICS_GROUP_NAME     string  `json:"physics_group_name" validate:"required"`
 	XTCROSSSECTION         float64 `json:"xtcrosssection" validate:"required,number"`
 	CREATION_DATE          int64   `json:"creation_date" validate:"required,number,gt=0"`
 	CREATE_BY              string  `json:"create_by" validate:"required"`
@@ -416,6 +417,11 @@ func (a *API) InsertDatasets() error {
 		log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
 		return err
 	}
+	//     primType, err := GetID(tx, "PRIMARY_DS_TYPE", "primary_ds_type_id", "primary_ds_type", rec.PRIMARY_DS_TYPE)
+	//     if err != nil {
+	//         log.Println("unable to find primary_ds_type_id for", rec.PRIMARY_DS_TYPE)
+	//         return err
+	//     }
 	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS_NAME)
@@ -425,9 +431,9 @@ func (a *API) InsertDatasets() error {
 			return err
 		}
 	}
-	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER)
+	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER_NAME)
 	if err != nil {
-		log.Println("unable to find data_tier_id for", rec.DATA_TIER)
+		log.Println("unable to find data_tier_id for", rec.DATA_TIER_NAME)
 		return err
 	}
 	daccId, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
@@ -435,9 +441,9 @@ func (a *API) InsertDatasets() error {
 		log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
 		return err
 	}
-	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA)
+	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA_NAME)
 	if err != nil {
-		log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA)
+		log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA_NAME)
 		return err
 	}
 	peraId, err := GetID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
@@ -445,14 +451,15 @@ func (a *API) InsertDatasets() error {
 		log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
 		return err
 	}
-	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP)
+	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP_NAME)
 	if err != nil {
-		log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP)
+		log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP_NAME)
 		return err
 	}
 
 	// assign all Id's in dataset DB record
 	dsrec.PRIMARY_DS_ID = primId
+	//     dsrec.PRIMARY_DS_TYPE = primType
 	dsrec.PROCESSED_DS_ID = procId
 	dsrec.DATA_TIER_ID = tierId
 	dsrec.DATASET_ACCESS_TYPE_ID = daccId
