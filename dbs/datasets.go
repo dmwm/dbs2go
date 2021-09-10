@@ -430,6 +430,10 @@ func (a *API) InsertDatasets() error {
 		if err != nil {
 			return err
 		}
+		procId, err = GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
+		if err != nil {
+			return err
+		}
 	}
 	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER_NAME)
 	if err != nil {
