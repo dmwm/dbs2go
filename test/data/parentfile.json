@@ -1,0 +1,1434 @@
+{
+  "files": [
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/0.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/1.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/2.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/3.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/4.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/5.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/6.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/7.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/8.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97",
+          "event_count": "66"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "97",
+          "event_count": "67"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "97",
+          "event_count": "68"
+        },
+        {
+          "lumi_section_num": "248",
+          "run_num": "97",
+          "event_count": "69"
+        },
+        {
+          "lumi_section_num": "250",
+          "run_num": "97",
+          "event_count": "70"
+        },
+        {
+          "lumi_section_num": "300",
+          "run_num": "97",
+          "event_count": "71"
+        },
+        {
+          "lumi_section_num": "534",
+          "run_num": "97",
+          "event_count": "72"
+        },
+        {
+          "lumi_section_num": "546",
+          "run_num": "97",
+          "event_count": "73"
+        },
+        {
+          "lumi_section_num": "638",
+          "run_num": "97",
+          "event_count": "74"
+        },
+        {
+          "lumi_section_num": "650",
+          "run_num": "97",
+          "event_count": "75"
+        },
+        {
+          "lumi_section_num": "794",
+          "run_num": "97",
+          "event_count": "76"
+        },
+        {
+          "lumi_section_num": "1313",
+          "run_num": "97",
+          "event_count": "77"
+        },
+        {
+          "lumi_section_num": "1327",
+          "run_num": "97",
+          "event_count": "78"
+        },
+        {
+          "lumi_section_num": "1339",
+          "run_num": "97",
+          "event_count": "79"
+        },
+        {
+          "lumi_section_num": "1353",
+          "run_num": "97",
+          "event_count": "80"
+        },
+        {
+          "lumi_section_num": "1428",
+          "run_num": "97",
+          "event_count": "81"
+        },
+        {
+          "lumi_section_num": "1496",
+          "run_num": "97",
+          "event_count": "82"
+        },
+        {
+          "lumi_section_num": "1537",
+          "run_num": "97",
+          "event_count": "83"
+        },
+        {
+          "lumi_section_num": "1652",
+          "run_num": "97",
+          "event_count": "84"
+        },
+        {
+          "lumi_section_num": "1664",
+          "run_num": "97",
+          "event_count": "85"
+        },
+        {
+          "lumi_section_num": "1743",
+          "run_num": "97",
+          "event_count": "86"
+        },
+        {
+          "lumi_section_num": "1755",
+          "run_num": "97",
+          "event_count": "87"
+        },
+        {
+          "lumi_section_num": "1860",
+          "run_num": "97",
+          "event_count": "88"
+        },
+        {
+          "lumi_section_num": "1872",
+          "run_num": "97",
+          "event_count": "89"
+        }
+      ],
+      "file_parent_list": [],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-pstr-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/9.root"
+    }
+  ]
+}

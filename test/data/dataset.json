@@ -1,0 +1,25 @@
+{
+  "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+  "physics_group_name": "Tracker",
+  "acquisition_era_name": "acq_era_207",
+  "data_tier_name": "GEN-SIM-RAW",
+  "dataset_access_type": "PRODUCTION",
+  "last_modification_date": 1234,
+  "processing_version": 207,
+  "creation_date": 1234,
+  "primary_ds_name": "unittest_web_primary_ds_name_207",
+  "create_by": "anzar",
+  "last_modified_by": "testuer",
+  "processed_ds_name": "acq_era_207-v207",
+  "xtcrosssection": 123,
+  "primary_ds_type": "test",
+  "output_configs": [
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag_207"
+    }
+  ]
+}

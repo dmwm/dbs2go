@@ -76,7 +76,7 @@ func TestInsertSQL(t *testing.T) {
 	defer db.Close()
 
 	// get list of APIs and their parameters
-	fname := "insert.yaml"
+	fname := "data/insert.yaml"
 	data, err := ioutil.ReadFile(fname)
 	if err != nil {
 		t.Errorf("Unable to read file %s, error %v\n", fname, err)

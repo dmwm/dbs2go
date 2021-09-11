@@ -1,0 +1,7 @@
+{
+  "release_version": "CMSSW_1_2_3",
+  "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+  "app_name": "cmsRun",
+  "output_module_label": "Merged",
+  "global_tag": "my-cms-gtag_207"
+}

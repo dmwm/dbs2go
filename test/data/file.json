@@ -1,0 +1,394 @@
+{
+  "files": [
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/0.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/0.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/1.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/1.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/2.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/2.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/3.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/3.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/4.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/4.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/5.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/5.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/6.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/6.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/7.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/7.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/8.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/8.root"
+    },
+    {
+      "adler32": "NOTSET",
+      "file_type": "EDM",
+      "file_output_config_list": [
+        {
+          "release_version": "CMSSW_1_2_3",
+          "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+          "app_name": "cmsRun",
+          "output_module_label": "Merged",
+          "global_tag": "my-cms-gtag_207"
+        }
+      ],
+      "dataset": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW",
+      "file_size": "2012211901",
+      "auto_cross_section": 0,
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": "27414",
+          "run_num": "97"
+        },
+        {
+          "lumi_section_num": "26422",
+          "run_num": "98"
+        },
+        {
+          "lumi_section_num": "29838",
+          "run_num": "99"
+        }
+      ],
+      "file_parent_list": [
+        {
+          "file_parent_lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p207/9.root"
+        }
+      ],
+      "event_count": "1619",
+      "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/9.root"
+    }
+  ]
+}

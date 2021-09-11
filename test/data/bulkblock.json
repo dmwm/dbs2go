@@ -1,0 +1,163 @@
+{
+  "file_conf_list": [
+    {
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/0.root",
+      "release_version": "CMSSW_1_2_3",
+      "global_tag": "my-cms-gtag_207"
+    },
+    {
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/1.root",
+      "release_version": "CMSSW_1_2_3",
+      "global_tag": "my-cms-gtag_207"
+    },
+    {
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/2.root",
+      "release_version": "CMSSW_1_2_3",
+      "global_tag": "my-cms-gtag_207"
+    },
+    {
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/3.root",
+      "release_version": "CMSSW_1_2_3",
+      "global_tag": "my-cms-gtag_207"
+    },
+    {
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/4.root",
+      "release_version": "CMSSW_1_2_3",
+      "global_tag": "my-cms-gtag_207"
+    }
+  ],
+  "dataset_conf_list": [
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag_207"
+    }
+  ],
+  "processing_era": {
+    "create_by": "WMAgent",
+    "processing_version": 207
+  },
+  "files": [
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 98,
+          "event_count": 66
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 98,
+          "event_count": 67
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 98,
+          "event_count": 68
+        }
+      ],
+      "adler32": "NOTSET",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/0.root",
+      "file_size": "2012211901",
+      "file_type": "EDM",
+      "event_count": "201",
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27415,
+          "run_num": 98,
+          "event_count": 66
+        },
+        {
+          "lumi_section_num": 26423,
+          "run_num": 98,
+          "event_count": 67
+        },
+        {
+          "lumi_section_num": 29839,
+          "run_num": 98,
+          "event_count": 68
+        }
+      ],
+      "adler32": "NOTSET",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/1.root",
+      "file_size": "2012211901",
+      "file_type": "EDM",
+      "event_count": "201",
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27416,
+          "run_num": 98,
+          "event_count": 66
+        },
+        {
+          "lumi_section_num": 26424,
+          "run_num": 98,
+          "event_count": 67
+        },
+        {
+          "lumi_section_num": 29840,
+          "run_num": 98,
+          "event_count": 68
+        }
+      ],
+      "adler32": "NOTSET",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/2.root",
+      "file_size": "2012211901",
+      "file_type": "EDM",
+      "event_count": "201",
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27417,
+          "run_num": 98,
+          "event_count": 66
+        },
+        {
+          "lumi_section_num": 26425,
+          "run_num": 98,
+          "event_count": 67
+        },
+        {
+          "lumi_section_num": 29841,
+          "run_num": 98,
+          "event_count": 68
+        }
+      ],
+      "adler32": "NOTSET",
+      "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/3.root",
+      "file_size": "2012211901",
+      "file_type": "EDM",
+      "event_count": "201",
+      "auto_cross_section": 0
+    }
+  ]
+}

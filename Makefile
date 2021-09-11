@@ -34,7 +34,7 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test: test-dbs test-sql test-validator test-bulk test-http test-utils test-migrate bench
+test: test-dbs test-sql test-validator test-bulk test-http test-utils test-migrate test-writer bench
 
 test-dbs:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run TestDBS
@@ -46,6 +46,8 @@ test-validator:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Validator
 test-http:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run HTTP
+test-writer:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Inject
 test-utils:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Utils
 test-migrate:
