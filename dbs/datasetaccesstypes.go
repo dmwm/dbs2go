@@ -32,6 +32,11 @@ type DatasetAccessTypes struct {
 
 // Insert implementation of DatasetAccessTypes
 func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
+
+	// check if our data already exist in DB
+	if IfExist(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", r.DATASET_ACCESS_TYPE) {
+		return nil
+	}
 	var tid int64
 	var err error
 	if r.DATASET_ACCESS_TYPE_ID == 0 {
@@ -95,5 +100,12 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 
 // InsertDatasetAccessTypes DBS API
 func (a *API) InsertDatasetAccessTypes() error {
-	return insertRecord(&DatasetAccessTypes{}, a.Reader)
+	err := insertRecord(&DatasetAccessTypes{}, a.Reader)
+	if err != nil {
+		return err
+	}
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }

@@ -108,6 +108,7 @@ func handlers() *mux.Router {
 	} else if Config.DBSWriterServer {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST")
 		router.HandleFunc(basePath("/datasetaccesstypes"), DatasetAccessTypesHandler).Methods("POST")
+		router.HandleFunc(basePath("/physicsgroups"), PhysicsGroupsHandler).Methods("POST")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")

@@ -334,6 +334,10 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	}
 	if a == "datatiers" {
 		err = api.InsertDataTiers()
+	} else if a == "datasetaccesstypes" {
+		err = api.InsertDatasetAccessTypes()
+	} else if a == "physicsgroups" {
+		err = api.InsertPhysicsGroups()
 	} else if a == "outputconfigs" {
 		err = api.InsertOutputConfigs()
 	} else if a == "primarydatasets" {
@@ -678,7 +682,11 @@ func DatasetAccessTypesHandler(w http.ResponseWriter, r *http.Request) {
 // PhysicsGroupsHandler provides access to PhysicsGroups DBS API
 // Takes the following arguments: physics_group_name
 func PhysicsGroupsHandler(w http.ResponseWriter, r *http.Request) {
-	DBSGetHandler(w, r, "physicsgroups")
+	if r.Method == "POST" {
+		DBSPostHandler(w, r, "physicsgroups")
+	} else {
+		DBSGetHandler(w, r, "physicsgroups")
+	}
 }
 
 // OutputConfigsHandler provides access to OutputConfigs DBS API.

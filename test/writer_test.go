@@ -55,10 +55,17 @@ func TestDBSWriter(t *testing.T) {
 
 	api = "/datasetaccesstypes"
 	hdlr = web.DatasetAccessTypesHandler
-	log.Println("insert data tier")
+	log.Println("insert dataset access type")
 	insertData(t, api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
-	log.Println("re-insert data tier")
+	log.Println("re-insert dataset access type")
 	insertData(t, api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
+
+	api = "/physicsgroups"
+	hdlr = web.PhysicsGroupsHandler
+	log.Println("insert physics group")
+	insertData(t, api, "data/physicsgroup.json", "physics_group_name", hdlr)
+	log.Println("re-insert physics group")
+	insertData(t, api, "data/physicsgroup.json", "physics_group_name", hdlr)
 
 	api = "/datasets"
 	hdlr = web.DatasetsHandler

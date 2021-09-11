@@ -33,6 +33,10 @@ type PhysicsGroups struct {
 
 // Insert implementation of PhysicsGroups
 func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
+	// check if our data already exist in DB
+	if IfExist(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", r.PHYSICS_GROUP_NAME) {
+		return nil
+	}
 	var tid int64
 	var err error
 	if r.PHYSICS_GROUP_ID == 0 {
@@ -96,5 +100,12 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 
 // InsertPhysicsGroups DBS API
 func (a *API) InsertPhysicsGroups() error {
-	return insertRecord(&PhysicsGroups{}, a.Reader)
+	err := insertRecord(&PhysicsGroups{}, a.Reader)
+	if err != nil {
+		return err
+	}
+	if a.Writer != nil {
+		a.Writer.Write([]byte(`[]`))
+	}
+	return nil
 }
