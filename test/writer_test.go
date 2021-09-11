@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -17,54 +18,86 @@ import (
 
 // TestDBSWriter provides a test to DBS writer functionality
 func TestDBSWriter(t *testing.T) {
+	api := "/primarydatasets"
+	hdlr := web.PrimaryDatasetsHandler
 	log.Println("insert primary dataset")
-	insertPrimaryDataset(t)
+	insertData(t, api, "data/primarydataset.json", "primary_ds_name", hdlr)
 	log.Println("re-insert primary dataset")
-	insertPrimaryDataset(t)
+	insertData(t, api, "data/primarydataset.json", "primary_ds_name", hdlr)
 
+	api = "/outputconfigs"
+	hdlr = web.OutputConfigsHandler
 	log.Println("insert output config")
-	insertOutputConfig(t)
+	insertData(t, api, "data/outputconfig.json", "output_module_label", hdlr)
 	log.Println("re-insert output config")
-	insertOutputConfig(t)
+	insertData(t, api, "data/outputconfig.json", "output_module_label", hdlr)
 
+	api = "/acquisitioneras"
+	hdlr = web.AcquisitionErasHandler
 	log.Println("insert acquisition era")
-	insertAcquisitionEra(t)
+	insertData(t, api, "data/acquisitionera.json", "acquisition_era_name", hdlr)
 	log.Println("re-insert acquisition era")
-	insertAcquisitionEra(t)
+	insertData(t, api, "data/acquisitionera.json", "acquisition_era_name", hdlr)
 
+	api = "/processingeras"
+	hdlr = web.ProcessingErasHandler
 	log.Println("insert processing era")
-	insertProcessingEra(t)
+	insertData(t, api, "data/processingera.json", "processing_era_name", hdlr)
 	log.Println("re-insert processing era")
-	insertProcessingEra(t)
+	insertData(t, api, "data/processingera.json", "processing_era_name", hdlr)
 
+	api = "/datatiers"
+	hdlr = web.DatatiersHandler
+	log.Println("insert data tier")
+	insertData(t, api, "data/datatier.json", "data_tier_name", hdlr)
+	log.Println("re-insert data tier")
+	insertData(t, api, "data/datatier.json", "data_tier_name", hdlr)
+
+	api = "/datasetaccesstypes"
+	hdlr = web.DatasetAccessTypesHandler
+	log.Println("insert data tier")
+	insertData(t, api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
+	log.Println("re-insert data tier")
+	insertData(t, api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
+
+	api = "/datasets"
+	hdlr = web.DatasetsHandler
 	log.Println("insert dataset")
-	insertDataset(t)
+	insertData(t, api, "data/dataset.json", "dataset", hdlr)
 	log.Println("re-insert dataset")
-	insertDataset(t)
+	insertData(t, api, "data/dataset.json", "dataset", hdlr)
 
+	api = "/blocks"
+	hdlr = web.BlocksHandler
 	log.Println("insert block")
-	insertBlock(t)
+	insertData(t, api, "data/block.json", "block_name", hdlr)
 	log.Println("re-insert block")
-	insertBlock(t)
+	insertData(t, api, "data/block.json", "block_name", hdlr)
 
+	api = "/files"
+	hdlr = web.FilesHandler
 	log.Println("insert files")
-	insertFiles(t)
+	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
 	log.Println("re-insert files")
-	insertFiles(t)
+	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
 
+	api = "/fileparents"
+	hdlr = web.FileParentsHandler
 	log.Println("insert file parents")
-	insertFileParents(t)
+	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
 	log.Println("re-insert file parents")
-	insertFileParents(t)
+	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
 
+	api = "/bulkblocks"
+	hdlr = web.BulkBlocksHandler
 	log.Println("insert bulk block")
-	insertBulkBlock(t)
+	insertData(t, api, "data/bulkblock.json", "block_name", hdlr)
 	log.Println("re-insert bulk block")
-	insertBulkBlock(t)
+	insertData(t, api, "data/bulkblock.json", "block_name", hdlr)
 }
 
-// insertPrimaryDataset provides a test to insert primary dataset data
-func insertPrimaryDataset(t *testing.T) {
+// insertData provides a test to insert DBS data
+func insertData(t *testing.T, api, dataFile, attr string, hdlr func(http.ResponseWriter, *http.Request)) {
 	// initialize DB for testing
 	db := initDB(false)
 	defer db.Close()
@@ -73,7 +106,7 @@ func insertPrimaryDataset(t *testing.T) {
 	var data []byte
 	var err error
 	var rr *httptest.ResponseRecorder
-	data, err = os.ReadFile("data/primarydataset.json")
+	data, err = os.ReadFile(dataFile)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -85,8 +118,7 @@ func insertPrimaryDataset(t *testing.T) {
 	reader := bytes.NewReader(data)
 
 	// test writer POST DBS API
-	api := "/dbs2go-writer/primarydatasets"
-	rr, err = respRecorder("POST", api, reader, web.PrimaryDatasetsHandler)
+	rr, err = respRecorder("POST", api, reader, hdlr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -108,12 +140,12 @@ func insertPrimaryDataset(t *testing.T) {
 	}
 
 	// test reader GET DBS API
-	primds, ok := rec["primary_ds_name"]
+	val, ok := rec[attr]
 	if !ok {
 		t.Error("unable to extract primary_ds_name from loaded record")
 	}
-	api = fmt.Sprintf("/dbs2go/primarydatasets?primary_ds_name=%s", primds)
-	rr, err = respRecorder("GET", api, reader, web.PrimaryDatasetsHandler)
+	getApi := fmt.Sprintf("%s?%s=%s", api, attr, val)
+	rr, err = respRecorder("GET", getApi, reader, hdlr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -124,7 +156,7 @@ func insertPrimaryDataset(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
 	}
-	log.Printf("reader api %s received data:\n%v", api, string(data))
+	log.Printf("reader api %s received data:\n%v", getApi, string(data))
 }
 
 // insertOutputConfig provides a test to insert output config data
@@ -133,28 +165,4 @@ func insertOutputConfig(t *testing.T) {
 
 // insertAcquisitionEra provides a test to insert acquisition era
 func insertAcquisitionEra(t *testing.T) {
-}
-
-// insertProcessingEra provides a test to insert processing era data
-func insertProcessingEra(t *testing.T) {
-}
-
-// insertDataset provides a test to insert dataset data
-func insertDataset(t *testing.T) {
-}
-
-// insertBlock provides a test to insert block data
-func insertBlock(t *testing.T) {
-}
-
-// insertFiles provides a test to insert files data
-func insertFiles(t *testing.T) {
-}
-
-// insertFileParents provides a test to insert file parents
-func insertFileParents(t *testing.T) {
-}
-
-// insertBulkBlock provides a test to insert bulk block data
-func insertBulkBlock(t *testing.T) {
 }

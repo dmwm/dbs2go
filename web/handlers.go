@@ -668,7 +668,11 @@ func DatasetChildrenHandler(w http.ResponseWriter, r *http.Request) {
 // DatasetAccessTypesHandler provides access to DatasetAccessTypes DBS API.
 // Takes the following arguments: dataset_access_type
 func DatasetAccessTypesHandler(w http.ResponseWriter, r *http.Request) {
-	DBSGetHandler(w, r, "datasetaccesstypes")
+	if r.Method == "POST" {
+		DBSPostHandler(w, r, "datasetaccesstypes")
+	} else {
+		DBSGetHandler(w, r, "datasetaccesstypes")
+	}
 }
 
 // PhysicsGroupsHandler provides access to PhysicsGroups DBS API
