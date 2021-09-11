@@ -15,8 +15,18 @@ import (
 	"github.com/vkuznet/dbs2go/web"
 )
 
-// TestInjectHTTPPost provides test of DBS writer injection POST APIs
-func TestInjectHTTPPost(t *testing.T) {
+// TestInjectDBSData provides a test to insert DBS data
+func TestInjectDBSData(t *testing.T) {
+	log.Println("insert primary dataset")
+	// insert primary dataset
+	insertPrimaryDataset(t)
+	// re-try should make no harm
+	log.Println("re-insert primary dataset")
+	insertPrimaryDataset(t)
+}
+
+// insertPrimaryDataset provides a test to insert primary dataset data
+func insertPrimaryDataset(t *testing.T) {
 	// initialize DB for testing
 	db := initDB(false)
 	defer db.Close()
