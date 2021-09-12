@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
 
@@ -84,16 +85,16 @@ func TestDBSWriter(t *testing.T) {
 	api = "/files"
 	hdlr = web.FilesHandler
 	log.Println("insert files")
-	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
+	insertData(t, api, "data/file.json", "", hdlr)
 	log.Println("re-insert files")
-	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
+	insertData(t, api, "data/file.json", "", hdlr)
 
 	api = "/fileparents"
 	hdlr = web.FileParentsHandler
 	log.Println("insert file parents")
-	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
+	insertData(t, api, "data/fileparent.json", "logical_file_name", hdlr)
 	log.Println("re-insert file parents")
-	insertData(t, api, "data/files.json", "logical_file_name", hdlr)
+	insertData(t, api, "data/fileparent.json", "logical_file_name", hdlr)
 
 	api = "/bulkblocks"
 	hdlr = web.BulkBlocksHandler
@@ -146,12 +147,23 @@ func insertData(t *testing.T, api, dataFile, attr string, hdlr func(http.Respons
 		t.Errorf("writer POST api %s, wrong output %v", api, string(data))
 	}
 
+	// if no attribute is provided we'll skip GET API test
+	if attr == "" {
+		return
+	}
 	// test reader GET DBS API
 	val, ok := rec[attr]
 	if !ok {
 		t.Error("unable to extract primary_ds_name from loaded record")
 	}
-	getApi := fmt.Sprintf("%s?%s=%s", api, attr, val)
+	var value string
+	switch v := val.(type) {
+	case string:
+		value = url.QueryEscape(v)
+	default:
+		value = fmt.Sprintf("%v", v)
+	}
+	getApi := fmt.Sprintf("%s?%s=%s", api, attr, value)
 	rr, err = respRecorder("GET", getApi, reader, hdlr)
 	if err != nil {
 		t.Error(err)
