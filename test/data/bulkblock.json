@@ -76,9 +76,9 @@
       ],
       "adler32": "NOTSET",
       "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/0.root",
-      "file_size": "2012211901",
+      "file_size": 2012211901,
       "file_type": "EDM",
-      "event_count": "201",
+      "event_count": 201,
       "auto_cross_section": 0
     },
     {
@@ -102,9 +102,9 @@
       ],
       "adler32": "NOTSET",
       "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/1.root",
-      "file_size": "2012211901",
+      "file_size": 2012211901,
       "file_type": "EDM",
-      "event_count": "201",
+      "event_count": 201,
       "auto_cross_section": 0
     },
     {
@@ -128,9 +128,9 @@
       ],
       "adler32": "NOTSET",
       "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/2.root",
-      "file_size": "2012211901",
+      "file_size": 2012211901,
       "file_type": "EDM",
-      "event_count": "201",
+      "event_count": 201,
       "auto_cross_section": 0
     },
     {
@@ -154,9 +154,9 @@
       ],
       "adler32": "NOTSET",
       "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p207/3.root",
-      "file_size": "2012211901",
+      "file_size": 2012211901,
       "file_type": "EDM",
-      "event_count": "201",
+      "event_count": 201,
       "auto_cross_section": 0
     }
   ]

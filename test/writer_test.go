@@ -82,19 +82,37 @@ func TestDBSWriter(t *testing.T) {
 	log.Println("re-insert block")
 	insertData(t, api, "data/block.json", "block_name", hdlr)
 
+	// use datasetparent.json to insert dataset record used by datasetparent.json
+	api = "/datasets"
+	hdlr = web.DatasetsHandler
+	log.Println("insert dataset")
+	insertData(t, api, "data/datasetparent.json", "dataset_name", hdlr)
+	log.Println("re-insert dataset")
+	insertData(t, api, "data/datasetparent.json", "dataset_name", hdlr)
+
+	// use blockparent.json to insert block record used by fileparent.json
+	api = "/blocks"
+	hdlr = web.BlocksHandler
+	log.Println("insert block")
+	insertData(t, api, "data/blockparent.json", "block_name", hdlr)
+	log.Println("re-insert block")
+	insertData(t, api, "data/blockparent.json", "block_name", hdlr)
+
+	// use fileparent.json to insert file records which later will be used
+	// as file parents in subsequent call with files.json
+	api = "/files"
+	hdlr = web.FilesHandler
+	log.Println("insert file parents")
+	insertData(t, api, "data/fileparent.json", "logical_file_name", hdlr)
+	log.Println("re-insert file parents")
+	insertData(t, api, "data/fileparent.json", "logical_file_name", hdlr)
+
 	api = "/files"
 	hdlr = web.FilesHandler
 	log.Println("insert files")
 	insertData(t, api, "data/file.json", "", hdlr)
 	log.Println("re-insert files")
 	insertData(t, api, "data/file.json", "", hdlr)
-
-	api = "/fileparents"
-	hdlr = web.FileParentsHandler
-	log.Println("insert file parents")
-	insertData(t, api, "data/fileparent.json", "logical_file_name", hdlr)
-	log.Println("re-insert file parents")
-	insertData(t, api, "data/fileparent.json", "logical_file_name", hdlr)
 
 	api = "/bulkblocks"
 	hdlr = web.BulkBlocksHandler

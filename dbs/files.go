@@ -320,9 +320,9 @@ type RunLumi struct {
 //     FileParentLfn string `json:"file_parent_lfn"`
 // }
 
-// InputFilesRecord represents input data record for files API
-type InputFilesRecord struct {
-	Records []FileRecord `json:"files"`
+// FileParentLFNRecord represents file parent recoord supplied in file parent list of FileRecord
+type FileParentLFNRecord struct {
+	FILE_PARENT_LFN string `json:"file_parent_lfn"`
 }
 
 // FileRecord represents input record for insert files API
@@ -343,9 +343,9 @@ type FileRecord struct {
 	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
 	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
 
-	FILE_LUMI_LIST          []RunLumi            `json:"file_lumi_list"`
-	FILE_PARENT_LIST        []FileParent         `json:"file_parent_list"`
-	FILE_OUTPUT_CONFIG_LIST []OutputConfigRecord `json:"file_output_config"`
+	FILE_LUMI_LIST          []RunLumi             `json:"file_lumi_list"`
+	FILE_PARENT_LIST        []FileParentLFNRecord `json:"file_parent_list"`
+	FILE_OUTPUT_CONFIG_LIST []OutputConfigRecord  `json:"file_output_config"`
 }
 
 // InsertFiles DBS API
@@ -396,13 +396,13 @@ func (a *API) InsertFiles() error {
 		log.Println("fail to read data", err)
 		return err
 	}
-	var record InputFilesRecord
-	err = json.Unmarshal(data, &record)
+	var records []FileRecord
+	err = json.Unmarshal(data, &records)
 	if err != nil {
 		log.Println("fail to decode data", err)
 		return err
 	}
-	for _, rec := range record.Records {
+	for _, rec := range records {
 		rec.CREATE_BY = a.CreateBy
 		rec.LAST_MODIFIED_BY = a.CreateBy
 		if utils.VERBOSE > 1 {
@@ -461,6 +461,26 @@ func (a *API) InsertFiles() error {
 		err = frec.Insert(tx)
 		if err != nil {
 			return err
+		}
+
+		// insert file parent list
+		for _, p := range rec.FILE_PARENT_LIST {
+			// get current file ID
+			fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME)
+			if err != nil {
+				return err
+			}
+			// get parent file ID
+			pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", p.FILE_PARENT_LFN)
+			if err != nil {
+				return err
+			}
+			// inject file parents record
+			r := FileParents{THIS_FILE_ID: fid, PARENT_FILE_ID: pid}
+			err = r.Insert(tx)
+			if err != nil {
+				return err
+			}
 		}
 
 		// commit transaction

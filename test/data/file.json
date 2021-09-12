@@ -1,5 +1,4 @@
-{
-  "files": [
+[
     {
       "adler32": "NOTSET",
       "file_type": "EDM",
@@ -390,5 +389,4 @@
       "block_name": "/unittest_web_primary_ds_name_207/acq_era_207-v207/GEN-SIM-RAW#207",
       "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/207/9.root"
     }
-  ]
-}
+]
