@@ -118,10 +118,10 @@ type Blocks struct {
 	BLOCK_ID               int64  `json:"block_id"`
 	BLOCK_NAME             string `json:"block_name" validate:"required"`
 	DATASET_ID             int64  `json:"dataset_id" validate:"required,number,gt=0"`
-	OPEN_FOR_WRITING       int64  `json:"open_for_writing" validate:"required,number"`
+	OPEN_FOR_WRITING       int64  `json:"open_for_writing" validate:"number"`
 	ORIGIN_SITE_NAME       string `json:"origin_site_name" validate:"required"`
-	BLOCK_SIZE             int64  `json:"block_size" validate:"required,number"`
-	FILE_COUNT             int64  `json:"file_count" validate:"required,number"`
+	BLOCK_SIZE             int64  `json:"block_size" validate:"number"`
+	FILE_COUNT             int64  `json:"file_count" validate:"number"`
 	CREATION_DATE          int64  `json:"creation_date" validate:"required,number"`
 	CREATE_BY              string `json:"create_by" validate:"required"`
 	LAST_MODIFICATION_DATE int64  `json:"last_modification_date" validate:"required,number"`
