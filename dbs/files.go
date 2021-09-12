@@ -320,7 +320,12 @@ type RunLumi struct {
 //     FileParentLfn string `json:"file_parent_lfn"`
 // }
 
-// FileRecord represent input recor for insert blocks API
+// InputFilesRecord represents input data record for files API
+type InputFilesRecord struct {
+	Records []FileRecord `json:"files"`
+}
+
+// FileRecord represents input record for insert files API
 type FileRecord struct {
 	LOGICAL_FILE_NAME      string  `json:"logical_file_name"`
 	IS_FILE_VALID          int64   `json:"is_file_valid"`
@@ -391,62 +396,79 @@ func (a *API) InsertFiles() error {
 		log.Println("fail to read data", err)
 		return err
 	}
-	rec := FileRecord{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
-	err = json.Unmarshal(data, &rec)
+	var record InputFilesRecord
+	err = json.Unmarshal(data, &record)
 	if err != nil {
 		log.Println("fail to decode data", err)
 		return err
 	}
-	// set dependent's records
-	frec := Files{LOGICAL_FILE_NAME: rec.LOGICAL_FILE_NAME, IS_FILE_VALID: rec.IS_FILE_VALID, CHECK_SUM: rec.CHECK_SUM, FILE_SIZE: rec.FILE_SIZE, EVENT_COUNT: rec.EVENT_COUNT, ADLER32: rec.ADLER32, MD5: rec.MD5, AUTO_CROSS_SECTION: rec.AUTO_CROSS_SECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
-
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
-	}
-	defer tx.Rollback()
-
-	// check if our data already exist in DB
-	if IfExist(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME) {
-		if a.Writer != nil {
-			a.Writer.Write([]byte(`[]`))
+	for _, rec := range record.Records {
+		rec.CREATE_BY = a.CreateBy
+		rec.LAST_MODIFIED_BY = a.CreateBy
+		if utils.VERBOSE > 1 {
+			log.Printf("insert %+v", rec)
 		}
-		return nil
-	}
 
-	// get all necessary IDs from different tables
-	blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME)
-	if err != nil {
-		log.Println("unable to find block_id for", rec.BLOCK_NAME)
-		return err
-	}
-	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
-	if err != nil {
-		log.Println("unable to find dataset_id for", rec.DATASET)
-		return err
-	}
-	ftId, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
-	if err != nil {
-		log.Println("unable to find file_type_id for", rec.FILE_TYPE)
-		return err
-	}
+		// set dependent's records
+		frec := Files{LOGICAL_FILE_NAME: rec.LOGICAL_FILE_NAME, IS_FILE_VALID: rec.IS_FILE_VALID, CHECK_SUM: rec.CHECK_SUM, FILE_SIZE: rec.FILE_SIZE, EVENT_COUNT: rec.EVENT_COUNT, ADLER32: rec.ADLER32, MD5: rec.MD5, AUTO_CROSS_SECTION: rec.AUTO_CROSS_SECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
 
-	// assign all Id's in dataset DB record
-	frec.DATASET_ID = dsId
-	frec.BLOCK_ID = blkId
-	frec.FILE_TYPE_ID = ftId
-	err = frec.Insert(tx)
-	if err != nil {
-		return err
-	}
+		// start transaction
+		tx, err := DB.Begin()
+		if err != nil {
+			msg := fmt.Sprintf("unable to get DB transaction %v", err)
+			return errors.New(msg)
+		}
+		defer tx.Rollback()
 
-	// commit transaction
-	err = tx.Commit()
-	if err != nil {
-		log.Println("fail to commit transaction", err)
-		return err
+		// check if our data already exist in DB
+		if IfExist(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME) {
+			if utils.VERBOSE > 1 {
+				log.Printf("skip %s as it already exists in DB", rec.LOGICAL_FILE_NAME)
+			}
+			continue
+		}
+
+		// get all necessary IDs from different tables
+		blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME)
+		if err != nil {
+			log.Println("unable to find block_id for", rec.BLOCK_NAME)
+			return err
+		}
+		dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
+		if err != nil {
+			log.Println("unable to find dataset_id for", rec.DATASET)
+			return err
+		}
+		ftId, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
+		if err != nil {
+			log.Println("unable to find file_type_id for", rec.FILE_TYPE)
+			// we will insert new file type
+			ftrec := FileDataTypes{FILE_TYPE: rec.FILE_TYPE}
+			err = ftrec.Insert(tx)
+			if err != nil {
+				return err
+			}
+			ftId, err = GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
+			if err != nil {
+				return err
+			}
+		}
+
+		// assign all Id's in dataset DB record
+		frec.DATASET_ID = dsId
+		frec.BLOCK_ID = blkId
+		frec.FILE_TYPE_ID = ftId
+		err = frec.Insert(tx)
+		if err != nil {
+			return err
+		}
+
+		// commit transaction
+		err = tx.Commit()
+		if err != nil {
+			log.Println("fail to commit transaction", err)
+			return err
+		}
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
