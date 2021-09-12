@@ -180,36 +180,38 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 		log.Println("fail to read data", err)
 		return err
 	}
-	var rec FileParentRecord
-	err = json.Unmarshal(data, &rec)
+	var records []FileParentRecord
+	err = json.Unmarshal(data, &records)
 	if err != nil {
 		log.Println("fail to decode data", err)
 		return err
 	}
-	if utils.VERBOSE > 0 {
-		log.Printf("Insert FileParents record %+v", rec)
-	}
-	// get file id for given lfn
-	fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
-	if err != nil {
-		log.Println("unable to find file_id for", rec.LogicalFileName)
-		return err
-	}
-	pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
-	if err != nil {
-		log.Println("unable to find file_id for", rec.ParentLogicalFileName)
-		return err
-	}
-	var rrr FileParents
-	rrr.THIS_FILE_ID = fid
-	rrr.PARENT_FILE_ID = pid
-	err = rrr.Validate()
-	if err != nil {
-		return err
-	}
-	err = rrr.Insert(tx)
-	if err != nil {
-		return err
+	for _, rec := range records {
+		if utils.VERBOSE > 0 {
+			log.Printf("Insert FileParents record %+v", rec)
+		}
+		// get file id for given lfn
+		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
+		if err != nil {
+			log.Println("unable to find file_id for", rec.LogicalFileName)
+			return err
+		}
+		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
+		if err != nil {
+			log.Println("unable to find file_id for", rec.ParentLogicalFileName)
+			return err
+		}
+		var rrr FileParents
+		rrr.THIS_FILE_ID = fid
+		rrr.PARENT_FILE_ID = pid
+		err = rrr.Validate()
+		if err != nil {
+			return err
+		}
+		err = rrr.Insert(tx)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
