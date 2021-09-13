@@ -24,7 +24,8 @@ type BulkBlocks struct {
 	Block             Block           `json:"block"`
 	FileParentList    []FileParent    `json:"file_parent_list"`
 	BlockParentList   []BlockParent   `json:"block_parent_list"`
-	DatasetParentList []DatasetParent `json:"dataset_parent_list"`
+	DatasetParentList []string        `json:"dataset_parent_list"`
+	//     DatasetParentList []DatasetParent `json:"dataset_parent_list"`
 }
 
 // DatasetConfig represents dataset config structure
@@ -329,19 +330,18 @@ func (a *API) InsertBulkBlocks() error {
 		LAST_MODIFICATION_DATE: creationDate,
 		LAST_MODIFIED_BY:       rec.Dataset.CreateBy,
 	}
-	err = dataset.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert dataset record", err)
-		return err
-	}
 	// get datasetID
 	if utils.VERBOSE > 0 {
 		log.Println("get dataset ID")
 	}
 	datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 	if err != nil {
-		log.Println("unable to find dataset_id for", rec.Dataset.Dataset)
-		return err
+		log.Println("unable to find dataset_id for", rec.Dataset.Dataset, "will insert")
+		err = dataset.Insert(tx)
+		if err != nil {
+			log.Println("unable to insert dataset record", err)
+			return err
+		}
 	}
 
 	// insert block
@@ -363,16 +363,15 @@ func (a *API) InsertBulkBlocks() error {
 		LAST_MODIFICATION_DATE: rec.Block.CreationDate,
 		LAST_MODIFIED_BY:       rec.Block.CreateBy,
 	}
-	err = blk.Insert(tx)
-	if err != nil {
-		log.Println("unable to insert block record", err)
-		return err
-	}
 	// get blockID
 	blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 	if err != nil {
-		log.Println("unable to find block_id for", rec.Block.BlockName)
-		return err
+		log.Println("unable to find block_id for", rec.Block.BlockName, "will insert")
+		err = blk.Insert(tx)
+		if err != nil {
+			log.Println("unable to insert block record", err)
+			return err
+		}
 	}
 
 	// insert files
@@ -400,6 +399,14 @@ func (a *API) InsertBulkBlocks() error {
 			return err
 		}
 
+		cBy := rrr.LastModifiedBy
+		if cBy == "" {
+			cBy = a.CreateBy
+		}
+		lBy := rrr.LastModifiedBy
+		if lBy == "" {
+			lBy = a.CreateBy
+		}
 		r := Files{
 			LOGICAL_FILE_NAME:      rrr.LogicalFileName,
 			IS_FILE_VALID:          isFileValid,
@@ -414,20 +421,19 @@ func (a *API) InsertBulkBlocks() error {
 			MD5:                    rrr.MD5,
 			AUTO_CROSS_SECTION:     rrr.AutoCrossSection,
 			CREATION_DATE:          creationDate,
-			CREATE_BY:              rrr.LastModifiedBy,
+			CREATE_BY:              cBy,
 			LAST_MODIFICATION_DATE: creationDate,
-			LAST_MODIFIED_BY:       rrr.LastModifiedBy,
-		}
-		err = r.Insert(tx)
-		if err != nil {
-			log.Println("unable to insert File record", err)
-			return err
+			LAST_MODIFIED_BY:       lBy,
 		}
 		// insert file lumi list
 		fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", rrr.LogicalFileName)
 		if err != nil {
-			log.Println("unable to find block_id for", rec.Block.BlockName)
-			return err
+			log.Println("unable to find file_id for", rrr.LogicalFileName, "will insert")
+			err = r.Insert(tx)
+			if err != nil {
+				log.Println("unable to insert File record", err)
+				return err
+			}
 		}
 		for _, r := range rrr.FileLumiList {
 			fl := FileLumis{FILE_ID: fileID, RUN_NUM: r.RunNumber, LUMI_SECTION_NUM: r.LumiSectionNumber, EVENT_COUNT: rrr.EventCount}
@@ -455,6 +461,7 @@ func (a *API) InsertBulkBlocks() error {
 		api.Reader = bytes.NewReader(data)
 		err = api.InsertFileOutputModConfigs(tx)
 		if err != nil {
+			log.Println("unable to insert file output mod config", err)
 			return err
 		}
 	}
@@ -469,6 +476,7 @@ func (a *API) InsertBulkBlocks() error {
 		api.Reader = bytes.NewReader(data)
 		err = api.InsertFileParentsTxt(tx)
 		if err != nil {
+			log.Println("unable to insert file parents", err)
 			return err
 		}
 	}
