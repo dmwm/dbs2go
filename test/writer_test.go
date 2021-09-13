@@ -90,9 +90,9 @@ func TestDBSWriter(t *testing.T) {
 	// use datasetparent.json to insert dataset record used by datasetparent.json
 	api = "/datasets"
 	hdlr = web.DatasetsHandler
-	log.Println("insert dataset")
+	log.Println("insert parent dataset")
 	insertData(t, db, api, "data/datasetparent.json", "dataset", hdlr)
-	log.Println("re-insert dataset")
+	log.Println("re-insert parent dataset")
 	insertData(t, db, api, "data/datasetparent.json", "dataset", hdlr)
 
 	// use blockparent.json to insert block record used by fileparent.json
