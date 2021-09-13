@@ -43,6 +43,13 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	// check if record already exists in DB
+	if IfExist(tx, "FILE_OUTPUT_MOD_CONFIGS", "file_output_config_id", "file_id", r.FILE_ID) {
+		if utils.VERBOSE > 1 {
+			log.Printf("skip %d as it already exists in DB", r.FILE_ID)
+		}
+		return nil
+	}
 	// set defaults and validate the record
 	r.SetDefaults()
 	err = r.Validate()
@@ -56,6 +63,9 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 		log.Printf("Insert FileOutputModConfigs\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.FILE_OUTPUT_CONFIG_ID, r.FILE_ID, r.OUTPUT_MOD_CONFIG_ID)
+	if err != nil {
+		log.Println("fail to insert file_output_config record", err)
+	}
 	return err
 }
 
