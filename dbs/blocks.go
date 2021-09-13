@@ -157,6 +157,9 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 		log.Printf("Insert Blocks\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.BLOCK_ID, r.BLOCK_NAME, r.DATASET_ID, r.OPEN_FOR_WRITING, r.ORIGIN_SITE_NAME, r.BLOCK_SIZE, r.FILE_COUNT, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	if err != nil {
+		log.Println("fail to insert block", err)
+	}
 	return err
 }
 
