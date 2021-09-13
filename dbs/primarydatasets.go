@@ -107,10 +107,10 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 
 // PrimaryDatasetRecord represents primary dataset record
 type PrimaryDatasetRecord struct {
-	PRIMARY_DS_NAME string `json:"primary_ds_name"`
-	PRIMARY_DS_TYPE string `json:"primary_ds_type"`
-	CREATION_DATE   int64  `json:"creation_date"`
-	CREATE_BY       string `json:"create_by"`
+	PRIMARY_DS_NAME string `json:"primary_ds_name" validate:"required"`
+	PRIMARY_DS_TYPE string `json:"primary_ds_type" validate:"required"`
+	CREATION_DATE   int64  `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY       string `json:"create_by" validate:"required"`
 }
 
 // InsertPrimaryDatasets DBS API
