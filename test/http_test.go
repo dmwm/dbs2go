@@ -34,8 +34,12 @@ func respRecorder(method, url string, reader io.Reader, hdlr func(http.ResponseW
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
-		log.Printf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		data, e := io.ReadAll(rr.Body)
+		if e != nil {
+			log.Println("unable to read reasponse body, error:", e)
+		}
+		log.Printf("handler returned wrong status code: got %v want %v message: %s",
+			status, http.StatusOK, string(data))
 		return nil, err
 	}
 	return rr, nil
