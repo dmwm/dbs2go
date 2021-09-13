@@ -209,6 +209,9 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 	if err != nil {
 		return nil, err
 	}
+	if utils.VERBOSE > 1 {
+		log.Println("HTTP POST payload\n", params)
+	}
 	for k, v := range params {
 		s := fmt.Sprintf("%v", v)
 		if strings.ToLower(k) == "run_num" && strings.Contains(s, "[") {
