@@ -342,6 +342,11 @@ func (a *API) InsertBulkBlocks() error {
 			log.Println("unable to insert dataset record", err)
 			return err
 		}
+		datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
+		if err != nil {
+			log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
+			return err
+		}
 	}
 
 	// insert block
@@ -370,6 +375,11 @@ func (a *API) InsertBulkBlocks() error {
 		err = blk.Insert(tx)
 		if err != nil {
 			log.Println("unable to insert block record", err)
+			return err
+		}
+		blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
+		if err != nil {
+			log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
 			return err
 		}
 	}
@@ -434,8 +444,18 @@ func (a *API) InsertBulkBlocks() error {
 				log.Println("unable to insert File record", err)
 				return err
 			}
+			fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", rrr.LogicalFileName)
+			if err != nil {
+				log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+				return err
+			}
 		}
 		for _, r := range rrr.FileLumiList {
+			flID, err := GetID(tx, "FILE_LUMIS", "file_id", "file_id", fileID)
+			if err == nil && flID > 0 {
+				// skip if we found valida filelumi record
+				continue
+			}
 			fl := FileLumis{FILE_ID: fileID, RUN_NUM: r.RunNumber, LUMI_SECTION_NUM: r.LumiSectionNumber, EVENT_COUNT: rrr.EventCount}
 			data, err = json.Marshal(fl)
 			if err != nil {
@@ -467,21 +487,33 @@ func (a *API) InsertBulkBlocks() error {
 	}
 
 	// insert file parent list
-	for _, rrr := range rec.FileParentList {
-		data, err = json.Marshal(rrr)
-		if err != nil {
-			log.Println("unable to marshal file parent list", err)
-			return err
-		}
-		api.Reader = bytes.NewReader(data)
-		err = api.InsertFileParentsTxt(tx)
-		if err != nil {
-			log.Println("unable to insert file parents", err)
-			return err
-		}
+	data, err = json.Marshal(rec.FileParentList)
+	if err != nil {
+		log.Println("unable to marshal file parent list", err)
+		return err
+	}
+	api.Reader = bytes.NewReader(data)
+	err = api.InsertFileParentsTxt(tx)
+	if err != nil {
+		log.Println("unable to insert file parents", err)
+		return err
 	}
 
 	// insert dataset parent list
+	for _, ds := range rec.DatasetParentList {
+		// get file id for parent dataset
+		pid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", ds)
+		if err != nil {
+			log.Println("unable to find dataset_id for", ds)
+			return err
+		}
+		r := DatasetParents{THIS_DATASET_ID: datasetID, PARENT_DATASET_ID: pid}
+		err = r.Insert(tx)
+		if err != nil {
+			log.Println("unable to insert parent dataset record", err)
+			return err
+		}
+	}
 
 	// commit transaction
 	err = tx.Commit()
