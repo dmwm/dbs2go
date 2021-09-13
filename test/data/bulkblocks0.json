@@ -1,0 +1,401 @@
+{
+  "dataset_conf_list": [
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    }
+  ],
+  "file_conf_list": [
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd0.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd1.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd2.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd3.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd4.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd5.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd6.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd7.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd8.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    },
+    {
+      "release_version": "CMSSW_1_2_3",
+      "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+      "lfn": "/store/data/a/b/A/a/1/abcd9.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "my-cms-gtag::ALL"
+    }
+  ],
+  "files": [
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd9.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd0.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd1.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd2.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd3.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd4.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd5.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd6.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd7.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    },
+    {
+      "check_sum": "1504266448",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 27414,
+          "run_num": 1
+        },
+        {
+          "lumi_section_num": 26422,
+          "run_num": 2
+        },
+        {
+          "lumi_section_num": 29838,
+          "run_num": 3
+        }
+      ],
+      "adler32": "NOTSET",
+      "event_count": 1619,
+      "file_type": "EDM",
+      "last_modified_by": "Yuyi",
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd8.root",
+      "file_size": 2012211901,
+      "last_modification_date": 1279912089,
+      "md5": null,
+      "auto_cross_section": 0
+    }
+  ],
+  "processing_era": {
+    "create_by": "Yuyi",
+    "processing_version": 10,
+    "description": "this_is_a_test"
+  },
+  "primds": {
+    "create_by": "Yuyi",
+    "primary_ds_type": "test",
+    "primary_ds_name": "unittest_web_primary_ds_name_14144",
+    "creation_date": 1279912078
+  },
+  "dataset": {
+    "physics_group_name": "Tracker",
+    "create_by": "Yuyi",
+    "dataset_access_type": "PRODUCTION",
+    "data_tier_name": "GEN-SIM-RAW",
+    "last_modified_by": "Yuyi",
+    "creation_date": 1279912078,
+    "processed_ds_name": "Summer2011-pstr-v10",
+    "xtcrosssection": 123,
+    "last_modification_date": 1279912078,
+    "dataset": "/unittest_web_primary_ds_name_14144/Summer2011-pstr-v10/GEN-SIM-RAW"
+  },
+  "acquisition_era": {
+    "acquisition_era_name": "Summer2011",
+    "start_date": 1978
+  },
+  "block": {
+    "create_by": "Yuyi",
+    "creation_date": 1279912079,
+    "open_for_writing": 1,
+    "block_name": "/unittest_web_primary_ds_name_14144/Summer2011-pstr-v10/GEN-SIM-RAW#141444",
+    "file_count": 10,
+    "origin_site_name": "my_site",
+    "block_size": 20122119010
+  },
+  "file_parent_list": [
+    {
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd4.root",
+      "parent_logical_file_name": "/store/data/a/b/A/a/1/parent/abcd3.root"
+    },
+    {
+      "logical_file_name": "/store/data/a/b/A/a/1/abcd5.root",
+      "parent_logical_file_name": "/store/data/a/b/A/a/1/parent/abcd2.root"
+    }
+  ]
+}
