@@ -39,12 +39,22 @@ func (r *DatasetParents) Insert(tx *sql.Tx) error {
 		log.Println("unable to validate record", err)
 		return err
 	}
+	// check if record exists in DB
+	if IfExist(tx, "DATASET_PARENTS", "this_dataset_id", "this_dataset_id", r.THIS_DATASET_ID) {
+		if utils.VERBOSE > 1 {
+			log.Printf("skip %s as it already exists in DB", r.THIS_DATASET_ID)
+		}
+		return nil
+	}
 	// get SQL statement from static area
-	stm := getSQL("insert_fileparents")
+	stm := getSQL("insert_dataset_parents")
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert DatasetParents\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.THIS_DATASET_ID, r.PARENT_DATASET_ID)
+	if err != nil {
+		log.Println("unable to insert DatasetParents record, error", err)
+	}
 	return err
 }
 
