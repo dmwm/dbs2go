@@ -348,6 +348,11 @@ type FileRecord struct {
 	FILE_OUTPUT_CONFIG_LIST []OutputConfigRecord  `json:"file_output_config"`
 }
 
+// PyFileRecord represents DBS python input file record structure
+type PyFileRecord struct {
+	Records []FileRecord `json:"files"`
+}
+
 // InsertFiles DBS API
 func (a *API) InsertFiles() error {
 	// implement the following logic
@@ -397,10 +402,18 @@ func (a *API) InsertFiles() error {
 		return err
 	}
 	var records []FileRecord
-	err = json.Unmarshal(data, &records)
+	var pyrec PyFileRecord
+	err = json.Unmarshal(data, &pyrec)
 	if err != nil {
-		log.Println("fail to decode data", err)
-		return err
+		log.Println("unable to decode input file record", err, "will proceed with []FileRecord")
+		// proceed with file record list
+		err = json.Unmarshal(data, &records)
+		if err != nil {
+			log.Println("fail to decode data", err)
+			return err
+		}
+	} else {
+		records = pyrec.Records
 	}
 	for _, rec := range records {
 		rec.CREATE_BY = a.CreateBy
