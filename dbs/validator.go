@@ -292,6 +292,7 @@ func CheckPattern(key, value string) error {
 	if p, ok := LexiconPatterns[key]; ok {
 		for _, pat := range p.Patterns {
 			if matched := pat.MatchString(value); matched {
+				log.Printf("CheckPattern key=%s value='%s' found match %s", key, value, pat)
 				return nil
 			} else {
 				log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
