@@ -178,7 +178,7 @@ func (a *API) InsertBulkBlocks() error {
 		CreateBy: a.CreateBy,
 		Params:   make(Record),
 	}
-	var isFileValid, datasetID, blockID, fileID, fileTypeID, branchHashID int64
+	var isFileValid, datasetID, blockID, fileID, fileTypeID int64
 	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
 	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
 	creationDate := time.Now().Unix()
@@ -400,14 +400,6 @@ func (a *API) InsertBulkBlocks() error {
 		if rrr.BranchHash == "" {
 			rrr.BranchHash = "branch-hash"
 		}
-		bhash := BranchHashes{
-			BRANCH_HASH: rrr.BranchHash,
-		}
-		branchHashID, err = GetRecID(tx, &bhash, "BRANCH_HASHES", "branch_hash_id", "branch_hash", rrr.BranchHash)
-		if err != nil {
-			log.Println("unable to find branch hash_id for", rrr.BranchHash)
-			return err
-		}
 
 		cBy := rrr.LastModifiedBy
 		if cBy == "" {
@@ -426,7 +418,6 @@ func (a *API) InsertBulkBlocks() error {
 			CHECK_SUM:              rrr.CheckSum,
 			FILE_SIZE:              rrr.FileSize,
 			EVENT_COUNT:            rrr.EventCount,
-			BRANCH_HASH_ID:         branchHashID,
 			ADLER32:                rrr.Adler32,
 			MD5:                    rrr.MD5,
 			AUTO_CROSS_SECTION:     rrr.AutoCrossSection,
