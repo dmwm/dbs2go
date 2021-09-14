@@ -261,6 +261,9 @@ func (r *Files) Insert(tx *sql.Tx) error {
 		log.Printf("Insert Files\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.FILE_ID, r.LOGICAL_FILE_NAME, r.IS_FILE_VALID, r.DATASET_ID, r.BLOCK_ID, r.FILE_TYPE_ID, r.CHECK_SUM, r.FILE_SIZE, r.EVENT_COUNT, r.BRANCH_HASH_ID, r.ADLER32, r.MD5, r.AUTO_CROSS_SECTION, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	if err != nil {
+		log.Println("unable to insert files, error", err)
+	}
 	return err
 }
 
