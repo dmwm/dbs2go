@@ -199,15 +199,27 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	var appID, psetID, relID int64
 	appID, err = GetRecID(tx, &arec, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME)
 	if err != nil {
-		return err
+		log.Println("unable to find app_exec_id", err, "will insert")
+		err = arec.Insert(tx)
+		if err != nil {
+			return err
+		}
 	}
 	psetID, err = GetRecID(tx, &prec, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH)
 	if err != nil {
-		return err
+		log.Println("unable to find parameter_set_hash_id", err)
+		err = prec.Insert(tx)
+		if err != nil {
+			return err
+		}
 	}
 	relID, err = GetRecID(tx, &rrec, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION)
 	if err != nil {
-		return err
+		log.Println("unable to find release_version_id", err)
+		err = rrec.Insert(tx)
+		if err != nil {
+			return err
+		}
 	}
 
 	// init all foreign Id's in output config record
@@ -215,6 +227,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	orec.RELEASE_VERSION_ID = relID
 	orec.PARAMETER_SET_HASH_ID = psetID
 	err = orec.Insert(tx)
+	if err != nil {
+		log.Println("unable to insert OutputConfigs record, error", err)
+	}
 	return err
 }
 
