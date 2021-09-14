@@ -255,6 +255,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	params["create_by"] = cby
 	api := &dbs.API{
 		Params:    params,
+		Writer:    w,
 		CreateBy:  cby,
 		Api:       a,
 		Separator: sep,
