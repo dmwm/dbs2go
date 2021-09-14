@@ -147,6 +147,7 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	tmpl["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("outputconfigs_id", tmpl)
 	if err != nil {
+		log.Println("unable to load outptuconfigs_id sql template, error", err)
 		return err
 	}
 	stm = WhereClause(stm, conds)
@@ -166,6 +167,7 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	}
 	err = rrr.Insert(tx)
 	if err != nil {
+		log.Println("unable to insert FileOutputModConfigs, error", err)
 		return err
 	}
 
