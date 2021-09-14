@@ -71,35 +71,62 @@ func TestValidatePostPayload(t *testing.T) {
 	}
 }
 
-// TestDBRecordValidator
-func TestDBRecordValidator(t *testing.T) {
+// helper function to test validation success
+func validationSuccess(t *testing.T, rec dbs.DBRecord) {
+	log.Printf("Validate %+v", rec)
+	err := rec.Validate()
+	if err == nil {
+		log.Println("Validation is successfull")
+	} else {
+		t.Error(err)
+	}
+}
+
+// helper function to test validation failure
+func validationFailure(t *testing.T, rec dbs.DBRecord) {
+	log.Printf("Validate %+v", rec)
+	err := rec.Validate()
+	if err == nil {
+		t.Error("No error is raised for invalid record")
+	} else {
+		log.Println("Validator error", err)
+	}
+}
+
+// TestValidatorDataTier
+func TestValidatorDataTier(t *testing.T) {
 	if dbs.RecordValidator == nil {
 		dbs.RecordValidator = validator.New()
 	}
+	var rec dbs.DBRecord
 	ts := time.Now().Unix()
 	cby := "test"
 	tier := "raw"
-	rec := dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts, CREATE_BY: cby}
-	// this should fail by design since we provide tier in lower-case
-	err := rec.Validate()
-	if err == nil {
-		t.Error("No error is raised when we request validation")
-	} else {
-		log.Println("WE SHOULD GET ERROR message from Validator =>", err)
-	}
-	rec = dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts}
-	// this should fail by design since we do not provide create by value
-	err = rec.Validate()
-	if err == nil {
-		t.Error("No error is raised when we request validation")
-	} else {
-		log.Println("WE SHOULD GET ERROR message from Validator =>", err)
-	}
+	log.Println("validate lower case data tier")
+	rec = &dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts, CREATE_BY: cby}
+	validationFailure(t, rec)
+	log.Println("validate no create_by")
+	rec = &dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts}
+	validationFailure(t, rec)
+	log.Println("validate creation_date")
+	rec = &dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: 123, CREATE_BY: cby}
+	validationFailure(t, rec)
 	tier = "RAW"
-	rec = dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts, CREATE_BY: cby}
-	err = rec.Validate()
-	// now validation should pass
-	if err != nil {
-		t.Error(err)
+	log.Println("validate correct record")
+	rec = &dbs.DataTiers{DATA_TIER_NAME: tier, CREATION_DATE: ts, CREATE_BY: cby}
+	validationSuccess(t, rec)
+}
+
+// TestValidatorDatasetAccessType
+func TestValidatorDatasetAccessType(t *testing.T) {
+	if dbs.RecordValidator == nil {
+		dbs.RecordValidator = validator.New()
 	}
+	var rec dbs.DBRecord
+	log.Println("validate without dataset access type")
+	rec = &dbs.DatasetAccessTypes{}
+	validationFailure(t, rec)
+	log.Println("validate correct record")
+	rec = &dbs.DatasetAccessTypes{DATASET_ACCESS_TYPE: "test"}
+	validationSuccess(t, rec)
 }
