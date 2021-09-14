@@ -291,11 +291,13 @@ func Validate(r *http.Request) error {
 func CheckPattern(key, value string) error {
 	if p, ok := LexiconPatterns[key]; ok {
 		for _, pat := range p.Patterns {
-			if matched := pat.MatchString(value); !matched {
-				log.Printf("%s value='%s' does not match %s", key, value, pat)
-				return errors.New("invalid pattern for " + key)
+			if matched := pat.MatchString(value); matched {
+				return nil
+			} else {
+				log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
 			}
 		}
+		return errors.New("invalid pattern for key=" + key)
 	}
 	return nil
 }
