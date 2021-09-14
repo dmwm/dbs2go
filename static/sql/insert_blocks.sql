@@ -1,4 +1,4 @@
-INSERT INTO BLOCKS
+INSERT INTO {{.Owner}}.BLOCKS
     (block_id,block_name,dataset_id,
      open_for_writing,origin_site_name,
      block_size,file_count,
