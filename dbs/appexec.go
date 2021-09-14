@@ -44,6 +44,9 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 		log.Printf("Insert ApplicationExecutables\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.APP_EXEC_ID, r.APP_NAME)
+	if err != nil {
+		log.Println("unable to insert ApplicationExecutables record, error", err)
+	}
 	return err
 }
 
