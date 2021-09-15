@@ -27,104 +27,109 @@ func TestDBSWriter(t *testing.T) {
 	api := "/primarydatasets"
 	hdlr := web.PrimaryDatasetsHandler
 	log.Println("insert primary dataset")
-	insertData(t, db, api, "data/primarydataset.json", "primary_ds_name", hdlr)
+	insertData(t, db, "POST", api, "data/primarydataset.json", "primary_ds_name", hdlr)
 	log.Println("re-insert primary dataset")
-	insertData(t, db, api, "data/primarydataset.json", "primary_ds_name", hdlr)
+	insertData(t, db, "POST", api, "data/primarydataset.json", "primary_ds_name", hdlr)
 
 	api = "/outputconfigs"
 	hdlr = web.OutputConfigsHandler
 	log.Println("insert output config")
-	insertData(t, db, api, "data/outputconfig.json", "output_module_label", hdlr)
+	insertData(t, db, "POST", api, "data/outputconfig.json", "output_module_label", hdlr)
 	log.Println("re-insert output config")
-	insertData(t, db, api, "data/outputconfig.json", "output_module_label", hdlr)
+	insertData(t, db, "POST", api, "data/outputconfig.json", "output_module_label", hdlr)
 
 	api = "/acquisitioneras"
 	hdlr = web.AcquisitionErasHandler
 	log.Println("insert acquisition era")
-	insertData(t, db, api, "data/acquisitionera.json", "acquisition_era_name", hdlr)
+	insertData(t, db, "POST", api, "data/acquisitionera.json", "acquisition_era_name", hdlr)
 	log.Println("re-insert acquisition era")
-	insertData(t, db, api, "data/acquisitionera.json", "acquisition_era_name", hdlr)
+	insertData(t, db, "POST", api, "data/acquisitionera.json", "acquisition_era_name", hdlr)
 
 	api = "/processingeras"
 	hdlr = web.ProcessingErasHandler
 	log.Println("insert processing era")
-	insertData(t, db, api, "data/processingera.json", "processing_version", hdlr)
+	insertData(t, db, "POST", api, "data/processingera.json", "processing_version", hdlr)
 	log.Println("re-insert processing era")
-	insertData(t, db, api, "data/processingera.json", "processing_version", hdlr)
+	insertData(t, db, "POST", api, "data/processingera.json", "processing_version", hdlr)
 
 	api = "/datatiers"
 	hdlr = web.DatatiersHandler
 	log.Println("insert data tier")
-	insertData(t, db, api, "data/datatier.json", "data_tier_name", hdlr)
+	insertData(t, db, "POST", api, "data/datatier.json", "data_tier_name", hdlr)
 	log.Println("re-insert data tier")
-	insertData(t, db, api, "data/datatier.json", "data_tier_name", hdlr)
+	insertData(t, db, "POST", api, "data/datatier.json", "data_tier_name", hdlr)
 
 	api = "/datasetaccesstypes"
 	hdlr = web.DatasetAccessTypesHandler
 	log.Println("insert dataset access type")
-	insertData(t, db, api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
+	insertData(t, db, "POST", api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
 	log.Println("re-insert dataset access type")
-	insertData(t, db, api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
+	insertData(t, db, "POST", api, "data/datasetaccesstype.json", "dataset_access_type", hdlr)
 
 	api = "/physicsgroups"
 	hdlr = web.PhysicsGroupsHandler
 	log.Println("insert physics group")
-	insertData(t, db, api, "data/physicsgroup.json", "physics_group_name", hdlr)
+	insertData(t, db, "POST", api, "data/physicsgroup.json", "physics_group_name", hdlr)
 	log.Println("re-insert physics group")
-	insertData(t, db, api, "data/physicsgroup.json", "physics_group_name", hdlr)
+	insertData(t, db, "POST", api, "data/physicsgroup.json", "physics_group_name", hdlr)
 
 	api = "/datasets"
 	hdlr = web.DatasetsHandler
 	log.Println("insert dataset")
-	insertData(t, db, api, "data/dataset.json", "dataset", hdlr)
+	insertData(t, db, "POST", api, "data/dataset.json", "dataset", hdlr)
 	log.Println("re-insert dataset")
-	insertData(t, db, api, "data/dataset.json", "dataset", hdlr)
+	insertData(t, db, "POST", api, "data/dataset.json", "dataset", hdlr)
 
 	api = "/blocks"
 	hdlr = web.BlocksHandler
 	log.Println("insert block")
-	insertData(t, db, api, "data/block.json", "block_name", hdlr)
+	insertData(t, db, "POST", api, "data/block.json", "block_name", hdlr)
 	log.Println("re-insert block")
-	insertData(t, db, api, "data/block.json", "block_name", hdlr)
+	insertData(t, db, "POST", api, "data/block.json", "block_name", hdlr)
 
 	// use datasetparent.json to insert dataset record used by datasetparent.json
 	api = "/datasets"
 	hdlr = web.DatasetsHandler
 	log.Println("insert parent dataset")
-	insertData(t, db, api, "data/datasetparent.json", "dataset", hdlr)
+	insertData(t, db, "POST", api, "data/datasetparent.json", "dataset", hdlr)
 	log.Println("re-insert parent dataset")
-	insertData(t, db, api, "data/datasetparent.json", "dataset", hdlr)
+	insertData(t, db, "POST", api, "data/datasetparent.json", "dataset", hdlr)
 
 	// use blockparent.json to insert block record used by fileparent.json
 	api = "/blocks"
 	hdlr = web.BlocksHandler
 	log.Println("insert block")
-	insertData(t, db, api, "data/blockparent.json", "block_name", hdlr)
+	insertData(t, db, "POST", api, "data/blockparent.json", "block_name", hdlr)
 	log.Println("re-insert block")
-	insertData(t, db, api, "data/blockparent.json", "block_name", hdlr)
+	insertData(t, db, "POST", api, "data/blockparent.json", "block_name", hdlr)
 
 	// use fileparent.json to insert file records which later will be used
 	// as file parents in subsequent call with files.json
 	api = "/files"
 	hdlr = web.FilesHandler
 	log.Println("insert file parents")
-	insertData(t, db, api, "data/fileparent.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/fileparent.json", "", hdlr)
 	log.Println("re-insert file parents")
-	insertData(t, db, api, "data/fileparent.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/fileparent.json", "", hdlr)
 
 	api = "/files"
 	hdlr = web.FilesHandler
 	log.Println("insert files")
-	insertData(t, db, api, "data/file.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/file.json", "", hdlr)
 	log.Println("re-insert files")
-	insertData(t, db, api, "data/file.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/file.json", "", hdlr)
 
 	api = "/bulkblocks"
 	hdlr = web.BulkBlocksHandler
 	log.Println("insert bulk block")
-	insertData(t, db, api, "data/bulkblock.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/bulkblock.json", "", hdlr)
 	log.Println("re-insert bulk block")
-	insertData(t, db, api, "data/bulkblock.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/bulkblock.json", "", hdlr)
+
+	api = "/files"
+	hdlr = web.FilesHandler
+	log.Println("update files")
+	insertData(t, db, "PUT", api, "data/updatefile.json", "", hdlr)
 
 	t.Logf("finish DBS writer test")
 	err = db.Close()
@@ -134,7 +139,7 @@ func TestDBSWriter(t *testing.T) {
 }
 
 // insertData provides a test to insert DBS data
-func insertData(t *testing.T, db *sql.DB, api, dataFile, attr string, hdlr func(http.ResponseWriter, *http.Request)) {
+func insertData(t *testing.T, db *sql.DB, method, api, dataFile, attr string, hdlr func(http.ResponseWriter, *http.Request)) {
 	// setup HTTP request
 	var data []byte
 	var err error
@@ -158,10 +163,10 @@ func insertData(t *testing.T, db *sql.DB, api, dataFile, attr string, hdlr func(
 	}
 	reader := bytes.NewReader(data)
 
-	// test writer POST DBS API
-	rr, err = respRecorder("POST", api, reader, hdlr)
+	// test writer DBS API
+	rr, err = respRecorder(method, api, reader, hdlr)
 	if err != nil {
-		log.Printf("ERROR: unable to make POST HTTP request with api=%s, error %v", api, err)
+		log.Printf("ERROR: unable to make %s HTTP request with api=%s, error %v", method, api, err)
 		t.Fatal(err)
 	}
 
