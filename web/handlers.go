@@ -247,6 +247,14 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 		// url query parameters are passed as list, we take first element only
 		params[k] = v[0]
 	}
+	if a == "files" {
+		var err error
+		params, err = parsePayload(r)
+		if err != nil {
+			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			return
+		}
+	}
 	if utils.VERBOSE > 0 {
 		dn, _ := r.Header["Cms-Authn-Dn"]
 		log.Printf("DBSPutHandler: API=%s, dn=%s, uri=%s, params: %+v", a, dn, requestURI(r), params)
