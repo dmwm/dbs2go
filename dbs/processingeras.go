@@ -31,7 +31,7 @@ type ProcessingEras struct {
 	PROCESSING_ERA_ID  int64  `json:"processing_era_id"`
 	PROCESSING_VERSION int64  `json:"processing_version" validate:"required,number,gt=0"`
 	CREATION_DATE      int64  `json:"creation_date" validate:"required,number,gt=0"`
-	CREATE_BY          string `json:"create_by validate:"required""`
+	CREATE_BY          string `json:"create_by" validate:"required"`
 	DESCRIPTION        string `json:"description"`
 }
 
