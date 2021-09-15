@@ -56,7 +56,7 @@ func (a *API) FileParents() error {
 
 // FileParents represents file parents DBS DB table
 type FileParents struct {
-	THIS_FILE_ID   int64 `json:"this_file_id"`
+	THIS_FILE_ID   int64 `json:"this_file_id" validate:"required,number,gt=0"`
 	PARENT_FILE_ID int64 `json:"parent_file_id" validate:"required,number,gt=0"`
 }
 
