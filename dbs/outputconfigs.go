@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 	"unsafe"
 
@@ -95,12 +94,28 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 		log.Println("unable to validate record", err)
 		return err
 	}
+
+	// check if our data already exist in DB
+	var vals []interface{}
+	vals = append(vals, r.APP_EXEC_ID)
+	vals = append(vals, r.PARAMETER_SET_HASH_ID)
+	vals = append(vals, r.RELEASE_VERSION_ID)
+	vals = append(vals, r.OUTPUT_MODULE_LABEL)
+	vals = append(vals, r.GLOBAL_TAG)
+	args := []string{"app_exec_id", "parameter_set_hash_id", "release_version_id", "output_module_label", "global_tag"}
+	if IfExistMulti(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", args, vals...) {
+		return nil
+	}
+
 	// get SQL statement from static area
 	stm := getSQL("insert_outputconfigs")
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert OutputConfigs\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.OUTPUT_MOD_CONFIG_ID, r.APP_EXEC_ID, r.RELEASE_VERSION_ID, r.PARAMETER_SET_HASH_ID, r.OUTPUT_MODULE_LABEL, r.GLOBAL_TAG, r.SCENARIO, r.CREATION_DATE, r.CREATE_BY)
+	if err != nil {
+		log.Println("unable to insert into OutputConfigs, error", err)
+	}
 	return err
 }
 
@@ -184,34 +199,14 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	}
 
 	// check if our data already exist in DB
-	if IfExist(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", rec.OUTPUT_MODULE_LABEL) {
-		return nil
-	}
-	// check if our data already exist in DB
 	var vals []interface{}
 	vals = append(vals, rec.APP_NAME)
 	vals = append(vals, rec.PSET_HASH)
+	vals = append(vals, rec.RELEASE_VERSION)
 	vals = append(vals, rec.OUTPUT_MODULE_LABEL)
 	vals = append(vals, rec.GLOBAL_TAG)
-	args := []string{"app_name", "pset_hash", "output_module_label", "global_tag"}
-	table := "OUTPUT_MODULE_CONIGS"
-	var stm string
-	var wheres []string
-	if DBOWNER == "sqlite" {
-		stm = fmt.Sprintf("SELECT output_mod_config_id FROM %s", table)
-		for _, a := range args {
-			wheres = append(wheres, fmt.Sprintf("%s=?", a))
-		}
-	} else {
-		stm = fmt.Sprintf("SELECT T.output_mod_config_id FROM %s.%s T", DBOWNER, table)
-		for _, a := range args {
-			wheres = append(wheres, fmt.Sprintf("%s=:%s", a, a))
-		}
-	}
-	stm = fmt.Sprintf("%s WHERE %s", stm, strings.Join(wheres, " "))
-	var oid float64
-	err = tx.QueryRow(stm, vals...).Scan(&oid)
-	if err == nil {
+	args := []string{"app_name", "pset_hash", "release_version", "output_module_label", "global_tag"}
+	if IfExistMulti(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", args, vals...) {
 		return nil
 	}
 
