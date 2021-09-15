@@ -209,11 +209,6 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 			records = append(records, rrr)
 		}
 	}
-	if len(records) == 0 {
-		msg := "fail to decode input request as FileParentRecord(s)"
-		log.Println(msg)
-		return errors.New(msg)
-	}
 	for _, rec := range records {
 		if utils.VERBOSE > 0 {
 			log.Printf("Insert FileParents record %+v", rec)
