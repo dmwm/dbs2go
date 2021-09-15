@@ -183,13 +183,14 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	var records []FileParentRecord
 	err = json.Unmarshal(data, &records)
 	if err != nil {
-		log.Println("fail to decode data", err)
+		log.Println("fail to decode data", err, "will proceed with FileParentRecord")
 		var rrr FileParentRecord
 		err = json.Unmarshal(data, &rrr)
 		if err != nil {
 			log.Println("fail to decode data", err)
 			return err
 		}
+		records = append(records, rrr)
 	}
 	for _, rec := range records {
 		if utils.VERBOSE > 0 {
