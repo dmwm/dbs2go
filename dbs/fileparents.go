@@ -38,7 +38,7 @@ func (a *API) FileParents() error {
 	lfns := getValues(a.Params, "logical_file_name")
 	if len(lfns) == 1 {
 		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
-	} else {
+	} else if len(lfns) > 1 {
 		token, binds := TokenGenerator(lfns, 30, "lfn_token")
 		stm = fmt.Sprintf("%s %s", token, stm)
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME in %s", TokenCondition())
