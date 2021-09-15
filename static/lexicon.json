@@ -136,13 +136,6 @@
     "length": -1
   },
   {
-    "name": "processed_ds_name",
-    "patterns": [
-      "^[0-9]+$"
-    ],
-    "length": 199
-  },
-  {
     "name": "processed_string",
     "patterns": [
       "[a-zA-Z0-9_]{1,100}$"
