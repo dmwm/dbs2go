@@ -514,11 +514,25 @@ func (a *API) InsertFiles() error {
 // UpdateFiles DBS API
 func (a *API) UpdateFiles() error {
 
+	var args []interface{}
+	var conds []string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	tmpl["TokenGenerator"] = ""
+	tmpl["Lfns"] = false
+	tmpl["Dataset"] = false
+	tmpl["SQLite"] = false
+	if strings.ToLower(DBOWNER) == "sqlite" {
+		tmpl["SQLite"] = true
+	}
+
 	// read input parameters
+	log.Printf("UpdateFiles params %+v", a.Params)
 	var createBy string
 	var isFileValid int
-	if v, ok := a.Params["is_file_valid"]; ok {
-		val, err := strconv.Atoi(v.(string))
+	vals := getValues(a.Params, "is_file_valid")
+	if len(vals) > 0 {
+		val, err := strconv.Atoi(vals[0])
 		if err != nil {
 			log.Println("invalid input parameter", err)
 		}
@@ -527,23 +541,36 @@ func (a *API) UpdateFiles() error {
 	if v, ok := a.Params["create_by"]; ok {
 		createBy = v.(string)
 	}
-	date := time.Now().Unix()
+	tstamp := time.Now().Unix()
+	// keep that order since it is present in sql statement
+	args = append(args, createBy)
+	args = append(args, tstamp)
+	args = append(args, isFileValid)
 
-	// validate input parameters
-	if createBy == "" {
-		return errors.New("invalid create_by parameter")
+	// additional where clause parameters
+	lfns := getValues(a.Params, "logical_file_name")
+	if len(lfns) == 1 {
+		tmpl["Lfns"] = true
+		if strings.ToLower(DBOWNER) == "sqlite" {
+			conds, args = AddParam("logical_file_name", "LOGICAL_FILE_NAME", a.Params, conds, args)
+		} else {
+			conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
+		}
 	}
-	if isFileValid < 0 || isFileValid > 1 {
-		return errors.New("invalid is_file_valid parameter")
+	if _, ok := a.Params["dataset"]; ok {
+		tmpl["Dataset"] = true
+		conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 	}
 
 	// get SQL statement from static area
-	stm := getSQL("update_files")
-	if utils.VERBOSE > 0 {
-		mydate := fmt.Sprintf("%d", date)
-		valid := fmt.Sprintf("%d", isFileValid)
-		params := []string{createBy, mydate, valid}
-		log.Printf("update Files\n%s\n%+v", stm, params)
+	stm, err := LoadTemplateSQL("update_files", tmpl)
+	if err != nil {
+		return err
+	}
+	stm = WhereClause(stm, conds)
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
 	}
 
 	// start transaction
@@ -553,7 +580,7 @@ func (a *API) UpdateFiles() error {
 		return err
 	}
 	defer tx.Rollback()
-	_, err = tx.Exec(stm, createBy, date, isFileValid)
+	_, err = tx.Exec(stm, args...)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err
