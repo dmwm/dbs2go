@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -184,6 +185,33 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 
 	// check if our data already exist in DB
 	if IfExist(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", rec.OUTPUT_MODULE_LABEL) {
+		return nil
+	}
+	// check if our data already exist in DB
+	var vals []interface{}
+	vals = append(vals, rec.APP_NAME)
+	vals = append(vals, rec.PSET_HASH)
+	vals = append(vals, rec.OUTPUT_MODULE_LABEL)
+	vals = append(vals, rec.GLOBAL_TAG)
+	args := []string{"app_name", "pset_hash", "output_module_label", "global_tag"}
+	table := "OUTPUT_MODULE_CONIGS"
+	var stm string
+	var wheres []string
+	if DBOWNER == "sqlite" {
+		stm = fmt.Sprintf("SELECT output_mod_config_id FROM %s", table)
+		for _, a := range args {
+			wheres = append(wheres, fmt.Sprintf("%s=?", a))
+		}
+	} else {
+		stm = fmt.Sprintf("SELECT T.output_mod_config_id FROM %s.%s T", DBOWNER, table)
+		for _, a := range args {
+			wheres = append(wheres, fmt.Sprintf("%s=:%s", a, a))
+		}
+	}
+	stm = fmt.Sprintf("%s WHERE %s", stm, strings.Join(wheres, " "))
+	var oid float64
+	err = tx.QueryRow(stm, vals...).Scan(&oid)
+	if err == nil {
 		return nil
 	}
 
