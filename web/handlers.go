@@ -248,11 +248,13 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 		params[k] = v[0]
 	}
 	if a == "files" {
-		var err error
-		params, err = parsePayload(r)
+		postParams, err := parsePayload(r)
 		if err != nil {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
 			return
+		}
+		for k, v := range postParams {
+			params[k] = v
 		}
 	}
 	if utils.VERBOSE > 0 {
