@@ -130,3 +130,36 @@ func TestValidatorDatasetAccessType(t *testing.T) {
 	rec = &dbs.DatasetAccessTypes{DATASET_ACCESS_TYPE: "test"}
 	validationSuccess(t, rec)
 }
+
+/*
+ApplicationExecutables
+PrimaryDatasets
+ProcessingEras
+AcquisitionEras
+DataTiers
+PhysicsGroups
+DatasetAccessTypes
+ProcessedDatasets
+Datasets
+Blocks
+Files
+FileDataTypes
+FileLumis
+FileOutputModConfigs
+FileParents
+DatasetParents
+*/
+
+// TestValidatorPrimaryDataset
+func TestValidatorPrimaryDataset(t *testing.T) {
+	if dbs.RecordValidator == nil {
+		dbs.RecordValidator = validator.New()
+	}
+	var rec dbs.DBRecord
+	log.Println("validate without dataset access type")
+	rec = &dbs.DatasetAccessTypes{}
+	validationFailure(t, rec)
+	log.Println("validate correct record")
+	rec = &dbs.DatasetAccessTypes{DATASET_ACCESS_TYPE: "test"}
+	validationSuccess(t, rec)
+}
