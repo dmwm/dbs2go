@@ -540,6 +540,36 @@ func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface
 	return rid, err
 }
 
+// IfExistMulti checks if given rid exists in given table for provided value conditions
+func IfExistMulti(tx *sql.Tx, table, rid string, args []string, vals ...interface{}) bool {
+	var stm string
+	var wheres []string
+	if DBOWNER == "sqlite" {
+		stm = fmt.Sprintf("SELECT %s FROM %s", rid, table)
+		for _, a := range args {
+			wheres = append(wheres, fmt.Sprintf("%s=?", a))
+		}
+	} else {
+		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T", rid, DBOWNER, table)
+		for _, a := range args {
+			wheres = append(wheres, fmt.Sprintf("%s=:%s", a, a))
+		}
+	}
+	stm = fmt.Sprintf("%s WHERE %s", stm, strings.Join(wheres, " AND "))
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, vals, "execute")
+	}
+	var tid float64
+	err := tx.QueryRow(stm, vals...).Scan(&tid)
+	if err == nil {
+		return true
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("fail to get ID from table %s %s for %v values %v", table, rid, args, vals)
+	}
+	return false
+}
+
 // IfExist check if given rid, attr exists in given table for provided value conditions
 func IfExist(tx *sql.Tx, table, rid, attr string, val ...interface{}) bool {
 	// check if our data already exist in DB
