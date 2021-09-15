@@ -115,8 +115,8 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST")
 		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("POST")
-		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST")
-		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
+		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST", "GET")
 	} else {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("GET")
