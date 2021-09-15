@@ -237,7 +237,7 @@ func PrintSQL(stm string, args []interface{}, msg string) {
 		log.Println("")
 	}
 	fmt.Printf("### SQL statement ###\n%s\n\n", stm)
-	fmt.Printf("### SQL arguments ###\n")
+	fmt.Printf("### SQL values ###\n")
 	for _, v := range args {
 		fmt.Printf("\t'%v'\n", v)
 	}
