@@ -110,7 +110,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
-		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("POST")
 		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT")
 		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST")
