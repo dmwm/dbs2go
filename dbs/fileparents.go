@@ -159,6 +159,10 @@ func (a *API) InsertFileParents() error {
 	}
 	defer tx.Rollback()
 	err = a.InsertFileParentsBlockTxt(tx)
+	if err != nil {
+		log.Println("unable to insert file parents", err)
+		return err
+	}
 	//     if err != nil {
 	//         err = a.InsertFileParentsTxt(tx)
 	//         if err != nil {
@@ -290,9 +294,9 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert FileParentsBlock record %+v", rec)
 	}
-	if utils.VERBOSE > 0 {
-		log.Printf("InsertFileParentsBlock record %+v", a.Params)
-	}
+	//     if utils.VERBOSE > 0 {
+	//         log.Printf("InsertFileParentsBlock record %+v", a.Params)
+	//     }
 
 	if len(rec.ChildParentIDList) == 0 {
 		msg := "InsertFileParentsBlock API requires child_parent_id_list"
@@ -307,6 +311,10 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	//     conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
 	stm := getSQL("fileparents_block")
 	stm = WhereClause(stm, conds)
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	// get file ids associated with given block name
 	rows, err := tx.Query(stm, args...)
@@ -333,6 +341,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	//         v := vals.([]int64)
 	//         fids = append(fids, v[0])
 	//     }
+	log.Println("InsertFileParentsBlock fids", fids, "bfids", bfids)
 	if len(fids) != len(bfids) {
 		log.Println("block fids != file ids")
 		log.Println("block ids", bfids)
@@ -347,6 +356,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		var r FileParents
 		r.THIS_FILE_ID = v[0]
 		r.PARENT_FILE_ID = v[1]
+		log.Println("InsertFileParentsBlock", r)
 		err = r.Validate()
 		if err != nil {
 			log.Println("unable to validate the record", r, "error", err)
@@ -354,7 +364,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		}
 		err = r.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert FileParents record, error", err)
+			log.Println("unable to insert FileParentsBlock record, error", err)
 			return err
 		}
 	}
