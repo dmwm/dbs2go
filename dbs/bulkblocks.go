@@ -133,21 +133,16 @@ type DatasetParent struct {
 	ParentDataset string `json:"parent_dataset"`
 }
 
-// InsertBulkBlocks DBS API
-/*
-   for details see:
-   /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
-   /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
-
-   #1 insert configuration
-   configList = self.insertOutputModuleConfig(
-                   blockcontent['dataset_conf_list'], migration)
-   #2 insert dataset
-   datasetId = self.insertDataset(blockcontent, configList, migration)
-   #3 insert block & files
-   self.insertBlockFile(blockcontent, datasetId, migration)
-*/
-//gocyclo:ignore
+// InsertBulkBlocks DBS API. It relies on BulkBlocks record which by itself
+// contains series of other records. The logic of this API is the following:
+// we read dataset_conf_list part of the record and insert output config data,
+// then we insert recursively PrimaryDSTypes, PrimaryDataset, ProcessingEras,
+// AcquisitionEras, ..., Datasets, Blocks, Files, FileLumis, FileCofig list,
+// and dataset parent lists.
+// for Python logic please refer to:
+// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
+// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
+// gocyclo:ignore
 func (a *API) InsertBulkBlocks() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)
@@ -275,7 +270,13 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get data tier ID")
 	}
-	dataTierID, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.Dataset.DataTierName)
+	dataTierID, err = GetID(
+		tx,
+		"DATA_TIERS",
+		"data_tier_id",
+		"data_tier_name",
+		rec.Dataset.DataTierName,
+	)
 	if err != nil {
 		log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
 		return err
@@ -284,7 +285,13 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get physics group ID")
 	}
-	physicsGroupID, err = GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.Dataset.PhysicsGroupName)
+	physicsGroupID, err = GetID(
+		tx,
+		"PHYSICS_GROUPS",
+		"physics_group_id",
+		"physics_group_name",
+		rec.Dataset.PhysicsGroupName,
+	)
 	if err != nil {
 		log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
 		return err
@@ -293,7 +300,13 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get dataset access type ID")
 	}
-	datasetAccessTypeID, err = GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.Dataset.DatasetAccessType)
+	datasetAccessTypeID, err = GetID(
+		tx,
+		"DATASET_ACCESS_TYPES",
+		"dataset_access_type_id",
+		"dataset_access_type",
+		rec.Dataset.DatasetAccessType,
+	)
 	if err != nil {
 		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
 		return err
@@ -301,7 +314,13 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get processed dataset ID")
 	}
-	processedDatasetID, err = GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.Dataset.ProcessedDSName)
+	processedDatasetID, err = GetID(
+		tx,
+		"PROCESSED_DATASETS",
+		"processed_ds_id",
+		"processed_ds_name",
+		rec.Dataset.ProcessedDSName,
+	)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
 		return err
@@ -447,7 +466,12 @@ func (a *API) InsertBulkBlocks() error {
 				// skip if we found valida filelumi record
 				continue
 			}
-			fl := FileLumis{FILE_ID: fileID, RUN_NUM: r.RunNumber, LUMI_SECTION_NUM: r.LumiSectionNumber, EVENT_COUNT: rrr.EventCount}
+			fl := FileLumis{
+				FILE_ID:          fileID,
+				RUN_NUM:          r.RunNumber,
+				LUMI_SECTION_NUM: r.LumiSectionNumber,
+				EVENT_COUNT:      rrr.EventCount,
+			}
 			data, err = json.Marshal(fl)
 			if err != nil {
 				log.Println("unable to marshal dataset file lumi list", err)
