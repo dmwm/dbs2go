@@ -336,7 +336,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		CreateBy:  cby,
 		Api:       a,
 	}
-	if a == "fileArray" || a == "datasetlist" || a == "fileparentsbylumi" || a == "filelumis" || a == "blockparents" {
+	if a == "fileArray" || a == "datasetlist" || a == "fileparentsbylumi" || a == "filelumis" || a == "blockparents" || a == "fileparents" {
 		params, err = parsePayload(r)
 		if err != nil {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
