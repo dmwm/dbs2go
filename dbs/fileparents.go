@@ -154,14 +154,9 @@ type FileParentBlockRecord struct {
 	ChildParentIDList [][]int64 `json:"child_parent_id_list"`
 }
 
-// InsertFileParents DBS API
+// InsertFileParents DBS API is used by /fileparents end-point
+// it accepts FileParentBlockRecord
 func (a *API) InsertFileParents() error {
-	// read given input
-	data, err := io.ReadAll(a.Reader)
-	if err != nil {
-		log.Println("fail to read data", err)
-		return err
-	}
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
@@ -169,14 +164,14 @@ func (a *API) InsertFileParents() error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = a.InsertFileParentsBlockTxt(tx, data)
-	if err != nil {
-		err = a.InsertFileParentsTxt(tx, data)
-		if err != nil {
-			log.Println("unable to insert file parents", err)
-			return err
-		}
-	}
+	err = a.InsertFileParentsBlockTxt(tx)
+	//     if err != nil {
+	//         err = a.InsertFileParentsTxt(tx)
+	//         if err != nil {
+	//             log.Println("unable to insert file parents", err)
+	//             return err
+	//         }
+	//     }
 
 	// commit transaction
 	err = tx.Commit()
@@ -190,13 +185,37 @@ func (a *API) InsertFileParents() error {
 	return nil
 }
 
-// InsertFileParentsTxt DBS API
-func (a *API) InsertFileParentsTxt(tx *sql.Tx, data []byte) error {
+// InsertFileParentsTxt DBS API is used by bulkblocks API
+func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert.py
 
+	// read given input
+	data, err := io.ReadAll(a.Reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return err
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert FileParents record %+v", a.Params)
+	}
+
+	//     rrr := FileParentRecord
+	//     lfns := getValues(a.Params, "logical_file_name")
+	//     plfns := getValues(a.Params, "parent_logical_file_name")
+	//     if len(lfns) != len(plfns) {
+	//         msg  := "wrong number of lfns vs plfns"
+	//         log.Println(msg)
+	//         return errrors.New(msg)
+	//     }
+	//     var records []FileParentRecord
+	//     for idx, lfn : range lfns {
+	//         r := FileParentRecord{LogicalFileName: lfn, ParentLogicalFileName: pfn}
+	//         records = append(records, r)
+	//     }
+
 	var records []FileParentRecord
-	err := json.Unmarshal(data, &records)
+	err = json.Unmarshal(data, &records)
 	if err != nil {
 		log.Println("fail to decode data", err, "will proceed with FileParentRecord")
 		var rrr FileParentRecord
@@ -240,7 +259,7 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx, data []byte) error {
 }
 
 // InsertFileParentsBlockTxt DBS API
-func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx, data []byte) error {
+func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert2.py
 	/*
@@ -252,25 +271,33 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx, data []byte) error {
 	   3. The dataset parentage is already in DBS.
 	*/
 
+	// read given input
+	//     data, err := io.ReadAll(a.Reader)
+	//     if err != nil {
+	//         log.Println("fail to read data", err)
+	//         return err
+	//     }
+
 	var args []interface{}
 	var conds []string
 
-	var rec FileParentBlockRecord
-	err := json.Unmarshal(data, &rec)
-	if err != nil {
-		log.Println("fail to decode data as FileParentBlockRecord", err)
-		return err
-	}
+	//     var rec FileParentBlockRecord
+	//     err := json.Unmarshal(data, &rec)
+	//     if err != nil {
+	//         log.Println("fail to decode data as FileParentBlockRecord", err)
+	//         return err
+	//     }
+	//     if utils.VERBOSE > 0 {
+	//         log.Printf("Insert FileParentsBlock record %+v", rec)
+	//     }
 	if utils.VERBOSE > 0 {
-		log.Printf("Insert FileParentsBlock record %+v", rec)
+		log.Printf("Insert FileParentsBlock record %+v", a.Params)
 	}
 
 	conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
 	stm := getSQL("fileparents_block")
 	stm = WhereClause(stm, conds)
-	if err != nil {
-		return err
-	}
+
 	// get file ids associated with given block name
 	rows, err := tx.Query(stm, args...)
 	if err != nil {

@@ -484,7 +484,7 @@ func (a *API) InsertBulkBlocks() error {
 		return err
 	}
 	api.Reader = bytes.NewReader(data)
-	err = api.InsertFileParentsTxt(tx, data)
+	err = api.InsertFileParentsTxt(tx)
 	if err != nil {
 		log.Println("unable to insert file parents", err)
 		return err
