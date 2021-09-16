@@ -169,10 +169,9 @@ func (a *API) InsertFileParents() error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = a.InsertFileParentsTxt(tx, data)
+	err = a.InsertFileParentsBlockTxt(tx, data)
 	if err != nil {
-		// let's try to insert via FileParentBlock record
-		err = a.InsertFileParentsBlockTxt(tx, data)
+		err = a.InsertFileParentsTxt(tx, data)
 		if err != nil {
 			log.Println("unable to insert file parents", err)
 			return err
