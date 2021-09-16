@@ -156,6 +156,12 @@ type FileParentBlockRecord struct {
 
 // InsertFileParents DBS API
 func (a *API) InsertFileParents() error {
+	// read given input
+	data, err := io.ReadAll(a.Reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return err
+	}
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
@@ -163,10 +169,10 @@ func (a *API) InsertFileParents() error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	err = a.InsertFileParentsTxt(tx)
+	err = a.InsertFileParentsTxt(tx, data)
 	if err != nil {
 		// let's try to insert via FileParentBlock record
-		err = a.InsertFileParentsBlockTxt(tx)
+		err = a.InsertFileParentsBlockTxt(tx, data)
 		if err != nil {
 			log.Println("unable to insert file parents", err)
 			return err
@@ -186,17 +192,12 @@ func (a *API) InsertFileParents() error {
 }
 
 // InsertFileParentsTxt DBS API
-func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
+func (a *API) InsertFileParentsTxt(tx *sql.Tx, data []byte) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert.py
 
-	data, err := io.ReadAll(a.Reader)
-	if err != nil {
-		log.Println("fail to read data", err)
-		return err
-	}
 	var records []FileParentRecord
-	err = json.Unmarshal(data, &records)
+	err := json.Unmarshal(data, &records)
 	if err != nil {
 		log.Println("fail to decode data", err, "will proceed with FileParentRecord")
 		var rrr FileParentRecord
@@ -240,7 +241,7 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 }
 
 // InsertFileParentsBlockTxt DBS API
-func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
+func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx, data []byte) error {
 	// TODO: implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert2.py
 	/*
@@ -255,14 +256,8 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	var args []interface{}
 	var conds []string
 
-	// read given input
-	data, err := io.ReadAll(a.Reader)
-	if err != nil {
-		log.Println("fail to read data", err)
-		return err
-	}
 	var rec FileParentBlockRecord
-	err = json.Unmarshal(data, &rec)
+	err := json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data as FileParentBlockRecord", err)
 		return err
