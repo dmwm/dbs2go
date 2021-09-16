@@ -34,6 +34,7 @@ func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code i
 	rec["method"] = r.Method
 	rec["exception"] = code
 	rec["type"] = "HTTPError"
+	log.Printf("ERROR: method=%s api=%s code=%d %s", r.Method, api, code, msg)
 	//     data, _ := json.Marshal(rec)
 	var out []dbs.Record
 	out = append(out, rec)
@@ -209,7 +210,7 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 	if err != nil {
 		return nil, err
 	}
-	if utils.VERBOSE > 1 {
+	if utils.VERBOSE > 0 {
 		log.Println("HTTP POST payload\n", params)
 	}
 	for k, v := range params {
