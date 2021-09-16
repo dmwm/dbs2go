@@ -148,12 +148,6 @@ type FileParentRecord struct {
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 
-// FileParentBlockRecord represents file parent DBS record
-type FileParentBlockRecord struct {
-	BlockName         string    `json:"block_name"`
-	ChildParentIDList [][]int64 `json:"child_parent_id_list"`
-}
-
 // InsertFileParents DBS API is used by /fileparents end-point
 // it accepts FileParentBlockRecord
 func (a *API) InsertFileParents() error {
@@ -258,6 +252,12 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	return nil
 }
 
+// FileParentBlockRecord represents file parent DBS record
+type FileParentBlockRecord struct {
+	BlockName         string    `json:"block_name"`
+	ChildParentIDList [][]int64 `json:"child_parent_id_list"`
+}
+
 // InsertFileParentsBlockTxt DBS API
 func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	// TODO: implement the following logic
@@ -272,29 +272,39 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	*/
 
 	// read given input
-	//     data, err := io.ReadAll(a.Reader)
-	//     if err != nil {
-	//         log.Println("fail to read data", err)
-	//         return err
-	//     }
+	data, err := io.ReadAll(a.Reader)
+	if err != nil {
+		log.Println("fail to read data", err)
+		return err
+	}
 
 	var args []interface{}
 	var conds []string
 
-	//     var rec FileParentBlockRecord
-	//     err := json.Unmarshal(data, &rec)
-	//     if err != nil {
-	//         log.Println("fail to decode data as FileParentBlockRecord", err)
-	//         return err
-	//     }
-	//     if utils.VERBOSE > 0 {
-	//         log.Printf("Insert FileParentsBlock record %+v", rec)
-	//     }
+	var rec FileParentBlockRecord
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		log.Println("fail to decode data as FileParentBlockRecord", err)
+		return err
+	}
 	if utils.VERBOSE > 0 {
-		log.Printf("Insert FileParentsBlock record %+v", a.Params)
+		log.Printf("Insert FileParentsBlock record %+v", rec)
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("InsertFileParentsBlock record %+v", a.Params)
 	}
 
-	conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
+	if len(rec.ChildParentIDList) == 0 {
+		msg := "InsertFileParentsBlock API requires child_parent_id_list"
+		log.Println(msg)
+		return errors.New(msg)
+	}
+
+	cond := fmt.Sprintf(" B.BLOCK_NAME = %s", placeholder("block_name"))
+	conds = append(conds, cond)
+	args = append(args, rec.BlockName)
+
+	//     conds, args = AddParam("block_name", "B.BLOCK_NAME", a.Params, conds, args)
 	stm := getSQL("fileparents_block")
 	stm = WhereClause(stm, conds)
 
@@ -309,16 +319,20 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	for rows.Next() {
 		var fid int64
 		if err := rows.Scan(&fid); err != nil {
+			log.Println("fail to get row.Scan, error", err)
 			return err
 		}
 		bfids = append(bfids, fid)
 	}
 	// check that out file ids from block are the same as from child_parent_id_list
 	var fids []int64
-	if vals, ok := a.Params["child_parent_id_list"]; ok {
-		v := vals.([]int64)
-		fids = append(fids, v[0])
+	for _, item := range rec.ChildParentIDList {
+		fids = append(fids, item[0])
 	}
+	//     if vals, ok := a.Params["child_parent_id_list"]; ok {
+	//         v := vals.([]int64)
+	//         fids = append(fids, v[0])
+	//     }
 	if len(fids) != len(bfids) {
 		log.Println("block fids != file ids")
 		log.Println("block ids", bfids)
@@ -327,13 +341,15 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		return errors.New(msg)
 	}
 	// now we can loop over provided list and insert file parents
-	if vals, ok := a.Params["child_parent_id_list"]; ok {
-		v := vals.([]int64)
+	//     if vals, ok := a.Params["child_parent_id_list"]; ok {
+	//         v := vals.([]int64)
+	for _, v := range rec.ChildParentIDList {
 		var r FileParents
 		r.THIS_FILE_ID = v[0]
 		r.PARENT_FILE_ID = v[1]
 		err = r.Validate()
 		if err != nil {
+			log.Println("unable to validate the record", r, "error", err)
 			return err
 		}
 		err = r.Insert(tx)
@@ -341,9 +357,6 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 			log.Println("unable to insert FileParents record, error", err)
 			return err
 		}
-	} else {
-		msg := "fileparents API requires child_parent_id_list"
-		return errors.New(msg)
 	}
 	return nil
 }
