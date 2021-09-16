@@ -320,6 +320,9 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 			log.Println("unable to insert FileParents record, error", err)
 			return err
 		}
+	} else {
+		msg := "fileparents API requires child_parent_id_list"
+		return errors.New(msg)
 	}
 	return nil
 }
