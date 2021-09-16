@@ -12,7 +12,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// BulkBlocks represents bulk block JSON structure
+// BulkBlocks represents bulk block structure used by `/bulkblocks` DBS API
 type BulkBlocks struct {
 	DatasetConfigList []DatasetConfig `json:"dataset_conf_list"`
 	FileConfigList    []FileConfig    `json:"file_conf_list"`
@@ -28,7 +28,7 @@ type BulkBlocks struct {
 	//     DatasetParentList []DatasetParent `json:"dataset_parent_list"`
 }
 
-// DatasetConfig represents dataset config structure
+// DatasetConfig represents dataset config structure used in BulkBlocks structure
 type DatasetConfig struct {
 	ReleaseVersion    string `json:"release_version"`
 	PsetHash          string `json:"pset_hash"`
@@ -37,7 +37,7 @@ type DatasetConfig struct {
 	GlogalTag         string `json:"global_tag"`
 }
 
-// FileConfig represents file config structure
+// FileConfig represents file config structure used in BulkBlocks structure
 type FileConfig struct {
 	ReleaseVersion    string `json:"release_version"`
 	PsetHash          string `json:"pset_hash"`
@@ -47,13 +47,13 @@ type FileConfig struct {
 	GlogalTag         string `json:"global_tag"`
 }
 
-// FileLumi represents file lumi structure
+// FileLumi represents file lumi structure used in File structure of BulkBlocks structure
 type FileLumi struct {
 	LumiSectionNumber int64 `json:"lumi_section_num"`
 	RunNumber         int64 `json:"run_num"`
 }
 
-// File represents file structure
+// File represents file structure used in BulkBlocks structure
 type File struct {
 	CheckSum         string     `json:"check_sum"`
 	FileLumiList     []FileLumi `json:"file_lumi_list"`
@@ -68,14 +68,14 @@ type File struct {
 	AutoCrossSection float64    `json:"auto_cross_section"`
 }
 
-// ProcessingEra represents processing era structure
+// ProcessingEra represents processing era structure used in BulkBlocks structure
 type ProcessingEra struct {
 	CreateBy          string `json:"create_by"`
 	ProcessingVersion int64  `json:"processing_version"`
 	Description       string `json:"description"`
 }
 
-// PrimaryDataset represents primary dataset structure
+// PrimaryDataset represents primary dataset structure used in BulkBlocks structure
 type PrimaryDataset struct {
 	CreateBy      string `json:"create_by"`
 	PrimaryDSType string `json:"primary_ds_type"`
@@ -83,7 +83,7 @@ type PrimaryDataset struct {
 	CreationDate  int64  `json:"creation_date"`
 }
 
-// Dataset represents dataset structure
+// Dataset represents dataset structure used in BulkBlocks structure
 type Dataset struct {
 	CreateBy             string  `json:"create_by"`
 	CreationDate         int64   `json:"creation_date"`
@@ -97,14 +97,14 @@ type Dataset struct {
 	Dataset              string  `json:"dataset'`
 }
 
-// AcquisitionEra represents AcquisitionEra structure
+// AcquisitionEra represents AcquisitionEra structure use in BulkBlocks structure
 type AcquisitionEra struct {
 	AcquisitionEraName string `json:"acquisition_era_name"`
 	StartDate          int64  `json:"start_date"`
 	CreateBy           string `json:"create_by"`
 }
 
-// Block represents Block structure
+// Block represents Block structure used in BulkBlocks structure
 type Block struct {
 	CreateBy       string `json:"create_by"`
 	CreationDate   int64  `json:"creation_date"`
@@ -115,19 +115,19 @@ type Block struct {
 	BlockSize      int64  `json:"block_size"`
 }
 
-// FileParent represents file parent structure
+// FileParent represents file parent structure used in BulkBlocks structure
 type FileParent struct {
 	LogicalFileName       string `json:"logical_file_name"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 
-// BlockParent represents block parent structure
+// BlockParent represents block parent structure used in BulkBlocks structure
 type BlockParent struct {
 	ThisBlockID string `json:"this_block_id"`
 	ParentBlock string `json:"parent_block"`
 }
 
-// DatasetParent represents dataset parent structure
+// DatasetParent represents dataset parent structure used in BulkBlocks structure
 type DatasetParent struct {
 	ThisDatasetID string `json:"this_dataset_id"`
 	ParentDataset string `json:"parent_dataset"`
@@ -202,7 +202,14 @@ func (a *API) InsertBulkBlocks() error {
 	pdstDS := PrimaryDSTypes{
 		PRIMARY_DS_TYPE: rec.PrimaryDataset.PrimaryDSType,
 	}
-	primaryDatasetTypeID, err = GetRecID(tx, &pdstDS, "PRIMARY_DS_TYPES", "primary_ds_type_id", "primary_ds_type", rec.PrimaryDataset.PrimaryDSType)
+	primaryDatasetTypeID, err = GetRecID(
+		tx,
+		&pdstDS,
+		"PRIMARY_DS_TYPES",
+		"primary_ds_type_id",
+		"primary_ds_type",
+		rec.PrimaryDataset.PrimaryDSType,
+	)
 	if err != nil {
 		log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
 		return err
@@ -221,7 +228,14 @@ func (a *API) InsertBulkBlocks() error {
 		CREATION_DATE:      rec.PrimaryDataset.CreationDate,
 		CREATE_BY:          rec.PrimaryDataset.CreateBy,
 	}
-	primaryDatasetID, err = GetRecID(tx, &primDS, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PrimaryDataset.PrimaryDSName)
+	primaryDatasetID, err = GetRecID(
+		tx,
+		&primDS,
+		"PRIMARY_DATASETS",
+		"primary_ds_id",
+		"primary_ds_name",
+		rec.PrimaryDataset.PrimaryDSName,
+	)
 	if err != nil {
 		log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
 		return err
@@ -240,7 +254,14 @@ func (a *API) InsertBulkBlocks() error {
 		CREATE_BY:          rec.ProcessingEra.CreateBy,
 		DESCRIPTION:        rec.ProcessingEra.Description,
 	}
-	processingEraID, err = GetRecID(tx, &pera, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.ProcessingEra.ProcessingVersion)
+	processingEraID, err = GetRecID(
+		tx,
+		&pera,
+		"PROCESSING_ERAS",
+		"processing_era_id",
+		"processing_version",
+		rec.ProcessingEra.ProcessingVersion,
+	)
 	if err != nil {
 		log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
 		return err
@@ -260,7 +281,14 @@ func (a *API) InsertBulkBlocks() error {
 		CREATION_DATE:        creationDate,
 		CREATE_BY:            rec.AcquisitionEra.CreateBy,
 	}
-	acquisitionEraID, err = GetRecID(tx, &aera, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.AcquisitionEra.AcquisitionEraName)
+	acquisitionEraID, err = GetRecID(
+		tx,
+		&aera,
+		"ACQUISITION_ERAS",
+		"acquisition_era_id",
+		"acquisition_era_name",
+		rec.AcquisitionEra.AcquisitionEraName,
+	)
 	if err != nil {
 		log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
 		return err
@@ -410,7 +438,14 @@ func (a *API) InsertBulkBlocks() error {
 	for _, rrr := range rec.Files {
 		// get fileTypeID and insert record if it does not exists
 		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
-		fileTypeID, err = GetRecID(tx, &ftype, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
+		fileTypeID, err = GetRecID(
+			tx,
+			&ftype,
+			"FILE_DATA_TYPES",
+			"file_type_id",
+			"file_type",
+			rrr.FileType,
+		)
 		if err != nil {
 			log.Println("unable to find file_type_id for", rrr.FileType)
 			return err
