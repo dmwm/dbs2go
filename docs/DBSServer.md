@@ -36,7 +36,7 @@ Here is architecture of the DBS server:
 - [utils](https://github.com/vkuznet/dbs2go/tree/master/utils) contains general
   utilities used across the codebase
 - [graphql](https://github.com/vkuznet/dbs2go/tree/master/graphql) contains
-  initial implementation of [GraphQL]((https://graphql.org/) for DBS server.
+  initial implementation of [GraphQL](https://graphql.org/) for DBS server.
 
 The HTTP server consists of the following components:
 - [server.go](https://github.com/vkuznet/dbs2go/blob/master/web/server.go)
