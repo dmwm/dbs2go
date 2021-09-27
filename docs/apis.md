@@ -5,6 +5,10 @@ or [ndJSON](http://ndjson.org/). The latter data-format is more
 suitable for data-streaming (as it does not require open/close
 list brackets and commas across JSON records).
 
+**Please note:** all data-types in Go implementation are following
+[DBS schema](https://github.com/dmwm/DBS/blob/master/Schema/DDL/create-oracle-schema.sql)
+convention.
+
 #### GET APIs
 DBS GET APIS provide infomration about DBS entities.
 You can use them as following:
