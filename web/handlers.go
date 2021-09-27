@@ -56,6 +56,28 @@ func createBy(r *http.Request) string {
 	return cby
 }
 
+// DBStatsHandler provides metrics
+func DBStatsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	dbStats, err := dbs.DBStats()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	responseJSON, err := json.Marshal(dbStats)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
+}
+
 // MetricsHandler provides metrics
 func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {

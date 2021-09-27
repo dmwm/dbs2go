@@ -154,6 +154,8 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/datasetlist"), DatasetListHandler).Methods("POST")
 		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
 
+		router.HandleFunc(basePath("/dbstats"), DBStatsHandler).Methods("GET")
+
 		// load graphql
 		if Config.GraphQLSchema != "" {
 			//         schema := dbsGraphQL.InitSchema(Config.GraphQLSchema, dbs.DB)
