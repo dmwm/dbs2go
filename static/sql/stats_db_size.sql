@@ -1,1 +1,2 @@
-select sum(bytes)/1024/1024/1024 as size_GB from dba_segments where owner like 'CMS_DBS3%';
+SELECT sum(bytes) AS db_size
+FROM dba_segments WHERE owner LIKE '{{.Owner}}%';

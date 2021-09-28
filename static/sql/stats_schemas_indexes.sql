@@ -1,1 +1,3 @@
-select owner, sum(bytes)/1024/1024/1024 as size_GB from dba_segments where owner like 'CMS_DBS3%' and segment_type='INDEX' group by owner;
+SELECT owner, sum(bytes) AS schema_index_size
+FROM dba_segments
+WHERE owner LIKE '{{.Owner}}%' AND segment_type='INDEX' GROUP BY owner;

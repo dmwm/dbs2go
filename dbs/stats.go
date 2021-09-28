@@ -74,7 +74,7 @@ func DBStats() (DBInfo, error) {
 
 // helper function to get full database size
 func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
-	stm, err := LoadTemplateSQL("stats_full_size", tmpl)
+	stm, err := LoadTemplateSQL("stats_db_size", tmpl)
 	if err != nil {
 		return 0, err
 	}
@@ -97,7 +97,7 @@ func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
 
 // helper function to get index size of database
 func indexSize(tx *sql.Tx, tmpl Record) (float64, error) {
-	stm, err := LoadTemplateSQL("stats_index_size", tmpl)
+	stm, err := LoadTemplateSQL("stats_db_indexes", tmpl)
 	if err != nil {
 		return 0, err
 	}

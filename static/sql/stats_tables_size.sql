@@ -1,1 +1,5 @@
-select t.owner, t.table_name, t.num_rows, s.bytes/1024/1024 as size_MB from dba_segments s, dba_tables t where s.owner=t.owner and s.segment_name=t.table_name and s.owner like 'CMS_DBS3%' and s.segment_type='TABLE' order by 1, 3;
+SELECT t.owner AS owner, t.table_name AS table_name, 
+    t.num_rows AS nrows, s.bytes AS table_size
+FROM dba_segments s, dba_tables t
+WHERE s.owner=t.owner AND s.segment_name=t.table_name 
+    AND s.owner LIKE '{{.Owner}}%' AND s.segment_type='TABLE' ORDER BY 1, 3;
