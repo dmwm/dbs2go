@@ -85,13 +85,6 @@
     "length": 99
   },
   {
-    "name": "migration_url",
-    "patterns": [
-      "^https?://(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}\\.?|localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|\\[?[a-fA-F0-9]*:[a-fA-F0-9:]+\\]?)(?::\\d+)?(?:/?|[/?]\\S+)$"
-    ],
-    "length": 99
-  },
-  {
     "name": "global_tag",
     "patterns": [
       "[a-zA-Z0-9\\s\\.\\-_:]{1,100}$",
@@ -175,18 +168,22 @@
   {
     "name": "validFileOnly",
     "patterns": [
+      "0|1"
     ],
     "length": -1
   },
   {
     "name": "dataset_id",
     "patterns": [
+      "\\d+"
     ],
     "length": -1
   },
   {
     "name": "run_num",
     "patterns": [
+      "\\d+",
+      "\\d+|\\[\\d+\\]|\\[[\\d+,]+\\]|\\[\\d+-\\d+\]"
     ],
     "length": -1
   },

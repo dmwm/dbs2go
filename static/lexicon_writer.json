@@ -40,21 +40,16 @@
     "length": -1
   },
   {
-    "name": "user",
-    "patterns": [],
-    "length": -1
-  },
-  {
-    "name": "search_block",
+    "name": "processing_version",
     "patterns": [
-      "^/(\\*|[a-zA-Z\\*][a-zA-Z0-9_\\*]{0,100})(/(\\*|[a-zA-Z0-9_\\.\\-\\*]{1,199})){0,1}(/(\\*|[A-Z\\-\\*]{1,99})(#(\\*|[a-zA-Z0-9\\.\\-_\\*]){0,100}){0,1}){0,1}$"
+	  "^[0-9]+$"
     ],
     "length": -1
   },
   {
-    "name": "search_dataset",
+    "name": "acquisition_era_name",
     "patterns": [
-      "^/(\\*|[a-zA-Z\\*][a-zA-Z0-9_\\*\\-]{0,100})(/(\\*|[a-zA-Z0-9_\\.\\-\\*]{1,199})){0,1}(/(\\*|[A-Z\\-\\*]{1,50})){0,1}$"
+	  "[a-zA-Z][a-zA-Z0-9_]*$"
     ],
     "length": -1
   },
@@ -80,51 +75,9 @@
     "length": 99
   },
   {
-    "name": "job_range",
-    "patterns": [
-      "^\\d+(-\\d+)?(,\\d+(-\\d+)?)*$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "cms_name",
-    "patterns": [
-      "^T[0-3]_[A-Z]{2}((_[A-Za-z0-9]+)+)$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "country_code",
-    "patterns": [
-      "^[A-Z]{2}$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "identifier",
-    "patterns": [
-      "[a-zA-Z0-9\\s\\.\\-_]{1,100}$"
-    ],
-    "length": -1
-  },
-  {
     "name": "global_tag",
     "patterns": [
       "[a-zA-Z0-9\\s\\.\\-_:]{1,100}$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "publish_dataset_name",
-    "patterns": [
-      "([a-zA-Z0-9\\-_])+$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "user_processed_dataset",
-    "patterns": [
-      "([a-zA-Z0-9\\.\\-_])+-([a-zA-Z0-9\\-_])+-([a-f0-9]){32}$"
     ],
     "length": -1
   },
@@ -139,13 +92,6 @@
     "name": "processed_string",
     "patterns": [
       "[a-zA-Z0-9_]{1,100}$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "processed_string_t0",
-    "patterns": [
-      "^$|[a-zA-Z0-9_]{1,100}$"
     ],
     "length": -1
   },
@@ -171,70 +117,9 @@
     "length": 99
   },
   {
-    "name": "task_step_name",
-    "patterns": [
-      "^[a-zA-Z][a-zA-Z0-9\\-_]*$"
-    ],
-    "length": 50
-  },
-  {
-    "name": "hn_name",
-    "patterns": [
-      "^([a-zA-Z0-9\\.]+)$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "lfn_base",
-    "patterns": [
-      "/([a-z]+)/([a-z0-9]+)/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)/([A-Z\\-_]+)/([a-zA-Z0-9\\-_]+)",
-      "/([a-z]+)/([a-z0-9]+)/([a-z0-9]+)/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)/([A-Z\\-_]+)/([a-zA-Z0-9\\-_]+)((/[0-9]+){3}){0,1}",
-      "/(store)/(temp/)*(user|group)/(([a-zA-Z0-9\\.]+)|([a-zA-Z0-9\\-_]+))/([a-zA-Z][a-zA-Z0-9\\-_]*)/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)",
-      "/store/(backfill/[0-9]/){0,1}(t0temp/|unmerged/){0,1}(data|express|hidata)/([a-zA-Z0-9\\-_]+)/([a-zA-Z][a-zA-Z0-9\\-_]*)/([A-Z\\-_]+)/([a-zA-Z0-9\\-_]+)/([0-9]+)/([0-9]+)/([0-9]+)"
-    ],
-    "length": -1
-  },
-  {
-    "name": "user_lfn",
-    "patterns": [
-      "/store/(temp/)*(user|group)/(([a-zA-Z0-9\\.]+)|([a-zA-Z0-9\\-_]+))/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-\\._]+)"
-    ],
-    "length": -1
-  },
-  {
     "name": "cmssw_version",
     "patterns": [
       "CMSSW(_\\d+){3}(_[a-zA-Z0-9_]+)?$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "request_name",
-    "patterns": [
-      "[a-zA-Z0-9\\.\\-_]{1,150}$"
-    ],
-    "length": -1
-  },
-  {
-    "name": "couch_url",
-    "patterns": [
-      "https?://(([a-zA-Z0-9:@\\.\\-_]){0,100})([a-z0-9\\.]+)(:\\d+|/couchdb)"
-    ],
-    "length": -1
-  },
-  {
-    "name": "activity",
-    "patterns": [
-      "reprocessing",
-      "production",
-      "relval",
-      "tier0",
-      "t0",
-      "harvesting",
-      "storeresults",
-      "integration",
-      "test",
-      "analysis"
     ],
     "length": -1
   },
@@ -247,5 +132,53 @@
       "test"
     ],
     "length": -1
+  },
+  {
+    "name": "last_modified_by",
+    "patterns": [
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+      "^/[a-zA-Z][a-zA-Z0-9/\\=\\s()\\']*\=[a-zA-Z0-9/\\=\\.\\-_/#:\\s\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*@[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "create_by",
+    "patterns": [
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+      "^/[a-zA-Z][a-zA-Z0-9/\\=\\s()\\']*\=[a-zA-Z0-9/\\=\\.\\-_/#:\\s\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*@[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "validFileOnly",
+    "patterns": [
+      "0|1"
+    ],
+    "length": -1
+  },
+  {
+    "name": "dataset_id",
+    "patterns": [
+      "\\d+"
+    ],
+    "length": -1
+  },
+  {
+    "name": "run_num",
+    "patterns": [
+      "\\d+"
+    ],
+    "length": -1
+  },
+  {
+    "name": "migration_url",
+    "patterns": [
+      "^https?://(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}\\.?|localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|\\[?[a-fA-F0-9]*:[a-fA-F0-9:]+\\]?)(?::\\d+)?(?:/?|[/?]\\S+)$"
+    ],
+    "length": 99
   }
 ]
