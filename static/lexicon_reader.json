@@ -1,0 +1,193 @@
+[
+  {
+    "name": "logical_file_name",
+    "patterns": [
+      "^/store/([A-Za-z0-9._\\-/])+/([A-Za-z0-9._\\-])+(.root|.lhe(.xz){0,1})$",
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+    ],
+    "length": 500
+  },
+  {
+    "name": "file_parent_lfn",
+    "patterns": [
+      "^/store/([A-Za-z0-9._\\-/])+/([A-Za-z0-9._\\-])+(.root|.lhe(.xz){0,1})$",
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+    ],
+    "length": 500
+  },
+  {
+    "name": "block_name",
+    "patterns": [
+      "^/([a-zA-Z0-9]+[a-zA-Z0-9\\-\\._]*)/([a-zA-Z]+[a-zA-Z0-9_\\-\\.]*)/([A-Z_\\-\\.]+)#([a-fA-F0-9\\-\\.]+)$",
+      "^/(\\*|[a-zA-Z\\*][a-zA-Z0-9_\\*]{0,100})(/(\\*|[a-zA-Z0-9_\\.\\-\\*]{1,199})){0,1}(/(\\*|[A-Z\\-\\*]{1,99})(#(\\*|[a-zA-Z0-9\\.\\-_\\*]){0,100}){0,1}){0,1}$"
+    ],
+    "length": 402
+  },
+  {
+    "name": "dataset",
+    "patterns": [
+      "^/([a-zA-Z0-9]+[a-zA-Z0-9\\-\\._]*)/([a-zA-Z]+[a-zA-Z0-9_\\-\\.]*)/([A-Z_\\-\\.]+)$",
+      "^/(\\*|[a-zA-Z\\*][a-zA-Z0-9_\\*\\-]{0,100})(/(\\*|[a-zA-Z0-9_\\.\\-\\*]{1,199})){0,1}(/(\\*|[A-Z\\-\\*]{1,50})){0,1}$",
+      ".*unittest.*"
+    ],
+    "length": 301
+  },
+  {
+    "name": "dataset_parent_list",
+    "patterns": [
+      "^/([a-zA-Z0-9]+[a-zA-Z0-9\\-\\._]*)/([a-zA-Z]+[a-zA-Z0-9_\\-\\.]*)/([A-Z_\\-\\.]+)$",
+      "^/(\\*|[a-zA-Z\\*][a-zA-Z0-9_\\*\\-]{0,100})(/(\\*|[a-zA-Z0-9_\\.\\-\\*]{1,199})){0,1}(/(\\*|[A-Z\\-\\*]{1,50})){0,1}$",
+      ".*unittest.*"
+    ],
+    "length": 301
+  },
+  {
+    "name": "processed_ds_name",
+    "patterns": [
+      "(^[a-zA-Z0-9]+[a-zA-Z0-9_\\-]*)$",
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "processing_version",
+    "patterns": [
+	  "^[0-9]+$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "acquisition_era_name",
+    "patterns": [
+	  "[a-zA-Z][a-zA-Z0-9_]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "searchstr",
+    "patterns": [
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "namestr",
+    "patterns": [
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_/#]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "site_tier",
+    "patterns": [
+      "^T[0-3]"
+    ],
+    "length": 99
+  },
+  {
+    "name": "migration_url",
+    "patterns": [
+      "^https?://(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}\\.?|localhost|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|\\[?[a-fA-F0-9]*:[a-fA-F0-9:]+\\]?)(?::\\d+)?(?:/?|[/?]\\S+)$"
+    ],
+    "length": 99
+  },
+  {
+    "name": "global_tag",
+    "patterns": [
+      "[a-zA-Z0-9\\s\\.\\-_:]{1,100}$",
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "physics_group",
+    "patterns": [
+      "([a-zA-Z0-9\\-_]+)$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "processed_string",
+    "patterns": [
+      "[a-zA-Z0-9_]{1,100}$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "acquisition_name",
+    "patterns": [
+      "[a-zA-Z][a-zA-Z0-9_]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "campaign",
+    "patterns": [
+      "^[a-zA-Z0-9-_]{1,80}$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "primary_ds_name",
+    "patterns": [
+      "^[a-zA-Z][a-zA-Z0-9\\-_]*$",
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+    ],
+    "length": 99
+  },
+  {
+    "name": "cmssw_version",
+    "patterns": [
+      "CMSSW(_\\d+){3}(_[a-zA-Z0-9_]+)?$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "primary_ds_type",
+    "patterns": [
+      "mc",
+      "data",
+      "cosmic",
+      "test"
+    ],
+    "length": -1
+  },
+  {
+    "name": "last_modified_by",
+    "patterns": [
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+      "^/[a-zA-Z][a-zA-Z0-9/\\=\\s()\\']*\=[a-zA-Z0-9/\\=\\.\\-_/#:\\s\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*@[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "create_by",
+    "patterns": [
+      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+      "^/[a-zA-Z][a-zA-Z0-9/\\=\\s()\\']*\=[a-zA-Z0-9/\\=\\.\\-_/#:\\s\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_\\']*$",
+      "^[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*@[a-zA-Z0-9/][a-zA-Z0-9/\\.\\-_]*$"
+    ],
+    "length": -1
+  },
+  {
+    "name": "validFileOnly",
+    "patterns": [
+    ],
+    "length": -1
+  },
+  {
+    "name": "dataset_id",
+    "patterns": [
+    ],
+    "length": -1
+  },
+  {
+    "name": "run_num",
+    "patterns": [
+    ],
+    "length": -1
+  },
+]
