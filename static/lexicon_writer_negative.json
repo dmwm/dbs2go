@@ -1,0 +1,10 @@
+{
+    "dataset": [
+        "/a/b/c",
+        "/ZMM/Summer/bla"
+    ],
+    "block_name": [
+        "/a/b/c#123",
+        "/ZMM/Summer/bla#123"
+    ]
+}

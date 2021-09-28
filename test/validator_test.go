@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +14,71 @@ import (
 	validator "github.com/go-playground/validator/v10"
 	"github.com/vkuznet/dbs2go/dbs"
 )
+
+// TestLexiconPositive
+func TestLexiconPositive(t *testing.T) {
+	testLexicon(t, "positive")
+}
+
+// TestLexiconNegative
+func TestLexiconNegative(t *testing.T) {
+	testLexicon(t, "negative")
+}
+
+// testLexicon
+func testLexicon(t *testing.T, test string) {
+	// set DBS lexicon patterns
+	lexiconFile := os.Getenv("DBS_LEXICON_FILE")
+	if lexiconFile == "" {
+		t.Fatal(errors.New("Please setup DBS_LEXICON_FILE env"))
+	}
+	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
+	sampleFile := os.Getenv("DBS_LEXICON_SAMPLE_FILE")
+	if sampleFile == "" {
+		t.Fatal(errors.New("Please setup DBS_LEXICON_SAMPLE_FILE env"))
+	}
+	data, err := ioutil.ReadFile(sampleFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := make(map[string][]string)
+	err = json.Unmarshal(data, &records)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cMap := make(map[string]bool)
+	for key, values := range records {
+		log.Println("check", key, "values", values)
+		if rec, ok := lexPatterns[key]; ok {
+			for _, pat := range rec.Patterns {
+				for _, v := range values {
+					if matched := pat.MatchString(v); matched {
+						cMap[key] = true
+						log.Printf("%s=%s matched with %v", key, v, pat)
+						break
+					}
+				}
+			}
+		} else {
+			log.Printf("attribute %s is not present in lexicon records", key)
+		}
+	}
+	log.Printf("performed %s lexicon test against %s", test, sampleFile)
+	if test == "positive" {
+		for k, v := range cMap {
+			if !v {
+				t.Errorf("key %s did not match any pattern", k)
+			}
+		}
+	} else if test == "negative" {
+		for k, v := range cMap {
+			if v {
+				t.Errorf("key %s matched some pattern while it should not", k)
+			}
+		}
+	}
+
+}
 
 // TestValidator
 func TestValidator(t *testing.T) {

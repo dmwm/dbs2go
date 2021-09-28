@@ -37,20 +37,28 @@ clean:
 test: test-dbs test-sql test-validator test-bulk test-http test-utils test-migrate test-writer bench
 
 test-dbs:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run TestDBS
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run TestDBS
 test-bulk:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Bulk
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run Bulk
 test-sql:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run SQL
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run SQL
 test-validator:
-	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Validator
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run Validator
 test-http:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run HTTP
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run HTTP
 test-writer:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run DBSWriter
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run DBSWriter
 test-utils:
-	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Utils
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run Utils
 test-migrate:
-	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -v -run Migrate
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run Migrate
+test-lexicon-writer-pos:
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_writer_positive.json go test -v -run LexiconPositive
+test-lexicon-writer-neg:
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_writer_negative.json go test -v -run LexiconNegative
+test-lexicon-reader-pos:
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_positive.json go test -v -run LexiconPositive
+test-lexicon-reader-neg:
+	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_negative.json go test -v -run LexiconNegative
 bench:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon.json go test -run Benchmark -bench=.
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -run Benchmark -bench=.
