@@ -48,7 +48,7 @@ func testLexicon(t *testing.T, test string) {
 	}
 	cMap := make(map[string]bool)
 	for key, values := range records {
-		log.Println("check", key, "values", values)
+		//         log.Println("check", key, "values", values)
 		if rec, ok := lexPatterns[key]; ok {
 			for _, pat := range rec.Patterns {
 				for _, v := range values {
