@@ -11,8 +11,8 @@
       "^/store/mc/(([a-zA-Z0-9\\-_]+))/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)(/([a-zA-Z0-9\\-_]+))*/([a-zA-Z0-9\\-_]+).root$",
       "^/store/results/([a-zA-Z0-9\\-_]+)/([a-zA-Z][a-zA-Z0-9\\-_]*)/([a-zA-Z0-9\\-_]+)/([a-zA-Z][a-zA-Z0-9\\-_]*)/([A-Z\\-_]+)/([a-zA-Z0-9\\-_]+)/([0-9]+)/([a-zA-Z0-9\\-_]+).root$",
       "^/store/results/([a-zA-Z0-9\\-_]+)/([a-zA-Z0-9\\-_]+)/([a-zA-Z][a-zA-Z0-9\\-_]*)/([A-Z\\-_]+)/([a-zA-Z0-9\\-_]+)/([0-9]+)/([a-zA-Z0-9\\-_]+).root$",
-      "^/store/lhe/([0-9]+)/([a-zA-Z0-9\\-_]+).lhe(.xz){0,1}",
-      "^/store/lhe/([a-zA-Z0-9\\-_]+)/([a-zA-Z][a-zA-Z0-9\\-_]*)/([0-9]+)/([a-zA-Z0-9\\-_]+).lhe(.xz){0,1}"
+      "^/store/lhe/([0-9]+)/([a-zA-Z0-9\\-_]+).lhe(.xz){0,1}$",
+      "^/store/lhe/([a-zA-Z0-9\\-_]+)/([a-zA-Z][a-zA-Z0-9\\-_]*)/([0-9]+)/([a-zA-Z0-9\\-_]+).lhe(.xz){0,1}$"
     ],
     "length": 500
   },
@@ -34,8 +34,8 @@
   {
     "name": "processed_ds_name",
     "patterns": [
-      "[a-zA-Z][a-zA-Z0-9_]*(\\-[a-zA-Z0-9_]+){0,2}-v[0-9]*$",
-      "[a-zA-Z0-9\\.\\-_]+"
+      "^[a-zA-Z][a-zA-Z0-9_]*(\\-[a-zA-Z0-9_]+){0,2}-v[0-9]*$",
+      "^[a-zA-Z0-9\\.\\-_]+"
     ],
     "length": -1
   },
@@ -68,23 +68,23 @@
     "length": -1
   },
   {
-    "name": "site_tier",
+    "name": "data_tier_name",
     "patterns": [
-      "^T[0-3]"
+      "^([A-Z]{3,100})+$"
     ],
     "length": 99
   },
   {
     "name": "global_tag",
     "patterns": [
-      "[a-zA-Z0-9\\s\\.\\-_:]{1,100}$"
+      "^[a-zA-Z0-9\\s\\.\\-_:]{1,100}$"
     ],
     "length": -1
   },
   {
     "name": "physics_group",
     "patterns": [
-      "([a-zA-Z0-9\\-_]+)$"
+      "^([a-zA-Z0-9\\-_]+)$"
     ],
     "length": -1
   },

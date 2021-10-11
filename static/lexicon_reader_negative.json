@@ -9,17 +9,17 @@
     ],
     "logical_file_name": [
         "/path/file.root",
-        "/store/mc/file.root",
-        "/store/mc/file.root-bla",
-        "/store/user/one/two/three/file123.root ",
-        "/store/data/one/two/three/file123.root ",
-        "/store/backfill/1/unmerged/data/one/two/three/file123.root ",
-        "/store/mc/one/two/three/file123.root ",
-        "/store/results/one/two/three/file123.root ",
-        "/store/lhe/123/file123.lhe.xz "
+        "/store/file.root",
+        "/store/file.root-bla",
+        "/store/file123.root ",
+        "/store/file123.root ",
+        "/store/file123.root ",
+        "/store/file123.root ",
+        "/store/file123.root ",
+        "/store/file123.lhe.xz "
     ],
     "primary_ds_name": [
-        "123-bla-123"
+        "@123-bla-123"
     ],
     "processed_ds_name": [
         "@123:bla:123"

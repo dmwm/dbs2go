@@ -2,8 +2,7 @@
   {
     "name": "logical_file_name",
     "patterns": [
-      "^/store/([A-Za-z0-9._\\-/])+/([A-Za-z0-9._\\-])+(.root|.lhe(.xz){0,1})$",
-      "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
+      "^/store/([A-Za-z0-9._\\-/])+/([A-Za-z0-9._\\-])+(.root|.lhe(.xz){0,1})$"
     ],
     "length": 500
   },
@@ -78,16 +77,16 @@
     "length": -1
   },
   {
-    "name": "site_tier",
+    "name": "data_tier_name",
     "patterns": [
-      "^T[0-3]"
+      "^([A-Z]{3,100})+$"
     ],
     "length": 99
   },
   {
     "name": "global_tag",
     "patterns": [
-      "[a-zA-Z0-9\\s\\.\\-_:]{1,100}$",
+      "^[a-zA-Z0-9\\s\\.\\-_:]{1,100}$",
       "^[a-zA-Z0-9/%*][a-zA-Z0-9/\\.\\-_%*/#]*$"
     ],
     "length": -1
@@ -95,14 +94,14 @@
   {
     "name": "physics_group",
     "patterns": [
-      "([a-zA-Z0-9\\-_]+)$"
+      "^([a-zA-Z0-9\\-_]+)$"
     ],
     "length": -1
   },
   {
     "name": "processed_string",
     "patterns": [
-      "[a-zA-Z0-9_]{1,100}$"
+      "^[a-zA-Z0-9_]{1,100}$"
     ],
     "length": -1
   },
@@ -183,8 +182,8 @@
     "name": "run_num",
     "patterns": [
       "\\d+",
-      "\\d+|\\[\\d+\\]|\\[[\\d+,]+\\]|\\[\\d+-\\d+\]"
+      "\\d+|\\[\\d+\\]|\\[\\[\\d+,\\]+\\]|\\[\\d+-\\d+\\]"
     ],
     "length": -1
-  },
+  }
 ]
