@@ -101,7 +101,9 @@ func LoadPatterns(fname string) (map[string]LexiconPattern, error) {
 		lex := LexiconPattern{Lexicon: rec, Patterns: patterns}
 		key := rec.Name
 		pmap[key] = lex
-		log.Printf("regexp pattern\n%s", rec.String())
+		if utils.VERBOSE > 1 {
+			log.Printf("regexp pattern\n%s", rec.String())
+		}
 	}
 	return pmap, nil
 }
