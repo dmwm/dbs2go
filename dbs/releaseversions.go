@@ -14,6 +14,10 @@ import (
 func (a *API) ReleaseVersions() error {
 	var args []interface{}
 	var conds []string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	tmpl["Dataset"] = false
+	tmpl["Lfn"] = false
 
 	// parse dataset argument
 	releaseversions := getValues(a.Params, "release_version")
@@ -23,9 +27,20 @@ func (a *API) ReleaseVersions() error {
 	} else if len(releaseversions) == 1 {
 		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", a.Params, conds, args)
 	}
+	if _, err := getSingleValue(a.Params, "dataset"); err == nil {
+		tmpl["Dataset"] = true
+		conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
+	}
+	if _, err := getSingleValue(a.Params, "logical_file_name"); err == nil {
+		tmpl["Lfn"] = true
+		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
+	}
 
 	// get SQL statement from static area
-	stm := getSQL("releaseversions")
+	stm, err := LoadTemplateSQL("releaseversions", tmpl)
+	if err != nil {
+		return err
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB

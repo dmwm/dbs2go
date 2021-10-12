@@ -1,1 +1,11 @@
 SELECT RV.RELEASE_VERSION FROM {{.Owner}}.RELEASE_VERSIONS RV 
+{{if .Dataset}}
+join {{.Owner}}.OUTPUT_MODULE_CONFIGS OMF on OMF.RELEASE_VERSION_ID =RV.RELEASE_VERSION_ID
+join {{.Owner}}.DATASET_OUTPUT_MOD_CONFIGS do on do.OUTPUT_MOD_CONFIG_ID=OMF.OUTPUT_MOD_CONFIG_ID
+join {{.Owner}}.DATASETS d on d.DATASET_ID= do.DATASET_ID
+{{end}}
+{{if .Lfn}}
+join {{.Owner}}.OUTPUT_MODULE_CONFIGS OMF on OMF.RELEASE_VERSION_ID=RV.RELEASE_VERSION_ID
+join {{.Owner}}.file_output_mod_configs fo on fo.output_mod_config_id=OMF.OUTPUT_MOD_CONFIG_ID
+join {{.Owner}}.FILES F on F.FILE_ID=FO.FILE_ID
+{{end}}
