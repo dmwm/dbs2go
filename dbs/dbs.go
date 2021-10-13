@@ -173,6 +173,25 @@ func LoadSQL(owner string) Record {
 	return dbsql
 }
 
+// GetTestData executes simple query to ensure that connection to DB is valid.
+// So far we can ask for a data tier id of specific tier since this table
+// is very small and query execution will be really fast.
+func GetTestData() error {
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	_, err = GetID(tx, "DATATIERS", "data_tier_id", "data_tier_name", "GEN-RAW")
+	if err != nil {
+		log.Println("unable to GetID from DATATIERS table, error", err)
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
+
 // helper function to get SQL statement from DBSQL dict for a given key
 func getSQL(key string) string {
 	// use generic query API to fetch the results from DB

@@ -29,10 +29,11 @@ type Configuration struct {
 	MigrationProcessTimeout int    `json:"migration_process_timeout"` // migration process timeout
 
 	// db related configuration
-	DBFile             string `json:"dbfile"`               // dbs db file with secrets
-	MaxDBConnections   int    `json:"max_db_connections"`   // maximum number of DB connections
-	MaxIdleConnections int    `json:"max_idle_connections"` // maximum number of idle connections
-	LexiconFile        string `json:"lexicon_file"`         // lexicon json file
+	DBFile               string `json:"dbfile"`                 // dbs db file with secrets
+	MaxDBConnections     int    `json:"max_db_connections"`     // maximum number of DB connections
+	MaxIdleConnections   int    `json:"max_idle_connections"`   // maximum number of idle connections
+	DBMonitoringInterval int    `json:"db_monitoring_interval"` // db mon interval in seconds
+	LexiconFile          string `json:"lexicon_file"`           // lexicon json file
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates

@@ -203,6 +203,47 @@ func walkFunction(route *mux.Route, router *mux.Router, ancestors []*mux.Route) 
 	return err
 }
 
+// helper function to initialize DB access
+func dbInit(dbtype, dburi string) error {
+	// close existing DB connection if it exist
+	if dbs.DB != nil {
+		dbs.DB.Close()
+	}
+	db, dberr := sql.Open(dbtype, dburi)
+	if dberr != nil {
+		log.Printf("unable to open %s %s, error %v", dbtype, dburi)
+		return dberr
+	}
+	dberr = db.Ping()
+	if dberr != nil {
+		log.Println("DB ping error", dberr)
+		return dberr
+	}
+	db.SetMaxOpenConns(Config.MaxDBConnections)
+	db.SetMaxIdleConns(Config.MaxIdleConnections)
+	dbs.DB = db
+	dbs.DBTYPE = dbtype
+	return nil
+}
+
+// helper function to perform db connection monitoring
+// it should be used as goroutine in main server
+func dbMonitor(dbtype, dburi string, interval int) {
+	for {
+		// get some results from DB
+		err := dbs.GetTestData()
+		if err != nil {
+			// if we get ORA error we should restart DB connection
+			log.Println("unable to get test data query, error", err)
+			dberr := dbInit(dbtype, dburi)
+			if dberr != nil {
+				log.Println("unable to init DB access, error", dberr)
+			}
+		}
+		time.Sleep(time.Duration(interval) * time.Second)
+	}
+}
+
 // Server represents main web server for DBS service
 //gocyclo:ignore
 func Server(configFile string) {
@@ -264,19 +305,11 @@ func Server(configFile string) {
 	if strings.HasPrefix(dbtype, "oci") {
 		utils.ORACLE = true
 	}
-	db, dberr := sql.Open(dbtype, dburi)
-	defer db.Close()
+	dberr := dbInit(dbtype, dburi)
 	if dberr != nil {
 		log.Fatal(dberr)
 	}
-	dberr = db.Ping()
-	if dberr != nil {
-		log.Println("DB ping error", dberr)
-	}
-	db.SetMaxOpenConns(Config.MaxDBConnections)
-	db.SetMaxIdleConns(Config.MaxIdleConnections)
-	dbs.DB = db
-	dbs.DBTYPE = dbtype
+	defer dbs.DB.Close()
 
 	// load Lexicon patterns
 	lexPatterns, err := dbs.LoadPatterns(Config.LexiconFile)
@@ -357,6 +390,11 @@ func Server(configFile string) {
 		}
 	}()
 
+	// star db monitoring goroutine
+	if Config.DBMonitoringInterval > 0 {
+		go dbMonitor(dbtype, dburi, Config.DBMonitoringInterval)
+	}
+
 	// start migration server if necessary
 	migDone := make(chan bool)
 	if Config.MigrationServer {
@@ -366,6 +404,11 @@ func Server(configFile string) {
 	// properly stop our HTTP and Migration Servers
 	<-httpDone
 	log.Print("HTTP server stopped")
+
+	// close database connection pointer
+	if dbs.DB != nil {
+		dbs.DB.Close()
+	}
 
 	// send notification to stop migration server
 	if Config.MigrationServer {
