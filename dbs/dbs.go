@@ -183,7 +183,7 @@ func GetTestData() error {
 		return errors.New(msg)
 	}
 	defer tx.Rollback()
-	_, err = GetID(tx, "DATATIERS", "data_tier_id", "data_tier_name", "GEN-RAW")
+	_, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", "GEN-RAW")
 	if err != nil {
 		log.Println("unable to GetID from DATATIERS table, error", err)
 		return err
