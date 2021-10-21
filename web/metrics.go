@@ -122,10 +122,9 @@ func metrics() Metrics {
 }
 
 // helper function to generate metrics in prometheus format
-func promMetrics() string {
+func promMetrics(prefix string) string {
 	var out string
 	data := metrics()
-	prefix := "proxy_server"
 
 	// cpu info
 	out += fmt.Sprintf("# HELP %s_cpu percentage of cpu used per CPU\n", prefix)

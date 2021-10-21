@@ -27,6 +27,7 @@ type Configuration struct {
 	MigrationServer         bool   `json:"migration_server"`          // migration server flag
 	MigrationServerInterval int    `json:"migration_server_interval"` // migration process interval
 	MigrationProcessTimeout int    `json:"migration_process_timeout"` // migration process timeout
+	MetricsPrefix           string `json:"metrics_prefix"`            // metrics prefix used for prometheus
 
 	// db related configuration
 	DBFile               string `json:"dbfile"`                 // dbs db file with secrets
@@ -91,6 +92,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MigrationServerInterval == 0 {
 		Config.MigrationServerInterval = 60 // in seconds
+	}
+	if Config.MetricsPrefix == "" {
+		Config.MetricsPrefix = "dbs2go"
 	}
 	return nil
 }
