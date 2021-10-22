@@ -276,16 +276,16 @@ func updateRPS() {
 	total := float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
 	oldLogical := float64(NumLogicalCores)
 	oldPhysical := float64(NumPhysicalCores)
-	time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Minute)
 	for {
-		RPS = float64(TotalGetRequests+TotalPostRequests+TotalPutRequests) - total
-		RPSLogical = float64(NumLogicalCores) - oldLogical
-		RPSPhysical = float64(NumPhysicalCores) - oldPhysical
+		RPS = (float64(TotalGetRequests+TotalPostRequests+TotalPutRequests) - total) / 3600
+		RPSLogical = (float64(NumLogicalCores) - oldLogical) / 3600.
+		RPSPhysical = (float64(NumPhysicalCores) - oldPhysical) / 3600.
 
 		total = float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
 		oldLogical = float64(NumLogicalCores)
 		oldPhysical = float64(NumPhysicalCores)
-		time.Sleep(1 * time.Second)
+		time.Sleep(1 * time.Minute)
 	}
 }
 
