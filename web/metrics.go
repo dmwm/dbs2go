@@ -114,18 +114,28 @@ func metrics() Metrics {
 		}
 	}
 	metrics.Uptime = time.Since(StartTime).Seconds()
+
+	metrics.AvgGetTime = AvgGetRequestTime
+	metrics.AvgPostTime = AvgPostRequestTime
+	metrics.AvgPutTime = AvgPutRequestTime
+
 	metrics.GetRequests = TotalGetRequests
 	metrics.PostRequests = TotalPostRequests
 	metrics.PutRequests = TotalPutRequests
-	if (metrics.GetRequests + metrics.PostRequests) > 0 {
-		metrics.RPS = RPS / float64(metrics.GetRequests+metrics.PostRequests)
-	}
-	if metrics.GetRequests+metrics.PostRequests > 0 {
-		metrics.RPSPhysical = RPSPhysical / float64(metrics.GetRequests+metrics.PostRequests)
-	}
-	if metrics.GetRequests+metrics.PostRequests > 0 {
-		metrics.RPSLogical = RPSLogical / float64(metrics.GetRequests+metrics.PostRequests)
-	}
+
+	metrics.RPS = RPS
+	metrics.RPSPhysical = RPSPhysical
+	metrics.RPSLogical = RPSLogical
+
+	//     if (metrics.GetRequests + metrics.PostRequests) > 0 {
+	//         metrics.RPS = RPS / float64(metrics.GetRequests+metrics.PostRequests)
+	//     }
+	//     if metrics.GetRequests+metrics.PostRequests > 0 {
+	//         metrics.RPSPhysical = RPSPhysical / float64(metrics.GetRequests+metrics.PostRequests)
+	//     }
+	//     if metrics.GetRequests+metrics.PostRequests > 0 {
+	//         metrics.RPSLogical = RPSLogical / float64(metrics.GetRequests+metrics.PostRequests)
+	//     }
 
 	// update time stamp
 	MetricsLastUpdateTime = time.Now()
@@ -264,20 +274,27 @@ func promMetrics(prefix string) string {
 // helper function to update RPS values
 func updateRPS() {
 	total := float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
+	oldLogical := float64(NumLogicalCores)
+	oldPhysical := float64(NumPhysicalCores)
 	time.Sleep(1 * time.Second)
 	for {
 		RPS = float64(TotalGetRequests+TotalPostRequests+TotalPutRequests) - total
-		time.Sleep(1 * time.Second)
+		RPSLogical = float64(NumLogicalCores) - oldLogical
+		RPSPhysical = float64(NumPhysicalCores) - oldPhysical
+
 		total = float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
+		oldLogical = float64(NumLogicalCores)
+		oldPhysical = float64(NumPhysicalCores)
+		time.Sleep(1 * time.Second)
 	}
 }
 
 // helper function that calculates request per second metrics
-func getRPS(time0 time.Time) {
-	RPS += 1. / time.Since(time0).Seconds()
-	RPSLogical += float64(NumLogicalCores) / time.Since(time0).Seconds()
-	RPSPhysical += float64(NumPhysicalCores) / time.Since(time0).Seconds()
-}
+// func getRPS(time0 time.Time) {
+//     RPS += 1. / time.Since(time0).Seconds()
+//     RPSLogical += float64(NumLogicalCores) / time.Since(time0).Seconds()
+//     RPSPhysical += float64(NumPhysicalCores) / time.Since(time0).Seconds()
+// }
 
 // helper function to update avg get request time
 func updateGetRequestTime(time0 time.Time) {
