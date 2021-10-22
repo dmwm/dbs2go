@@ -23,6 +23,9 @@ var TotalGetRequests uint64
 // TotalPostRequests counts total number of POST requests received by the server
 var TotalPostRequests uint64
 
+// TotalPutRequests counts total number of PUT requests received by the server
+var TotalPutRequests uint64
+
 // MetricsLastUpdateTime keeps track of last update time of the metrics
 var MetricsLastUpdateTime time.Time
 
@@ -57,22 +60,19 @@ type Mem struct {
 
 // Metrics provide various metrics about our server
 type Metrics struct {
-	CPU               []float64               `json:"cpu"`               // cpu metrics from gopsutils
-	Connections       []net.ConnectionStat    `json:"connections"`       // connections metrics from gopsutils
-	Load              load.AvgStat            `json:"load"`              // load metrics from gopsutils
-	Memory            Mem                     `json:"memory"`            // memory metrics from gopsutils
-	OpenFiles         []process.OpenFilesStat `json:"openFiles"`         // open files metrics from gopsutils
-	GoRoutines        uint64                  `json:"goroutines"`        // total number of go routines at run-time
-	Uptime            float64                 `json:"uptime"`            // uptime of the server
-	GetX509Requests   uint64                  `json:"x509GetRequests"`   // total number of get x509 requests
-	PostX509Requests  uint64                  `json:"x509PostRequests"`  // total number of post X509 requests
-	GetOAuthRequests  uint64                  `json:"oAuthGetRequests"`  // total number of get requests form OAuth server
-	PostOAuthRequests uint64                  `json:"oAuthPostRequests"` // total number of post requests from OAuth server
-	GetRequests       uint64                  `json:"getRequests"`       // total number of get requests across all services
-	PostRequests      uint64                  `json:"postRequests"`      // total number of post requests across all services
-	RPS               float64                 `json:"rps"`               // throughput req/sec
-	RPSPhysical       float64                 `json:"rpsPhysical"`       // throughput req/sec using physical cpu
-	RPSLogical        float64                 `json:"rpsLogical"`        // throughput req/sec using logical cpu
+	CPU          []float64               `json:"cpu"`          // cpu metrics from gopsutils
+	Connections  []net.ConnectionStat    `json:"connections"`  // connections metrics from gopsutils
+	Load         load.AvgStat            `json:"load"`         // load metrics from gopsutils
+	Memory       Mem                     `json:"memory"`       // memory metrics from gopsutils
+	OpenFiles    []process.OpenFilesStat `json:"openFiles"`    // open files metrics from gopsutils
+	GoRoutines   uint64                  `json:"goroutines"`   // total number of go routines at run-time
+	Uptime       float64                 `json:"uptime"`       // uptime of the server
+	GetRequests  uint64                  `json:"getRequests"`  // total number of get requests across all services
+	PostRequests uint64                  `json:"postRequests"` // total number of post requests across all services
+	PutRequests  uint64                  `json:"putRequests"`  // total number of post requests across all services
+	RPS          float64                 `json:"rps"`          // throughput req/sec
+	RPSPhysical  float64                 `json:"rpsPhysical"`  // throughput req/sec using physical cpu
+	RPSLogical   float64                 `json:"rpsLogical"`   // throughput req/sec using logical cpu
 }
 
 func metrics() Metrics {
@@ -105,6 +105,7 @@ func metrics() Metrics {
 	metrics.Uptime = time.Since(StartTime).Seconds()
 	metrics.GetRequests = TotalGetRequests
 	metrics.PostRequests = TotalPostRequests
+	metrics.PutRequests = TotalPutRequests
 	if (metrics.GetRequests + metrics.PostRequests) > 0 {
 		metrics.RPS = RPS / float64(metrics.GetRequests+metrics.PostRequests)
 	}
@@ -208,22 +209,6 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_uptime reports server uptime in seconds\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_uptime counter\n", prefix)
 	out += fmt.Sprintf("%s_uptime %v\n", prefix, data.Uptime)
-
-	// x509 requests
-	out += fmt.Sprintf("# HELP %s_get_x509_requests reports total number of X509 HTTP GET requests\n", prefix)
-	out += fmt.Sprintf("# TYPE %s_get_x509_requests counter\n", prefix)
-	out += fmt.Sprintf("%s_get_x509_requests %v\n", prefix, data.GetX509Requests)
-	out += fmt.Sprintf("# HELP %s_post_x509_requests reports total number of X509 HTTP POST requests\n", prefix)
-	out += fmt.Sprintf("# TYPE %s_post_x509_requests counter\n", prefix)
-	out += fmt.Sprintf("%s_post_x509_requests %v\n", prefix, data.PostX509Requests)
-
-	// oauth requests
-	out += fmt.Sprintf("# HELP %s_get_oauth_requests reports total number of OAuth HTTP GET requests\n", prefix)
-	out += fmt.Sprintf("# TYPE %s_get_oauth_requests counter\n", prefix)
-	out += fmt.Sprintf("%s_get_oauth_requests %v\n", prefix, data.GetOAuthRequests)
-	out += fmt.Sprintf("# HELP %s_post_oauth_requests reports total number of OAuth HTTP POST requests\n", prefix)
-	out += fmt.Sprintf("# TYPE %s_post_oauth_requests counter\n", prefix)
-	out += fmt.Sprintf("%s_post_oauth_requests %v\n", prefix, data.PostOAuthRequests)
 
 	// total requests
 	out += fmt.Sprintf("# HELP %s_get_requests reports total number of HTTP GET requests\n", prefix)

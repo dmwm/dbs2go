@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync/atomic"
 
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
@@ -259,6 +260,7 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
+	atomic.AddUint64(&TotalPutRequests, 1)
 	// all outputs will be added to output list
 	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
@@ -318,6 +320,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
+	atomic.AddUint64(&TotalPostRequests, 1)
 	// all outputs will be added to output list
 	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
@@ -419,6 +422,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
 //gocyclo:ignore
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
+	atomic.AddUint64(&TotalGetRequests, 1)
+
 	// all outputs will be added to output list
 	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
