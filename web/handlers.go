@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
@@ -423,6 +424,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 //gocyclo:ignore
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	atomic.AddUint64(&TotalGetRequests, 1)
+	time0 := time.Now()
+	defer updateGetRequestTime(time0)
 
 	// all outputs will be added to output list
 	sep := ","

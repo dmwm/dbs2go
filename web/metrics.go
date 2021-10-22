@@ -44,6 +44,15 @@ var NumPhysicalCores int
 // NumLogicalCores represents number of cores in our node
 var NumLogicalCores int
 
+// AvgGetRequestTime represents average GET request time
+var AvgGetRequestTime float64
+
+// AvgPostRequestTime represents average POST request time
+var AvgPostRequestTime float64
+
+// AvgPutRequestTime represents average PUT request time
+var AvgPutRequestTime float64
+
 // Memory structure keeps track of server memory
 type Memory struct {
 	Total       uint64  `json:"total"`
@@ -70,13 +79,15 @@ type Metrics struct {
 	GetRequests  uint64                  `json:"getRequests"`  // total number of get requests across all services
 	PostRequests uint64                  `json:"postRequests"` // total number of post requests across all services
 	PutRequests  uint64                  `json:"putRequests"`  // total number of post requests across all services
+	AvgGetTime   float64                 `json:"avgGetTime"`   // avg GET request time
+	AvgPostTime  float64                 `json:"avgPostTime"`  // avg POST request time
+	AvgPutTime   float64                 `json:"avgPutTime"`   // avg PUT request time
 	RPS          float64                 `json:"rps"`          // throughput req/sec
 	RPSPhysical  float64                 `json:"rpsPhysical"`  // throughput req/sec using physical cpu
 	RPSLogical   float64                 `json:"rpsLogical"`   // throughput req/sec using logical cpu
 }
 
 func metrics() Metrics {
-
 	// get cpu and mem profiles
 	m, _ := mem.VirtualMemory()
 	s, _ := mem.SwapMemory()
@@ -223,6 +234,22 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# TYPE %s_rps gauge\n", prefix)
 	out += fmt.Sprintf("%s_rps %v\n", prefix, data.RPS)
 
+	out += fmt.Sprintf("# HELP %s_avg_get_time reports average get request time\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_avg_get_time gauge\n", prefix)
+	out += fmt.Sprintf("%s_avg_get_time %v\n", prefix, data.AvgGetTime)
+
+	out += fmt.Sprintf("# HELP %s_avg_post_time reports average post request time\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_avg_post_time gauge\n", prefix)
+	out += fmt.Sprintf("%s_avg_post_time %v\n", prefix, data.AvgPostTime)
+
+	out += fmt.Sprintf("# HELP %s_avg_put_time reports average put request time\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_avg_put_time gauge\n", prefix)
+	out += fmt.Sprintf("%s_avg_put_time %v\n", prefix, data.AvgPutTime)
+
+	out += fmt.Sprintf("# HELP %s_avg_get_time reports average get request time\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_avg_get_time gauge\n", prefix)
+	out += fmt.Sprintf("%s_avg_get_time %v\n", prefix, data.AvgGetTime)
+
 	out += fmt.Sprintf("# HELP %s_rps_physical_cpu reports request per second average weighted by physical CPU cores\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_rps_physical_cpu gauge\n", prefix)
 	out += fmt.Sprintf("%s_rps_physical_cpu %v\n", prefix, data.RPSPhysical)
@@ -234,9 +261,35 @@ func promMetrics(prefix string) string {
 	return out
 }
 
+// helper function to update RPS values
+func updateRPS() {
+	total := float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
+	time.Sleep(1 * time.Second)
+	for {
+		RPS = float64(TotalGetRequests+TotalPostRequests+TotalPutRequests) - total
+		time.Sleep(1 * time.Second)
+		total = float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
+	}
+}
+
 // helper function that calculates request per second metrics
 func getRPS(time0 time.Time) {
 	RPS += 1. / time.Since(time0).Seconds()
 	RPSLogical += float64(NumLogicalCores) / time.Since(time0).Seconds()
 	RPSPhysical += float64(NumPhysicalCores) / time.Since(time0).Seconds()
+}
+
+// helper function to update avg get request time
+func updateGetRequestTime(time0 time.Time) {
+	AvgGetRequestTime = time.Since(time0).Seconds() / float64(TotalGetRequests)
+}
+
+// helper function to update avg post request time
+func updatePostRequestTime(time0 time.Time) {
+	AvgPostRequestTime = time.Since(time0).Seconds() / float64(TotalPostRequests)
+}
+
+// helper function to update avg put request time
+func updatePutRequestTime(time0 time.Time) {
+	AvgPutRequestTime = time.Since(time0).Seconds() / float64(TotalPutRequests)
 }
