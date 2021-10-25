@@ -390,9 +390,6 @@ func Server(configFile string) {
 		}
 	}()
 
-	// get live updates for RPS metrics
-	go updateRPS()
-
 	// star db monitoring goroutine
 	if Config.DBMonitoringInterval > 0 {
 		go dbMonitor(dbtype, dburi, Config.DBMonitoringInterval)

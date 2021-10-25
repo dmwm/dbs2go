@@ -53,6 +53,28 @@ var AvgPostRequestTime float64
 // AvgPutRequestTime represents average PUT request time
 var AvgPutRequestTime float64
 
+// RequestStats holds metrics related to number of requests on a server
+type RequestStats struct {
+	TotalGetRequests  uint64
+	TotalPostRequests uint64
+	TotalPutRequests  uint64
+	Time              time.Time
+	NumPhysicalCores  int
+	NumLogicalCores   int
+}
+
+// update RequestStatus
+func (r *RequestStats) Update() {
+	r.TotalGetRequests = TotalGetRequests
+	r.TotalPostRequests = TotalPostRequests
+	r.TotalPutRequests = TotalPutRequests
+	r.NumPhysicalCores = NumPhysicalCores
+	r.NumLogicalCores = NumLogicalCores
+	r.Time = time.Now()
+}
+
+var rstat *RequestStats
+
 // Memory structure keeps track of server memory
 type Memory struct {
 	Total       uint64  `json:"total"`
@@ -88,6 +110,11 @@ type Metrics struct {
 }
 
 func metrics() Metrics {
+	if rstat == nil {
+		rstat = &RequestStats{}
+		rstat.Time = time.Now()
+	}
+
 	// get cpu and mem profiles
 	m, _ := mem.VirtualMemory()
 	s, _ := mem.SwapMemory()
@@ -123,22 +150,17 @@ func metrics() Metrics {
 	metrics.PostRequests = TotalPostRequests
 	metrics.PutRequests = TotalPutRequests
 
-	metrics.RPS = RPS
-	metrics.RPSPhysical = RPSPhysical
-	metrics.RPSLogical = RPSLogical
-
-	//     if (metrics.GetRequests + metrics.PostRequests) > 0 {
-	//         metrics.RPS = RPS / float64(metrics.GetRequests+metrics.PostRequests)
-	//     }
-	//     if metrics.GetRequests+metrics.PostRequests > 0 {
-	//         metrics.RPSPhysical = RPSPhysical / float64(metrics.GetRequests+metrics.PostRequests)
-	//     }
-	//     if metrics.GetRequests+metrics.PostRequests > 0 {
-	//         metrics.RPSLogical = RPSLogical / float64(metrics.GetRequests+metrics.PostRequests)
-	//     }
+	lapse := time.Since(rstat.Time).Seconds()
+	total := float64(TotalGetRequests + TotalPostRequests + TotalPutRequests)
+	metrics.RPS = (total - float64(rstat.TotalGetRequests+rstat.TotalPostRequests+rstat.TotalPutRequests)) / lapse
+	metrics.RPSLogical = float64(rstat.NumLogicalCores-NumLogicalCores) / lapse
+	metrics.RPSPhysical = float64(rstat.NumPhysicalCores-NumPhysicalCores) / lapse
 
 	// update time stamp
 	MetricsLastUpdateTime = time.Now()
+
+	// update request stats metrics
+	rstat.Update()
 
 	return metrics
 }
@@ -289,24 +311,17 @@ func updateRPS() {
 	}
 }
 
-// helper function that calculates request per second metrics
-// func getRPS(time0 time.Time) {
-//     RPS += 1. / time.Since(time0).Seconds()
-//     RPSLogical += float64(NumLogicalCores) / time.Since(time0).Seconds()
-//     RPSPhysical += float64(NumPhysicalCores) / time.Since(time0).Seconds()
-// }
-
 // helper function to update avg get request time
 func updateGetRequestTime(time0 time.Time) {
-	AvgGetRequestTime = time.Since(time0).Seconds() / float64(TotalGetRequests)
+	AvgGetRequestTime += time.Since(time0).Seconds() / float64(TotalGetRequests)
 }
 
 // helper function to update avg post request time
 func updatePostRequestTime(time0 time.Time) {
-	AvgPostRequestTime = time.Since(time0).Seconds() / float64(TotalPostRequests)
+	AvgPostRequestTime += time.Since(time0).Seconds() / float64(TotalPostRequests)
 }
 
 // helper function to update avg put request time
 func updatePutRequestTime(time0 time.Time) {
-	AvgPutRequestTime = time.Since(time0).Seconds() / float64(TotalPutRequests)
+	AvgPutRequestTime += time.Since(time0).Seconds() / float64(TotalPutRequests)
 }
