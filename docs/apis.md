@@ -130,6 +130,9 @@ curl -H "Accept: application/json" \
 - `/metrics`
   - return DBS server metrics suitable for Prometheus
   - arguments: None
+- `/dbstats`
+  - return database statistics, e.g. total size, tables, index stats, etc.
+  - arguments: None
 
 #### POST APIs
 The POST APIs are used both by DBS Reader and DBS Writer servers. In former
