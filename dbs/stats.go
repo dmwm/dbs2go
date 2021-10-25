@@ -2,7 +2,10 @@ package dbs
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // SchemaInfo represents schema details
@@ -78,6 +81,10 @@ func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+	}
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
@@ -100,6 +107,10 @@ func indexSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	stm, err := LoadTemplateSQL("stats_db_indexes", tmpl)
 	if err != nil {
 		return 0, err
+	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err := tx.Query(stm)
 	if err != nil {
@@ -126,6 +137,10 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	if err != nil {
 		return schemas, err
 	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+	}
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
@@ -146,6 +161,10 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	stm, err = LoadTemplateSQL("stats_schemas_size", tmpl)
 	if err != nil {
 		return schemas, err
+	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err = tx.Query(stm)
 	if err != nil {
@@ -176,6 +195,10 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	if err != nil {
 		return tables, err
 	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+	}
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
@@ -196,6 +219,10 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	stm, err = LoadTemplateSQL("stats_tables_size", tmpl)
 	if err != nil {
 		return tables, err
+	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err = tx.Query(stm)
 	if err != nil {
