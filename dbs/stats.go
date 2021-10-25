@@ -148,13 +148,12 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	}
 	for rows.Next() {
 		var owner string
-		var index string
 		var size float64
-		if err := rows.Scan(&owner, &index, &size); err != nil {
+		if err := rows.Scan(&owner, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
 			return schemas, err
 		}
-		schema := SchemaIndex{Owner: owner, Index: index, Size: size}
+		schema := SchemaIndex{Owner: owner, Size: size}
 		schemaIndexes = append(schemaIndexes, schema)
 	}
 
@@ -209,7 +208,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 		var table string
 		var index string
 		var size float64
-		if err := rows.Scan(&owner, &size); err != nil {
+		if err := rows.Scan(&owner, &table, &index, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
 			return tables, err
 		}
