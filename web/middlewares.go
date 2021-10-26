@@ -66,7 +66,8 @@ func validateMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			rec := make(dbs.Record)
 			rec["error"] = fmt.Sprintf("Validation error %v", err)
-			if r, e := json.Marshal(rec); e == nil {
+			output := []dbs.Record{rec}
+			if r, e := json.Marshal(output); e == nil {
 				w.Write(r)
 			}
 			return
