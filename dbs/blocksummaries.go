@@ -30,7 +30,11 @@ func (a *API) BlockSummaries() error {
 			return errors.New(msg)
 		}
 		var blocks []string
-		if strings.Contains(blk, "[") {
+		if len(block) > 1 {
+			for _, v := range block {
+				blocks = append(blocks, strings.Trim(v, " "))
+			}
+		} else if strings.Contains(blk, "[") {
 			// convert input to list of blocks
 			blk = strings.Replace(blk, "[", "", -1)
 			blk = strings.Replace(blk, "]", "", -1)
