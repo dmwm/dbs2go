@@ -175,6 +175,8 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 	router.HandleFunc(basePath("/apis"), ApisHandler).Methods("GET")
+	// backward compatible with Python server
+	router.HandleFunc(basePath("/help"), ApisHandler).Methods("GET")
 	router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
 
 	// for all requests
