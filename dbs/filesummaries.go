@@ -79,7 +79,7 @@ func (a *API) FileSummaries() error {
 	}
 	// replace whererun in stm
 	stm = strings.Replace(stm, "whererun", whererun, -1)
-	stm = strings.Replace(stm, "wheresqlIsFileValid", wheresqlIsFileValid, -1)
+	stm = strings.Replace(stm, "wheresql_isFileValid", wheresqlIsFileValid, -1)
 	//     stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
