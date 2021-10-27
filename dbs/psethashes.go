@@ -25,7 +25,7 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 			tid, err = LastInsertID(tx, "PARAMETER_SET_HASHES", "parameter_set_hash_id")
 			r.PARAMETER_SET_HASH_ID = tid + 1
 		} else {
-			tid, err = IncrementSequence(tx, "SEQ_PSET")
+			tid, err = IncrementSequence(tx, "SEQ_PSH")
 			r.PARAMETER_SET_HASH_ID = tid
 		}
 		if err != nil {
