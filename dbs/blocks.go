@@ -200,6 +200,11 @@ func (r *Blocks) Decode(reader io.Reader) error {
 	}
 	err = json.Unmarshal(data, &r)
 
+	// check if open_for_writing was present in request, if not set it to 1
+	if !strings.Contains(string(data), "open_for_writing") {
+		r.OPEN_FOR_WRITING = 1
+	}
+
 	//     decoder := json.NewDecoder(r)
 	//     err := decoder.Decode(&rec)
 	if err != nil {
