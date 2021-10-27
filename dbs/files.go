@@ -303,6 +303,11 @@ func (r *Files) Decode(reader io.Reader) error {
 	}
 	err = json.Unmarshal(data, &r)
 
+	// check if is_file_valid was present in request, if not set it to 1
+	if !strings.Contains(string(data), "is_file_valid") {
+		r.IS_FILE_VALID = 1
+	}
+
 	//     decoder := json.NewDecoder(r)
 	//     err := decoder.Decode(&rec)
 	if err != nil {
