@@ -276,7 +276,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 		// url query parameters are passed as list, we take first element only
 		params[k] = v[0]
 	}
-	if a == "files" {
+	if a == "files" || a == "datasets" {
 		postParams, err := parsePayload(r)
 		if err != nil {
 			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
