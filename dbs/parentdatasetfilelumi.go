@@ -16,8 +16,11 @@ func (a *API) ParentDatasetFileLumiIds() error {
 	// add dataset condition
 	conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 
+	// NOTE: the parentdatasetfilelumiids is already contains :dataset
+	// binding clause, therefore we don't need to add where condition
+
 	// add where clause
-	stm = WhereClause(stm, conds)
+	//     stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)
