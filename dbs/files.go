@@ -422,12 +422,19 @@ func (a *API) InsertFiles() error {
 	} else {
 		records = pyrec.Records
 	}
+
+	// check if is_file_valid was present in request, if not set it to 1
+	isFileValid := 0
+	if !strings.Contains(string(data), "is_file_valid") {
+		isFileValid = 1
+	}
 	for _, rec := range records {
 		rec.CREATE_BY = a.CreateBy
 		rec.LAST_MODIFIED_BY = a.CreateBy
 		if utils.VERBOSE > 1 {
 			log.Printf("insert %+v", rec)
 		}
+		rec.IS_FILE_VALID = int64(isFileValid)
 
 		// set dependent's records
 		frec := Files{LOGICAL_FILE_NAME: rec.LOGICAL_FILE_NAME, IS_FILE_VALID: rec.IS_FILE_VALID, CHECK_SUM: rec.CHECK_SUM, FILE_SIZE: rec.FILE_SIZE, EVENT_COUNT: rec.EVENT_COUNT, ADLER32: rec.ADLER32, MD5: rec.MD5, AUTO_CROSS_SECTION: rec.AUTO_CROSS_SECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
