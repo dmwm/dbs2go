@@ -544,7 +544,12 @@ func (a *API) UpdateFiles() error {
 		isFileValid = val
 	}
 	if v, ok := a.Params["create_by"]; ok {
-		createBy = v.(string)
+		switch t := v.(type) {
+		case string:
+			createBy = t
+		case []string:
+			createBy = t[0]
+		}
 	}
 	tstamp := time.Now().Unix()
 	// keep that order since it is present in sql statement

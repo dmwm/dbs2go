@@ -493,15 +493,30 @@ func (a *API) UpdateDatasets() error {
 	// get accessTypeID from Access dataset types table
 	var createBy string
 	if v, ok := a.Params["create_by"]; ok {
-		createBy = v.(string)
+		switch t := v.(type) {
+		case string:
+			createBy = t
+		case []string:
+			createBy = t[0]
+		}
 	}
 	var dataset string
 	var datasetAccessType string
 	if v, ok := a.Params["dataset"]; ok {
-		dataset = v.(string)
+		switch t := v.(type) {
+		case string:
+			dataset = t
+		case []string:
+			dataset = t[0]
+		}
 	}
 	if v, ok := a.Params["dataset_access_type"]; ok {
-		datasetAccessType = v.(string)
+		switch t := v.(type) {
+		case string:
+			datasetAccessType = t
+		case []string:
+			datasetAccessType = t[0]
+		}
 	}
 	date := time.Now().Unix()
 
