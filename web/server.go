@@ -105,18 +105,6 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
 		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
-	} else if Config.DBSWriterServer {
-		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST")
-		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
-		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
-		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
-		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT", "GET")
-		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("POST")
-		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT")
-		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST")
-		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("POST")
-		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST", "GET")
-		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST", "GET")
 	} else {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("GET")
@@ -170,6 +158,22 @@ func handlers() *mux.Router {
 		//         HandlerFunc(DummyHandler).
 		//         Methods("GET")
 	}
+
+	// add DBS writer APIs
+	if Config.DBSWriterServer {
+		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST")
+		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
+		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("POST")
+		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST")
+		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("POST")
+		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST")
+		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
+	}
+
 	// aux APIs used by all DBS servers
 	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
 	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
@@ -195,13 +199,30 @@ func handlers() *mux.Router {
 	return router
 }
 
-// webRoutes will hold list of defined HTTP routes
-var webRoutes []string
+// webRoutes will HTTP routes
+var webRoutes map[string][]string
 
 // helper function which walk through mux router and collect all available routes
 func walkFunction(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+	if webRoutes == nil {
+		webRoutes = make(map[string][]string)
+	}
 	path, err := route.GetPathTemplate()
-	webRoutes = append(webRoutes, path)
+	if err != nil {
+		log.Println("unable to get route path templates", err)
+		return err
+	}
+	methods, err := route.GetMethods()
+	if err != nil {
+		log.Println("unable to get route methds", err)
+		return err
+	}
+	if v, ok := webRoutes[path]; ok {
+		v = append(v, methods...)
+		webRoutes[path] = v
+	} else {
+		webRoutes[path] = methods
+	}
 	return err
 }
 
