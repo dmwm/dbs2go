@@ -248,6 +248,12 @@ func (a *API) InsertBlocks() error {
 		log.Println("fail to decode data", err)
 		return err
 	}
+
+	// check if open_for_writing was present in request, if not set it to 1
+	if !strings.Contains(string(data), "open_for_writing") {
+		rec.OPEN_FOR_WRITING = 1
+	}
+
 	// set dependent's records
 	brec := Blocks{BLOCK_NAME: rec.BLOCK_NAME, OPEN_FOR_WRITING: rec.OPEN_FOR_WRITING, ORIGIN_SITE_NAME: rec.ORIGIN_SITE_NAME, BLOCK_SIZE: rec.BLOCK_SIZE, FILE_COUNT: rec.FILE_COUNT, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
 
