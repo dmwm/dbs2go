@@ -143,6 +143,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
 
 		router.HandleFunc(basePath("/dbstats"), DBStatsHandler).Methods("GET")
+		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
 
 		// load graphql
 		if Config.GraphQLSchema != "" {
@@ -175,7 +176,6 @@ func handlers() *mux.Router {
 	}
 
 	// aux APIs used by all DBS servers
-	router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
 	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 	router.HandleFunc(basePath("/apis"), ApisHandler).Methods("GET")
