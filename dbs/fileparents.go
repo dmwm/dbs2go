@@ -102,6 +102,68 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	if err != nil {
 		log.Println("unable to execute", stm, "error", err)
 	}
+
+	// now we need to ensure that the parentage exists at block and dataset level too
+	// for that we perform the following items:
+
+	// get block name of this_file_id and call it thisBlockID
+	stm = getSQL("blockid4fileid")
+	if utils.VERBOSE > 0 {
+		log.Printf("get block id for file id\n%s\n%+v", stm, r)
+	}
+	var thisBlockID int64
+	err = tx.QueryRow(stm, r.THIS_FILE_ID).Scan(&thisBlockID)
+	if err != nil {
+		log.Println("unable to execute", stm, "error", err)
+	}
+
+	// get block name of parent_file_id and call it parentBlockID
+	stm = getSQL("blockid4fileid")
+	if utils.VERBOSE > 0 {
+		log.Printf("get block id for fileid\n%s\n%+v", stm, r)
+	}
+	var parentBlockID int64
+	err = tx.QueryRow(stm, r.PARENT_FILE_ID).Scan(&parentBlockID)
+	if err != nil {
+		log.Println("unable to execute", stm, "error", err)
+	}
+
+	// get dataset id of thisBlockID and call it thisDatasetID
+	stm = getSQL("datasetid4blockid")
+	if utils.VERBOSE > 0 {
+		log.Printf("get dataset id for block id\n%s\n%+v", stm, r)
+	}
+	var thisDatasetID int64
+	err = tx.QueryRow(stm, thisBlockID).Scan(&thisDatasetID)
+	if err != nil {
+		log.Println("unable to execute", stm, "error", err)
+	}
+
+	// get dataset id of parentBlockID and call it parentDatasetID
+	stm = getSQL("datasetid4blockid")
+	if utils.VERBOSE > 0 {
+		log.Printf("get dataset id for block id\n%s\n%+v", stm, r)
+	}
+	var parentDatasetID int64
+	err = tx.QueryRow(stm, parentBlockID).Scan(&parentDatasetID)
+	if err != nil {
+		log.Println("unable to execute", stm, "error", err)
+	}
+
+	// insert relationship between block and parent block
+	blockParents := BlockParents{THIS_BLOCK_ID: thisBlockID, PARENT_BLOCK_ID: parentBlockID}
+	err = blockParents.Insert(tx)
+	if err != nil {
+		log.Println("unable to insert block parentage", blockParents, "error", err)
+	}
+
+	// insert relationship between dataset and parent dataset
+	datasetParents := DatasetParents{THIS_DATASET_ID: thisDatasetID, PARENT_DATASET_ID: parentDatasetID}
+	err = datasetParents.Insert(tx)
+	if err != nil {
+		log.Println("unable to insert dataset parentage", datasetParents, "error", err)
+	}
+
 	return err
 }
 
