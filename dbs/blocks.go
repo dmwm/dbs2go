@@ -399,8 +399,8 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 		log.Println("unable to load update_block_stats template", err)
 		return err
 	}
-	var fileCount, blockSize int64
-	err = tx.QueryRow(stm, blockID).Scan(&fileCount, &blockSize)
+	var fileCount, blockSize, bid int64
+	err = tx.QueryRow(stm, blockID).Scan(&fileCount, &blockSize, &bid)
 	if err != nil {
 		log.Println("unable to load block_stats template", err)
 		return err
