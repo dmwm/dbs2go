@@ -1,9 +1,8 @@
 package dbs
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"log"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 
 // MigrationRequests fetches migration requests from migration table
 func MigrationRequests(mid int64) ([]MigrationRequest, error) {
-	var out []MigrationRequest
+	//     var out []MigrationRequest
 
 	// query MigrationRequest table and fetch all non-completed requests
 	var args []interface{}
@@ -25,32 +24,87 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 		stm = WhereClause(stm, conds)
 	}
 
-	// define in-memory pipe for writing and reading our data from the server
-	// see working example of pipe usage in test/utils_test.go
-	pr, pw := io.Pipe()
-	defer pr.Close()
+	/*
+		// define in-memory pipe for writing and reading our data from the server
+		// see working example of pipe usage in test/utils_test.go
+		pr, pw := io.Pipe()
+		defer pr.Close()
 
-	// execute SQL call within goroutine to allow it to write via pipe writer
-	go func() {
-		defer pw.Close()
-		pw.Write([]byte("["))             // open JSON records
-		executeAll(pw, ",", stm, args...) // write JSON records
-		pw.Write([]byte("]"))             // close JSON records
-	}()
+		// execute SQL call within goroutine to allow it to write via pipe writer
+		go func() {
+			defer pw.Close()
+			pw.Write([]byte("["))             // open JSON records
+			executeAll(pw, ",", stm, args...) // write JSON records
+			pw.Write([]byte("]"))             // close JSON records
+		}()
 
-	// read from our pipe reader
-	data, err := io.ReadAll(pr)
-	if err != nil {
-		log.Println("fail to read data", err)
-		return out, err
-	}
-	// unmarshal our data from byte string
+		// read from our pipe reader
+		data, err := io.ReadAll(pr)
+		if err != nil {
+			log.Println("fail to read data", err)
+			return out, err
+		}
+	*/
+
 	var records []MigrationRequest
-	err = json.Unmarshal(data, &records)
+	// execute sql statement
+	tx, err := DB.Begin()
 	if err != nil {
-		log.Println("fail to unmarshal data", err)
-		return out, err
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return records, errors.New(msg)
 	}
+	defer tx.Rollback()
+	rows, err := tx.Query(stm, args...)
+	if err != nil {
+		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
+		return records, errors.New(msg)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var mid, migRetryCount, migCreationDate, migLastModificationDate, migStatus int64
+		var migURL, migInput, migCreateBy, migLastModifiedBy string
+		err := rows.Scan(
+			&mid,
+			&migURL,
+			&migInput,
+			&migStatus,
+			&migCreateBy,
+			&migCreationDate,
+			&migLastModifiedBy,
+			&migLastModificationDate,
+			&migRetryCount,
+		)
+		if err != nil {
+			msg := fmt.Sprintf("unable to scan DB results %s", err)
+			return records, errors.New(msg)
+		}
+		rec := MigrationRequest{
+			MIGRATION_REQUEST_ID:   mid,
+			MIGRATION_URL:          migURL,
+			MIGRATION_INPUT:        migInput,
+			MIGRATION_STATUS:       migStatus,
+			CREATE_BY:              migCreateBy,
+			CREATION_DATE:          migCreationDate,
+			LAST_MODIFIED_BY:       migLastModifiedBy,
+			LAST_MODIFICATION_DATE: migLastModificationDate,
+			RETRY_COUNT:            migRetryCount,
+		}
+		records = append(records, rec)
+	}
+	if err = rows.Err(); err != nil {
+		msg := fmt.Sprintf("rows error %v", err)
+		return records, errors.New(msg)
+	}
+
+	/*
+		// unmarshal our data from byte string
+		var records []MigrationRequest
+		err = json.Unmarshal(data, &records)
+		if err != nil {
+			log.Println("fail to unmarshal data", err, "data", string(data))
+			return out, err
+		}
+	*/
 	return records, nil
 }
 
