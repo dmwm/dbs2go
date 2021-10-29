@@ -500,6 +500,7 @@ func (a *API) UpdateDatasets() error {
 			createBy = t[0]
 		}
 	}
+	var isValidDataset int64
 	var dataset string
 	var datasetAccessType string
 	if v, ok := a.Params["dataset"]; ok {
@@ -530,6 +531,9 @@ func (a *API) UpdateDatasets() error {
 	if datasetAccessType == "" {
 		return errors.New("invalid datasetAccessType parameter")
 	}
+	if datasetAccessType == "VALID" {
+		isValidDataset = 1
+	}
 
 	// get SQL statement from static area
 	stm := getSQL("update_datasets")
@@ -550,7 +554,7 @@ func (a *API) UpdateDatasets() error {
 		log.Println("unable to find dataset_access_type_id for", datasetAccessType)
 		return err
 	}
-	_, err = tx.Exec(stm, createBy, date, accessTypeID, dataset)
+	_, err = tx.Exec(stm, createBy, date, accessTypeID, isValidDataset, dataset)
 	if err != nil {
 		log.Printf("unable to update %v", err)
 		return err
