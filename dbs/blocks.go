@@ -389,3 +389,36 @@ func (a *API) UpdateBlocks() error {
 	}
 	return nil
 }
+
+// UpdateBlockStats DBS API
+func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
+	tmplData := make(Record)
+	tmplData["Owner"] = DBOWNER
+	stm, err := LoadTemplateSQL("block_stats", tmplData)
+	if err != nil {
+		log.Println("unable to load update_block_stats template", err)
+		return err
+	}
+	var fileCount, blockSize int64
+	err = tx.QueryRow(stm, blockID).Scan(&fileCount, &blockSize)
+	if err != nil {
+		log.Println("unable to load block_stats template", err)
+		return err
+	}
+
+	stm, err = LoadTemplateSQL("update_block_stats", tmplData)
+	if err != nil {
+		log.Println("unable to load update_block_stats template", err)
+		return err
+	}
+
+	if utils.VERBOSE > 0 {
+		log.Printf("UpdateBlockStats\n%s\n%+v", stm)
+	}
+	_, err = tx.Exec(stm, fileCount, blockSize, blockID)
+	if err != nil {
+		log.Println("unable to update block stats", stm, "error", err)
+		return err
+	}
+	return nil
+}

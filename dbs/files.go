@@ -510,6 +510,9 @@ func (a *API) InsertFiles() error {
 			}
 		}
 
+		// we need to update block info about inserted file
+		a.UpdateBlockStats(tx, blkId)
+
 		// commit transaction
 		err = tx.Commit()
 		if err != nil {
