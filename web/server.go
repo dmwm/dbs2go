@@ -162,17 +162,19 @@ func handlers() *mux.Router {
 
 	// add DBS writer APIs
 	if Config.DBSWriterServer {
-		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST")
-		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT")
-		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT")
+		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT", "GET")
+		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
-		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT")
-		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("POST")
-		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT")
-		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST")
-		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("POST")
-		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST")
-		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST")
+		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT", "GET")
+		router.HandleFunc(basePath("/primarydatasets"), PrimaryDatasetsHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/acquisitioneras"), AcquisitionErasHandler).Methods("POST", "PUT", "GET")
+		router.HandleFunc(basePath("/processingeras"), ProcessingErasHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/outputconfigs"), OutputConfigsHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/fileparents"), FileParentsHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/fileparentsbylumi"), FileParentsByLumiHandler).Methods("POST", "GET")
+		router.HandleFunc(basePath("/blockparents"), BlockParentsHandler).Methods("GET")
+		router.HandleFunc(basePath("/datasetparents"), DatasetParentsHandler).Methods("GET")
 	}
 
 	// aux APIs used by all DBS servers
