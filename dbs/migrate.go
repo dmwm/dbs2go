@@ -606,7 +606,7 @@ func updateMigrationStatus(mid int64, status int) error {
 
 	_, err = tx.Exec(stm, status, mid)
 	if err != nil {
-		log.Printf("unable to update %v", err)
+		log.Printf("unable to execute %s, error %v", stm, err)
 		return err
 	}
 
