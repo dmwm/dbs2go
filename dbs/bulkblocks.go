@@ -342,6 +342,9 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get processed dataset ID")
 	}
+	procDS := ProcessedDatasets{
+		PROCESSED_DS_NAME: rec.Dataset.ProcessedDSName,
+	}
 	processedDatasetID, err = GetID(
 		tx,
 		"PROCESSED_DATASETS",
@@ -351,7 +354,22 @@ func (a *API) InsertBulkBlocks() error {
 	)
 	if err != nil {
 		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
-		return err
+		err := procDS.Insert(tx)
+		if err != nil {
+			log.Println("unable to insert processed dataset name record", err)
+			return err
+		}
+		processedDatasetID, err = GetID(
+			tx,
+			"PROCESSED_DATASETS",
+			"processed_ds_id",
+			"processed_ds_name",
+			rec.Dataset.ProcessedDSName,
+		)
+		if err != nil {
+			log.Printf("unable to find processed_ds_id %s error %v", rec.Dataset.ProcessedDSName, err)
+			return err
+		}
 	}
 
 	// insert dataset
