@@ -570,14 +570,24 @@ func (a *API) processMigration(ch chan<- bool) {
 	if err != nil {
 		log.Printf("unable to query %s/blockdump, error %v", rurl, err)
 	}
-	var rec BlockDumpRecord
+	// NOTE: /blockdump API returns BulkBlocks record used in /bulkblocks API
+	//     var rec BlockDumpRecord
+	var rec Record
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Printf("unable to unmarshal BlockDumpRecord, error %v", err)
+		log.Printf("unable to unmarshal BulkBlocks, error %v", err)
 	}
 
 	// insert block dump record into source DBS
-	err = rec.InsertBlockDump()
+	//     err = rec.InsertBlockDump()
+	api := &API{
+		Params:    rec,
+		Api:       "bulkblocks",
+		Writer:    a.Writer,
+		CreateBy:  a.CreateBy,
+		Separator: a.Separator,
+	}
+	err = api.InsertBulkBlocks()
 	if err != nil {
 		log.Println("insert block dump record failed with", err)
 		updateMigrationStatus(mid, FAILED)

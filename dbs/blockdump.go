@@ -7,7 +7,106 @@ import (
 	"io"
 	"log"
 	"strings"
+	"sync"
 )
+
+func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
+	defer wg.Done()
+	log.Println("getBlock")
+	block = &Block{}
+}
+func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
+	defer wg.Done()
+	log.Println("getDataset")
+	dataset = &Dataset{}
+}
+func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDataset) {
+	defer wg.Done()
+	log.Println("getPrimaryDataset")
+	primaryDataset = &PrimaryDataset{}
+}
+func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingEra) {
+	defer wg.Done()
+	log.Println("getProcessingEra")
+	processingEra = &ProcessingEra{}
+}
+func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *AcquisitionEra) {
+	defer wg.Done()
+	log.Println("getAcquisitionEra")
+	acquisitionEra = &AcquisitionEra{}
+}
+
+type FileList []File
+
+func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
+	defer wg.Done()
+	log.Println("getFileList")
+	file := File{}
+	if files == nil {
+		files = &FileList{}
+	}
+	*files = append(*files, file)
+}
+
+type BlockParentList []BlockParent
+
+func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockParentList) {
+	defer wg.Done()
+	log.Println("getBlockParentList")
+	if blockParentList == nil {
+		blockParentList = &BlockParentList{}
+	}
+	blockParent := BlockParent{}
+	*blockParentList = append(*blockParentList, blockParent)
+}
+
+type DatasetParentList []string
+
+func getDatasetParentList(blk string, wg *sync.WaitGroup, datasetParentList *DatasetParentList) {
+	defer wg.Done()
+	log.Println("getDatasetParentList")
+	if datasetParentList == nil {
+		datasetParentList = &DatasetParentList{}
+	}
+	var datasetParent string
+	*datasetParentList = append(*datasetParentList, datasetParent)
+}
+
+type FileConfigList []FileConfig
+
+func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfigList) {
+	defer wg.Done()
+	log.Println("getFileConfigList")
+	if fileConfigList == nil {
+		fileConfigList = &FileConfigList{}
+	}
+	fileConfig := FileConfig{}
+	*fileConfigList = append(*fileConfigList, fileConfig)
+}
+
+type FileParentList []FileParent
+
+func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParentList) {
+	defer wg.Done()
+	log.Println("getFileParentList")
+	if fileParentList == nil {
+		fileParentList = &FileParentList{}
+	}
+	fileParent := FileParent{}
+	*fileParentList = append(*fileParentList, fileParent)
+}
+
+type DatasetConfigList []DatasetConfig
+
+func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *DatasetConfigList) {
+	defer wg.Done()
+	log.Println("getDatasetConfigList")
+	datasetConfig := DatasetConfig{}
+	if datasetConfigList == nil {
+		datasetConfigList = &DatasetConfigList{}
+	}
+	*datasetConfigList = append(*datasetConfigList, datasetConfig)
+}
 
 // BlockDumpRecord represents input block record used in BlockDump and InsertBlockDump APIs
 type BlockDumpRecord struct {
@@ -41,18 +140,52 @@ func (a *API) BlockDump() error {
 	if err != nil {
 		return err
 	}
-	// initialize BlockDumpRecord
-	rec := BlockDumpRecord{BLOCK_NAME: blk}
 
-	// fill out BlockDumpRecord details, see dumpBlock method in
-	// ../../Server/Python/src/dbs/business/DBSBlock.py
-	// - obtain dataset
-	// - get dataset and block parentage
-	// - get file parent list for given block_id
-	// - get primary dataset
-	// - get file/dataset conf list
+	// fill out BulkBlock record via async calls
+	var datasetConfigList DatasetConfigList
+	var fileConfigList FileConfigList
+	var files FileList
+	var processingEra ProcessingEra
+	var primaryDataset PrimaryDataset
+	var dataset Dataset
+	var acquisitionEra AcquisitionEra
+	var block Block
+	var fileParentList FileParentList
+	var blockParentList BlockParentList
+	var datasetParentList DatasetParentList
+	var wg sync.WaitGroup
+	wg.Add(11) // wait for 11 goroutines below
+	go getBlock(blk, &wg, &block)
+	go getDataset(blk, &wg, &dataset)
+	go getPrimaryDataset(blk, &wg, &primaryDataset)
+	go getProcessingEra(blk, &wg, &processingEra)
+	go getAcquisitionEra(blk, &wg, &acquisitionEra)
+	go getFileList(blk, &wg, &files)
+	go getBlockParentList(blk, &wg, &blockParentList)
+	go getDatasetParentList(blk, &wg, &datasetParentList)
+	go getFileConfigList(blk, &wg, &fileConfigList)
+	go getFileParentList(blk, &wg, &fileParentList)
+	go getDatasetConfigList(blk, &wg, &datasetConfigList)
+	wg.Wait()
 
-	// write BlockDumpRecord
+	log.Println("waited for all goroutines to finish")
+
+	// initialize BulkBlocks record
+	rec := BulkBlocks{
+		AcquisitionEra:    acquisitionEra,
+		ProcessingEra:     processingEra,
+		Block:             block,
+		Dataset:           dataset,
+		PrimaryDataset:    primaryDataset,
+		Files:             files,
+		BlockParentList:   blockParentList,
+		DatasetParentList: datasetParentList,
+		FileConfigList:    fileConfigList,
+		FileParentList:    fileParentList,
+		DatasetConfigList: datasetConfigList,
+	}
+
+	// write BulkBlocks record
 	data, err := json.Marshal(rec)
 	if err == nil {
 		a.Writer.Write(data)
