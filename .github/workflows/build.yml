@@ -94,29 +94,29 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Publish image
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        registry: docker.pkg.github.com
-        repository: vkuznet/dbs2go/dbs2go
-        tag_with_ref: true
+#     - name: Publish image
+#       uses: docker/build-push-action@v1
+#       with:
+#         username: ${{ github.actor }}
+#         password: ${{ secrets.GITHUB_TOKEN }}
+#         registry: docker.pkg.github.com
+#         repository: vkuznet/dbs2go/dbs2go
+#         tag_with_ref: true
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+#     - name: Login to DockerHub
+#       uses: docker/login-action@v1
+#       with:
+#         username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./Dockerfile
-        load: true
-        tags: cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
-    - run: docker push cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
+#     - name: Build and push
+#       uses: docker/build-push-action@v2
+#       with:
+#         context: .
+#         file: ./Dockerfile
+#         load: true
+#         tags: cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
+#     - run: docker push cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
 
     - name: Push new image to k8s
       run: |
