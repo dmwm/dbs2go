@@ -17,13 +17,13 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 	stm := getSQL("blockdump_block")
 
 	err := DB.QueryRow(stm, args...).Scan(
-		block.CreateBy,
-		block.CreationDate,
-		block.OpenForWriting,
-		block.BlockName,
-		block.FileCount,
-		block.OriginSiteName,
-		block.BlockSize,
+		&block.CreateBy,
+		&block.CreationDate,
+		&block.OpenForWriting,
+		&block.BlockName,
+		&block.FileCount,
+		&block.OriginSiteName,
+		&block.BlockSize,
 	)
 	if err != nil {
 		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
@@ -37,16 +37,16 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 	stm := getSQL("blockdump_dataset")
 
 	err := DB.QueryRow(stm, args...).Scan(
-		dataset.CreateBy,
-		dataset.CreationDate,
-		dataset.PhysicsGroupName,
-		dataset.DatasetAccessType,
-		dataset.DataTierName,
-		dataset.LastModifiedBy,
-		dataset.ProcessedDSName,
-		dataset.Xtcrosssection,
-		dataset.LastModificationDate,
-		dataset.Dataset,
+		&dataset.CreateBy,
+		&dataset.CreationDate,
+		&dataset.PhysicsGroupName,
+		&dataset.DatasetAccessType,
+		&dataset.DataTierName,
+		&dataset.LastModifiedBy,
+		&dataset.ProcessedDSName,
+		&dataset.Xtcrosssection,
+		&dataset.LastModificationDate,
+		&dataset.Dataset,
 	)
 	if err != nil {
 		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
@@ -60,10 +60,10 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 	stm := getSQL("blockdump_primds")
 
 	err := DB.QueryRow(stm, args...).Scan(
-		primaryDataset.CreateBy,
-		primaryDataset.PrimaryDSType,
-		primaryDataset.PrimaryDSName,
-		primaryDataset.CreationDate,
+		&primaryDataset.CreateBy,
+		&primaryDataset.PrimaryDSType,
+		&primaryDataset.PrimaryDSName,
+		&primaryDataset.CreationDate,
 	)
 	if err != nil {
 		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
@@ -77,9 +77,9 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 	stm := getSQL("blockdump_procera")
 
 	err := DB.QueryRow(stm, args...).Scan(
-		processingEra.CreateBy,
-		processingEra.ProcessingVersion,
-		processingEra.Description,
+		&processingEra.CreateBy,
+		&processingEra.ProcessingVersion,
+		&processingEra.Description,
 	)
 	if err != nil {
 		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
@@ -93,9 +93,9 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	stm := getSQL("blockdump_acqera")
 
 	err := DB.QueryRow(stm, args...).Scan(
-		acquisitionEra.AcquisitionEraName,
-		acquisitionEra.StartDate,
-		acquisitionEra.CreateBy,
+		&acquisitionEra.AcquisitionEraName,
+		&acquisitionEra.StartDate,
+		&acquisitionEra.CreateBy,
 	)
 	if err != nil {
 		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
@@ -120,16 +120,16 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	for rows.Next() {
 		file := File{}
 		err = rows.Scan(
-			file.CheckSum,
-			file.Adler32,
-			file.FileSize,
-			file.EventCount,
-			file.FileType,
-			file.BranchHash,
-			file.LastModifiedBy,
-			file.LogicalFileName,
-			file.MD5,
-			file.AutoCrossSection,
+			&file.CheckSum,
+			&file.Adler32,
+			&file.FileSize,
+			&file.EventCount,
+			&file.FileType,
+			&file.BranchHash,
+			&file.LastModifiedBy,
+			&file.LogicalFileName,
+			&file.MD5,
+			&file.AutoCrossSection,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -160,8 +160,8 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 	for rows.Next() {
 		blockParent := BlockParent{}
 		err = rows.Scan(
-			blockParent.ThisBlockID,
-			blockParent.ParentBlock,
+			&blockParent.ThisBlockID,
+			&blockParent.ParentBlock,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -219,12 +219,12 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 	for rows.Next() {
 		fileConfig := FileConfig{}
 		err = rows.Scan(
-			fileConfig.ReleaseVersion,
-			fileConfig.PsetHash,
-			fileConfig.LFN,
-			fileConfig.AppName,
-			fileConfig.OutputModuleLabel,
-			fileConfig.GlogalTag,
+			&fileConfig.ReleaseVersion,
+			&fileConfig.PsetHash,
+			&fileConfig.LFN,
+			&fileConfig.AppName,
+			&fileConfig.OutputModuleLabel,
+			&fileConfig.GlogalTag,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -254,8 +254,8 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	for rows.Next() {
 		fileParent := FileParent{}
 		err = rows.Scan(
-			fileParent.LogicalFileName,
-			fileParent.ParentLogicalFileName,
+			&fileParent.LogicalFileName,
+			&fileParent.ParentLogicalFileName,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -285,11 +285,11 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 	for rows.Next() {
 		datasetConfig := DatasetConfig{}
 		err = rows.Scan(
-			datasetConfig.ReleaseVersion,
-			datasetConfig.PsetHash,
-			datasetConfig.AppName,
-			datasetConfig.OutputModuleLabel,
-			datasetConfig.GlogalTag,
+			&datasetConfig.ReleaseVersion,
+			&datasetConfig.PsetHash,
+			&datasetConfig.AppName,
+			&datasetConfig.OutputModuleLabel,
+			&datasetConfig.GlogalTag,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
