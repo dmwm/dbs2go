@@ -87,12 +87,12 @@ jobs:
         repository: cmsweb/dbs2go
         tag_with_ref: true
 
-    - name: Login to docker github registry
-      uses: docker/login-action@v1.6.0
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+#     - name: Login to docker github registry
+#       uses: docker/login-action@v1.6.0
+#       with:
+#         registry: docker.pkg.github.com
+#         username: ${{ github.actor }}
+#         password: ${{ secrets.GITHUB_TOKEN }}
 
 #     - name: Publish image
 #       uses: docker/build-push-action@v1
