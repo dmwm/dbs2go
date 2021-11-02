@@ -12,100 +12,324 @@ import (
 
 func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 	defer wg.Done()
-	log.Println("getBlock")
-	block = &Block{}
+	var args []interface{}
+	args = append(args, blk)
+	stm := getSQL("blockdump_block")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+	defer rows.Close()
+	err = rows.Scan(
+		block.CreateBy,
+		block.CreationDate,
+		block.OpenForWriting,
+		block.BlockName,
+		block.FileCount,
+		block.OriginSiteName,
+		block.BlockSize,
+	)
+	if err != nil {
+		log.Println("unable to scan rows", err)
+		return
+	}
 }
 func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 	defer wg.Done()
-	log.Println("getDataset")
-	dataset = &Dataset{}
+	var args []interface{}
+	args = append(args, strings.Split(blk, "#")[0])
+	stm := getSQL("blockdump_dataset")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+	defer rows.Close()
+	err = rows.Scan(
+		dataset.CreateBy,
+		dataset.CreationDate,
+		dataset.PhysicsGroupName,
+		dataset.DatasetAccessType,
+		dataset.DataTierName,
+		dataset.LastModifiedBy,
+		dataset.ProcessedDSName,
+		dataset.Xtcrosssection,
+		dataset.LastModificationDate,
+		dataset.Dataset,
+	)
+	if err != nil {
+		log.Println("unable to scan rows", err)
+		return
+	}
 }
 func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDataset) {
 	defer wg.Done()
-	log.Println("getPrimaryDataset")
-	primaryDataset = &PrimaryDataset{}
+	var args []interface{}
+	args = append(args, strings.Split(blk, "#")[0])
+	stm := getSQL("blockdump_primds")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+	defer rows.Close()
+	err = rows.Scan(
+		primaryDataset.CreateBy,
+		primaryDataset.PrimaryDSType,
+		primaryDataset.PrimaryDSName,
+		primaryDataset.CreationDate,
+	)
+	if err != nil {
+		log.Println("unable to scan rows", err)
+		return
+	}
 }
 func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingEra) {
 	defer wg.Done()
-	log.Println("getProcessingEra")
-	processingEra = &ProcessingEra{}
+	var args []interface{}
+	args = append(args, strings.Split(blk, "#")[0])
+	stm := getSQL("blockdump_procera")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+	defer rows.Close()
+	err = rows.Scan(
+		processingEra.CreateBy,
+		processingEra.ProcessingVersion,
+		processingEra.Description,
+	)
+	if err != nil {
+		log.Println("unable to scan rows", err)
+		return
+	}
 }
 func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *AcquisitionEra) {
 	defer wg.Done()
-	log.Println("getAcquisitionEra")
-	acquisitionEra = &AcquisitionEra{}
+	var args []interface{}
+	args = append(args, strings.Split(blk, "#")[0])
+	stm := getSQL("blockdump_acqera")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+	defer rows.Close()
+	err = rows.Scan(
+		acquisitionEra.AcquisitionEraName,
+		acquisitionEra.StartDate,
+		acquisitionEra.CreateBy,
+	)
+	if err != nil {
+		log.Println("unable to scan rows", err)
+		return
+	}
 }
 
 type FileList []File
 
 func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	defer wg.Done()
-	log.Println("getFileList")
-	file := File{}
-	if files == nil {
-		files = &FileList{}
+	var args []interface{}
+	args = append(args, blk)
+	stm := getSQL("blockdump_files")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
 	}
-	*files = append(*files, file)
+	defer rows.Close()
+	for rows.Next() {
+		file := File{}
+		err = rows.Scan(
+			file.CheckSum,
+			file.Adler32,
+			file.FileSize,
+			file.EventCount,
+			file.FileType,
+			file.BranchHash,
+			file.LastModifiedBy,
+			file.LogicalFileName,
+			file.MD5,
+			file.AutoCrossSection,
+		)
+		if err != nil {
+			log.Println("unable to scan rows", err)
+			return
+		}
+		// TODO: get file lumi list in separate query
+		*files = append(*files, file)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+	}
 }
 
 type BlockParentList []BlockParent
 
 func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockParentList) {
 	defer wg.Done()
-	log.Println("getBlockParentList")
-	if blockParentList == nil {
-		blockParentList = &BlockParentList{}
+	var args []interface{}
+	args = append(args, blk)
+	stm := getSQL("blockdump_blockparents")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
 	}
-	blockParent := BlockParent{}
-	*blockParentList = append(*blockParentList, blockParent)
+	defer rows.Close()
+	for rows.Next() {
+		blockParent := BlockParent{}
+		err = rows.Scan(
+			blockParent.ThisBlockID,
+			blockParent.ParentBlock,
+		)
+		if err != nil {
+			log.Println("unable to scan rows", err)
+			return
+		}
+		*blockParentList = append(*blockParentList, blockParent)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+	}
 }
 
 type DatasetParentList []string
 
 func getDatasetParentList(blk string, wg *sync.WaitGroup, datasetParentList *DatasetParentList) {
 	defer wg.Done()
-	log.Println("getDatasetParentList")
-	if datasetParentList == nil {
-		datasetParentList = &DatasetParentList{}
+	var args []interface{}
+	args = append(args, strings.Split(blk, "#")[0])
+	stm := getSQL("blockdump_datasetparents")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
 	}
-	var datasetParent string
-	*datasetParentList = append(*datasetParentList, datasetParent)
+	defer rows.Close()
+	for rows.Next() {
+		var datasetParent string
+		err = rows.Scan(&datasetParent)
+		if err != nil {
+			log.Println("unable to scan rows", err)
+			return
+		}
+		*datasetParentList = append(*datasetParentList, datasetParent)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+	}
 }
 
 type FileConfigList []FileConfig
 
 func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfigList) {
 	defer wg.Done()
-	log.Println("getFileConfigList")
-	if fileConfigList == nil {
-		fileConfigList = &FileConfigList{}
+	var args []interface{}
+	args = append(args, blk)
+	stm := getSQL("blockdump_fileconfigs")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
 	}
-	fileConfig := FileConfig{}
-	*fileConfigList = append(*fileConfigList, fileConfig)
+	defer rows.Close()
+	for rows.Next() {
+		fileConfig := FileConfig{}
+		err = rows.Scan(
+			fileConfig.ReleaseVersion,
+			fileConfig.PsetHash,
+			fileConfig.LFN,
+			fileConfig.AppName,
+			fileConfig.OutputModuleLabel,
+			fileConfig.GlogalTag,
+		)
+		if err != nil {
+			log.Println("unable to scan rows", err)
+			return
+		}
+		*fileConfigList = append(*fileConfigList, fileConfig)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+	}
 }
 
 type FileParentList []FileParent
 
 func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParentList) {
 	defer wg.Done()
-	log.Println("getFileParentList")
-	if fileParentList == nil {
-		fileParentList = &FileParentList{}
+	var args []interface{}
+	args = append(args, blk)
+	stm := getSQL("blockdump_fileparents")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
 	}
-	fileParent := FileParent{}
-	*fileParentList = append(*fileParentList, fileParent)
+	defer rows.Close()
+	for rows.Next() {
+		fileParent := FileParent{}
+		err = rows.Scan(
+			fileParent.LogicalFileName,
+			fileParent.ParentLogicalFileName,
+		)
+		if err != nil {
+			log.Println("unable to scan rows", err)
+			return
+		}
+		*fileParentList = append(*fileParentList, fileParent)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+	}
 }
 
 type DatasetConfigList []DatasetConfig
 
 func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *DatasetConfigList) {
 	defer wg.Done()
-	log.Println("getDatasetConfigList")
-	datasetConfig := DatasetConfig{}
-	if datasetConfigList == nil {
-		datasetConfigList = &DatasetConfigList{}
+	var args []interface{}
+	args = append(args, strings.Split(blk, "#")[0])
+	stm := getSQL("blockdump_datasetconfigs")
+
+	rows, err := DB.Query(stm, args...)
+	if err != nil {
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		return
 	}
-	*datasetConfigList = append(*datasetConfigList, datasetConfig)
+	defer rows.Close()
+	for rows.Next() {
+		datasetConfig := DatasetConfig{}
+		err = rows.Scan(
+			datasetConfig.ReleaseVersion,
+			datasetConfig.PsetHash,
+			datasetConfig.AppName,
+			datasetConfig.OutputModuleLabel,
+			datasetConfig.GlogalTag,
+		)
+		if err != nil {
+			log.Println("unable to scan rows", err)
+			return
+		}
+		*datasetConfigList = append(*datasetConfigList, datasetConfig)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+	}
 }
 
 // BlockDumpRecord represents input block record used in BlockDump and InsertBlockDump APIs
