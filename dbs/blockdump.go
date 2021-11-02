@@ -174,9 +174,9 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 		var fargs []interface{}
 		fargs = append(fargs, file.LogicalFileName)
 		fstm := getSQL("blockdump_filelumis")
-		fstm = CleanStatement(stm)
+		fstm = CleanStatement(fstm)
 		if utils.VERBOSE > 1 {
-			utils.PrintSQL(stm, args, "execute")
+			utils.PrintSQL(fstm, fargs, "execute")
 		}
 		frows, err := DB.Query(fstm, fargs...)
 		if err != nil {
