@@ -16,13 +16,7 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 	args = append(args, blk)
 	stm := getSQL("blockdump_block")
 
-	rows, err := DB.Query(stm, args...)
-	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return
-	}
-	defer rows.Close()
-	err = rows.Scan(
+	err := DB.QueryRow(stm, args...).Scan(
 		block.CreateBy,
 		block.CreationDate,
 		block.OpenForWriting,
@@ -32,7 +26,7 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 		block.BlockSize,
 	)
 	if err != nil {
-		log.Println("unable to scan rows", err)
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -42,13 +36,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_dataset")
 
-	rows, err := DB.Query(stm, args...)
-	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return
-	}
-	defer rows.Close()
-	err = rows.Scan(
+	err := DB.QueryRow(stm, args...).Scan(
 		dataset.CreateBy,
 		dataset.CreationDate,
 		dataset.PhysicsGroupName,
@@ -61,7 +49,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		dataset.Dataset,
 	)
 	if err != nil {
-		log.Println("unable to scan rows", err)
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -71,20 +59,14 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_primds")
 
-	rows, err := DB.Query(stm, args...)
-	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return
-	}
-	defer rows.Close()
-	err = rows.Scan(
+	err := DB.QueryRow(stm, args...).Scan(
 		primaryDataset.CreateBy,
 		primaryDataset.PrimaryDSType,
 		primaryDataset.PrimaryDSName,
 		primaryDataset.CreationDate,
 	)
 	if err != nil {
-		log.Println("unable to scan rows", err)
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -94,19 +76,13 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_procera")
 
-	rows, err := DB.Query(stm, args...)
-	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return
-	}
-	defer rows.Close()
-	err = rows.Scan(
+	err := DB.QueryRow(stm, args...).Scan(
 		processingEra.CreateBy,
 		processingEra.ProcessingVersion,
 		processingEra.Description,
 	)
 	if err != nil {
-		log.Println("unable to scan rows", err)
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -116,19 +92,13 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_acqera")
 
-	rows, err := DB.Query(stm, args...)
-	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return
-	}
-	defer rows.Close()
-	err = rows.Scan(
+	err := DB.QueryRow(stm, args...).Scan(
 		acquisitionEra.AcquisitionEraName,
 		acquisitionEra.StartDate,
 		acquisitionEra.CreateBy,
 	)
 	if err != nil {
-		log.Println("unable to scan rows", err)
+		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
