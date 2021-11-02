@@ -8,6 +8,8 @@ import (
 	"log"
 	"strings"
 	"sync"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
@@ -15,6 +17,10 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 	var args []interface{}
 	args = append(args, blk)
 	stm := getSQL("blockdump_block")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	err := DB.QueryRow(stm, args...).Scan(
 		&block.CreateBy,
@@ -26,7 +32,7 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 		&block.BlockSize,
 	)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -35,6 +41,10 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 	var args []interface{}
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_dataset")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	err := DB.QueryRow(stm, args...).Scan(
 		&dataset.CreateBy,
@@ -49,7 +59,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		&dataset.Dataset,
 	)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -58,6 +68,10 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 	var args []interface{}
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_primds")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	err := DB.QueryRow(stm, args...).Scan(
 		&primaryDataset.CreateBy,
@@ -66,7 +80,7 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 		&primaryDataset.CreationDate,
 	)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -75,6 +89,10 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 	var args []interface{}
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_procera")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	err := DB.QueryRow(stm, args...).Scan(
 		&processingEra.CreateBy,
@@ -82,7 +100,7 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 		&processingEra.Description,
 	)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -91,6 +109,10 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	var args []interface{}
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_acqera")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	err := DB.QueryRow(stm, args...).Scan(
 		&acquisitionEra.AcquisitionEraName,
@@ -98,7 +120,7 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 		&acquisitionEra.CreateBy,
 	)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 }
@@ -110,10 +132,14 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	var args []interface{}
 	args = append(args, blk)
 	stm := getSQL("blockdump_files")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 	defer rows.Close()
@@ -135,7 +161,38 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			log.Println("unable to scan rows", err)
 			return
 		}
-		// TODO: get file lumi list in separate query
+
+		// get file lumis for given LFN
+		var fargs []interface{}
+		fargs = append(fargs, file.LogicalFileName)
+		fstm := getSQL("blockdump_filelumis")
+		fstm = CleanStatement(stm)
+		if utils.VERBOSE > 1 {
+			utils.PrintSQL(stm, args, "execute")
+		}
+		frows, err := DB.Query(fstm, fargs...)
+		if err != nil {
+			log.Printf("query='%s' args='%v' error=%v", fstm, fargs, err)
+			return
+		}
+		defer frows.Close()
+		var fileLumiList []FileLumi
+		for frows.Next() {
+			fileLumi := FileLumi{}
+			err = rows.Scan(
+				&fileLumi.LumiSectionNumber,
+				&fileLumi.RunNumber,
+			)
+			if err != nil {
+				log.Println("unable to scan rows", err)
+				return
+			}
+			fileLumiList = append(fileLumiList, fileLumi)
+		}
+		if err = frows.Err(); err != nil {
+			log.Printf("rows error %v", err)
+		}
+		file.FileLumiList = fileLumiList
 		*files = append(*files, file)
 	}
 	if err = rows.Err(); err != nil {
@@ -150,10 +207,14 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 	var args []interface{}
 	args = append(args, blk)
 	stm := getSQL("blockdump_blockparents")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 	defer rows.Close()
@@ -181,10 +242,14 @@ func getDatasetParentList(blk string, wg *sync.WaitGroup, datasetParentList *Dat
 	var args []interface{}
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_datasetparents")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 	defer rows.Close()
@@ -209,10 +274,14 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 	var args []interface{}
 	args = append(args, blk)
 	stm := getSQL("blockdump_fileconfigs")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 	defer rows.Close()
@@ -244,10 +313,14 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	var args []interface{}
 	args = append(args, blk)
 	stm := getSQL("blockdump_fileparents")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 	defer rows.Close()
@@ -275,10 +348,14 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 	var args []interface{}
 	args = append(args, strings.Split(blk, "#")[0])
 	stm := getSQL("blockdump_datasetconfigs")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	rows, err := DB.Query(stm, args...)
 	if err != nil {
-		log.Printf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
 	defer rows.Close()
