@@ -187,7 +187,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 		var fileLumiList []FileLumi
 		for frows.Next() {
 			fileLumi := FileLumi{}
-			err = rows.Scan(
+			err = frows.Scan(
 				&fileLumi.LumiSectionNumber,
 				&fileLumi.RunNumber,
 			)
