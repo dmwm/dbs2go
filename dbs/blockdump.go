@@ -146,7 +146,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	defer rows.Close()
 	for rows.Next() {
 		file := File{}
-		var bhash sql.NullString
+		var bhash, md5 sql.NullString
 		err = rows.Scan(
 			&file.CheckSum,
 			&file.Adler32,
@@ -156,11 +156,14 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			&bhash,
 			&file.LastModifiedBy,
 			&file.LogicalFileName,
-			&file.MD5,
+			&md5,
 			&file.AutoCrossSection,
 		)
 		if bhash.Valid {
 			file.BranchHash = bhash.String
+		}
+		if md5.Valid {
+			file.MD5 = md5.String
 		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
