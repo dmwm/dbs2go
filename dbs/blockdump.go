@@ -47,6 +47,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		utils.PrintSQL(stm, args, "execute")
 	}
 
+	var xt sql.NullFloat64
 	err := DB.QueryRow(stm, args...).Scan(
 		&dataset.CreateBy,
 		&dataset.CreationDate,
@@ -55,10 +56,13 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		&dataset.DataTierName,
 		&dataset.LastModifiedBy,
 		&dataset.ProcessedDSName,
-		&dataset.Xtcrosssection,
+		&xt,
 		&dataset.LastModificationDate,
 		&dataset.Dataset,
 	)
+	if xt.Valid {
+		dataset.Xtcrosssection = xt.Float64
+	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
@@ -95,11 +99,15 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 		utils.PrintSQL(stm, args, "execute")
 	}
 
+	var desc sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
 		&processingEra.CreateBy,
 		&processingEra.ProcessingVersion,
-		&processingEra.Description,
+		&desc,
 	)
+	if desc.Valid {
+		processingEra.Description = desc.String
+	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
@@ -115,11 +123,15 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 		utils.PrintSQL(stm, args, "execute")
 	}
 
+	var cby sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
 		&acquisitionEra.AcquisitionEraName,
 		&acquisitionEra.StartDate,
-		&acquisitionEra.CreateBy,
+		&cby,
 	)
+	if cby.Valid {
+		acquisitionEra.CreateBy = cby.String
+	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
