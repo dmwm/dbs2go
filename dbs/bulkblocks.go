@@ -95,7 +95,7 @@ type Dataset struct {
 	ProcessedDSName      string  `json:"processed_ds_name"`
 	Xtcrosssection       float64 `json:"xtcrosssection"`
 	LastModificationDate int64   `json:"last_modification_date"`
-	Dataset              string  `json:"dataset'`
+	Dataset              string  `json:"dataset"`
 }
 
 // AcquisitionEra represents AcquisitionEra structure use in BulkBlocks structure
