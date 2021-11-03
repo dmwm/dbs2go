@@ -541,9 +541,12 @@ func (a *API) InsertBulkBlocks() error {
 			}
 		}
 		for _, r := range rrr.FileLumiList {
-			flID, err := GetID(tx, "FILE_LUMIS", "file_id", "file_id", fileID)
-			if err == nil && flID > 0 {
-				// skip if we found valida filelumi record
+			var vals []interface{}
+			vals = append(vals, r.RunNumber)
+			vals = append(vals, r.LumiSectionNumber)
+			args := []string{"run_num", "lumi_section_num"}
+			if IfExistMulti(tx, "FILE_LUMIS", "file_id", args, vals...) {
+				// skip if we found valid filelumi record for given run and lumi
 				continue
 			}
 			fl := FileLumis{
