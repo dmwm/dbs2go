@@ -282,6 +282,7 @@ func (a *API) InsertBulkBlocks() error {
 		END_DATE:             0,
 		CREATION_DATE:        creationDate,
 		CREATE_BY:            rec.AcquisitionEra.CreateBy,
+		DESCRIPTION:          rec.AcquisitionEra.Description,
 	}
 	acquisitionEraID, err = GetRecID(
 		tx,
