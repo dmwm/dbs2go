@@ -43,6 +43,14 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 			return err
 		}
 	}
+	// check if our data already exist in DB
+	var vals []interface{}
+	vals = append(vals, r.DATASET_ID)
+	vals = append(vals, r.OUTPUT_MOD_CONFIG_ID)
+	args := []string{"dataset_id", "output_mod_config_id"}
+	if IfExistMulti(tx, "DATASET_OUTPUT_MOD_CONFIGS", "ds_output_mod_conf_id", args, vals...) {
+		return nil
+	}
 	// set defaults and validate the record
 	r.SetDefaults()
 	err = r.Validate()
