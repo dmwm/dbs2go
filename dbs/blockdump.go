@@ -374,7 +374,7 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 			&datasetConfig.PsetHash,
 			&datasetConfig.AppName,
 			&datasetConfig.OutputModuleLabel,
-			&datasetConfig.GlogalTag,
+			&datasetConfig.GlobalTag,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
