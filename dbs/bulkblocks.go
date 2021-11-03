@@ -553,7 +553,7 @@ func (a *API) InsertBulkBlocks() error {
 				FILE_ID:          fileID,
 				RUN_NUM:          r.RunNumber,
 				LUMI_SECTION_NUM: r.LumiSectionNumber,
-				EVENT_COUNT:      rrr.EventCount,
+				EVENT_COUNT:      r.EventCount,
 			}
 			data, err = json.Marshal(fl)
 			if err != nil {
