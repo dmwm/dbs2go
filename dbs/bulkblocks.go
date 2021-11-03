@@ -51,6 +51,7 @@ type FileConfig struct {
 type FileLumi struct {
 	LumiSectionNumber int64 `json:"lumi_section_num"`
 	RunNumber         int64 `json:"run_num"`
+	EventCount        int64 `json:"event_count"`
 }
 
 // File represents file structure used in BulkBlocks structure

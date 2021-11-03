@@ -190,6 +190,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			err = frows.Scan(
 				&fileLumi.LumiSectionNumber,
 				&fileLumi.RunNumber,
+				&fileLumi.EventCount,
 			)
 			if err != nil {
 				log.Println("unable to scan rows", err)
