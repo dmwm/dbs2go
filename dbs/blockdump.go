@@ -123,14 +123,18 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 		utils.PrintSQL(stm, args, "execute")
 	}
 
-	var cby sql.NullString
+	var cby, desc sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
 		&acquisitionEra.AcquisitionEraName,
 		&acquisitionEra.StartDate,
 		&cby,
+		&desc,
 	)
 	if cby.Valid {
 		acquisitionEra.CreateBy = cby.String
+	}
+	if desc.Valid {
+		acquisitionEra.Description = desc.String
 	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)

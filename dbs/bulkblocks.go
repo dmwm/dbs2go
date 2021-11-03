@@ -103,6 +103,7 @@ type AcquisitionEra struct {
 	AcquisitionEraName string `json:"acquisition_era_name"`
 	StartDate          int64  `json:"start_date"`
 	CreateBy           string `json:"create_by"`
+	Description        string `json:"description"`
 }
 
 // Block represents Block structure used in BulkBlocks structure
