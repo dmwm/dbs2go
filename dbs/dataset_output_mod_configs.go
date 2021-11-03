@@ -36,7 +36,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 			tid, err = LastInsertID(tx, "DATASET_OUTPUT_MOD_CONFIGS", "ds_output_mod_conf_id")
 			r.DS_OUTPUT_MOD_CONF_ID = tid + 1
 		} else {
-			tid, err = IncrementSequence(tx, "SEQ_DOMC")
+			tid, err = IncrementSequence(tx, "SEQ_DC")
 			r.DS_OUTPUT_MOD_CONF_ID = tid
 		}
 		if err != nil {
