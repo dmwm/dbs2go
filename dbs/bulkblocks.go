@@ -34,7 +34,7 @@ type DatasetConfig struct {
 	PsetHash          string `json:"pset_hash"`
 	AppName           string `json:"app_name"`
 	OutputModuleLabel string `json:"output_module_label"`
-	GlogalTag         string `json:"global_tag"`
+	GlobalTag         string `json:"global_tag"`
 }
 
 // FileConfig represents file config structure used in BulkBlocks structure
@@ -410,6 +410,32 @@ func (a *API) InsertBulkBlocks() error {
 		datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 		if err != nil {
 			log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
+			return err
+		}
+	}
+	// get outputModConfigID using datasetID
+	// since we already inserted records from DatasetConfigList
+	for _, r := range rec.DatasetConfigList {
+		var vals []interface{}
+		vals = append(vals, r.AppName)
+		vals = append(vals, r.PsetHash)
+		vals = append(vals, r.ReleaseVersion)
+		vals = append(vals, r.OutputModuleLabel)
+		vals = append(vals, r.GlobalTag)
+		stm := getSQL("datasetoutmodconfigs")
+		var oid float64
+		err := tx.QueryRow(stm, vals...).Scan(&oid)
+		if err != nil {
+			log.Printf("fail to get id for %s, %v, error %v", stm, vals, err)
+		}
+		// insert into DATASET_OUTPUT_MOD_CONFIGS
+		dsoRec := DatasetOutputModConfigs{
+			DATASET_ID:           datasetID,
+			OUTPUT_MOD_CONFIG_ID: int64(oid),
+		}
+		err = dsoRec.Insert(tx)
+		if err != nil {
+			log.Println("unable to insert dataset output mod configs record", err)
 			return err
 		}
 	}
