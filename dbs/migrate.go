@@ -584,6 +584,7 @@ func (a *API) processMigration(ch chan<- bool) {
 		Params:    rec,
 		Api:       "bulkblocks",
 		Writer:    a.Writer,
+		Reader:    a.Reader,
 		CreateBy:  a.CreateBy,
 		Separator: a.Separator,
 	}
