@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -76,11 +77,8 @@ const (
 	TERM_FAILED
 )
 
-// MigrationProcessTimeout defines migration process timeout
-var MigrationProcessTimeout int
-
-// MigrationServerInterval defines migration process timeout
-var MigrationServerInterval int
+// MigrateURL holds URL of DBSMigrate server
+var MigrateURL string
 
 // MigrationReport represents migration report returned by the migration API
 type MigrationReport struct {
@@ -555,7 +553,9 @@ func (a *API) processMigration(ch chan<- bool) {
 		log.Println("unable to convert mid", err)
 	}
 	mid := int64(midint)
-	records, err := MigrationRequests(mid)
+	// send HTTP request to DBSMigrate server to fetch migration
+	// requests associated with given mid
+	records, err := getMigrationRecords(MigrateURL, mid)
 	if err != nil {
 		log.Printf("fail to fetch migration request %d, error", mid, err)
 		return
@@ -771,4 +771,114 @@ func (a *API) TotalMigration() error {
 
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)
+}
+
+// MigrationRequests DBS API query migration request table and stream
+// migration request records
+func (a *API) MigrationRequests() error {
+
+	var enc *json.Encoder
+	if a.Writer != nil {
+		enc = json.NewEncoder(a.Writer)
+		a.Writer.Write([]byte("[\n"))
+		defer a.Writer.Write([]byte("]"))
+	}
+
+	// query MigrationRequest table and fetch all non-completed requests
+	var args []interface{}
+	var conds []string
+	stm := getSQL("migration_requests")
+	mid, err := getSingleValue(a.Params, "mid")
+	if err == nil && mid != "-1" {
+		cond := fmt.Sprintf(" MR.MIGRATION_REQUEST_ID = %s", placeholder("migration_request_id"))
+		conds = append(conds, cond)
+		args = append(args, mid)
+		stm = WhereClause(stm, conds)
+	}
+
+	// execute sql statement
+	tx, err := DB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return errors.New(msg)
+	}
+	defer tx.Rollback()
+	rows, err := tx.Query(stm, args...)
+	if err != nil {
+		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
+		return errors.New(msg)
+	}
+	defer rows.Close()
+	rowCount := 0
+	sep := ",\n"
+	for rows.Next() {
+		if rowCount != 0 && a.Writer != nil {
+			// add separator line to our output
+			a.Writer.Write([]byte(sep))
+		}
+		var mid, migRetryCount, migCreationDate, migLastModificationDate, migStatus int64
+		var migURL, migInput, migCreateBy, migLastModifiedBy string
+		err := rows.Scan(
+			&mid,
+			&migURL,
+			&migInput,
+			&migStatus,
+			&migCreateBy,
+			&migCreationDate,
+			&migLastModifiedBy,
+			&migLastModificationDate,
+			&migRetryCount,
+		)
+		if err != nil {
+			msg := fmt.Sprintf("unable to scan DB results %s", err)
+			return errors.New(msg)
+		}
+		rec := MigrationRequest{
+			MIGRATION_REQUEST_ID:   mid,
+			MIGRATION_URL:          migURL,
+			MIGRATION_INPUT:        migInput,
+			MIGRATION_STATUS:       migStatus,
+			CREATE_BY:              migCreateBy,
+			CREATION_DATE:          migCreationDate,
+			LAST_MODIFIED_BY:       migLastModifiedBy,
+			LAST_MODIFICATION_DATE: migLastModificationDate,
+			RETRY_COUNT:            migRetryCount,
+		}
+		if a.Writer != nil {
+			err = enc.Encode(rec)
+			if err != nil {
+				log.Printf("unable to encode record %+v, error %v", rec, err)
+				return err
+			}
+		}
+		rowCount += 1
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("rows error %v", err)
+		return err
+	}
+	return nil
+}
+
+// helper function to get migration records from remote URL
+func getMigrationRecords(murl string, mid int64) ([]MigrationRequest, error) {
+	var records []MigrationRequest
+	rurl := fmt.Sprintf("%s/requests/?mid=%d", murl, mid)
+	resp, err := http.Get(rurl)
+	if err != nil {
+		log.Printf("unable to make HTTP request to %s, error %v", rurl, err)
+		return records, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("unable to read response body", err)
+		return records, err
+	}
+	err = json.Unmarshal(body, &records)
+	if err != nil {
+		log.Println("unable to unmarshal Migration records", err)
+		return records, err
+	}
+	return records, nil
 }

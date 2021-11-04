@@ -98,14 +98,16 @@ func handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
 
-	if Config.MigrationServer {
+	if Config.MigrateServer {
 		router.HandleFunc(basePath("/submit"), MigrationSubmitHandler).Methods("POST")
 		router.HandleFunc(basePath("/process"), MigrationProcessHandler).Methods("POST")
 		router.HandleFunc(basePath("/remove"), MigrationRemoveHandler).Methods("POST")
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
-		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
+		router.HandleFunc(basePath("/requests"), MigrationRequestsHandler).Methods("GET")
+	} else if Config.MigrationServer {
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("GET")
+		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
 	} else {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("GET")
@@ -388,43 +390,50 @@ func Server(configFile string) {
 	httpDone := make(chan os.Signal, 1)
 	signal.Notify(httpDone, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
-		// Start either HTTPs or HTTP web server
-		_, e1 := os.Stat(Config.ServerCrt)
-		_, e2 := os.Stat(Config.ServerKey)
-		if e1 == nil && e2 == nil {
-			//start HTTPS server which require user certificates
-			rootCA := x509.NewCertPool()
-			caCert, _ := ioutil.ReadFile(Config.RootCA)
-			rootCA.AppendCertsFromPEM(caCert)
-			server = &http.Server{
-				Addr: addr,
-				TLSConfig: &tls.Config{
-					//                 ClientAuth: tls.RequestClientCert,
-					RootCAs: rootCA,
-				},
+	// start necessary HTTP server
+	// DBSReader is HTTP server to provide read APIs
+	// DBSWriter is HTTP server to provide write APIs
+	// DBSMigrate is HTTP server to provide migration APIs
+	// DBSMigration server process migration requests (it is Go server and not HTTP one)
+
+	migDone := make(chan bool)
+	dbs.MigrateURL = Config.MigrateURL
+	if Config.MigrationServer {
+		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
+	} else {
+
+		go func() {
+			// Start either HTTPs or HTTP web server
+			_, e1 := os.Stat(Config.ServerCrt)
+			_, e2 := os.Stat(Config.ServerKey)
+			if e1 == nil && e2 == nil {
+				//start HTTPS server which require user certificates
+				rootCA := x509.NewCertPool()
+				caCert, _ := ioutil.ReadFile(Config.RootCA)
+				rootCA.AppendCertsFromPEM(caCert)
+				server = &http.Server{
+					Addr: addr,
+					TLSConfig: &tls.Config{
+						//                 ClientAuth: tls.RequestClientCert,
+						RootCAs: rootCA,
+					},
+				}
+				log.Println("Starting HTTPs server", addr)
+				err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
+			} else {
+				// Start server without user certificates
+				log.Println("Starting HTTP server", addr)
+				err = server.ListenAndServe()
 			}
-			log.Println("Starting HTTPs server", addr)
-			err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
-		} else {
-			// Start server without user certificates
-			log.Println("Starting HTTP server", addr)
-			err = server.ListenAndServe()
-		}
-		if err != nil {
-			log.Printf("Fail to start server %v", err)
-		}
-	}()
+			if err != nil {
+				log.Printf("Fail to start server %v", err)
+			}
+		}()
+	}
 
 	// star db monitoring goroutine
 	if Config.DBMonitoringInterval > 0 {
 		go dbMonitor(dbtype, dburi, Config.DBMonitoringInterval)
-	}
-
-	// start migration server if necessary
-	migDone := make(chan bool)
-	if Config.MigrationServer {
-		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
 	}
 
 	// properly stop our HTTP and Migration Servers
