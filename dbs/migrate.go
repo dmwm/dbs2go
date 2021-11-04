@@ -38,6 +38,9 @@ Server/Python/src/dbs/business/DBSMigrate.py
 and various bisuness dao, e.g.
 Server/Python/src/dbs/dao/Oracle/MigrationBlock
 
+Yhe DBS migration server is here:
+Server/Python/src/dbs/components/migration/DBSMigrationServer.py
+
 Submit should submit migration request
 (see insertMigrationRequest python API)
 
@@ -564,8 +567,26 @@ func (a *API) processMigration(ch chan<- bool) {
 	// update migration status
 	updateMigrationStatus(mid, IN_PROGRESS)
 
+	// find block name for our migration id
+	stm := getSQL("migration_block")
+	stm = CleanStatement(stm)
+	var args []interface{}
+	args = append(args, mid)
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
+	var bid, bOrder, bStatus int64
+	var block string
+	err = DB.QueryRow(stm, args...).Scan(
+		&bid, &block, &bOrder, &bStatus,
+	)
+	if err != nil {
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+
 	// obtain block details from destination DBS
-	rurl := fmt.Sprintf("%s/blockdump", mrec.MIGRATION_URL)
+	rurl := fmt.Sprintf("%s/blockdump?block_name=%s", mrec.MIGRATION_URL, url.QueryEscape(block))
 	data, err := getData(rurl)
 	if err != nil {
 		log.Printf("unable to query %s/blockdump, error %v", rurl, err)
@@ -575,7 +596,8 @@ func (a *API) processMigration(ch chan<- bool) {
 	var rec Record
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Printf("unable to unmarshal BulkBlocks, error %v", err)
+		log.Printf("unable to unmarshal BulkBlocks\n%v\nerror %v", string(data), err)
+		return
 	}
 
 	// insert block dump record into source DBS
