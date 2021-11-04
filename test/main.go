@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	validator "github.com/go-playground/validator/v10"
@@ -12,27 +11,6 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
 )
-
-// StdoutWriter provides the same functionality as http.ResponseWriter
-// to cover unit tests of DBS APIs. It prints given data directly to stdout.
-type StdoutWriter string
-
-// Header implements Header() API of http.ResponseWriter interface
-func (s StdoutWriter) Header() http.Header {
-	return http.Header{}
-}
-
-// Write implements Write API of http.ResponseWriter interface
-func (s StdoutWriter) Write(b []byte) (int, error) {
-	v := string(b)
-	fmt.Println(v)
-	return len(v), nil
-}
-
-// WriteHeader implements WriteHeader API of http.ResponseWriter interface
-func (s StdoutWriter) WriteHeader(statusCode int) {
-	fmt.Println("statusCode", statusCode)
-}
 
 // helper function to initialize DB for tests
 func initDB(dryRun bool) *sql.DB {

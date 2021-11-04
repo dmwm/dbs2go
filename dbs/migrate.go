@@ -14,6 +14,7 @@ package dbs
 // MigrationRequest table. The request details resides in MigrationBlocks table.
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -593,21 +594,35 @@ func (a *API) processMigration(ch chan<- bool) {
 	}
 	// NOTE: /blockdump API returns BulkBlocks record used in /bulkblocks API
 	//     var rec BlockDumpRecord
+	var brec BulkBlocks
+	err = json.Unmarshal(data, &brec)
+	if err != nil {
+		log.Println("blockdump data", string(data))
+		log.Printf("unable to unmarshal BulkBlocks, error %v", err)
+		return
+	}
+	cby := a.CreateBy
+	if brec.Dataset.CreateBy != "" {
+		cby = brec.Dataset.CreateBy
+	}
 	var rec Record
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Printf("unable to unmarshal BulkBlocks\n%v\nerror %v", string(data), err)
+		log.Println("blockdump data", string(data))
+		log.Printf("unable to unmarshal Record, error %v", err)
 		return
 	}
+	reader := bytes.NewReader(data)
+	writer := utils.StdoutWriter("")
 
 	// insert block dump record into source DBS
 	//     err = rec.InsertBlockDump()
 	api := &API{
 		Params:    rec,
 		Api:       "bulkblocks",
-		Writer:    a.Writer,
-		Reader:    a.Reader,
-		CreateBy:  a.CreateBy,
+		Writer:    writer,
+		Reader:    reader,
+		CreateBy:  cby,
 		Separator: a.Separator,
 	}
 	err = api.InsertBulkBlocks()

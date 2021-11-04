@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // TestBulkBlocks API
@@ -26,7 +27,7 @@ func TestBulkBlocks(t *testing.T) {
 	//     var reader *bytes.Reader
 	ts := time.Now().Unix()
 	createBy := "tester"
-	w := StdoutWriter("")
+	w := utils.StdoutWriter("")
 	api := dbs.API{
 		Writer:   w,
 		CreateBy: createBy,

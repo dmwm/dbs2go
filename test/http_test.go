@@ -13,6 +13,7 @@ import (
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 	"github.com/vkuznet/dbs2go/web"
 )
 
@@ -59,7 +60,7 @@ func TestHTTPGet(t *testing.T) {
 	rec["create_by"] = createBy
 	data, _ := json.Marshal(rec)
 	reader := bytes.NewReader(data)
-	writer := StdoutWriter("")
+	writer := utils.StdoutWriter("")
 
 	// insert new record
 	//     var api dbs.API
@@ -160,7 +161,7 @@ func TestHTTPPut(t *testing.T) {
 	rec["start_date"] = float64(date)
 	data, _ := json.Marshal(rec)
 	reader := bytes.NewReader(data)
-	writer := StdoutWriter("")
+	writer := utils.StdoutWriter("")
 
 	// insert new record
 	//     var api dbs.API
