@@ -113,6 +113,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 // exit channel
 func MigrationServer(interval, timeout int, ch <-chan bool) {
 	log.Println("Start migration server")
+
 	for {
 		select {
 		case v := <-ch:
@@ -125,6 +126,11 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 			// look-up all available migration requests
 			records, err := MigrationRequests(-1)
 			if err != nil {
+				log.Println("unable to fetch Migration requestes, error", err)
+				continue
+			}
+			if utils.VERBOSE > 0 {
+				log.Println("found %d migration requests", len(records))
 			}
 			for _, r := range records {
 				if utils.VERBOSE > 0 {
@@ -138,7 +144,8 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 					Api:    "ProcessMigration",
 				}
 				log.Printf("start new migration process with %+v", params)
-				go api.ProcessMigration(timeout, false)
+				api.ProcessMigration(timeout, false)
+				//                 go api.ProcessMigration(timeout, false)
 			}
 		}
 	}
