@@ -105,6 +105,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
 		router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
+		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("GET")
 	} else {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("GET")

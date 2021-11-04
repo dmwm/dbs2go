@@ -152,7 +152,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	var out map[int][]string
 
 	// check if block exists at destination (this server)
-	localhost := utils.BasePath(utils.BASE, "/blocks")
+	localhost := utils.BASE
 	dstblocks, err := GetBlocks(localhost, block)
 	if err != nil {
 		return out, err
@@ -204,7 +204,7 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 	}
 	// get list of parent blocks at destination (this server)
 	parentBlocksInDst := make(map[string]bool)
-	localhost := utils.BasePath(utils.BASE, "/blocks")
+	localhost := utils.BASE
 	ch := make(chan BlockResponse)
 	umap := make(map[string]struct{})
 	for _, blk := range srcblocks {
@@ -298,7 +298,7 @@ func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]str
 		msg := fmt.Sprintf("No blocks in the required dataset %s found at source %s", dataset, rurl)
 		return out, errors.New(msg)
 	}
-	localhost := utils.BasePath(utils.BASE, "/blocks")
+	localhost := utils.BASE
 	dstblks, err := GetBlocks(localhost, dataset)
 	if err != nil {
 		return out, err
