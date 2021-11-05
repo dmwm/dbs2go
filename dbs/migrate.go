@@ -194,6 +194,9 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	for idx, blks := range parentBlocks {
 		out[idx] = blks
 	}
+	if utils.VERBOSE > 0 {
+		log.Printf("prepareBlockMigrationList yields %d blocks", len(out))
+	}
 	return out, nil
 }
 
@@ -230,6 +233,8 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 		// no parent blocks
 		log.Printf("no parent blocks found for %s in %s", block, rurl)
 		return out, nil
+	} else {
+		log.Printf("GetParentBlocks yield %d blocks", len(umap))
 	}
 	// collect results from goroutines
 	for {
@@ -250,6 +255,9 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 			time.Sleep(time.Duration(1) * time.Millisecond) // wait for response
 		}
 	}
+	if utils.VERBOSE > 0 {
+		log.Printf("GetParentBlocks processed %d parent blocks", len(parentBlocksInDst))
+	}
 
 	// loop over source blocks
 	for _, blk := range srcblocks {
@@ -268,6 +276,9 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 			}
 			out = utils.UpdateOrderedDict(out, omap)
 		}
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("GetParentBlocks output yield %d blocks", len(out))
 	}
 	return out, nil
 }
@@ -302,6 +313,9 @@ func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error)
 	if len(pdict) != 0 {
 		// update out
 		out = utils.UpdateOrderedDict(out, pdict)
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("prepareDatasetMigrationList yields %d blocks", len(out))
 	}
 	return out, nil
 }
@@ -380,6 +394,8 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 		// no parent datasets
 		log.Printf("no parent datasets found for %s in %s", dataset, rurl)
 		return out, nil
+	} else {
+		log.Println("process %d dataset", len(umap))
 	}
 	// collect results from goroutines
 	for {
@@ -397,6 +413,9 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 			}
 			time.Sleep(time.Duration(1) * time.Millisecond) // wait for response
 		}
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("GetParentDatasets yield %d", len(out))
 	}
 
 	return out, nil
