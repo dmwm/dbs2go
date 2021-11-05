@@ -98,14 +98,13 @@ func handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
 
-	if Config.MigrateServer {
+	if Config.ServerType == "DBSMigrate" {
 		router.HandleFunc(basePath("/submit"), MigrationSubmitHandler).Methods("POST")
 		router.HandleFunc(basePath("/process"), MigrationProcessHandler).Methods("POST")
 		router.HandleFunc(basePath("/remove"), MigrationRemoveHandler).Methods("POST")
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
-		router.HandleFunc(basePath("/requests"), MigrationRequestsHandler).Methods("GET")
-	} else if Config.MigrationServer {
+	} else if Config.ServerType == "DBSMigration" {
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("GET")
 		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
 	} else {
@@ -164,7 +163,7 @@ func handlers() *mux.Router {
 	}
 
 	// add DBS writer APIs
-	if Config.DBSWriterServer {
+	if Config.ServerType == "DBSWriter" {
 		router.HandleFunc(basePath("/datatiers"), DatatiersHandler).Methods("POST", "GET")
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT", "GET")
@@ -232,26 +231,24 @@ func walkFunction(route *mux.Route, router *mux.Router, ancestors []*mux.Route) 
 }
 
 // helper function to initialize DB access
-func dbInit(dbtype, dburi string) error {
-	// close existing DB connection if it exist
-	if dbs.DB != nil {
-		dbs.DB.Close()
-	}
+func dbInit(dbtype, dburi string) (*sql.DB, error) {
+	//     close existing DB connection if it exist
+	//     if pdb != nil {
+	//         pdb.Close()
+	//     }
 	db, dberr := sql.Open(dbtype, dburi)
 	if dberr != nil {
 		log.Printf("unable to open %s %s, error %v", dbtype, dburi)
-		return dberr
+		return nil, dberr
 	}
 	dberr = db.Ping()
 	if dberr != nil {
 		log.Println("DB ping error", dberr)
-		return dberr
+		return nil, dberr
 	}
 	db.SetMaxOpenConns(Config.MaxDBConnections)
 	db.SetMaxIdleConns(Config.MaxIdleConnections)
-	dbs.DB = db
-	dbs.DBTYPE = dbtype
-	return nil
+	return db, nil
 }
 
 // helper function to perform db connection monitoring
@@ -263,10 +260,14 @@ func dbMonitor(dbtype, dburi string, interval int) {
 		if err != nil {
 			// if we get ORA error we should restart DB connection
 			log.Println("unable to get test data query, error", err)
-			dberr := dbInit(dbtype, dburi)
+			if dbs.DB != nil {
+				dbs.DB.Close()
+			}
+			db, dberr := dbInit(dbtype, dburi)
 			if dberr != nil {
 				log.Println("unable to init DB access, error", dberr)
 			}
+			dbs.DB = db
 		}
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
@@ -328,16 +329,31 @@ func Server(configFile string) {
 	}
 
 	// set database connection once
+	log.Println("parse Config.DBFile:", Config.DBFile)
 	dbtype, dburi, dbowner := dbs.ParseDBFile(Config.DBFile)
 	// for oci driver we know it is oracle backend
 	if strings.HasPrefix(dbtype, "oci") {
 		utils.ORACLE = true
 	}
-	dberr := dbInit(dbtype, dburi)
+	db, dberr := dbInit(dbtype, dburi)
 	if dberr != nil {
 		log.Fatal(dberr)
 	}
+	dbs.DB = db
+	dbs.DBTYPE = dbtype
 	defer dbs.DB.Close()
+
+	// setup MigrationDB access
+	if Config.ServerType == "DBSMigration" || Config.ServerType == "DBSMigrate" {
+		log.Println("parse Config.MigrationDBFile:", Config.MigrationDBFile)
+		dbtype, dburi, dbowner = dbs.ParseDBFile(Config.MigrationDBFile)
+		db, dberr = dbInit(dbtype, dburi)
+		if dberr != nil {
+			log.Fatal(dberr)
+		}
+		dbs.MigrationDB = db
+		defer dbs.MigrationDB.Close()
+	}
 
 	// load Lexicon patterns
 	lexPatterns, err := dbs.LoadPatterns(Config.LexiconFile)
@@ -390,50 +406,50 @@ func Server(configFile string) {
 	httpDone := make(chan os.Signal, 1)
 	signal.Notify(httpDone, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	// start necessary HTTP server
-	// DBSReader is HTTP server to provide read APIs
-	// DBSWriter is HTTP server to provide write APIs
-	// DBSMigrate is HTTP server to provide migration APIs
-	// DBSMigration server process migration requests (it is Go server and not HTTP one)
+	// start necessary HTTP servers
+	// DBSReader: HTTP server to provide read APIs
+	// DBSWriter: HTTP server to provide write APIs
+	// DBSMigrate: HTTP server to provide migration APIs
+	// DBSMigration server will have two processes:
+	// - HTTP server to access and write to internal DB
+	// - daemon to process migration requests
 
-	migDone := make(chan bool)
-	dbs.MigrateURL = Config.MigrateURL
-	if Config.MigrationServer {
-		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
-	} else {
-
-		go func() {
-			// Start either HTTPs or HTTP web server
-			_, e1 := os.Stat(Config.ServerCrt)
-			_, e2 := os.Stat(Config.ServerKey)
-			if e1 == nil && e2 == nil {
-				//start HTTPS server which require user certificates
-				rootCA := x509.NewCertPool()
-				caCert, _ := ioutil.ReadFile(Config.RootCA)
-				rootCA.AppendCertsFromPEM(caCert)
-				server = &http.Server{
-					Addr: addr,
-					TLSConfig: &tls.Config{
-						//                 ClientAuth: tls.RequestClientCert,
-						RootCAs: rootCA,
-					},
-				}
-				log.Println("Starting HTTPs server", addr)
-				err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
-			} else {
-				// Start server without user certificates
-				log.Println("Starting HTTP server", addr)
-				err = server.ListenAndServe()
+	go func() {
+		// Start either HTTPs or HTTP web server
+		_, e1 := os.Stat(Config.ServerCrt)
+		_, e2 := os.Stat(Config.ServerKey)
+		if e1 == nil && e2 == nil {
+			//start HTTPS server which require user certificates
+			rootCA := x509.NewCertPool()
+			caCert, _ := ioutil.ReadFile(Config.RootCA)
+			rootCA.AppendCertsFromPEM(caCert)
+			server = &http.Server{
+				Addr: addr,
+				TLSConfig: &tls.Config{
+					//                 ClientAuth: tls.RequestClientCert,
+					RootCAs: rootCA,
+				},
 			}
-			if err != nil {
-				log.Printf("Fail to start server %v", err)
-			}
-		}()
-	}
+			log.Printf("Starting %s HTTPs server at %v", Config.ServerType, addr)
+			err = server.ListenAndServeTLS(Config.ServerCrt, Config.ServerKey)
+		} else {
+			// Start server without user certificates
+			log.Printf("Starting %s HTTP server at %s", Config.ServerType, addr)
+			err = server.ListenAndServe()
+		}
+		if err != nil {
+			log.Printf("Fail to start server %v", err)
+		}
+	}()
 
 	// star db monitoring goroutine
 	if Config.DBMonitoringInterval > 0 {
 		go dbMonitor(dbtype, dburi, Config.DBMonitoringInterval)
+	}
+
+	migDone := make(chan bool)
+	if Config.ServerType == "DBSMigration" {
+		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
 	}
 
 	// properly stop our HTTP and Migration Servers
@@ -445,8 +461,13 @@ func Server(configFile string) {
 		dbs.DB.Close()
 	}
 
+	// close database connection pointer
+	if dbs.MigrationDB != nil {
+		dbs.MigrationDB.Close()
+	}
+
 	// send notification to stop migration server
-	if Config.MigrationServer {
+	if Config.ServerType == "DBSMigration" {
 		migDone <- true
 	}
 

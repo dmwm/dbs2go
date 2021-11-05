@@ -3,6 +3,8 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 )
@@ -81,4 +83,74 @@ func (r *MigrationRequest) Decode(reader io.Reader) error {
 		return err
 	}
 	return nil
+}
+
+// MigrationRequests fetches migration requests from migration table
+func MigrationRequests(mid int64) ([]MigrationRequest, error) {
+	var records []MigrationRequest
+
+	// query MigrationRequest table and fetch all non-completed requests
+	var args []interface{}
+	var conds []string
+	stm := getSQL("migration_requests")
+	if mid > 0 {
+		cond := fmt.Sprintf(" MR.MIGRATION_REQUEST_ID = %s", placeholder("migration_request_id"))
+		conds = append(conds, cond)
+		args = append(args, mid)
+		stm = WhereClause(stm, conds)
+	}
+
+	if MigrationDB == nil {
+		return records, errors.New("MigrationDB access is closed")
+	}
+
+	// execute sql statement
+	tx, err := MigrationDB.Begin()
+	if err != nil {
+		msg := fmt.Sprintf("unable to get DB transaction %v", err)
+		return records, errors.New(msg)
+	}
+	defer tx.Rollback()
+	rows, err := tx.Query(stm, args...)
+	if err != nil {
+		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
+		return records, errors.New(msg)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var mid, migRetryCount, migCreationDate, migLastModificationDate, migStatus int64
+		var migURL, migInput, migCreateBy, migLastModifiedBy string
+		err := rows.Scan(
+			&mid,
+			&migURL,
+			&migInput,
+			&migStatus,
+			&migCreateBy,
+			&migCreationDate,
+			&migLastModifiedBy,
+			&migLastModificationDate,
+			&migRetryCount,
+		)
+		if err != nil {
+			msg := fmt.Sprintf("unable to scan DB results %s", err)
+			return records, errors.New(msg)
+		}
+		rec := MigrationRequest{
+			MIGRATION_REQUEST_ID:   mid,
+			MIGRATION_URL:          migURL,
+			MIGRATION_INPUT:        migInput,
+			MIGRATION_STATUS:       migStatus,
+			CREATE_BY:              migCreateBy,
+			CREATION_DATE:          migCreationDate,
+			LAST_MODIFIED_BY:       migLastModifiedBy,
+			LAST_MODIFICATION_DATE: migLastModificationDate,
+			RETRY_COUNT:            migRetryCount,
+		}
+		records = append(records, rec)
+	}
+	if err = rows.Err(); err != nil {
+		msg := fmt.Sprintf("rows error %v", err)
+		return records, errors.New(msg)
+	}
+	return records, nil
 }

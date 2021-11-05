@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"database/sql"
 	"log"
 	"time"
 
@@ -12,6 +13,9 @@ var MigrationProcessTimeout int
 
 // MigrationServerInterval defines migration process timeout
 var MigrationServerInterval int
+
+// MigrationDB points to migration DB
+var MigrationDB *sql.DB
 
 // MigrationServer represent migration server.
 // it accepts migration process timeout used by ProcessMigration API and
@@ -29,10 +33,9 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 		default:
 			time.Sleep(time.Duration(interval) * time.Second)
 			// look-up all available migration requests
-			// via HTTP call to DBSMigrate server
-			records, err := getMigrationRecords(MigrateURL, -1)
+			records, err := MigrationRequests(-1)
 			if err != nil {
-				log.Printf("fail to fetch migration records from %s, error", MigrateURL, err)
+				log.Printf("fail to fetch migration records from %s, error %v", MigrateURL, err)
 				continue
 			}
 			if utils.VERBOSE > 0 {
