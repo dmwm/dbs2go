@@ -151,7 +151,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 		5. add 'order' to parent and then this block (ascending)
 		6. return the ordered list
 	*/
-	var out map[int][]string
+	out := make(map[int][]string)
 
 	// check if block exists at destination (this server)
 	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
