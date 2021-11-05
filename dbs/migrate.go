@@ -164,17 +164,17 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 		return out, nil
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("found %d destination blocks at %s", len(dstblocks), localhost)
+		log.Printf("found %d destination blocks at %s", len(dstblocks), localhost)
 	}
 
 	// check if block exists at a source location
 	srcblocks, err := GetBlocks(rurl, block)
 	if err != nil {
-		log.Println("unable to fetch blocks from %s, error %v", rurl, err)
+		log.Printf("unable to fetch blocks from %s, error %v", rurl, err)
 		return out, err
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("found %d source blocks at %s", len(srcblocks), rurl)
+		log.Printf("found %d source blocks at %s", len(srcblocks), rurl)
 	}
 	if len(srcblocks) == 0 {
 		msg := fmt.Sprintf("requested block %s is not found at %s", block, rurl)
@@ -225,6 +225,11 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 			blks, err := GetBlocks(localhost, dataset)
 			ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
 		}()
+	}
+	if len(umap) == 0 {
+		// no parent blocks
+		log.Printf("no parent blocks found for %s in %s", block, rurl)
+		return out, nil
 	}
 	// collect results from goroutines
 	for {
@@ -370,6 +375,11 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 			}
 			ch <- DatasetResponse{Dataset: dataset, OrderedMap: omap, Error: err}
 		}()
+	}
+	if len(umap) == 0 {
+		// no parent datasets
+		log.Printf("no parent datasets found for %s in %s", dataset, rurl)
+		return out, nil
 	}
 	// collect results from goroutines
 	for {
