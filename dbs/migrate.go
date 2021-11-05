@@ -420,14 +420,28 @@ func (a *API) SubmitMigration() error {
 		return writeReport("fail to decode data", err, a.Writer)
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("strart migration request %+v", rec)
+		log.Printf("start migration request %+v", rec)
 	}
-
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
+	mid := rec.MIGRATION_REQUEST_ID
+	mstr := fmt.Sprintf("Migration request %d", mid)
 	if err := alreadyQueued(input, a.Writer); err != nil {
-		return err
+		msg := fmt.Sprintf("%s already queued error %v", mstr, err)
+		return writeReport(msg, err, a.Writer)
 	}
+	go startMigrationRequest(rec)
+
+	msg := fmt.Sprintf("start MigrationRequest %+v", rec)
+	return writeReport(msg, nil, a.Writer)
+}
+
+func startMigrationRequest(rec MigrationRequest) error {
+	var err error
+	input := rec.MIGRATION_INPUT
+	mid := rec.MIGRATION_REQUEST_ID
+	mstr := fmt.Sprintf("Migration request %d", mid)
+
 	var migBlocks map[int][]string
 	rurl := rec.MIGRATION_URL
 	if strings.Contains(input, "#") {
@@ -436,21 +450,22 @@ func (a *API) SubmitMigration() error {
 		migBlocks, err = prepareDatasetMigrationList(rurl, input)
 	}
 	if err != nil {
-		log.Println("unable to prepare dataset/blocks migration list", err)
+		log.Println("%s unable to prepare dataset/blocks migration list error %v", mstr, err)
 		return err
 	}
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
-		msg := "Migration request is already fulfilled"
-		report := MigrationReport{Report: msg, Details: string(data)}
-		data, err = json.Marshal(report)
-		if err == nil {
-			a.Writer.Write(data)
-		}
+		//         msg := "Migration request is already fulfilled"
+		//         report := MigrationReport{Report: msg, Details: string(data)}
+		//         data, err = json.Marshal(report)
+		//         if err == nil {
+		//             a.Writer.Write(data)
+		//         }
+		log.Printf("%s is already fulfilled", mstr)
 		return nil
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("found %d blocks for migration request %+v", len(migBlocks), rec)
+		log.Printf("%s found %d blocks", mstr, len(migBlocks))
 	}
 
 	var orderedList []int
@@ -460,23 +475,25 @@ func (a *API) SubmitMigration() error {
 	sort.Sort(sort.Reverse(sort.IntSlice(orderedList)))
 
 	if utils.VERBOSE > 0 {
-		log.Println("performed ordered list for %d blocks", len(orderedList))
+		log.Printf("%s performed ordered list for %d blocks", mstr, len(orderedList))
 	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return writeReport("unable to get DB transaction", err, a.Writer)
+		//         return writeReport("unable to get DB transaction", err, a.Writer)
+		return err
 	}
 	defer tx.Rollback()
 
 	// insert MigrationRequest object
 	err = rec.Insert(tx)
 	if err != nil {
-		return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
+		//         return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
+		return err
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("Insert MigrationRequest %+v", rec)
+		log.Printf("%s insert MigrationRequest record %+v", mstr, rec)
 	}
 
 	// loop over orderedList which is [[blocks], [blocks]]
@@ -495,10 +512,11 @@ func (a *API) SubmitMigration() error {
 				LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
 			err = mrec.Insert(tx)
 			if utils.VERBOSE > 0 {
-				log.Printf("Insert MigrationBlocks %+v", mrec)
+				log.Printf("%s insert MigrationBlocks record %+v", mstr, mrec)
 			}
 			if err != nil {
-				return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
+				//                 return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
+				return err
 			}
 			totalQueued += 1
 		}
@@ -507,20 +525,24 @@ func (a *API) SubmitMigration() error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		return writeReport("fail to commit transaction", err, a.Writer)
+		log.Printf("%s unatble to commit transaction error %v", mstr, err)
+		//         return writeReport("fail to commit transaction", err, a.Writer)
+		return err
 	}
 
-	report := MigrationReport{Report: fmt.Sprintf("REQUEST QUEUED with total %d blocks to be migrated", totalQueued), Details: string(data)}
-	data, err = json.Marshal(report)
-	if err == nil {
-		a.Writer.Write(data)
-	}
+	//     report := MigrationReport{Report: fmt.Sprintf("REQUEST QUEUED with total %d blocks to be migrated", totalQueued), Details: string(data)}
+	//     data, err = json.Marshal(report)
+	//     if err == nil {
+	//         a.Writer.Write(data)
+	//     }
 
 	// once migration report is ready we'll process it asynchronously
 	//     a.Params["migration_request_url"] = rurl
 	//     go a.ProcessMigration(MigrationProcessTimeout, false)
 
-	return err
+	//     return err
+	log.Printf("%s finished", mstr)
+	return nil
 }
 
 // ProcessMigration will process given migration request
