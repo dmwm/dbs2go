@@ -160,8 +160,8 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 		return out, err
 	}
 	if len(dstblocks) > 0 {
-		msg := fmt.Sprintf("requested blocks %v is already at destination", dstblocks)
-		return out, errors.New(msg)
+		log.Printf("requested blocks %v is already at destination", dstblocks)
+		return out, nil
 	}
 
 	// check if block exists at a source location
@@ -171,6 +171,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	}
 	if len(srcblocks) == 0 {
 		msg := fmt.Sprintf("requested block %s is not found at %s", block, rurl)
+		log.Println(msg)
 		return out, errors.New(msg)
 	}
 	// we need to migrate existing block
@@ -180,6 +181,7 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	out[orderCounter] = blocks
 	parentBlocks, err := GetParentBlocks(rurl, block, orderCounter)
 	if err != nil {
+		log.Printf("unable to find parent blocks for %s, error %v", block, err)
 		return out, err
 	}
 	for idx, blks := range parentBlocks {
@@ -274,8 +276,8 @@ func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error)
 		return out, err
 	}
 	if len(out) == 0 {
-		msg := fmt.Sprintf("requested dataset %s is already at destination", dataset)
-		return out, errors.New(msg)
+		log.Printf("requested dataset %s is already at destination", dataset)
+		return out, nil
 	}
 	pdict, err := GetParentDatasets(rurl, dataset, orderCounter+1)
 	if err != nil {
@@ -432,6 +434,16 @@ func (a *API) SubmitMigration() error {
 	}
 	if err != nil {
 		return err
+	}
+	// if no migration blocks found to process return immediately
+	if len(migBlocks) == 0 {
+		msg := "Migration request is already fulfilled"
+		report := MigrationReport{Report: msg, Details: string(data)}
+		data, err = json.Marshal(report)
+		if err == nil {
+			a.Writer.Write(data)
+		}
+		return nil
 	}
 
 	var orderedList []int
