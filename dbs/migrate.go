@@ -419,6 +419,9 @@ func (a *API) SubmitMigration() error {
 	if err != nil {
 		return writeReport("fail to decode data", err, a.Writer)
 	}
+	if utils.VERBOSE > 0 {
+		log.Println("strart migration request %+v", rec)
+	}
 
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
@@ -433,6 +436,7 @@ func (a *API) SubmitMigration() error {
 		migBlocks, err = prepareDatasetMigrationList(rurl, input)
 	}
 	if err != nil {
+		log.Println("unable to prepare dataset/blocks migration list", err)
 		return err
 	}
 	// if no migration blocks found to process return immediately
@@ -445,12 +449,19 @@ func (a *API) SubmitMigration() error {
 		}
 		return nil
 	}
+	if utils.VERBOSE > 0 {
+		log.Println("found %d blocks for migration request %+v", len(migBlocks), rec)
+	}
 
 	var orderedList []int
 	for k := range migBlocks {
 		orderedList = append(orderedList, k)
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(orderedList)))
+
+	if utils.VERBOSE > 0 {
+		log.Println("performed ordered list for %d blocks", len(orderedList))
+	}
 
 	// start transaction
 	tx, err := DB.Begin()
