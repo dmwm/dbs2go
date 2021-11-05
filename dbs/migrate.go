@@ -163,11 +163,18 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 		log.Printf("requested blocks %v is already at destination", dstblocks)
 		return out, nil
 	}
+	if utils.VERBOSE > 0 {
+		log.Println("found %d destination blocks at %s", len(dstblocks), localhost)
+	}
 
 	// check if block exists at a source location
 	srcblocks, err := GetBlocks(rurl, block)
 	if err != nil {
+		log.Println("unable to fetch blocks from %s, error %v", rurl, err)
 		return out, err
+	}
+	if utils.VERBOSE > 0 {
+		log.Println("found %d source blocks at %s", len(srcblocks), rurl)
 	}
 	if len(srcblocks) == 0 {
 		msg := fmt.Sprintf("requested block %s is not found at %s", block, rurl)
@@ -281,7 +288,11 @@ func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error)
 	}
 	pdict, err := GetParentDatasets(rurl, dataset, orderCounter+1)
 	if err != nil {
+		log.Println("unable to fetch parent daatasets from %s, error %v", rurl, err)
 		return out, err
+	}
+	if utils.VERBOSE > 0 {
+		log.Println("found %d parent dataset from %s", len(pdict), rurl)
 	}
 	if len(pdict) != 0 {
 		// update out
@@ -343,9 +354,13 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 	for _, dataset := range parentDatasets {
 		umap[dataset] = struct{}{}
 		go func() {
+			if utils.VERBOSE > 0 {
+				log.Printf("processDatasetBlocks for %s from %s", dataset, rurl)
+			}
 			omap, err := processDatasetBlocks(rurl, dataset, orderCounter)
 			if err != nil {
 				log.Println("unable to process dataset blocks", err)
+				ch <- DatasetResponse{Dataset: dataset, OrderedMap: omap, Error: err}
 				return
 			}
 			// get ordered map of parents
@@ -441,6 +456,9 @@ func startMigrationRequest(rec MigrationRequest) error {
 	input := rec.MIGRATION_INPUT
 	mid := rec.MIGRATION_REQUEST_ID
 	mstr := fmt.Sprintf("Migration request %d", mid)
+	if utils.VERBOSE > 0 {
+		log.Println(mstr)
+	}
 
 	var migBlocks map[int][]string
 	rurl := rec.MIGRATION_URL
