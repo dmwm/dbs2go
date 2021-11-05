@@ -96,6 +96,7 @@ func GetBlocks(rurl, val string) ([]string, error) {
 	}
 	data, err := getData(rurl)
 	if err != nil {
+		log.Printf("unable to get data for %s, error %v", rurl, err)
 		return out, err
 	}
 	var rec []Blocks
@@ -153,8 +154,8 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	var out map[int][]string
 
 	// check if block exists at destination (this server)
-	localhost := utils.BASE
-	dstblocks, err := GetBlocks(localhost, block)
+	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
+	dstblocks, err := GetBlocks(deploymentHost, block)
 	if err != nil {
 		return out, err
 	}
@@ -205,14 +206,14 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 	}
 	// get list of parent blocks at destination (this server)
 	parentBlocksInDst := make(map[string]bool)
-	localhost := utils.BASE
+	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
 	ch := make(chan BlockResponse)
 	umap := make(map[string]struct{})
 	for _, blk := range srcblocks {
 		dataset := strings.Split(blk, "#")[0]
 		umap[dataset] = struct{}{}
 		go func() {
-			blks, err := GetBlocks(localhost, dataset)
+			blks, err := GetBlocks(deploymentHost, dataset)
 			ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
 		}()
 	}
@@ -221,7 +222,7 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 		select {
 		case r := <-ch:
 			if r.Error != nil {
-				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", localhost, r.Dataset, r.Error)
+				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", deploymentHost, r.Dataset, r.Error)
 			} else {
 				for _, blk := range r.Blocks {
 					parentBlocksInDst[blk] = true
@@ -299,8 +300,8 @@ func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]str
 		msg := fmt.Sprintf("No blocks in the required dataset %s found at source %s", dataset, rurl)
 		return out, errors.New(msg)
 	}
-	localhost := utils.BASE
-	dstblks, err := GetBlocks(localhost, dataset)
+	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
+	dstblks, err := GetBlocks(deploymentHost, dataset)
 	if err != nil {
 		return out, err
 	}

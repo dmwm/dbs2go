@@ -95,6 +95,7 @@ func getData(rurl string) ([]byte, error) {
 	client := HttpClient(Ckey, Cert, Timeout)
 	req, err := http.NewRequest("GET", rurl, nil)
 	if err != nil {
+		log.Printf("unable to get data for %s, error %v, http request %+v", rurl, err, req)
 		return out, err
 	}
 	req.Header.Add("Content-Type", "application/json")

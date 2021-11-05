@@ -28,6 +28,9 @@ var ORACLE bool
 // BASE represents /base path of dbs2go end-point
 var BASE string
 
+// DeploymentHost represents deployment host name
+var DeploymentHost string
+
 // GzipReader struct to handle GZip'ed content of HTTP requests
 type GzipReader struct {
 	*gzip.Reader
