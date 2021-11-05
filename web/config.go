@@ -7,26 +7,24 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 )
 
 // Configuration stores dbs configuration parameters
 type Configuration struct {
-	DeploymentHost string `json:"deployment_host"` // deployment hostname
-	Port           int    `json:"port"`            // dbs port number
-	StaticDir      string `json:"staticdir"`       // location of static directory
-	Base           string `json:"base"`            // dbs base path
-	Verbose        int    `json:"verbose"`         // verbosity level
-	LogFile        string `json:"log_file"`        // server log file
-	UTC            bool   `json:"utc"`             // report logger time in UTC
-	MonitType      string `json:"monit_type"`      // monit record type
-	MonitProducer  string `json:"monit_producer"`  // monit record producer
-	Hmac           string `json:"hmac"`            // cmsweb hmac file location
-	LimiterPeriod  string `json:"rate"`            // limiter rate value
-	MetricsPrefix  string `json:"metrics_prefix"`  // metrics prefix used for prometheus
-	ServerType     string `json:"server_type"`     // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
+	Port          int    `json:"port"`           // dbs port number
+	StaticDir     string `json:"staticdir"`      // location of static directory
+	Base          string `json:"base"`           // dbs base path
+	Verbose       int    `json:"verbose"`        // verbosity level
+	LogFile       string `json:"log_file"`       // server log file
+	UTC           bool   `json:"utc"`            // report logger time in UTC
+	MonitType     string `json:"monit_type"`     // monit record type
+	MonitProducer string `json:"monit_producer"` // monit record producer
+	Hmac          string `json:"hmac"`           // cmsweb hmac file location
+	LimiterPeriod string `json:"rate"`           // limiter rate value
+	MetricsPrefix string `json:"metrics_prefix"` // metrics prefix used for prometheus
+	ServerType    string `json:"server_type"`    // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
 
 	// Migration server settings
 	MigrationDBFile         string `json:"migration_dbfile"`          // dbfile with secrets
@@ -99,9 +97,6 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MetricsPrefix == "" {
 		Config.MetricsPrefix = "dbs2go"
-	}
-	if Config.DeploymentHost == "" {
-		Config.DeploymentHost = fmt.Sprintf("http://localhost:%d", Config.Port)
 	}
 	return nil
 }

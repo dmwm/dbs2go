@@ -28,8 +28,8 @@ var ORACLE bool
 // BASE represents /base path of dbs2go end-point
 var BASE string
 
-// DeploymentHost represents deployment host name
-var DeploymentHost string
+// Localhost represents localhost name (with port) which can be used for local HTTP requests
+var Localhost string
 
 // GzipReader struct to handle GZip'ed content of HTTP requests
 type GzipReader struct {

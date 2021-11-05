@@ -154,8 +154,8 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	out := make(map[int][]string)
 
 	// check if block exists at destination (this server)
-	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
-	dstblocks, err := GetBlocks(deploymentHost, block)
+	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
+	dstblocks, err := GetBlocks(localhost, block)
 	if err != nil {
 		return out, err
 	}
@@ -208,14 +208,14 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 	}
 	// get list of parent blocks at destination (this server)
 	parentBlocksInDst := make(map[string]bool)
-	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
+	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
 	ch := make(chan BlockResponse)
 	umap := make(map[string]struct{})
 	for _, blk := range srcblocks {
 		dataset := strings.Split(blk, "#")[0]
 		umap[dataset] = struct{}{}
 		go func() {
-			blks, err := GetBlocks(deploymentHost, dataset)
+			blks, err := GetBlocks(localhost, dataset)
 			ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
 		}()
 	}
@@ -224,7 +224,7 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 		select {
 		case r := <-ch:
 			if r.Error != nil {
-				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", deploymentHost, r.Dataset, r.Error)
+				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", localhost, r.Dataset, r.Error)
 			} else {
 				for _, blk := range r.Blocks {
 					parentBlocksInDst[blk] = true
@@ -302,8 +302,8 @@ func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]str
 		msg := fmt.Sprintf("No blocks in the required dataset %s found at source %s", dataset, rurl)
 		return out, errors.New(msg)
 	}
-	deploymentHost := fmt.Sprintf("%s/%s", utils.DeploymentHost, utils.BASE)
-	dstblks, err := GetBlocks(deploymentHost, dataset)
+	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
+	dstblks, err := GetBlocks(localhost, dataset)
 	if err != nil {
 		return out, err
 	}
@@ -464,6 +464,9 @@ func (a *API) SubmitMigration() error {
 	if err != nil {
 		return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
 	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert MigrationRequest %+v", rec)
+	}
 
 	// loop over orderedList which is [[blocks], [blocks]]
 	// and insert every chunk of blocks as MigrationBlocks objects
@@ -480,6 +483,9 @@ func (a *API) SubmitMigration() error {
 				LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
 				LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
 			err = mrec.Insert(tx)
+			if utils.VERBOSE > 0 {
+				log.Printf("Insert MigrationBlocks %+v", mrec)
+			}
 			if err != nil {
 				return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
 			}
@@ -636,6 +642,9 @@ func (a *API) processMigration(ch chan<- bool) {
 		Separator: a.Separator,
 	}
 	err = api.InsertBulkBlocks()
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert bulkblocks %+v", api)
+	}
 	if err != nil {
 		log.Println("insert block dump record failed with", err)
 		updateMigrationStatus(mid, FAILED)

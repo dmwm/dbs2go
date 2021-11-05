@@ -286,7 +286,7 @@ func Server(configFile string) {
 	utils.VERBOSE = Config.Verbose
 	utils.STATICDIR = Config.StaticDir
 	utils.BASE = Config.Base
-	utils.DeploymentHost = Config.DeploymentHost
+	utils.Localhost = fmt.Sprintf("http://localhost:%d", Config.Port)
 	log.SetFlags(0)
 	if Config.Verbose > 0 {
 		log.SetFlags(log.Lshortfile)
