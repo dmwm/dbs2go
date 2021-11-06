@@ -216,6 +216,9 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 		log.Println("unable to get list of blocks at remote url", rurl, err)
 		return out, err
 	}
+	if utils.VERBOSE > 0 {
+		log.Printf("GetParentBlocks %d source blocks", len(srcblocks))
+	}
 	// get list of parent blocks at destination (this server)
 	parentBlocksInDst := make(map[string]bool)
 	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
@@ -237,6 +240,7 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 		log.Printf("GetParentBlocks yield %d blocks", len(umap))
 	}
 	// collect results from goroutines
+	exit := false
 	for {
 		select {
 		case r := <-ch:
@@ -250,9 +254,12 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 			delete(umap, r.Dataset)
 		default:
 			if len(umap) == 0 {
-				break
+				exit = true
 			}
-			time.Sleep(time.Duration(1) * time.Millisecond) // wait for response
+			time.Sleep(time.Duration(100) * time.Millisecond) // wait for response
+		}
+		if exit {
+			break
 		}
 	}
 	if utils.VERBOSE > 0 {
@@ -398,6 +405,7 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 		log.Println("process %d dataset", len(umap))
 	}
 	// collect results from goroutines
+	exit := false
 	for {
 		select {
 		case r := <-ch:
@@ -409,9 +417,12 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 			delete(umap, r.Dataset)
 		default:
 			if len(umap) == 0 {
-				break
+				exit = true
 			}
-			time.Sleep(time.Duration(1) * time.Millisecond) // wait for response
+			time.Sleep(time.Duration(100) * time.Millisecond) // wait for response
+		}
+		if exit {
+			break
 		}
 	}
 	if utils.VERBOSE > 0 {
