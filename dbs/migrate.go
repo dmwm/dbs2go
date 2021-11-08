@@ -145,51 +145,15 @@ func GetParents(rurl, val string) ([]string, error) {
 
 // helper function to prepare the ordered lists of blocks based on input BLOCK
 func prepareBlockMigrationList(rurl, block string) []string {
-	out := []string{}
-
-	// check if block exists at destination (this server)
-	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
-	dstblocks, err := GetBlocks(localhost, block)
-	if err != nil {
-		log.Print("unable to get blocks for %s at %s", block, localhost)
-		return out
-	}
-	if len(dstblocks) > 0 {
-		log.Printf("requested blocks %v is already at destination", dstblocks)
-		return out
-	}
-	if utils.VERBOSE > 0 {
-		log.Printf("found %d destination blocks at %s", len(dstblocks), localhost)
-	}
-
-	// check if block exists at a source location
-	srcblocks, err := GetBlocks(rurl, block)
-	if err != nil {
-		log.Printf("unable to fetch blocks for %s from %s error %v", block, rurl, err)
-		return out
-	}
-	if utils.VERBOSE > 0 {
-		log.Printf("found %d source blocks at %s", len(srcblocks), rurl)
-	}
-	if len(srcblocks) == 0 {
-		log.Printf("requested block %s is not found at %s", block, rurl)
-		return out
-	}
-	// we need to migrate existing block
-	var blocks []string
-	blocks = append(blocks, block)
 	parentBlocks, err := GetParentBlocks(rurl, block)
 	if err != nil {
 		log.Printf("unable to find parent blocks for %s, error %v", block, err)
-		return out
-	}
-	for _, blk := range parentBlocks {
-		out = append(out, blk)
+		return parentBlocks
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("prepareBlockMigrationList yields %d blocks", len(out))
+		log.Printf("prepareBlockMigrationList yields %d blocks", len(parentBlocks))
 	}
-	return out
+	return parentBlocks
 }
 
 // BlockResponse represents block response structure used in GetParentBlocks
@@ -438,7 +402,7 @@ func writeReport(ids []int64, msg string, status int, err error, w http.Response
 	}
 	var out []MigrationReport
 	out = append(out, report)
-	if data, e := json.Marshal(report); e == nil {
+	if data, e := json.Marshal(out); e == nil {
 		w.Write(data)
 	}
 }
@@ -490,9 +454,9 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 	var out []int64
 	input := rec.MIGRATION_INPUT
 	mid := rec.MIGRATION_REQUEST_ID
-	mstr := fmt.Sprintf("Migration request %d", mid)
+	mstr := fmt.Sprintf("Migration request %+v", mid)
 	if utils.VERBOSE > 0 {
-		log.Println(mstr)
+		log.Printf("%s %+v", mstr, rec)
 	}
 
 	var dstParentBlocks, srcParentBlocks []string
@@ -522,6 +486,8 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
+		log.Printf("Migration blocks from destination %s %+v", rurl, dstParentBlocks)
+		log.Printf("Migration blocks from source %s %+v", localhost, srcParentBlocks)
 		log.Printf("%s is already fulfilled", mstr)
 		return []int64{}, nil
 	}
@@ -543,6 +509,9 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 	log.Println("migrationt input", input)
 	for _, blk := range migBlocks {
 		log.Println("migration block", blk)
+	}
+	if !utils.InList(input, migBlocks) {
+		migBlocks = append(migBlocks, input)
 	}
 
 	// loop over migBlocks
