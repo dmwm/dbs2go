@@ -1,0 +1,4 @@
+{
+    "migration_url":"https://cmsweb.cern.ch:8443/dbs/prod/global/DBSReader",
+    "migration_input": "/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/AODSIM#e9b596e0-25b1-4c17-a628-9d9964be123a"
+}

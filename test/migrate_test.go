@@ -1,12 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
+	"github.com/vkuznet/dbs2go/web"
 )
 
 // TestMigrateGetBlocks
@@ -94,5 +98,50 @@ func TestMigrateGetParentDatasets(t *testing.T) {
 	}
 	if datasets[0] != parentDataset {
 		t.Error("Unexpected dataset")
+	}
+}
+
+// TestMigrate
+func TestMigrate(t *testing.T) {
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+	utils.VERBOSE = 2
+
+	// setup HTTP request
+	migFile := "data/mig_request.json"
+	data, err := os.ReadFile(migFile)
+	if err != nil {
+		log.Printf("ERROR: unable to read %s error %v", migFile, err.Error())
+		t.Fatal(err.Error())
+	}
+	reader := bytes.NewReader(data)
+
+	// test existing DBS API
+	rr, err := respRecorder("POST", "/dbs2go/submit", reader, web.MigrationSubmitHandler)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// unmarshal received records
+	var records []dbs.MigrationReport
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &records)
+	if err != nil {
+		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
+	}
+	log.Println("Received data", string(data))
+	for _, rrr := range records {
+		if rrr.Status != "IN_PROGRESS" {
+			t.Errorf("invalid return status of migration request %+v", rrr)
+		}
+		if len(rrr.MigrationRequestIDs) == 0 {
+			t.Errorf("invalid number of migration requests %+v", rrr)
+		}
+		for idx, id := range rrr.MigrationRequestIDs {
+			if id != int64(idx+1) {
+				t.Errorf("intavlid migration request id %+v", rrr)
+			}
+		}
 	}
 }
