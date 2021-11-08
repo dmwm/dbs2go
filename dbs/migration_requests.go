@@ -7,18 +7,20 @@ import (
 	"fmt"
 	"io"
 	"log"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // MigrationRequest represent MigrationRequest table
 type MigrationRequest struct {
-	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id"`
-	MIGRATION_URL          string `json:"migration_url"`
-	MIGRATION_INPUT        string `json:"migration_input"`
-	MIGRATION_STATUS       int64  `json:"migration_status"`
-	CREATE_BY              string `json:"create_by"`
-	CREATION_DATE          int64  `json:"creation_date"`
-	LAST_MODIFIED_BY       string `json:"last_modified_by"`
-	LAST_MODIFICATION_DATE int64  `json:"last_modification_date"`
+	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id" validate:"required,number,gt=0"`
+	MIGRATION_URL          string `json:"migration_url" validate:"required"`
+	MIGRATION_INPUT        string `json:"migration_input"  validate:"required"`
+	MIGRATION_STATUS       int64  `json:"migration_status" validate:"gte=0,lte=10"`
+	CREATE_BY              string `json:"create_by" validate:"required"`
+	CREATION_DATE          int64  `json:"creation_date" validate:"required,number,gt=0"`
+	LAST_MODIFIED_BY       string `json:"last_modified_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64  `json:"last_modification_date" validate:"required,number,gt=0`
 	RETRY_COUNT            int64  `json:"retry_count"`
 }
 
@@ -46,17 +48,30 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 		return err
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_migration_request")
-	_, err = tx.Exec(stm, r.MIGRATION_REQUEST_ID, r.MIGRATION_URL,
-		r.MIGRATION_INPUT, r.MIGRATION_STATUS,
-		r.CREATE_BY, r.CREATION_DATE,
-		r.LAST_MODIFIED_BY, r.LAST_MODIFICATION_DATE, r.RETRY_COUNT)
+	stm := getSQL("insert_migration_requests")
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert MigrationRequest\n%s\n%+v", stm, r)
+	}
+	_, err = tx.Exec(stm,
+		r.MIGRATION_REQUEST_ID,
+		r.MIGRATION_URL,
+		r.MIGRATION_INPUT,
+		r.MIGRATION_STATUS,
+		r.CREATION_DATE,
+		r.CREATE_BY,
+		r.LAST_MODIFICATION_DATE,
+		r.LAST_MODIFIED_BY,
+		r.RETRY_COUNT)
+	if err != nil {
+		log.Println("unabel to insert MigratinRequest", err)
+	}
 	return err
 }
 
 // Validate implementation of MigrationRequest
 func (r *MigrationRequest) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
+		log.Println("validation error", err)
 		return DecodeValidatorError(r, err)
 	}
 	return nil
@@ -111,6 +126,10 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 		return records, errors.New(msg)
 	}
 	defer tx.Rollback()
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 0 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)

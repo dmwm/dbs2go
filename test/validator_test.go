@@ -599,3 +599,51 @@ func TestValidatorDatasetParents(t *testing.T) {
 	}
 	validationSuccess(t, rec)
 }
+
+// TestValidatorMigrationRequest
+func TestValidatorMigrationRequest(t *testing.T) {
+	if dbs.RecordValidator == nil {
+		dbs.RecordValidator = validator.New()
+	}
+	var rec dbs.DBRecord
+	log.Println("validate incorrect record")
+	rec = &dbs.MigrationRequest{}
+	validationFailure(t, rec)
+	log.Println("validate incorrect record")
+	rec = &dbs.MigrationRequest{
+		MIGRATION_REQUEST_ID:   1,
+		MIGRATION_URL:          "url",
+		MIGRATION_INPUT:        "input",
+		MIGRATION_STATUS:       0,
+		CREATE_BY:              "me",
+		CREATION_DATE:          123456789,
+		LAST_MODIFIED_BY:       "me",
+		LAST_MODIFICATION_DATE: 123456789,
+		RETRY_COUNT:            0,
+	}
+	validationSuccess(t, rec)
+}
+
+// TestValidatorMigrationBlocks
+func TestValidatorMigrationBlocs(t *testing.T) {
+	if dbs.RecordValidator == nil {
+		dbs.RecordValidator = validator.New()
+	}
+	var rec dbs.DBRecord
+	log.Println("validate incorrect record")
+	rec = &dbs.MigrationBlocks{}
+	validationFailure(t, rec)
+	log.Println("validate incorrect record")
+	rec = &dbs.MigrationBlocks{
+		MIGRATION_BLOCK_ID:     1,
+		MIGRATION_REQUEST_ID:   1,
+		MIGRATION_BLOCK_NAME:   "block",
+		MIGRATION_ORDER:        1,
+		MIGRATION_STATUS:       1,
+		CREATE_BY:              "me",
+		CREATION_DATE:          123456789,
+		LAST_MODIFIED_BY:       "me",
+		LAST_MODIFICATION_DATE: 123456789,
+	}
+	validationSuccess(t, rec)
+}

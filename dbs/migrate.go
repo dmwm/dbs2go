@@ -81,20 +81,23 @@ var MigrateURL string
 
 // MigrationReport represents migration report returned by the migration API
 type MigrationReport struct {
-	Report  string `json:"report"`
-	Status  int    `json:"status"`
-	Details string `json:"details"`
+	MigrationRequestIDs []int64 `json:"migration_request_ids"`
+	Report              string  `json:"report"`
+	Status              string  `json:"status"`
+	Error               error   `json:"error"`
 }
 
 // GetBlocks returns list of blocks for a given url and block/dataset input
 func GetBlocks(rurl, val string) ([]string, error) {
 	var out []string
+	open := "&open_for_writing=0"
 	if strings.Contains(val, "#") {
-		rurl = fmt.Sprintf("%s/blocks?block_name=%s&open_for_writing=0", rurl, url.QueryEscape(val))
+		rurl = fmt.Sprintf("%s/blocks?block_name=%s%s", rurl, url.QueryEscape(val), open)
 	} else {
-		rurl = fmt.Sprintf("%s/blocks?dataset=%s&open_for_writing=0", rurl, val)
+		rurl = fmt.Sprintf("%s/blocks?dataset=%s%s", rurl, val, open)
 	}
 	data, err := getData(rurl)
+	fmt.Println("GetBlocks", rurl, string(data))
 	if err != nil {
 		log.Printf("unable to get data for %s, error %v", rurl, err)
 		return out, err
@@ -114,7 +117,7 @@ func GetBlocks(rurl, val string) ([]string, error) {
 func GetParents(rurl, val string) ([]string, error) {
 	var out []string
 	if strings.Contains(val, "#") {
-		rurl = fmt.Sprintf("%s/blockparents?block_name=%s", rurl, val)
+		rurl = fmt.Sprintf("%s/blockparents?block_name=%s", rurl, url.QueryEscape(val))
 	} else {
 		rurl = fmt.Sprintf("%s/datasetparents?dataset=%s", rurl, val)
 	}
@@ -125,6 +128,7 @@ func GetParents(rurl, val string) ([]string, error) {
 	var rec []map[string]interface{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
+		log.Println("unable to unmarshal data", string(data), err)
 		return out, err
 	}
 	for _, v := range rec {
@@ -140,28 +144,19 @@ func GetParents(rurl, val string) ([]string, error) {
 }
 
 // helper function to prepare the ordered lists of blocks based on input BLOCK
-// return map of blocks with their parents
-func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
-	/*
-		1. see if block already exists at dst (no need to migrate),
-		   raise "ALREADY EXISTS"
-		2. see if block exists at src & make sure the block's open_for_writing=0
-		3. see if block has parents
-		4. see if parent blocks are already at dst
-		5. add 'order' to parent and then this block (ascending)
-		6. return the ordered list
-	*/
-	out := make(map[int][]string)
+func prepareBlockMigrationList(rurl, block string) []string {
+	out := []string{}
 
 	// check if block exists at destination (this server)
 	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
 	dstblocks, err := GetBlocks(localhost, block)
 	if err != nil {
-		return out, err
+		log.Print("unable to get blocks for %s at %s", block, localhost)
+		return out
 	}
 	if len(dstblocks) > 0 {
 		log.Printf("requested blocks %v is already at destination", dstblocks)
-		return out, nil
+		return out
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("found %d destination blocks at %s", len(dstblocks), localhost)
@@ -170,74 +165,74 @@ func prepareBlockMigrationList(rurl, block string) (map[int][]string, error) {
 	// check if block exists at a source location
 	srcblocks, err := GetBlocks(rurl, block)
 	if err != nil {
-		log.Printf("unable to fetch blocks from %s, error %v", rurl, err)
-		return out, err
+		log.Printf("unable to fetch blocks for %s from %s error %v", block, rurl, err)
+		return out
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("found %d source blocks at %s", len(srcblocks), rurl)
 	}
 	if len(srcblocks) == 0 {
-		msg := fmt.Sprintf("requested block %s is not found at %s", block, rurl)
-		log.Println(msg)
-		return out, errors.New(msg)
+		log.Printf("requested block %s is not found at %s", block, rurl)
+		return out
 	}
 	// we need to migrate existing block
 	var blocks []string
 	blocks = append(blocks, block)
-	orderCounter := 0
-	out[orderCounter] = blocks
-	parentBlocks, err := GetParentBlocks(rurl, block, orderCounter)
+	parentBlocks, err := GetParentBlocks(rurl, block)
 	if err != nil {
 		log.Printf("unable to find parent blocks for %s, error %v", block, err)
-		return out, err
+		return out
 	}
-	for idx, blks := range parentBlocks {
-		out[idx] = blks
+	for _, blk := range parentBlocks {
+		out = append(out, blk)
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("prepareBlockMigrationList yields %d blocks", len(out))
 	}
-	return out, nil
+	return out
 }
 
 // BlockResponse represents block response structure used in GetParentBlocks
 type BlockResponse struct {
+	Index   int
 	Dataset string
+	Block   string
 	Blocks  []string
 	Error   error
 }
 
-// GetParentBlocks returns parent blocks ordered list for given url and block name
-func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, error) {
-	out := make(map[int][]string)
+// GetParentBlocks returns parent blocks for given url and block name
+func GetParentBlocks(rurl, block string) ([]string, error) {
+	out := []string{}
+	log.Println("call GetParentBlocks with", block)
+	out = append(out, block)
 	// get list of blocks from the source (remote url)
-	srcblocks, err := GetBlocks(rurl, block)
+	//     srcblocks, err := GetBlocks(rurl, "blockparents", block)
+	srcblocks, err := GetParents(rurl, block)
 	if err != nil {
 		log.Println("unable to get list of blocks at remote url", rurl, err)
 		return out, err
 	}
-	if utils.VERBOSE > 0 {
-		log.Printf("GetParentBlocks %d source blocks", len(srcblocks))
-	}
-	// get list of parent blocks at destination (this server)
-	parentBlocksInDst := make(map[string]bool)
-	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
-	ch := make(chan BlockResponse)
-	umap := make(map[string]struct{})
+	// add block parents to final list
 	for _, blk := range srcblocks {
-		dataset := strings.Split(blk, "#")[0]
-		umap[dataset] = struct{}{}
-		go func() {
-			blks, err := GetBlocks(localhost, dataset)
-			ch <- BlockResponse{Dataset: dataset, Blocks: blks, Error: err}
-		}()
+		out = append(out, blk)
+	}
+	// get list of parent blocks of previous parents
+	parentBlocks := []string{}
+	ch := make(chan BlockResponse)
+	umap := make(map[int]struct{})
+	for idx, blk := range srcblocks {
+		umap[idx] = struct{}{}
+		go func(i int, b string) {
+			//             blks, err := GetBlocks(rurl, "blockparents", b)
+			blks, err := GetParents(rurl, b)
+			ch <- BlockResponse{Index: i, Block: b, Blocks: blks, Error: err}
+		}(idx, blk)
 	}
 	if len(umap) == 0 {
 		// no parent blocks
 		log.Printf("no parent blocks found for %s in %s", block, rurl)
 		return out, nil
-	} else {
-		log.Printf("GetParentBlocks yield %d blocks", len(umap))
 	}
 	// collect results from goroutines
 	exit := false
@@ -245,13 +240,13 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 		select {
 		case r := <-ch:
 			if r.Error != nil {
-				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", localhost, r.Dataset, r.Error)
+				log.Printf("unable to fetch blocks for url=%s block=%s error=%v", rurl, r.Block, r.Error)
 			} else {
 				for _, blk := range r.Blocks {
-					parentBlocksInDst[blk] = true
+					parentBlocks = append(parentBlocks, blk)
 				}
 			}
-			delete(umap, r.Dataset)
+			delete(umap, r.Index)
 		default:
 			if len(umap) == 0 {
 				exit = true
@@ -262,75 +257,58 @@ func GetParentBlocks(rurl, block string, orderCounter int) (map[int][]string, er
 			break
 		}
 	}
-	if utils.VERBOSE > 0 {
-		log.Printf("GetParentBlocks processed %d parent blocks", len(parentBlocksInDst))
-	}
 
-	// loop over source blocks
-	for _, blk := range srcblocks {
-		if _, ok := parentBlocksInDst[blk]; !ok {
-			// block is not at destination
-			if list, ok := out[orderCounter]; ok {
-				list = append(list, blk)
-				out[orderCounter] = list
-			} else {
-				out[orderCounter] = []string{blk}
-			}
-			omap, err := GetParentBlocks(rurl, blk, orderCounter+1)
-			if err != nil {
-				log.Printf("fail to get url=%s block=%s error=%v", rurl, blk, err)
-				continue
-			}
-			out = utils.UpdateOrderedDict(out, omap)
+	// loop over parent blocks and get its parents
+	for _, blk := range parentBlocks {
+		out = append(out, blk)
+		results, err := GetParentBlocks(rurl, blk)
+		if err != nil {
+			log.Printf("fail to get url=%s block=%s error=%v", rurl, blk, err)
+			continue
+		}
+		for _, b := range results {
+			out = append(out, b)
 		}
 	}
+
 	if utils.VERBOSE > 0 {
 		log.Printf("GetParentBlocks output yield %d blocks", len(out))
 	}
 	return out, nil
 }
 
-// helper function to prepare the ordered lists of blocks based on input DATASET
-// return map of blocks with their parents
-func prepareDatasetMigrationList(rurl, dataset string) (map[int][]string, error) {
-	/*
-		1. Get list of blocks from source
-		   - for a given dataset get list of blocks from local DB and remote url
-		2. Check and see if these blocks are already at DST
-		3. Check if dataset has parents
-		4. Check if parent blocks are already at DST
-	*/
-	orderCounter := 0
-	out, err := processDatasetBlocks(rurl, dataset, orderCounter)
+// helper function to return lists of blocks based on input DATASET
+func prepareDatasetMigrationList(rurl, dataset string) []string {
+	out, err := processDatasetBlocks(rurl, dataset)
 	if err != nil {
-		return out, err
+		log.Printf("unable to process dataset blocks for %s from %s, error %v", dataset, rurl, err)
+		return out
 	}
 	if len(out) == 0 {
 		log.Printf("requested dataset %s is already at destination", dataset)
-		return out, nil
+		return out
 	}
-	pdict, err := GetParentDatasets(rurl, dataset, orderCounter+1)
+	pblocks, err := GetParentDatasets(rurl, dataset)
 	if err != nil {
-		log.Println("unable to fetch parent daatasets from %s, error %v", rurl, err)
-		return out, err
+		log.Printf("unable to fetch parent daatasets from %s, error %v", rurl, err)
+		return out
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("found %d parent dataset from %s", len(pdict), rurl)
+		log.Println("found %d parent dataset from %s", len(pblocks), rurl)
 	}
-	if len(pdict) != 0 {
-		// update out
-		out = utils.UpdateOrderedDict(out, pdict)
+	for _, blk := range pblocks {
+		out = append(out, blk)
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("prepareDatasetMigrationList yields %d blocks", len(out))
 	}
-	return out, nil
+	return out
 }
 
 // helper function, that comapares blocks of a dataset at source and dst
-// and returns an ordered list of blocks not already at dst for migration
-func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]string, error) {
-	out := make(map[int][]string)
+// and returns list of blocks not already at dst for migration
+func processDatasetBlocks(rurl, dataset string) ([]string, error) {
+	out := []string{}
 	srcblks, err := GetBlocks(rurl, dataset)
 	if err != nil {
 		return out, err
@@ -344,18 +322,9 @@ func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]str
 	if err != nil {
 		return out, err
 	}
-	dstBlocksMap := make(map[string]struct{})
-	for _, blk := range dstblks {
-		dstBlocksMap[blk] = struct{}{}
-	}
-	for idx, blk := range srcblks {
-		if _, ok := dstBlocksMap[blk]; !ok {
-			if eblks, ok := out[idx]; ok {
-				eblks = append(eblks, blk)
-				out[idx] = eblks
-			} else {
-				out[idx] = []string{blk}
-			}
+	for _, blk := range srcblks {
+		if utils.InList(blk, dstblks) {
+			out = append(out, blk)
 		}
 	}
 	return out, nil
@@ -363,14 +332,14 @@ func processDatasetBlocks(rurl, dataset string, orderCounter int) (map[int][]str
 
 // DatasetResponse represents response of processDatasetBlocks API
 type DatasetResponse struct {
-	Dataset    string
-	OrderedMap map[int][]string
-	Error      error
+	Dataset string
+	Blocks  []string
+	Error   error
 }
 
-// GetParentDatasets return ordered dict of parent datasets
-func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string, error) {
-	out := make(map[int][]string)
+// GetParentDatasets returns list of parent datasets
+func GetParentDatasets(rurl, dataset string) ([]string, error) {
+	out := []string{}
 	parentDatasets, err := GetParents(rurl, dataset)
 	if err != nil {
 		return out, err
@@ -383,18 +352,20 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 			if utils.VERBOSE > 0 {
 				log.Printf("processDatasetBlocks for %s from %s", dataset, rurl)
 			}
-			omap, err := processDatasetBlocks(rurl, dataset, orderCounter)
+			blocks, err := processDatasetBlocks(rurl, dataset)
 			if err != nil {
 				log.Println("unable to process dataset blocks", err)
-				ch <- DatasetResponse{Dataset: dataset, OrderedMap: omap, Error: err}
+				ch <- DatasetResponse{Dataset: dataset, Blocks: blocks, Error: err}
 				return
 			}
 			// get ordered map of parents
-			pmap, err := GetParentDatasets(rurl, dataset, orderCounter+1)
-			if err == nil && len(pmap) > 0 {
-				omap = utils.UpdateOrderedDict(omap, pmap)
+			pblocks, err := GetParentDatasets(rurl, dataset)
+			if err != nil {
+				log.Println("unable to process parent dataset blocks", err)
+				ch <- DatasetResponse{Dataset: dataset, Blocks: blocks, Error: err}
+				return
 			}
-			ch <- DatasetResponse{Dataset: dataset, OrderedMap: omap, Error: err}
+			ch <- DatasetResponse{Dataset: dataset, Blocks: pblocks, Error: err}
 		}()
 	}
 	if len(umap) == 0 {
@@ -412,7 +383,9 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 			if r.Error != nil {
 				log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", rurl, r.Dataset, r.Error)
 			} else {
-				out = utils.UpdateOrderedDict(out, r.OrderedMap)
+				for _, blk := range r.Blocks {
+					out = append(out, blk)
+				}
 			}
 			delete(umap, r.Dataset)
 		default:
@@ -432,67 +405,89 @@ func GetParentDatasets(rurl, dataset string, orderCounter int) (map[int][]string
 	return out, nil
 }
 
-// helper function to check if migration is already queued
-func alreadyQueued(input string, w http.ResponseWriter) error {
-	report := MigrationReport{}
-	data, err := json.Marshal(report)
-	if err == nil {
-		w.Write(data)
-	}
-	return err
+// helper function to check if migration input is already queued
+func alreadyQueued(input string) error {
+	// TODO: check if given migration input is already queued
+	return nil
 }
 
-// helper function to write Migration Report to http response writer and return its error to upstream caller
-func writeReport(msg string, err error, w http.ResponseWriter) error {
-	report := MigrationReport{Report: msg, Details: fmt.Sprintf("%v", err)}
-	log.Println(msg, err)
+// helper function to return string for status ID
+func statusString(status int) string {
+	var s string
+	if status == IN_PROGRESS {
+		s = "IN_PROGRESS"
+	} else if status == PENDING {
+		s = "PENDING"
+	} else if status == COMPLETED {
+		s = "COMPLETED"
+	} else if status == FAILED {
+		s = "FAILED"
+	} else if status == TERM_FAILED {
+		s = "TEERMINATED"
+	}
+	return s
+}
+
+// helper function to write Migration Report to http response writer
+func writeReport(ids []int64, msg string, status int, err error, w http.ResponseWriter) {
+	report := MigrationReport{
+		MigrationRequestIDs: ids,
+		Report:              msg,
+		Error:               err,
+		Status:              statusString(status),
+	}
+	var out []MigrationReport
+	out = append(out, report)
 	if data, e := json.Marshal(report); e == nil {
 		w.Write(data)
 	}
-	return err
 }
 
 // SubmitMigration DBS API
 func (a *API) SubmitMigration() error {
-	/* Logic of submit API:
-	- check if migration_input is already queued
-	  - if already queued it should return migration_status
-	  - if not prepare ordered list of dataset or block to migrate
-	- iterate over ordered list of datasets or blocks
-	  - prepare and insert MigrationBlocks object
-	- write MigrationReport object
-	- spawn goroutine to process migration report
-	*/
 
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		return writeReport("fail to read data", err, a.Writer)
+		log.Println("unable to read from reader", err)
+		return err
 	}
-	rec := MigrationRequest{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
+	tstamp := time.Now().Unix()
+	rec := MigrationRequest{
+		MIGRATION_STATUS:       PENDING,
+		CREATE_BY:              a.CreateBy,
+		CREATION_DATE:          tstamp,
+		LAST_MODIFIED_BY:       a.CreateBy,
+		LAST_MODIFICATION_DATE: tstamp,
+	}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		return writeReport("fail to decode data", err, a.Writer)
-	}
-	if utils.VERBOSE > 0 {
-		log.Printf("start migration request %+v", rec)
+		log.Println("unable to unmarshal migration request", err)
+		return err
 	}
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
 	mid := rec.MIGRATION_REQUEST_ID
 	mstr := fmt.Sprintf("Migration request %d", mid)
-	if err := alreadyQueued(input, a.Writer); err != nil {
+	if err := alreadyQueued(input); err != nil {
 		msg := fmt.Sprintf("%s already queued error %v", mstr, err)
-		return writeReport(msg, err, a.Writer)
+		log.Println(msg)
+		return err
 	}
-	go startMigrationRequest(rec)
-
-	msg := fmt.Sprintf("start MigrationRequest %+v", rec)
-	return writeReport(msg, nil, a.Writer)
+	ids, err := startMigrationRequest(rec)
+	if err != nil {
+		log.Println("unable to start migration request", err)
+		return err
+	}
+	msg := fmt.Sprintf("Migration request for %s has started", rec.MIGRATION_INPUT)
+	writeReport(ids, msg, IN_PROGRESS, nil, a.Writer)
+	return nil
 }
 
-func startMigrationRequest(rec MigrationRequest) error {
+// helper function to start migration request and return list of migration ids
+func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 	var err error
+	var out []int64
 	input := rec.MIGRATION_INPUT
 	mid := rec.MIGRATION_REQUEST_ID
 	mstr := fmt.Sprintf("Migration request %d", mid)
@@ -500,113 +495,121 @@ func startMigrationRequest(rec MigrationRequest) error {
 		log.Println(mstr)
 	}
 
-	var migBlocks map[int][]string
+	var dstParentBlocks, srcParentBlocks []string
 	rurl := rec.MIGRATION_URL
+	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
 	if strings.Contains(input, "#") {
-		migBlocks, err = prepareBlockMigrationList(rurl, input)
+		// get parent blocks at destination DBS instance for input block
+		dstParentBlocks = prepareBlockMigrationList(rurl, input)
+		// get parent blocks at source DBS instance for input block
+		srcParentBlocks = prepareBlockMigrationList(localhost, input)
 	} else {
-		migBlocks, err = prepareDatasetMigrationList(rurl, input)
+		// get parent blocks at destination DBS instance for input dataset
+		dstParentBlocks = prepareDatasetMigrationList(rurl, input)
+		// get parent blocks at source DBS instance for input dataset
+		srcParentBlocks = prepareDatasetMigrationList(localhost, input)
 	}
-	if err != nil {
-		log.Println("%s unable to prepare dataset/blocks migration list error %v", mstr, err)
-		return err
+	dstParentBlocks = utils.List2Set(dstParentBlocks)
+	srcParentBlocks = utils.List2Set(srcParentBlocks)
+
+	// get list of blocks required for migration
+	var migBlocks []string
+	for _, blk := range dstParentBlocks {
+		if !utils.InList(blk, srcParentBlocks) {
+			migBlocks = append(migBlocks, blk)
+		}
 	}
+
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
-		//         msg := "Migration request is already fulfilled"
-		//         report := MigrationReport{Report: msg, Details: string(data)}
-		//         data, err = json.Marshal(report)
-		//         if err == nil {
-		//             a.Writer.Write(data)
-		//         }
 		log.Printf("%s is already fulfilled", mstr)
-		return nil
+		return []int64{}, nil
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("%s found %d blocks", mstr, len(migBlocks))
+		log.Printf("%s will migrate %d blocks", mstr, len(migBlocks))
 	}
 
-	var orderedList []int
-	for k := range migBlocks {
-		orderedList = append(orderedList, k)
-	}
-	sort.Sort(sort.Reverse(sort.IntSlice(orderedList)))
-
-	if utils.VERBOSE > 0 {
-		log.Printf("%s performed ordered list for %d blocks", mstr, len(orderedList))
-	}
+	// reverse list of migration blocks such that we will start
+	// migration from bottom parents
+	sort.Sort(sort.Reverse(sort.StringSlice(migBlocks)))
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		//         return writeReport("unable to get DB transaction", err, a.Writer)
-		return err
+		return []int64{}, err
 	}
 	defer tx.Rollback()
 
-	// insert MigrationRequest object
-	err = rec.Insert(tx)
-	if err != nil {
-		//         return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
-		return err
-	}
-	if utils.VERBOSE > 0 {
-		log.Printf("%s insert MigrationRequest record %+v", mstr, rec)
+	log.Println("migrationt input", input)
+	for _, blk := range migBlocks {
+		log.Println("migration block", blk)
 	}
 
-	// loop over orderedList which is [[blocks], [blocks]]
+	// loop over migBlocks
 	// and insert every chunk of blocks as MigrationBlocks objects
-	var totalQueued int
-	for idx, b := range orderedList {
-		for _, blk := range migBlocks[b] {
-			// set migration record
-			mrec := MigrationBlocks{
-				MIGRATION_STATUS:       rec.MIGRATION_STATUS,
-				MIGRATION_ORDER:        int64(idx),
-				MIGRATION_BLOCK_NAME:   blk,
-				CREATION_DATE:          rec.CREATION_DATE,
-				CREATE_BY:              rec.CREATE_BY,
-				LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
-				LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
-			err = mrec.Insert(tx)
-			if utils.VERBOSE > 0 {
-				log.Printf("%s insert MigrationBlocks record %+v", mstr, mrec)
-			}
-			if err != nil {
-				//                 return writeReport("fail to insert MigrationBlocks record", err, a.Writer)
-				return err
-			}
-			totalQueued += 1
+	for idx, blk := range migBlocks {
+
+		// insert MigrationRequest object
+		rec.MIGRATION_REQUEST_ID = 0
+		rec.MIGRATION_INPUT = blk
+		if utils.VERBOSE > 0 {
+			log.Printf("%s insert MigrationRequest record %+v", mstr, rec)
 		}
+		err = rec.Insert(tx)
+		if err != nil {
+			log.Printf("unable to insert MigrationRequest record %+v, error %v", rec, err)
+			return []int64{}, err
+		}
+
+		// get inserted migration ID
+		rid, err := GetID(tx, "MIGRATION_REQUESTS", "MIGRATION_REQUEST_ID", "MIGRATION_INPUT", blk)
+		if err != nil {
+			log.Println("unable to get MIGRATION_REQUESTS id", err)
+			return []int64{}, err
+		}
+
+		// set migration record
+		mrec := MigrationBlocks{
+			MIGRATION_REQUEST_ID:   rid,
+			MIGRATION_BLOCK_NAME:   blk,
+			MIGRATION_ORDER:        int64(idx),
+			MIGRATION_STATUS:       PENDING,
+			CREATE_BY:              rec.CREATE_BY,
+			CREATION_DATE:          rec.CREATION_DATE,
+			LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
+			LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
+		if utils.VERBOSE > 0 {
+			log.Printf("%s insert MigrationBlocks record %+v", mstr, mrec)
+		}
+		err = mrec.Insert(tx)
+		if err != nil {
+			log.Println("unable to insert MigrationBlocks record", err)
+			return []int64{}, err
+		}
+		out = append(out, rid)
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Printf("%s unatble to commit transaction error %v", mstr, err)
-		//         return writeReport("fail to commit transaction", err, a.Writer)
-		return err
+		return []int64{}, err
 	}
 
-	//     report := MigrationReport{Report: fmt.Sprintf("REQUEST QUEUED with total %d blocks to be migrated", totalQueued), Details: string(data)}
-	//     data, err = json.Marshal(report)
-	//     if err == nil {
-	//         a.Writer.Write(data)
-	//     }
-
-	// once migration report is ready we'll process it asynchronously
-	//     a.Params["migration_request_url"] = rurl
-	//     go a.ProcessMigration(MigrationProcessTimeout, false)
-
-	//     return err
-	log.Printf("%s finished", mstr)
-	return nil
+	if utils.VERBOSE > 0 {
+		log.Printf("%s finished", mstr)
+	}
+	return out, nil
 }
 
 // ProcessMigration will process given migration request
 // and inject data to source DBS
 // It expects that client will provide migration_request_url and migration id
 func (a *API) ProcessMigration(timeout int, writeReport bool) error {
+
+	var status int
+	var err error
+	var msg string
 
 	// setup context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
@@ -615,23 +618,21 @@ func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 	// create channel to report when operation will be completed
 	ch := make(chan bool)
 
+	// set default status
+	status = FAILED
+
 	// execute slow operation in background
-	go a.processMigration(ch)
+	go a.processMigration(ch, &status)
 
 	// the slow operation will either finish or timeout
-	var status int
-	var err error
-	var msg string
 	select {
 	case <-ctx.Done():
 		msg = fmt.Sprintf("Process migration function timeout")
 		err = errors.New(msg)
-		status = FAILED
 	case <-ch:
-		msg = fmt.Sprintf("Process migration successful")
-		status = COMPLETED
+		msg = fmt.Sprintf("migration request status %v", status)
 	}
-	report := MigrationReport{Report: msg, Status: status}
+	report := MigrationReport{Report: msg, Status: statusString(status)}
 	log.Println(report.Report)
 	if writeReport {
 		data, err := json.Marshal(report)
@@ -645,30 +646,37 @@ func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 
 // processMigration will process given migration report
 // and inject data to source DBS
-func (a *API) processMigration(ch chan<- bool) {
+func (a *API) processMigration(ch chan<- bool, status *int) {
 	// report on channel that we are done with this workflow
 	defer func() {
 		ch <- true
 	}()
 
-	// obtain migration request record
-	val, ok := a.Params["migration_request_id"]
-	if !ok {
-		log.Println("API=%s does not provide migration_request_id", a.Api)
-		return
+	// backward compatibility with DBS migration server which uses migration_rqst_id
+	if v, ok := a.Params["migration_rqst_id"]; ok {
+		a.Params["migration_request_id"] = v
 	}
-	midint, err := strconv.Atoi(fmt.Sprintf("%d", val))
+
+	// obtain migration request record
+	val, err := getSingleValue(a.Params, "migration_request_id")
+	midint, err := strconv.Atoi(val)
 	if err != nil {
-		log.Println("unable to convert mid", err)
+		log.Printf("unable to convert mid", err)
 	}
 	mid := int64(midint)
+	if utils.VERBOSE > 0 {
+		log.Println("process migration request", mid)
+	}
 	records, err := MigrationRequests(mid)
+	if utils.VERBOSE > 0 {
+		log.Println("found process migration request records", records)
+	}
 	if err != nil {
 		log.Printf("fail to fetch migration request %d, error", mid, err)
 		return
 	}
 	if len(records) != 1 {
-		log.Printf("found more than %d requests for mid=%d, stop processing", len(records), mid)
+		log.Printf("found %d requests for mid=%d, stop processing", len(records), mid)
 		return
 	}
 	mrec := records[0]
@@ -680,7 +688,7 @@ func (a *API) processMigration(ch chan<- bool) {
 	stm = CleanStatement(stm)
 	var args []interface{}
 	args = append(args, mid)
-	if utils.VERBOSE > 1 {
+	if utils.VERBOSE > 0 {
 		utils.PrintSQL(stm, args, "execute")
 	}
 	var bid, bOrder, bStatus int64
@@ -733,13 +741,14 @@ func (a *API) processMigration(ch chan<- bool) {
 		Separator: a.Separator,
 	}
 	err = api.InsertBulkBlocks()
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert bulkblocks %+v", api)
 	}
 	if err != nil {
 		log.Println("insert block dump record failed with", err)
 		updateMigrationStatus(mid, FAILED)
 	} else {
+		*status = COMPLETED
 		updateMigrationStatus(mid, COMPLETED)
 	}
 }
@@ -761,6 +770,13 @@ func updateMigrationStatus(mid int64, status int) error {
 		return err
 	}
 	defer tx.Rollback()
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 0 {
+		var args []interface{}
+		args = append(args, status)
+		args = append(args, mid)
+		utils.PrintSQL(stm, args, "execute")
+	}
 
 	_, err = tx.Exec(stm, status, mid)
 	if err != nil {
@@ -787,39 +803,55 @@ type MigrationRemoveRequest struct {
 func (a *API) RemoveMigration() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		return writeReport("fail to read data", err, a.Writer)
+		log.Println("unable to readl data", err)
+		return err
 	}
-	rec := MigrationRemoveRequest{CREATE_BY: a.CreateBy}
+	rec := MigrationRemoveRequest{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		return writeReport("fail to decode data", err, a.Writer)
+		log.Println("unable to decode data", err)
+		return err
 	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return writeReport("unable to get DB transaction", err, a.Writer)
+		log.Println("unable to get DB transaction", err)
+		return err
 	}
 	defer tx.Rollback()
 
 	stm := getSQL("count_migration_requests")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 0 {
+		var args []interface{}
+		args = append(args, rec.MIGRATION_REQUEST_ID)
+		args = append(args, rec.CREATE_BY)
+		utils.PrintSQL(stm, args, "execute")
+	}
 	var tid float64
 	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY).Scan(&tid)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
-		return writeReport(msg, err, a.Writer)
+		log.Println(msg)
+		return errors.New(msg)
+	}
+	if utils.VERBOSE > 0 {
+		log.Println("found request ID", tid, "to remove")
 	}
 
-	if tid > 1 {
+	if tid > 0 {
 		stm = getSQL("remove_migration_requests")
 		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
 		if err != nil {
 			msg := fmt.Sprintf("fail to execute SQL statement '%s'", stm)
-			return writeReport(msg, err, a.Writer)
+			log.Println(msg)
+			return errors.New(msg)
 		}
 		err = tx.Commit()
 		if err != nil {
-			return writeReport("fail to commit transaction", err, a.Writer)
+			log.Println("unable to commit transaction", err)
+			return err
 		}
 	}
 	return nil
@@ -838,6 +870,12 @@ func (a *API) StatusMigration() error {
 	var conds []string
 	tmpl := make(Record)
 	tmpl["Owner"] = DBOWNER
+
+	// backward compatibility with DBS migration server which uses migration_rqst_id
+	val, ok := a.Params["migration_rqst_id"]
+	if ok {
+		a.Params["migration_request_id"] = val
+	}
 
 	oldest, _ := getSingleValue(a.Params, "oldest")
 	if oldest == "true" {

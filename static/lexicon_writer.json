@@ -70,7 +70,7 @@
   {
     "name": "data_tier_name",
     "patterns": [
-      "^([A-Z]{3,100})+$"
+      "^([A-Z\\-]{3,100})+$"
     ],
     "length": 99
   },

@@ -301,8 +301,14 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get data tier ID")
 	}
-	dataTierID, err = GetID(
+	tier := DataTiers{
+		DATA_TIER_NAME: rec.Dataset.DataTierName,
+		CREATION_DATE:  creationDate,
+		CREATE_BY:      a.CreateBy,
+	}
+	dataTierID, err = GetRecID(
 		tx,
+		&tier,
 		"DATA_TIERS",
 		"data_tier_id",
 		"data_tier_name",
@@ -316,8 +322,12 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get physics group ID")
 	}
-	physicsGroupID, err = GetID(
+	pgrp := PhysicsGroups{
+		PHYSICS_GROUP_NAME: rec.Dataset.PhysicsGroupName,
+	}
+	physicsGroupID, err = GetRecID(
 		tx,
+		&pgrp,
 		"PHYSICS_GROUPS",
 		"physics_group_id",
 		"physics_group_name",
@@ -331,8 +341,12 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 0 {
 		log.Println("get dataset access type ID")
 	}
-	datasetAccessTypeID, err = GetID(
+	dat := DatasetAccessTypes{
+		DATASET_ACCESS_TYPE: rec.Dataset.DatasetAccessType,
+	}
+	datasetAccessTypeID, err = GetRecID(
 		tx,
+		&dat,
 		"DATASET_ACCESS_TYPES",
 		"dataset_access_type_id",
 		"dataset_access_type",
@@ -348,8 +362,9 @@ func (a *API) InsertBulkBlocks() error {
 	procDS := ProcessedDatasets{
 		PROCESSED_DS_NAME: rec.Dataset.ProcessedDSName,
 	}
-	processedDatasetID, err = GetID(
+	processedDatasetID, err = GetRecID(
 		tx,
+		&procDS,
 		"PROCESSED_DATASETS",
 		"processed_ds_id",
 		"processed_ds_name",

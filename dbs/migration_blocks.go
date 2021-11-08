@@ -9,15 +9,15 @@ import (
 
 // MigrationBlocks represents migration blocks table
 type MigrationBlocks struct {
-	MIGRATION_BLOCK_ID     int64  `json:"migration_block_id"`
-	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id"`
-	MIGRATION_BLOCK_NAME   string `json:"migration_block_name"`
-	MIGRATION_ORDER        int64  `json:"migration_order"`
-	MIGRATION_STATUS       int64  `json:"migration_status"`
-	CREATE_BY              string `json:"create_by"`
-	CREATION_DATE          int64  `json:"creation_date"`
-	LAST_MODIFIED_BY       string `json:"last_modified_by"`
-	LAST_MODIFICATION_DATE int64  `json:"last_modification_date"`
+	MIGRATION_BLOCK_ID     int64  `json:"migration_block_id" validate:"required,number,gt=0"`
+	MIGRATION_REQUEST_ID   int64  `json:"migration_request_id" validate:"required,number,gt=0"`
+	MIGRATION_BLOCK_NAME   string `json:"migration_block_name" validate:"required"`
+	MIGRATION_ORDER        int64  `json:"migration_order" validate:"gte=0"`
+	MIGRATION_STATUS       int64  `json:"migration_status" validate:"gte=0,lte=10"`
+	CREATE_BY              string `json:"create_by" validate:"required"`
+	CREATION_DATE          int64  `json:"creation_date" validate:"required,number,gt=0"`
+	LAST_MODIFIED_BY       string `json:"last_modified_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64  `json:"last_modification_date" validate:"required,number,gt=0"`
 }
 
 // Insert implementation of MigrationBlocks
@@ -47,14 +47,19 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 	stm := getSQL("insert_migration_blocks")
 	_, err = tx.Exec(stm, r.MIGRATION_BLOCK_ID, r.MIGRATION_REQUEST_ID,
 		r.MIGRATION_BLOCK_NAME, r.MIGRATION_ORDER,
+		r.MIGRATION_STATUS,
 		r.CREATE_BY, r.CREATION_DATE,
 		r.LAST_MODIFIED_BY, r.LAST_MODIFICATION_DATE)
+	if err != nil {
+		log.Println("unable to insert migration block", err)
+	}
 	return err
 }
 
 // Validate implementation of MigrationBlocks
 func (r *MigrationBlocks) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
+		log.Println("validation error", err)
 		return DecodeValidatorError(r, err)
 	}
 	return nil
