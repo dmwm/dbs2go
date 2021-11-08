@@ -32,6 +32,7 @@ func initDB(dryRun bool) *sql.DB {
 		log.Fatal("unable to open db file", err)
 	}
 	dbs.DB = db
+	dbs.MigrationDB = db
 	dbs.DBTYPE = dbtype
 	dbsql := dbs.LoadSQL(dbowner)
 	dbs.DBSQL = dbsql

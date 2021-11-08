@@ -106,7 +106,7 @@ func TestMigrate(t *testing.T) {
 	// initialize DB for testing
 	db := initDB(false)
 	defer db.Close()
-	utils.VERBOSE = 2
+	utils.VERBOSE = 1
 
 	// setup HTTP request
 	migFile := "data/mig_request.json"
@@ -168,5 +168,31 @@ func TestMigrate(t *testing.T) {
 	}
 	if len(rids) != len(sids) {
 		t.Errorf("wrong number of status IDs %+v, expect +%v", sids, rids)
+	}
+
+	// finally, let's process specific migration request
+	dbs.MigrationProcessTimeout = 100
+	procFile := "data/mig_request_process.json"
+	data, err = os.ReadFile(procFile)
+	if err != nil {
+		log.Printf("ERROR: unable to read %s error %v", procFile, err.Error())
+		t.Fatal(err.Error())
+	}
+	reader = bytes.NewReader(data)
+	rr, err = respRecorder("POST", "dbs2go/process", reader, web.MigrationProcessHandler)
+	if err != nil {
+		t.Error(err)
+	}
+	var reportRecords []dbs.MigrationReport
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &reportRecords)
+	if err != nil {
+		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
+	}
+	log.Println("Received data", string(data))
+	for _, rec := range reportRecords {
+		if rec.Status != "COMPLETED" {
+			t.Errorf("invalid status in %+v, expected COMPLETED", rec)
+		}
 	}
 }
