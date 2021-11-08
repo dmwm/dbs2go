@@ -131,6 +131,7 @@ func TestMigrate(t *testing.T) {
 		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
 	}
 	log.Println("Received data", string(data))
+	var rids []int64
 	for _, rrr := range records {
 		if rrr.Status != "IN_PROGRESS" {
 			t.Errorf("invalid return status of migration request %+v", rrr)
@@ -142,6 +143,30 @@ func TestMigrate(t *testing.T) {
 			if id != int64(idx+1) {
 				t.Errorf("intavlid migration request id %+v", rrr)
 			}
+			rids = append(rids, id)
 		}
+	}
+
+	// now we should request status of the migration request
+	rr, err = respRecorder("GET", "dbs2go/status", reader, web.MigrationStatusHandler)
+	if err != nil {
+		t.Error(err)
+	}
+	var statusRecords []dbs.MigrationRequest
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &statusRecords)
+	if err != nil {
+		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
+	}
+	log.Println("Received data", string(data))
+	var sids []int64
+	for _, rrr := range statusRecords {
+		sids = append(sids, rrr.MIGRATION_REQUEST_ID)
+		if !utils.InInt64List(rrr.MIGRATION_REQUEST_ID, rids) {
+			t.Errorf("unvalid status request id %d, expect %+v", rrr.MIGRATION_REQUEST_ID, rids)
+		}
+	}
+	if len(rids) != len(sids) {
+		t.Errorf("wrong number of status IDs %+v, expect +%v", sids, rids)
 	}
 }
