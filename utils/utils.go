@@ -93,6 +93,20 @@ func GoDeferFunc(api string, f func()) {
 	}
 }
 
+// InInt64List checks item in a list
+func InInt64List(a int64, list []int64) bool {
+	check := 0
+	for _, b := range list {
+		if b == a {
+			check += 1
+		}
+	}
+	if check != 0 {
+		return true
+	}
+	return false
+}
+
 // InList checks item in a list
 func InList(a string, list []string) bool {
 	check := 0
