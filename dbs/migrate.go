@@ -602,9 +602,11 @@ func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 		msg = fmt.Sprintf("migration request status %v", status)
 	}
 	report := MigrationReport{Report: msg, Status: statusString(status)}
+	var reports []MigrationReport
+	reports = append(reports, report)
 	log.Println(report.Report)
 	if writeReport {
-		data, err := json.Marshal(report)
+		data, err := json.Marshal(reports)
 		if err == nil {
 			a.Writer.Write(data)
 		}
@@ -641,7 +643,7 @@ func (a *API) processMigration(ch chan<- bool, status *int) {
 		log.Println("found process migration request records", records)
 	}
 	if err != nil {
-		log.Printf("fail to fetch migration request %d, error", mid, err)
+		log.Printf("fail to fetch migration request %d, error %v", mid, err)
 		return
 	}
 	if len(records) != 1 {
