@@ -31,7 +31,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 			tid, err = LastInsertID(tx, "MIGRATION_BLOCKS", "migration_block_id")
 			r.MIGRATION_BLOCK_ID = tid + 1
 		} else {
-			tid, err = IncrementSequence(tx, "SEQ_MR")
+			tid, err = IncrementSequence(tx, "SEQ_MB")
 			r.MIGRATION_BLOCK_ID = tid
 		}
 		if err != nil {
