@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
@@ -81,10 +80,10 @@ var MigrateURL string
 
 // MigrationReport represents migration report returned by the migration API
 type MigrationReport struct {
-	MigrationRequestIDs []int64 `json:"migration_request_ids"`
-	Report              string  `json:"report"`
-	Status              string  `json:"status"`
-	Error               error   `json:"error"`
+	MigrationRequests []MigrationRequest `json:"migration_details"`
+	Report            string             `json:"migration_report"`
+	Status            string             `json:"status"`
+	Error             error              `json:"error"`
 }
 
 // GetBlocks returns list of blocks for a given url and block/dataset input
@@ -376,7 +375,7 @@ func alreadyQueued(input string) error {
 }
 
 // helper function to return string for status ID
-func statusString(status int) string {
+func statusString(status int64) string {
 	var s string
 	if status == IN_PROGRESS {
 		s = "IN_PROGRESS"
@@ -390,21 +389,6 @@ func statusString(status int) string {
 		s = "TEERMINATED"
 	}
 	return s
-}
-
-// helper function to write Migration Report to http response writer
-func writeReport(ids []int64, msg string, status int, err error, w http.ResponseWriter) {
-	report := MigrationReport{
-		MigrationRequestIDs: ids,
-		Report:              msg,
-		Error:               err,
-		Status:              statusString(status),
-	}
-	var out []MigrationReport
-	out = append(out, report)
-	if data, e := json.Marshal(out); e == nil {
-		w.Write(data)
-	}
 }
 
 // SubmitMigration DBS API
@@ -438,23 +422,26 @@ func (a *API) SubmitMigration() error {
 		log.Println(msg)
 		return err
 	}
-	ids, err := startMigrationRequest(rec)
+	report, err := startMigrationRequest(rec)
 	if err != nil {
 		log.Println("unable to start migration request", err)
 		return err
 	}
-	msg := fmt.Sprintf("Migration request for %s has started", rec.MIGRATION_INPUT)
-	writeReport(ids, msg, IN_PROGRESS, nil, a.Writer)
-	return nil
+	data, err = json.Marshal([]MigrationReport{report})
+	if err == nil {
+		a.Writer.Write(data)
+	}
+	return err
 }
 
 // helper function to start migration request and return list of migration ids
-func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
+func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 	var err error
-	var out []int64
+	status := int64(PENDING)
+	msg := "Migration request is started"
+	var out []MigrationRequest
 	input := rec.MIGRATION_INPUT
-	mid := rec.MIGRATION_REQUEST_ID
-	mstr := fmt.Sprintf("Migration request %+v", mid)
+	mstr := fmt.Sprintf("Migration request for %+v", input)
 	if utils.VERBOSE > 0 {
 		log.Printf("%s %+v", mstr, rec)
 	}
@@ -490,8 +477,9 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
-		log.Printf("%s is already fulfilled, no blocks found for migration", mstr)
-		return []int64{}, nil
+		msg = fmt.Sprintf("%s is already fulfilled, no blocks found for migration", mstr)
+		log.Println(msg)
+		return migrationReport(out, msg, status, err), nil
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("%s will migrate %d blocks", mstr, len(migBlocks))
@@ -504,7 +492,9 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return []int64{}, err
+		msg = fmt.Sprintf("%s, unable to get DB connection", mstr)
+		log.Println(msg)
+		return migrationReport(out, msg, status, err), err
 	}
 	defer tx.Rollback()
 
@@ -528,23 +518,26 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 		}
 		err = rec.Insert(tx)
 		if err != nil {
-			log.Printf("unable to insert MigrationRequest record %+v, error %v", rec, err)
-			return []int64{}, err
+			msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
+			log.Println(msg)
+			return migrationReport(out, msg, status, err), err
 		}
 
 		// get inserted migration ID
 		rid, err := GetID(tx, "MIGRATION_REQUESTS", "MIGRATION_REQUEST_ID", "MIGRATION_INPUT", blk)
 		if err != nil {
-			log.Println("unable to get MIGRATION_REQUESTS id", err)
-			return []int64{}, err
+			msg = fmt.Sprintf("unable to get MIGRATION_REQUESTS id, error %v", err)
+			log.Println(msg)
+			return migrationReport(out, msg, status, err), err
 		}
 
 		// set migration record
+		status := int64(PENDING)
 		mrec := MigrationBlocks{
 			MIGRATION_REQUEST_ID:   rid,
 			MIGRATION_BLOCK_NAME:   blk,
 			MIGRATION_ORDER:        int64(idx),
-			MIGRATION_STATUS:       int64(PENDING),
+			MIGRATION_STATUS:       status,
 			CREATE_BY:              rec.CREATE_BY,
 			CREATION_DATE:          rec.CREATION_DATE,
 			LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
@@ -553,24 +546,36 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 			log.Printf("%s insert MigrationBlocks record %+v", mstr, mrec)
 		}
 		err = mrec.Insert(tx)
+		out = append(out, rec)
 		if err != nil {
-			log.Println("unable to insert MigrationBlocks record", err)
-			return []int64{}, err
+			msg = fmt.Sprintf("unable to insert MigrationBlocks record, error %v", err)
+			log.Println(msg)
+			return migrationReport(out, msg, status, err), err
 		}
-		out = append(out, rid)
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Printf("%s unatble to commit transaction error %v", mstr, err)
-		return []int64{}, err
+		msg = fmt.Sprintf("%s unable to commit transaction error %v", mstr, err)
+		log.Println(msg)
+		return migrationReport(out, msg, status, err), err
 	}
 
 	if utils.VERBOSE > 0 {
-		log.Printf("%s finished", mstr)
+		log.Printf("%s finished, migration ids", mstr, out)
 	}
-	return out, nil
+	return migrationReport(out, msg, status, nil), nil
+}
+
+func migrationReport(out []MigrationRequest, report string, status int64, err error) MigrationReport {
+	r := MigrationReport{
+		MigrationRequests: out,
+		Report:            report,
+		Status:            statusString(status),
+		Error:             err,
+	}
+	return r
 }
 
 // ProcessMigration will process given migration request
@@ -578,7 +583,7 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 // It expects that client will provide migration_request_url and migration id
 func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 
-	var status int
+	var status int64
 	var err error
 	var msg string
 
@@ -619,7 +624,7 @@ func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 
 // processMigration will process given migration report
 // and inject data to source DBS
-func (a *API) processMigration(ch chan<- bool, status *int) {
+func (a *API) processMigration(ch chan<- bool, status *int64) {
 	// report on channel that we are done with this workflow
 	defer func() {
 		ch <- true

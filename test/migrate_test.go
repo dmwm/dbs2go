@@ -133,17 +133,11 @@ func TestMigrate(t *testing.T) {
 	log.Println("Received data", string(data))
 	var rids []int64
 	for _, rrr := range records {
-		if rrr.Status != "IN_PROGRESS" {
-			t.Errorf("invalid return status of migration request %+v", rrr)
-		}
-		if len(rrr.MigrationRequestIDs) == 0 {
-			t.Errorf("invalid number of migration requests %+v", rrr)
-		}
-		for idx, id := range rrr.MigrationRequestIDs {
-			if id != int64(idx+1) {
-				t.Errorf("intavlid migration request id %+v", rrr)
+		for _, req := range rrr.MigrationRequests {
+			if req.MIGRATION_STATUS != 0 {
+				t.Errorf("invalid return status of migration request %+v", rrr)
 			}
-			rids = append(rids, id)
+			rids = append(rids, req.MIGRATION_REQUEST_ID)
 		}
 	}
 
