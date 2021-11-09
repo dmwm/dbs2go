@@ -45,13 +45,28 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_migration_blocks")
-	_, err = tx.Exec(stm, r.MIGRATION_BLOCK_ID, r.MIGRATION_REQUEST_ID,
-		r.MIGRATION_BLOCK_NAME, r.MIGRATION_ORDER,
+	_, err = tx.Exec(stm,
+		r.MIGRATION_BLOCK_ID,
+		r.MIGRATION_REQUEST_ID,
+		r.MIGRATION_BLOCK_NAME,
+		r.MIGRATION_ORDER,
 		r.MIGRATION_STATUS,
-		r.CREATE_BY, r.CREATION_DATE,
-		r.LAST_MODIFIED_BY, r.LAST_MODIFICATION_DATE)
+		r.CREATE_BY,
+		r.CREATION_DATE,
+		r.LAST_MODIFIED_BY,
+		r.LAST_MODIFICATION_DATE)
 	if err != nil {
 		log.Println("unable to insert migration block", err)
+		log.Println("MigrationBlock block_id='%v' request_id='%v' block='%v' order='%v' status='%v' cby='%v' cdate='%v' lby='%v' ldate='%v'",
+			r.MIGRATION_BLOCK_ID,
+			r.MIGRATION_REQUEST_ID,
+			r.MIGRATION_BLOCK_NAME,
+			r.MIGRATION_ORDER,
+			r.MIGRATION_STATUS,
+			r.CREATE_BY,
+			r.CREATION_DATE,
+			r.LAST_MODIFIED_BY,
+			r.LAST_MODIFICATION_DATE)
 	}
 	return err
 }

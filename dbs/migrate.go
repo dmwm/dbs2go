@@ -128,7 +128,7 @@ func GetParents(rurl, val string) ([]string, error) {
 	var rec []map[string]interface{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Println("unable to unmarshal data", string(data), err)
+		log.Printf("unable to unmarshal data url=%s data=%s error=%v", rurl, string(data), err)
 		return out, err
 	}
 	for _, v := range rec {
@@ -281,7 +281,7 @@ func processDatasetBlocks(rurl, dataset string) ([]string, error) {
 		msg := fmt.Sprintf("No blocks in the required dataset %s found at source %s", dataset, rurl)
 		return out, errors.New(msg)
 	}
-	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
+	localhost := fmt.Sprintf("%s%s", utils.Localhost, utils.BASE)
 	dstblks, err := GetBlocks(localhost, dataset)
 	if err != nil {
 		return out, err
@@ -461,7 +461,7 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 
 	var dstParentBlocks, srcParentBlocks []string
 	rurl := rec.MIGRATION_URL
-	localhost := fmt.Sprintf("%s/%s", utils.Localhost, utils.BASE)
+	localhost := fmt.Sprintf("%s%s", utils.Localhost, utils.BASE)
 	if strings.Contains(input, "#") {
 		// get parent blocks at destination DBS instance for input block
 		dstParentBlocks = prepareBlockMigrationList(rurl, input)
@@ -475,6 +475,10 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 	}
 	dstParentBlocks = utils.List2Set(dstParentBlocks)
 	srcParentBlocks = utils.List2Set(srcParentBlocks)
+	if utils.VERBOSE > 0 {
+		log.Printf("Migration blocks from destination %s %+v", rurl, dstParentBlocks)
+		log.Printf("Migration blocks from source %s %+v", localhost, srcParentBlocks)
+	}
 
 	// get list of blocks required for migration
 	var migBlocks []string
@@ -486,9 +490,7 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
-		log.Printf("Migration blocks from destination %s %+v", rurl, dstParentBlocks)
-		log.Printf("Migration blocks from source %s %+v", localhost, srcParentBlocks)
-		log.Printf("%s is already fulfilled", mstr)
+		log.Printf("%s is already fulfilled, no blocks found for migration", mstr)
 		return []int64{}, nil
 	}
 	if utils.VERBOSE > 0 {
@@ -542,7 +544,7 @@ func startMigrationRequest(rec MigrationRequest) ([]int64, error) {
 			MIGRATION_REQUEST_ID:   rid,
 			MIGRATION_BLOCK_NAME:   blk,
 			MIGRATION_ORDER:        int64(idx),
-			MIGRATION_STATUS:       PENDING,
+			MIGRATION_STATUS:       int64(PENDING),
 			CREATE_BY:              rec.CREATE_BY,
 			CREATION_DATE:          rec.CREATION_DATE,
 			LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
