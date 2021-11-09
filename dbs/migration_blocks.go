@@ -55,10 +55,10 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		args = append(args, r.MIGRATION_BLOCK_NAME)
 		args = append(args, r.MIGRATION_ORDER)
 		args = append(args, r.MIGRATION_STATUS)
-		args = append(args, r.CREATE_BY)
 		args = append(args, r.CREATION_DATE)
-		args = append(args, r.LAST_MODIFIED_BY)
+		args = append(args, r.CREATE_BY)
 		args = append(args, r.LAST_MODIFICATION_DATE)
+		args = append(args, r.LAST_MODIFIED_BY)
 		utils.PrintSQL(stm, args, "execute")
 	}
 	_, err = tx.Exec(stm,
@@ -67,22 +67,12 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		r.MIGRATION_BLOCK_NAME,
 		r.MIGRATION_ORDER,
 		r.MIGRATION_STATUS,
-		r.CREATE_BY,
 		r.CREATION_DATE,
-		r.LAST_MODIFIED_BY,
-		r.LAST_MODIFICATION_DATE)
+		r.CREATE_BY,
+		r.LAST_MODIFICATION_DATE,
+		r.LAST_MODIFIED_BY)
 	if err != nil {
 		log.Println("unable to insert migration block", err)
-		log.Printf("MigrationBlock block_id='%v' request_id='%v' block='%v' order='%v' status='%v' cby='%v' cdate='%v' lby='%v' ldate='%v'",
-			r.MIGRATION_BLOCK_ID,
-			r.MIGRATION_REQUEST_ID,
-			r.MIGRATION_BLOCK_NAME,
-			r.MIGRATION_ORDER,
-			r.MIGRATION_STATUS,
-			r.CREATE_BY,
-			r.CREATION_DATE,
-			r.LAST_MODIFIED_BY,
-			r.LAST_MODIFICATION_DATE)
 	}
 	return err
 }
