@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // MigrationBlocks represents migration blocks table
@@ -45,6 +47,20 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_migration_blocks")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 0 {
+		var args []interface{}
+		args = append(args, r.MIGRATION_BLOCK_ID)
+		args = append(args, r.MIGRATION_REQUEST_ID)
+		args = append(args, r.MIGRATION_BLOCK_NAME)
+		args = append(args, r.MIGRATION_ORDER)
+		args = append(args, r.MIGRATION_STATUS)
+		args = append(args, r.CREATE_BY)
+		args = append(args, r.CREATION_DATE)
+		args = append(args, r.LAST_MODIFIED_BY)
+		args = append(args, r.LAST_MODIFICATION_DATE)
+		utils.PrintSQL(stm, args, "execute")
+	}
 	_, err = tx.Exec(stm,
 		r.MIGRATION_BLOCK_ID,
 		r.MIGRATION_REQUEST_ID,
@@ -57,7 +73,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		r.LAST_MODIFICATION_DATE)
 	if err != nil {
 		log.Println("unable to insert migration block", err)
-		log.Println("MigrationBlock block_id='%v' request_id='%v' block='%v' order='%v' status='%v' cby='%v' cdate='%v' lby='%v' ldate='%v'",
+		log.Printf("MigrationBlock block_id='%v' request_id='%v' block='%v' order='%v' status='%v' cby='%v' cdate='%v' lby='%v' ldate='%v'",
 			r.MIGRATION_BLOCK_ID,
 			r.MIGRATION_REQUEST_ID,
 			r.MIGRATION_BLOCK_NAME,
