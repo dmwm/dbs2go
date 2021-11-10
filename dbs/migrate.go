@@ -286,7 +286,7 @@ func processDatasetBlocks(rurl, dataset string) ([]string, error) {
 		return out, err
 	}
 	for _, blk := range srcblks {
-		if utils.InList(blk, dstblks) {
+		if !utils.InList(blk, dstblks) {
 			out = append(out, blk)
 		}
 	}
