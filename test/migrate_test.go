@@ -124,21 +124,20 @@ func TestMigrate(t *testing.T) {
 	}
 
 	// unmarshal received records
-	var records []dbs.MigrationReport
+	var reports []dbs.MigrationReport
 	data = rr.Body.Bytes()
-	err = json.Unmarshal(data, &records)
+	err = json.Unmarshal(data, &reports)
 	if err != nil {
 		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
 	}
 	log.Println("Received data", string(data))
 	var rids []int64
-	for _, rrr := range records {
-		for _, req := range rrr.MigrationRequests {
-			if req.MIGRATION_STATUS != 0 {
-				t.Errorf("invalid return status of migration request %+v", rrr)
-			}
-			rids = append(rids, req.MIGRATION_REQUEST_ID)
+	for _, rrr := range reports {
+		req := rrr.MigrationRequest
+		if req.MIGRATION_STATUS != 0 {
+			t.Errorf("invalid return status of migration request %+v", rrr)
 		}
+		rids = append(rids, req.MIGRATION_REQUEST_ID)
 	}
 
 	// now we should request status of the migration request

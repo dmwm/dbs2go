@@ -80,10 +80,10 @@ var MigrateURL string
 
 // MigrationReport represents migration report returned by the migration API
 type MigrationReport struct {
-	MigrationRequests []MigrationRequest `json:"migration_details"`
-	Report            string             `json:"migration_report"`
-	Status            string             `json:"status"`
-	Error             error              `json:"error"`
+	MigrationRequest MigrationRequest `json:"migration_details"`
+	Report           string           `json:"migration_report"`
+	Status           string           `json:"status"`
+	Error            error            `json:"error"`
 }
 
 // GetBlocks returns list of blocks for a given url and block/dataset input
@@ -422,12 +422,12 @@ func (a *API) SubmitMigration() error {
 		log.Println(msg)
 		return err
 	}
-	report, err := startMigrationRequest(rec)
+	reports, err := startMigrationRequest(rec)
 	if err != nil {
 		log.Println("unable to start migration request", err)
 		return err
 	}
-	data, err = json.Marshal([]MigrationReport{report})
+	data, err = json.Marshal(reports)
 	if err == nil {
 		a.Writer.Write(data)
 	}
@@ -435,11 +435,13 @@ func (a *API) SubmitMigration() error {
 }
 
 // helper function to start migration request and return list of migration ids
-func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
+func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	var err error
 	status := int64(PENDING)
 	msg := "Migration request is started"
-	var out []MigrationRequest
+	var req MigrationRequest
+	var reports []MigrationReport
+
 	input := rec.MIGRATION_INPUT
 	mstr := fmt.Sprintf("Migration request for %+v", input)
 	if utils.VERBOSE > 0 {
@@ -479,7 +481,7 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 	if len(migBlocks) == 0 {
 		msg = fmt.Sprintf("%s is already fulfilled, no blocks found for migration", mstr)
 		log.Println(msg)
-		return migrationReport(out, msg, status, err), nil
+		return []MigrationReport{migrationReport(rec, msg, status, err)}, nil
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("%s will migrate %d blocks", mstr, len(migBlocks))
@@ -494,7 +496,7 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 	if err != nil {
 		msg = fmt.Sprintf("%s, unable to get DB connection", mstr)
 		log.Println(msg)
-		return migrationReport(out, msg, status, err), err
+		return []MigrationReport{migrationReport(req, msg, status, err)}, err
 	}
 	defer tx.Rollback()
 
@@ -508,6 +510,7 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 
 	// loop over migBlocks
 	// and insert every chunk of blocks as MigrationBlocks objects
+	var ids []int64
 	for idx, blk := range migBlocks {
 
 		// insert MigrationRequest object
@@ -520,7 +523,7 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 		if err != nil {
 			msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
 			log.Println(msg)
-			return migrationReport(out, msg, status, err), err
+			return []MigrationReport{migrationReport(req, msg, status, err)}, err
 		}
 
 		// get inserted migration ID
@@ -528,7 +531,7 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 		if err != nil {
 			msg = fmt.Sprintf("unable to get MIGRATION_REQUESTS id, error %v", err)
 			log.Println(msg)
-			return migrationReport(out, msg, status, err), err
+			return []MigrationReport{migrationReport(req, msg, status, err)}, err
 		}
 
 		// set migration record
@@ -546,12 +549,13 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 			log.Printf("%s insert MigrationBlocks record %+v", mstr, mrec)
 		}
 		err = mrec.Insert(tx)
-		out = append(out, rec)
 		if err != nil {
 			msg = fmt.Sprintf("unable to insert MigrationBlocks record, error %v", err)
 			log.Println(msg)
-			return migrationReport(out, msg, status, err), err
+			return []MigrationReport{migrationReport(rec, msg, status, err)}, err
 		}
+		reports = append(reports, migrationReport(rec, msg, status, nil))
+		ids = append(ids, rid)
 	}
 
 	// commit transaction
@@ -559,21 +563,22 @@ func startMigrationRequest(rec MigrationRequest) (MigrationReport, error) {
 	if err != nil {
 		msg = fmt.Sprintf("%s unable to commit transaction error %v", mstr, err)
 		log.Println(msg)
-		return migrationReport(out, msg, status, err), err
+		return []MigrationReport{migrationReport(req, msg, status, err)}, err
 	}
 
 	if utils.VERBOSE > 0 {
-		log.Printf("%s finished, migration ids", mstr, out)
+		log.Printf("%s finished, migration ids %v", mstr, ids)
 	}
-	return migrationReport(out, msg, status, nil), nil
+	return reports, nil
 }
 
-func migrationReport(out []MigrationRequest, report string, status int64, err error) MigrationReport {
+// helper function to return migrationReport
+func migrationReport(req MigrationRequest, report string, status int64, err error) MigrationReport {
 	r := MigrationReport{
-		MigrationRequests: out,
-		Report:            report,
-		Status:            statusString(status),
-		Error:             err,
+		MigrationRequest: req,
+		Report:           report,
+		Status:           statusString(status),
+		Error:            err,
 	}
 	return r
 }
