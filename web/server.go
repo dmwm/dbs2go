@@ -105,6 +105,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("GET")
+		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
 		router.HandleFunc(basePath("/blockparents"), BlocksHandler).Methods("GET")
 		router.HandleFunc(basePath("/datasetparents"), DatasetParentsHandler).Methods("GET")
 	} else if Config.ServerType == "DBSMigration" {
