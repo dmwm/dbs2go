@@ -42,5 +42,6 @@ func initDB(dryRun bool) *sql.DB {
 	}
 	// init validator
 	dbs.RecordValidator = validator.New()
+	dbs.FileLumiChunkSize = 1000
 	return db
 }
