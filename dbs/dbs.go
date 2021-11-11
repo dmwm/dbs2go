@@ -61,6 +61,9 @@ var DBOWNER string
 // DRYRUN allows to skip query execution and printout DB statements along with passed parameters
 var DRYRUN bool
 
+// FileLumiChunkSize controls chunk size for FileLumi list insertion
+var FileLumiChunkSize int
+
 // DBRecord interface allows to insert DBS record using given transaction
 type DBRecord interface {
 	Insert(tx *sql.Tx) error

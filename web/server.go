@@ -319,6 +319,9 @@ func Server(configFile string) {
 	// initialize record validator
 	dbs.RecordValidator = validator.New()
 
+	// set chunk size for []FileLumi insertion
+	dbs.FileLumiChunkSize = Config.FileLumiChunkSize
+
 	// initialize templates
 	tmplData := make(map[string]interface{})
 	tmplData["Time"] = time.Now()

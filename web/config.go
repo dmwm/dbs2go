@@ -37,6 +37,7 @@ type Configuration struct {
 	MaxIdleConnections   int    `json:"max_idle_connections"`   // maximum number of idle connections
 	DBMonitoringInterval int    `json:"db_monitoring_interval"` // db mon interval in seconds
 	LexiconFile          string `json:"lexicon_file"`           // lexicon json file
+	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`   // chunk size for []FileLumi insertion
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates
@@ -97,6 +98,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MetricsPrefix == "" {
 		Config.MetricsPrefix = "dbs2go"
+	}
+	if Config.FileLumiChunkSize == 0 {
+		Config.FileLumiChunkSize = 1000
 	}
 	return nil
 }
