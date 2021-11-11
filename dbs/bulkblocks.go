@@ -568,7 +568,7 @@ func (a *API) InsertBulkBlocks() error {
 			if i+FileLumiChunkSize < len(rrr.FileLumiList) {
 				chunk = rrr.FileLumiList[i : i+FileLumiChunkSize]
 			} else {
-				chunk = rrr.FileLumiList[i : len(rrr.FileLumiList)-1]
+				chunk = rrr.FileLumiList[i:len(rrr.FileLumiList)]
 			}
 			var fileLumiChunk []FileLumis
 			for _, r := range chunk {
