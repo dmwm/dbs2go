@@ -15,6 +15,7 @@ import (
 	_ "github.com/mattn/go-oci8"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 	"github.com/vkuznet/dbs2go/web"
 )
 
@@ -23,6 +24,7 @@ func TestDBSWriter(t *testing.T) {
 	// initialize DB for testing
 	db := initDB(false)
 	var err error
+	utils.VERBOSE = 3
 
 	api := "/primarydatasets"
 	hdlr := web.PrimaryDatasetsHandler
