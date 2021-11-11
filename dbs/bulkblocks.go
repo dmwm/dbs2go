@@ -12,6 +12,12 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
+/* NOTES: we should use bulk insert
+ * see Server/Python/src/dbs/dao/Oracle/File/Insert2.py
+ *     Server/Python/src/dbs/business/DBSBlockInsert.py
+ *     Server/Python/src/dbs/dao/Oracle/FileLumi/Insert.py
+ */
+
 // BulkBlocks represents bulk block structure used by `/bulkblocks` DBS API
 type BulkBlocks struct {
 	DatasetConfigList []DatasetConfig `json:"dataset_conf_list"`
@@ -557,34 +563,63 @@ func (a *API) InsertBulkBlocks() error {
 				return err
 			}
 		}
-		for _, r := range rrr.FileLumiList {
-			var vals []interface{}
-			vals = append(vals, fileID)
-			vals = append(vals, r.RunNumber)
-			vals = append(vals, r.LumiSectionNumber)
-			args := []string{"file_id", "run_num", "lumi_section_num"}
-			if IfExistMulti(tx, "FILE_LUMIS", "file_id", args, vals...) {
-				// skip if we found valid filelumi record for given run and lumi
-				continue
+		var chunk []FileLumi
+		for i := 0; i < len(rrr.FileLumiList); i = i + FileLumiChunkSize {
+			if i+FileLumiChunkSize < len(rrr.FileLumiList) {
+				chunk = rrr.FileLumiList[i : i+FileLumiChunkSize]
+			} else {
+				chunk = rrr.FileLumiList[i : len(rrr.FileLumiList)-1]
 			}
-			fl := FileLumis{
-				FILE_ID:          fileID,
-				RUN_NUM:          r.RunNumber,
-				LUMI_SECTION_NUM: r.LumiSectionNumber,
-				EVENT_COUNT:      r.EventCount,
+			var fileLumiChunk []FileLumis
+			for _, r := range chunk {
+				fl := FileLumis{
+					FILE_ID:          fileID,
+					RUN_NUM:          r.RunNumber,
+					LUMI_SECTION_NUM: r.LumiSectionNumber,
+					EVENT_COUNT:      r.EventCount,
+				}
+				fileLumiChunk = append(fileLumiChunk, fl)
 			}
-			data, err = json.Marshal(fl)
-			if err != nil {
-				log.Println("unable to marshal dataset file lumi list", err)
-				return err
-			}
-			api.Reader = bytes.NewReader(data)
-			err = api.InsertFileLumisTx(tx)
+			err := InsertFileLumisTxMany(tx, fileLumiChunk)
 			if err != nil {
 				log.Println("unable to insert FileLumis record", err)
 				return err
 			}
 		}
+
+		/*
+
+			// sequential insert of file lumi records
+			for _, r := range rrr.FileLumiList {
+				var vals []interface{}
+				vals = append(vals, fileID)
+				vals = append(vals, r.RunNumber)
+				vals = append(vals, r.LumiSectionNumber)
+				args := []string{"file_id", "run_num", "lumi_section_num"}
+				if IfExistMulti(tx, "FILE_LUMIS", "file_id", args, vals...) {
+					// skip if we found valid filelumi record for given run and lumi
+					continue
+				}
+				fl := FileLumis{
+					FILE_ID:          fileID,
+					RUN_NUM:          r.RunNumber,
+					LUMI_SECTION_NUM: r.LumiSectionNumber,
+					EVENT_COUNT:      r.EventCount,
+				}
+				data, err = json.Marshal(fl)
+				if err != nil {
+					log.Println("unable to marshal dataset file lumi list", err)
+					return err
+				}
+				api.Reader = bytes.NewReader(data)
+				err = api.InsertFileLumisTx(tx)
+				if err != nil {
+					log.Println("unable to insert FileLumis record", err)
+					return err
+				}
+			}
+
+		*/
 	}
 
 	// insert file configuration
