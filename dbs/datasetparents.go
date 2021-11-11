@@ -42,7 +42,7 @@ func (r *DatasetParents) Insert(tx *sql.Tx) error {
 	// check if record exists in DB
 	if IfExist(tx, "DATASET_PARENTS", "this_dataset_id", "this_dataset_id", r.THIS_DATASET_ID) {
 		if utils.VERBOSE > 1 {
-			log.Printf("skip %s as it already exists in DB", r.THIS_DATASET_ID)
+			log.Printf("skip %v as it already exists in DB", r.THIS_DATASET_ID)
 		}
 		return nil
 	}
