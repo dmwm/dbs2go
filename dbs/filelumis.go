@@ -229,7 +229,7 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 	}
 	stm = fmt.Sprintf("%s VALUES %s", stm, strings.Join(valueStrings, ","))
 	if utils.VERBOSE > 2 {
-		log.Printf("new statement\n%v", stm)
+		log.Printf("new statement\n%v\n%v", stm, valueArgs)
 	}
 	_, err := tx.Exec(stm, valueArgs...)
 	if err != nil {
