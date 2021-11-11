@@ -191,3 +191,49 @@ func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 	}
 	return err
 }
+
+// InsertFileLumisTxMany DBS API
+func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
+	valueStrings := []string{}
+	valueArgs := []interface{}{}
+	var stm string
+	var valArr string
+	if len(records) == 0 {
+		return errors.New("zero array of FileLumi records")
+	}
+	r := records[0]
+	if r.EVENT_COUNT != 0 {
+		stm = getSQL("insert_filelumis")
+		valArr = "(?,?,?,?)"
+		if DBOWNER != "sqlite" {
+			valArr = "(:r,:l,:f,:e)"
+		}
+	} else {
+		stm = getSQL("insert_filelumis2")
+		valArr = "(?,?,?)"
+		if DBOWNER != "sqlite" {
+			valArr = "(:r,:l,:f)"
+		}
+	}
+	stm = strings.Split(stm, "VALUES")[0]
+	for _, r := range records {
+		valueStrings = append(valueStrings, valArr)
+		if r.EVENT_COUNT != 0 {
+			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID, r.EVENT_COUNT)
+		} else {
+			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID)
+		}
+	}
+	if utils.VERBOSE > 0 {
+		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi records", stm, len(valueArgs))
+	}
+	stm = fmt.Sprintf("%s VALUES %s", stm, strings.Join(valueStrings, ","))
+	if utils.VERBOSE > 2 {
+		log.Printf("new statement\n%v", stm)
+	}
+	_, err := tx.Exec(stm, valueArgs...)
+	if err != nil {
+		log.Printf("Unable to insert FileLumis records, error %v", err)
+	}
+	return err
+}
