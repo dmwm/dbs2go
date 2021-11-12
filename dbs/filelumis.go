@@ -243,7 +243,7 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 		stm = stmOra
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi records", stm, len(valueArgs))
+		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi values", stm, len(valueArgs))
 	}
 	if utils.VERBOSE > 2 {
 		log.Printf("new statement\n%v\n%v", stm, valueArgs)
