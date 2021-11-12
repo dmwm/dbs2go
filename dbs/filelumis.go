@@ -197,41 +197,58 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	var stm string
+	var err error
 	var valArr string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
 	if len(records) == 0 {
 		return errors.New("zero array of FileLumi records")
 	}
 	r := records[0]
 	if r.EVENT_COUNT != 0 {
-		stm = getSQL("insert_filelumis")
+		stm, err = LoadTemplateSQL("insert_filelumis", tmpl)
 		valArr = "(?,?,?,?)"
 		if DBOWNER != "sqlite" {
 			valArr = "(:r,:l,:f,:e)"
 		}
 	} else {
-		stm = getSQL("insert_filelumis2")
+		stm, err = LoadTemplateSQL("insert_filelumis2", tmpl)
 		valArr = "(?,?,?)"
 		if DBOWNER != "sqlite" {
 			valArr = "(:r,:l,:f)"
 		}
 	}
+	if err != nil {
+		log.Println("Fail to load template", err)
+		return err
+	}
 	stm = strings.Split(stm, "VALUES")[0]
+	stmOra := fmt.Sprintf("INSERT ALL")
 	for _, r := range records {
 		valueStrings = append(valueStrings, valArr)
+		names := "FL.RUN_NUM,FL_LUMI_SECTION_NUM,FL.FILE_ID,FL.EVENT_COUNT"
+		vals := ":r,:l,:f,:e"
 		if r.EVENT_COUNT != 0 {
 			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID, r.EVENT_COUNT)
 		} else {
 			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID)
+			names = "FL.RUN_NUM,FL_LUMI_SECTION_NUM,FL.FILE_ID"
+			vals = ":r,:l,:f"
 		}
+		stmOra = fmt.Sprintf("%s\nINTO %s.FILE_LUMIS (%s) VALUES (%s)", stmOra, DBOWNER, names, vals)
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi records", stm, len(valueArgs))
 	}
 	stm = fmt.Sprintf("%s VALUES %s", stm, strings.Join(valueStrings, ","))
+	stmOra = fmt.Sprintf("%s\nSELECT * FROM dual", stmOra)
+	if DBOWNER != "sqlite" {
+		stm = stmOra
+	}
 	if utils.VERBOSE > 2 {
 		log.Printf("new statement\n%v\n%v", stm, valueArgs)
 	}
-	_, err := tx.Exec(stm, valueArgs...)
+	_, err = tx.Exec(stm, valueArgs...)
 	if err != nil {
 		log.Printf("Unable to insert FileLumis records, error %v", err)
 	}
