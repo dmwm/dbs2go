@@ -357,7 +357,7 @@ func (a *API) UpdateBlocks() error {
 	}
 
 	if utils.VERBOSE > 0 {
-		log.Printf("update Blocks\n%s\n%+v", stm)
+		log.Printf("update Blocks\n%s", stm)
 	}
 
 	// start transaction
