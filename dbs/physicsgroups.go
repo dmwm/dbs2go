@@ -89,11 +89,15 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 	}
 	err = json.Unmarshal(data, &r)
 
-	log.Printf("### physics group decode data %v record %v", string(data), r)
+	if utils.VERBOSE > 1 {
+		log.Printf("### physics group decode data %v record %v", string(data), r)
+	}
 	//     decoder := json.NewDecoder(r)
 	//     err := decoder.Decode(&rec)
 	if err != nil {
-		log.Printf("fail to decode data %v, error %v", string(data), err)
+		if utils.VERBOSE > 0 {
+			log.Printf("fail to decode data %v, error %v", string(data), err)
+		}
 		return err
 	}
 	return nil

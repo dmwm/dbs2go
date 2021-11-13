@@ -187,7 +187,7 @@ func (a *API) InsertBulkBlocks() error {
 	creationDate := time.Now().Unix()
 
 	// insert dataset configuration
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("insert output configs")
 	}
 	for _, rrr := range rec.DatasetConfigList {
@@ -204,7 +204,7 @@ func (a *API) InsertBulkBlocks() error {
 	}
 
 	// get primaryDatasetTypeID and insert record if it does not exists
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get primary dataset type ID")
 	}
 	pdstDS := PrimaryDSTypes{
@@ -219,12 +219,14 @@ func (a *API) InsertBulkBlocks() error {
 		rec.PrimaryDataset.PrimaryDSType,
 	)
 	if err != nil {
-		log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
+		}
 		return err
 	}
 
 	// get primarayDatasetID and insert record if it does not exists
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get primary dataset ID")
 	}
 	if rec.PrimaryDataset.CreateBy == "" {
@@ -245,12 +247,14 @@ func (a *API) InsertBulkBlocks() error {
 		rec.PrimaryDataset.PrimaryDSName,
 	)
 	if err != nil {
-		log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
+		}
 		return err
 	}
 
 	// get processing era ID and insert record if it does not exists
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get processing era ID")
 	}
 	if rec.ProcessingEra.CreateBy == "" {
@@ -271,12 +275,14 @@ func (a *API) InsertBulkBlocks() error {
 		rec.ProcessingEra.ProcessingVersion,
 	)
 	if err != nil {
-		log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
+		}
 		return err
 	}
 
 	// insert acquisition era if it does not exists
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get acquisition era ID")
 	}
 	if rec.AcquisitionEra.CreateBy == "" {
@@ -299,12 +305,14 @@ func (a *API) InsertBulkBlocks() error {
 		rec.AcquisitionEra.AcquisitionEraName,
 	)
 	if err != nil {
-		log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
+		}
 		return err
 	}
 
 	// get dataTierID
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get data tier ID")
 	}
 	tier := DataTiers{
@@ -321,11 +329,13 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.DataTierName,
 	)
 	if err != nil {
-		log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
+		}
 		return err
 	}
 	// get physicsGroupID
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get physics group ID")
 	}
 	pgrp := PhysicsGroups{
@@ -340,11 +350,13 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.PhysicsGroupName,
 	)
 	if err != nil {
-		log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
+		}
 		return err
 	}
 	// get datasetAccessTypeID
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get dataset access type ID")
 	}
 	dat := DatasetAccessTypes{
@@ -359,10 +371,12 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.DatasetAccessType,
 	)
 	if err != nil {
-		log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
+		}
 		return err
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get processed dataset ID")
 	}
 	procDS := ProcessedDatasets{
@@ -377,10 +391,14 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.ProcessedDSName,
 	)
 	if err != nil {
-		log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
+		}
 		err := procDS.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert processed dataset name record", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert processed dataset name record", err)
+			}
 			return err
 		}
 		processedDatasetID, err = GetID(
@@ -391,13 +409,15 @@ func (a *API) InsertBulkBlocks() error {
 			rec.Dataset.ProcessedDSName,
 		)
 		if err != nil {
-			log.Printf("unable to find processed_ds_id %s error %v", rec.Dataset.ProcessedDSName, err)
+			if utils.VERBOSE > 1 {
+				log.Printf("unable to find processed_ds_id %s error %v", rec.Dataset.ProcessedDSName, err)
+			}
 			return err
 		}
 	}
 
 	// insert dataset
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("insert dataset")
 	}
 	if rec.Dataset.CreateBy == "" {
@@ -420,20 +440,26 @@ func (a *API) InsertBulkBlocks() error {
 		LAST_MODIFIED_BY:       rec.Dataset.CreateBy,
 	}
 	// get datasetID
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("get dataset ID")
 	}
 	datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 	if err != nil {
-		log.Println("unable to find dataset_id for", rec.Dataset.Dataset, "will insert")
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find dataset_id for", rec.Dataset.Dataset, "will insert")
+		}
 		err = dataset.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert dataset record", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert dataset record", err)
+			}
 			return err
 		}
 		datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 		if err != nil {
-			log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
+			if utils.VERBOSE > 1 {
+				log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
+			}
 			return err
 		}
 	}
@@ -450,7 +476,9 @@ func (a *API) InsertBulkBlocks() error {
 		var oid float64
 		err := tx.QueryRow(stm, vals...).Scan(&oid)
 		if err != nil {
-			log.Printf("fail to get id for %s, %v, error %v", stm, vals, err)
+			if utils.VERBOSE > 1 {
+				log.Printf("fail to get id for %s, %v, error %v", stm, vals, err)
+			}
 		}
 		// insert into DATASET_OUTPUT_MOD_CONFIGS
 		dsoRec := DatasetOutputModConfigs{
@@ -459,13 +487,15 @@ func (a *API) InsertBulkBlocks() error {
 		}
 		err = dsoRec.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert dataset output mod configs record", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert dataset output mod configs record", err)
+			}
 			return err
 		}
 	}
 
 	// insert block
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("insert block")
 	}
 	if rec.Block.CreateBy == "" {
@@ -486,21 +516,27 @@ func (a *API) InsertBulkBlocks() error {
 	// get blockID
 	blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 	if err != nil {
-		log.Println("unable to find block_id for", rec.Block.BlockName, "will insert")
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find block_id for", rec.Block.BlockName, "will insert")
+		}
 		err = blk.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert block record", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert block record", err)
+			}
 			return err
 		}
 		blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 		if err != nil {
-			log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+			if utils.VERBOSE > 1 {
+				log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+			}
 			return err
 		}
 	}
 
 	// insert files
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("insert files")
 	}
 	for _, rrr := range rec.Files {
@@ -515,7 +551,9 @@ func (a *API) InsertBulkBlocks() error {
 			rrr.FileType,
 		)
 		if err != nil {
-			log.Println("unable to find file_type_id for", rrr.FileType)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to find file_type_id for", rrr.FileType)
+			}
 			return err
 		}
 		// get branch hash ID and insert record if it does not exists
@@ -551,15 +589,21 @@ func (a *API) InsertBulkBlocks() error {
 		// insert file lumi list
 		fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", rrr.LogicalFileName)
 		if err != nil {
-			log.Println("unable to find file_id for", rrr.LogicalFileName, "will insert")
+			if utils.VERBOSE > 1 {
+				log.Println("unable to find file_id for", rrr.LogicalFileName, "will insert")
+			}
 			err = r.Insert(tx)
 			if err != nil {
-				log.Println("unable to insert File record", err)
+				if utils.VERBOSE > 1 {
+					log.Println("unable to insert File record", err)
+				}
 				return err
 			}
 			fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", rrr.LogicalFileName)
 			if err != nil {
-				log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+				if utils.VERBOSE > 1 {
+					log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+				}
 				return err
 			}
 		}
@@ -582,7 +626,9 @@ func (a *API) InsertBulkBlocks() error {
 			}
 			err := InsertFileLumisTxMany(tx, fileLumiChunk)
 			if err != nil {
-				log.Println("unable to insert FileLumis record", err)
+				if utils.VERBOSE > 1 {
+					log.Println("unable to insert FileLumis record", err)
+				}
 				return err
 			}
 		}
@@ -608,13 +654,17 @@ func (a *API) InsertBulkBlocks() error {
 				}
 				data, err = json.Marshal(fl)
 				if err != nil {
-					log.Println("unable to marshal dataset file lumi list", err)
+					if utils.VERBOSE > 1 {
+						log.Println("unable to marshal dataset file lumi list", err)
+					}
 					return err
 				}
 				api.Reader = bytes.NewReader(data)
 				err = api.InsertFileLumisTx(tx)
 				if err != nil {
-					log.Println("unable to insert FileLumis record", err)
+					if utils.VERBOSE > 1 {
+						log.Println("unable to insert FileLumis record", err)
+					}
 					return err
 				}
 			}
@@ -626,13 +676,17 @@ func (a *API) InsertBulkBlocks() error {
 	for _, rrr := range rec.FileConfigList {
 		data, err = json.Marshal(rrr)
 		if err != nil {
-			log.Println("unable to marshal file config list", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to marshal file config list", err)
+			}
 			return err
 		}
 		api.Reader = bytes.NewReader(data)
 		err = api.InsertFileOutputModConfigs(tx)
 		if err != nil {
-			log.Println("unable to insert file output mod config", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert file output mod config", err)
+			}
 			return err
 		}
 	}
@@ -640,13 +694,17 @@ func (a *API) InsertBulkBlocks() error {
 	// insert file parent list
 	data, err = json.Marshal(rec.FileParentList)
 	if err != nil {
-		log.Println("unable to marshal file parent list", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to marshal file parent list", err)
+		}
 		return err
 	}
 	api.Reader = bytes.NewReader(data)
 	err = api.InsertFileParentsTxt(tx)
 	if err != nil {
-		log.Println("unable to insert file parents", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to insert file parents", err)
+		}
 		return err
 	}
 
@@ -655,13 +713,17 @@ func (a *API) InsertBulkBlocks() error {
 		// get file id for parent dataset
 		pid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", ds)
 		if err != nil {
-			log.Println("unable to find dataset_id for", ds)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to find dataset_id for", ds)
+			}
 			return err
 		}
 		r := DatasetParents{THIS_DATASET_ID: datasetID, PARENT_DATASET_ID: pid}
 		err = r.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert parent dataset record", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert parent dataset record", err)
+			}
 			return err
 		}
 	}
@@ -669,7 +731,9 @@ func (a *API) InsertBulkBlocks() error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("fail to commit transaction", err)
+		if utils.VERBOSE > 1 {
+			log.Println("fail to commit transaction", err)
+		}
 		return err
 	}
 

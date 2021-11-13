@@ -114,7 +114,9 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.OUTPUT_MOD_CONFIG_ID, r.APP_EXEC_ID, r.RELEASE_VERSION_ID, r.PARAMETER_SET_HASH_ID, r.OUTPUT_MODULE_LABEL, r.GLOBAL_TAG, r.SCENARIO, r.CREATION_DATE, r.CREATE_BY)
 	if err != nil {
-		log.Println("unable to insert into OutputConfigs, error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert into OutputConfigs, error", err)
+		}
 	}
 	return err
 }
@@ -222,7 +224,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	var appID, psetID, relID int64
 	appID, err = GetRecID(tx, &arec, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME)
 	if err != nil {
-		log.Println("unable to find app_exec_id", err, "will insert")
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find app_exec_id", err, "will insert")
+		}
 		err = arec.Insert(tx)
 		if err != nil {
 			return err
@@ -230,7 +234,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	}
 	psetID, err = GetRecID(tx, &prec, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH)
 	if err != nil {
-		log.Println("unable to find parameter_set_hash_id", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find parameter_set_hash_id", err)
+		}
 		err = prec.Insert(tx)
 		if err != nil {
 			return err
@@ -238,7 +244,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	}
 	relID, err = GetRecID(tx, &rrec, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION)
 	if err != nil {
-		log.Println("unable to find release_version_id", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find release_version_id", err)
+		}
 		err = rrec.Insert(tx)
 		if err != nil {
 			return err
@@ -251,7 +259,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	orec.PARAMETER_SET_HASH_ID = psetID
 	err = orec.Insert(tx)
 	if err != nil {
-		log.Println("unable to insert OutputConfigs record, error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert OutputConfigs record, error", err)
+		}
 	}
 	return err
 }
@@ -274,7 +284,9 @@ func (a *API) InsertOutputConfigs() error {
 
 	err = a.InsertOutputConfigsTx(tx)
 	if err != nil {
-		log.Println("unable to insert output configs", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert output configs", err)
+		}
 		return err
 	}
 

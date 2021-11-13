@@ -72,7 +72,9 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		r.LAST_MODIFICATION_DATE,
 		r.LAST_MODIFIED_BY)
 	if err != nil {
-		log.Println("unable to insert migration block", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert migration block", err)
+		}
 	}
 	return err
 }

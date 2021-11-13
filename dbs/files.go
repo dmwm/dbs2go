@@ -261,7 +261,9 @@ func (r *Files) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.FILE_ID, r.LOGICAL_FILE_NAME, r.IS_FILE_VALID, r.DATASET_ID, r.BLOCK_ID, r.FILE_TYPE_ID, r.CHECK_SUM, r.FILE_SIZE, r.EVENT_COUNT, r.ADLER32, r.MD5, r.AUTO_CROSS_SECTION, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
 	if err != nil {
-		log.Println("unable to insert files, error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert files, error", err)
+		}
 	}
 	return err
 }
@@ -458,17 +460,23 @@ func (a *API) InsertFiles() error {
 		// get all necessary IDs from different tables
 		blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME)
 		if err != nil {
-			log.Println("unable to find block_id for", rec.BLOCK_NAME)
+			if utils.VERBOSE > 0 {
+				log.Println("unable to find block_id for", rec.BLOCK_NAME)
+			}
 			return err
 		}
 		dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
 		if err != nil {
-			log.Println("unable to find dataset_id for", rec.DATASET)
+			if utils.VERBOSE > 0 {
+				log.Println("unable to find dataset_id for", rec.DATASET)
+			}
 			return err
 		}
 		ftId, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
 		if err != nil {
-			log.Println("unable to find file_type_id for", rec.FILE_TYPE)
+			if utils.VERBOSE > 0 {
+				log.Println("unable to find file_type_id for", rec.FILE_TYPE)
+			}
 			// we will insert new file type
 			ftrec := FileDataTypes{FILE_TYPE: rec.FILE_TYPE}
 			err = ftrec.Insert(tx)
@@ -542,7 +550,9 @@ func (a *API) UpdateFiles() error {
 	}
 
 	// read input parameters
-	log.Printf("UpdateFiles params %+v", a.Params)
+	if utils.VERBOSE > 1 {
+		log.Printf("UpdateFiles params %+v", a.Params)
+	}
 	var createBy string
 	var isFileValid int
 	vals := getValues(a.Params, "is_file_valid")
@@ -602,7 +612,9 @@ func (a *API) UpdateFiles() error {
 	defer tx.Rollback()
 	_, err = tx.Exec(stm, args...)
 	if err != nil {
-		log.Printf("unable to update %v", err)
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to update %v", err)
+		}
 		return err
 	}
 

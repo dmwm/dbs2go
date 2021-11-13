@@ -16,7 +16,9 @@ import (
 // Datasets API
 //gocyclo:ignore
 func (a *API) Datasets() error {
-	log.Printf("datasets params %+v", a.Params)
+	if utils.VERBOSE > 1 {
+		log.Printf("datasets params %+v", a.Params)
+	}
 	var args []interface{}
 	var conds []string
 	tmpl := make(Record)
@@ -259,6 +261,9 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.DATASET_ID, r.DATASET, r.IS_DATASET_VALID, r.PRIMARY_DS_ID, r.PROCESSED_DS_ID, r.DATA_TIER_ID, r.DATASET_ACCESS_TYPE_ID, r.ACQUISITION_ERA_ID, r.PROCESSING_ERA_ID, r.PHYSICS_GROUP_ID, r.XTCROSSSECTION, r.PREP_ID, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	if utils.VERBOSE > 0 {
+		log.Printf("unable to insert Datasets %+v", err)
+	}
 	return err
 }
 
@@ -414,7 +419,9 @@ func (a *API) InsertDatasets() error {
 	// get all necessary IDs from different tables
 	primId, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
 	if err != nil {
-		log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
+		}
 		return err
 	}
 	//     primType, err := GetID(tx, "PRIMARY_DS_TYPE", "primary_ds_type_id", "primary_ds_type", rec.PRIMARY_DS_TYPE)
@@ -424,7 +431,9 @@ func (a *API) InsertDatasets() error {
 	//     }
 	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
 	if err != nil {
-		log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS_NAME)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS_NAME)
+		}
 		prec := ProcessedDatasets{PROCESSED_DS_NAME: rec.PROCESSED_DS_NAME}
 		err := prec.Insert(tx)
 		if err != nil {
@@ -437,27 +446,37 @@ func (a *API) InsertDatasets() error {
 	}
 	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER_NAME)
 	if err != nil {
-		log.Println("unable to find data_tier_id for", rec.DATA_TIER_NAME)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find data_tier_id for", rec.DATA_TIER_NAME)
+		}
 		return err
 	}
 	daccId, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
 	if err != nil {
-		log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
+		}
 		return err
 	}
 	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA_NAME)
 	if err != nil {
-		log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA_NAME)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA_NAME)
+		}
 		return err
 	}
 	peraId, err := GetID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
 	if err != nil {
-		log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
+		}
 		return err
 	}
 	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP_NAME)
 	if err != nil {
-		log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP_NAME)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP_NAME)
+		}
 		return err
 	}
 
@@ -551,12 +570,16 @@ func (a *API) UpdateDatasets() error {
 	defer tx.Rollback()
 	accessTypeID, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", datasetAccessType)
 	if err != nil {
-		log.Println("unable to find dataset_access_type_id for", datasetAccessType)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find dataset_access_type_id for", datasetAccessType)
+		}
 		return err
 	}
 	_, err = tx.Exec(stm, createBy, date, accessTypeID, isValidDataset, dataset)
 	if err != nil {
-		log.Printf("unable to update %v", err)
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to update %v", err)
+		}
 		return err
 	}
 

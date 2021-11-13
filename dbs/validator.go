@@ -145,7 +145,9 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		return nil
 	}
 	if o.Len > 0 && len(v) > o.Len {
-		log.Println("lexicon str pattern", o)
+		if utils.VERBOSE > 0 {
+			log.Println("lexicon str pattern", o)
+		}
 		return errors.New(fmt.Sprintf("length of %s exceed %d characters", v, o.Len))
 	}
 	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
@@ -283,7 +285,9 @@ func Validate(r *http.Request) error {
 					}
 				}
 			}
-			log.Printf("query parameter key=%s values=%+v\n", k, vvv)
+			if utils.VERBOSE > 0 {
+				log.Printf("query parameter key=%s values=%+v\n", k, vvv)
+			}
 		}
 	}
 	return nil
@@ -294,10 +298,14 @@ func CheckPattern(key, value string) error {
 	if p, ok := LexiconPatterns[key]; ok {
 		for _, pat := range p.Patterns {
 			if matched := pat.MatchString(value); matched {
-				log.Printf("CheckPattern key=%s value='%s' found match %s", key, value, pat)
+				if utils.VERBOSE > 0 {
+					log.Printf("CheckPattern key=%s value='%s' found match %s", key, value, pat)
+				}
 				return nil
 			} else {
-				log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
+				if utils.VERBOSE > 0 {
+					log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
+				}
 			}
 		}
 		return errors.New("invalid pattern for key=" + key)

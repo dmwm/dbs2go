@@ -2,12 +2,16 @@ package dbs
 
 import (
 	"log"
+
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // DatasetList DBS API
 func (a *API) DatasetList() error {
 	// perform some data preprocessing on given record
-	log.Printf("DatasetList data %+v", a.Params)
+	if utils.VERBOSE > 0 {
+		log.Printf("DatasetList data %+v", a.Params)
+	}
 	return a.Datasets()
 }
 

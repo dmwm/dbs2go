@@ -53,7 +53,9 @@ func (r *DatasetParents) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.THIS_DATASET_ID, r.PARENT_DATASET_ID)
 	if err != nil {
-		log.Println("unable to insert DatasetParents record, error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert DatasetParents record, error", err)
+		}
 	}
 	return err
 }

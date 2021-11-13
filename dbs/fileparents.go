@@ -100,7 +100,9 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.THIS_FILE_ID, r.PARENT_FILE_ID)
 	if err != nil {
-		log.Println("unable to execute", stm, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to execute", stm, "error", err)
+		}
 	}
 
 	// now we need to ensure that the parentage exists at block and dataset level too
@@ -114,7 +116,9 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	var thisBlockID int64
 	err = tx.QueryRow(stm, r.THIS_FILE_ID).Scan(&thisBlockID)
 	if err != nil {
-		log.Println("unable to execute", stm, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to execute", stm, "error", err)
+		}
 	}
 
 	// get block name of parent_file_id and call it parentBlockID
@@ -125,7 +129,9 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	var parentBlockID int64
 	err = tx.QueryRow(stm, r.PARENT_FILE_ID).Scan(&parentBlockID)
 	if err != nil {
-		log.Println("unable to execute", stm, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to execute", stm, "error", err)
+		}
 	}
 
 	// get dataset id of thisBlockID and call it thisDatasetID
@@ -136,7 +142,9 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	var thisDatasetID int64
 	err = tx.QueryRow(stm, thisBlockID).Scan(&thisDatasetID)
 	if err != nil {
-		log.Println("unable to execute", stm, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to execute", stm, "error", err)
+		}
 	}
 
 	// get dataset id of parentBlockID and call it parentDatasetID
@@ -147,21 +155,27 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	var parentDatasetID int64
 	err = tx.QueryRow(stm, parentBlockID).Scan(&parentDatasetID)
 	if err != nil {
-		log.Println("unable to execute", stm, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to execute", stm, "error", err)
+		}
 	}
 
 	// insert relationship between block and parent block
 	blockParents := BlockParents{THIS_BLOCK_ID: thisBlockID, PARENT_BLOCK_ID: parentBlockID}
 	err = blockParents.Insert(tx)
 	if err != nil {
-		log.Println("unable to insert block parentage", blockParents, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to insert block parentage", blockParents, "error", err)
+		}
 	}
 
 	// insert relationship between dataset and parent dataset
 	datasetParents := DatasetParents{THIS_DATASET_ID: thisDatasetID, PARENT_DATASET_ID: parentDatasetID}
 	err = datasetParents.Insert(tx)
 	if err != nil {
-		log.Println("unable to insert dataset parentage", datasetParents, "error", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to insert dataset parentage", datasetParents, "error", err)
+		}
 	}
 
 	return err
@@ -216,7 +230,9 @@ func (a *API) InsertFileParents() error {
 	defer tx.Rollback()
 	err = a.InsertFileParentsBlockTxt(tx)
 	if err != nil {
-		log.Println("unable to insert file parents", err)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to insert file parents", err)
+		}
 		return err
 	}
 
@@ -259,7 +275,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		log.Println("fail to decode data as FileParentBlockRecord", err)
 		return err
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert FileParentsBlock record %+v", rec)
 	}
 
@@ -302,7 +318,9 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	for _, item := range rec.ChildParentIDList {
 		fids = append(fids, item[0])
 	}
-	log.Println("InsertFileParentsBlock fids", fids, "bfids", bfids)
+	if utils.VERBOSE > 1 {
+		log.Println("InsertFileParentsBlock fids", fids, "bfids", bfids)
+	}
 	if len(fids) != len(bfids) {
 		log.Println("block fids != file ids")
 		log.Println("block ids", bfids)
@@ -316,7 +334,9 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		var r FileParents
 		r.THIS_FILE_ID = v[0]
 		r.PARENT_FILE_ID = v[1]
-		log.Println("InsertFileParentsBlock", r)
+		if utils.VERBOSE > 1 {
+			log.Println("InsertFileParentsBlock", r)
+		}
 		err = r.Validate()
 		if err != nil {
 			log.Println("unable to validate the record", r, "error", err)
@@ -324,7 +344,9 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		}
 		err = r.Insert(tx)
 		if err != nil {
-			log.Println("unable to insert FileParentsBlock record, error", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert FileParentsBlock record, error", err)
+			}
 			return err
 		}
 	}
@@ -356,11 +378,15 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	var records []FileParentRecord
 	err = json.Unmarshal(data, &records)
 	if err != nil {
-		log.Println("fail to decode data", err, "will proceed with FileParentRecord")
+		if utils.VERBOSE > 0 {
+			log.Println("fail to decode data", err, "will proceed with FileParentRecord")
+		}
 		var rrr FileParentRecord
 		err = json.Unmarshal(data, &rrr)
 		if err != nil {
-			log.Println("fail to decode data", err)
+			if utils.VERBOSE > 0 {
+				log.Println("fail to decode data", err)
+			}
 			return err
 		}
 		if rrr.LogicalFileName != "" {
@@ -368,18 +394,22 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 		}
 	}
 	for _, rec := range records {
-		if utils.VERBOSE > 0 {
+		if utils.VERBOSE > 1 {
 			log.Printf("Insert FileParents record %+v", rec)
 		}
 		// get file id for given lfn
 		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
 		if err != nil {
-			log.Println("unable to find file_id for", rec.LogicalFileName)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to find file_id for", rec.LogicalFileName)
+			}
 			return err
 		}
 		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
 		if err != nil {
-			log.Println("unable to find file_id for", rec.ParentLogicalFileName)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to find file_id for", rec.ParentLogicalFileName)
+			}
 			return err
 		}
 		var rrr FileParents

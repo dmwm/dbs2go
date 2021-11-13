@@ -59,7 +59,9 @@ func (a *API) FileLumis() error {
 	}
 
 	stm, err := LoadTemplateSQL("filelumis", tmpl)
-	//     log.Println("### stm", stm)
+	if utils.VERBOSE > 0 {
+		log.Println("### stm", stm)
+	}
 	if err != nil {
 		return err
 	}
@@ -186,7 +188,9 @@ func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 	}
 	err = rec.Insert(tx)
 	if err != nil {
-		log.Printf("unable to insert %+v, %v", rec, err)
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to insert %+v, %v", rec, err)
+		}
 		return err
 	}
 	return err
@@ -219,7 +223,9 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 		}
 	}
 	if err != nil {
-		log.Println("Fail to load template", err)
+		if utils.VERBOSE > 0 {
+			log.Println("Fail to load template", err)
+		}
 		return err
 	}
 	stm = strings.Split(stm, "VALUES")[0]
@@ -250,7 +256,9 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 	}
 	_, err = tx.Exec(stm, valueArgs...)
 	if err != nil {
-		log.Printf("Unable to insert FileLumis records, error %v", err)
+		if utils.VERBOSE > 0 {
+			log.Printf("Unable to insert FileLumis records, error %v", err)
+		}
 	}
 	return err
 }

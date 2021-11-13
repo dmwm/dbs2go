@@ -64,6 +64,9 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 		log.Printf("Insert DatasetAccessTypes\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.DATASET_ACCESS_TYPE_ID, r.DATASET_ACCESS_TYPE)
+	if utils.VERBOSE > 0 {
+		log.Printf("unable to insert DatasetAccessTypes %+v", err)
+	}
 	return err
 }
 

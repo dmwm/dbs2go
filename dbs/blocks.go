@@ -158,7 +158,9 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.BLOCK_ID, r.BLOCK_NAME, r.DATASET_ID, r.OPEN_FOR_WRITING, r.ORIGIN_SITE_NAME, r.BLOCK_SIZE, r.FILE_COUNT, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
 	if err != nil {
-		log.Println("fail to insert block", err)
+		if utils.VERBOSE > 0 {
+			log.Println("fail to insert block", err)
+		}
 	}
 	return err
 }
@@ -277,7 +279,9 @@ func (a *API) InsertBlocks() error {
 	dataset := strings.Split(rec.BLOCK_NAME, "#")[0]
 	dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", dataset)
 	if err != nil {
-		log.Println("unable to find dataset_id for", dataset)
+		if utils.VERBOSE > 1 {
+			log.Println("unable to find dataset_id for", dataset)
+		}
 		return err
 	}
 
@@ -352,7 +356,9 @@ func (a *API) UpdateBlocks() error {
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_blocks", tmplData)
 	if err != nil {
-		log.Println("unable to load update_blocks template", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to load update_blocks template", err)
+		}
 		return err
 	}
 
@@ -374,7 +380,9 @@ func (a *API) UpdateBlocks() error {
 		_, err = tx.Exec(stm, openForWriting, createBy, date, blockName)
 	}
 	if err != nil {
-		log.Printf("unable to update %v", err)
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to update %v", err)
+		}
 		return err
 	}
 
@@ -396,20 +404,26 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("block_stats", tmplData)
 	if err != nil {
-		log.Println("unable to load update_block_stats template", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to load update_block_stats template", err)
+		}
 		return err
 	}
 	var fileCount, bid int64
 	var blkSize float64
 	err = tx.QueryRow(stm, blockID).Scan(&fileCount, &blkSize, &bid)
 	if err != nil {
-		log.Println("unable to load block_stats template", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to load block_stats template", err)
+		}
 		return err
 	}
 
 	stm, err = LoadTemplateSQL("update_block_stats", tmplData)
 	if err != nil {
-		log.Println("unable to load update_block_stats template", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to load update_block_stats template", err)
+		}
 		return err
 	}
 
@@ -418,7 +432,9 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 	}
 	_, err = tx.Exec(stm, fileCount, int64(blkSize), blockID)
 	if err != nil {
-		log.Println("unable to update block stats", stm, "error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to update block stats", stm, "error", err)
+		}
 		return err
 	}
 	return nil

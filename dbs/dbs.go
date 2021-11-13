@@ -137,7 +137,7 @@ func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	if !strings.HasSuffix(tmpl, ".sql") {
 		tmpl += ".sql"
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("load template", tmpl)
 	}
 	stm, err := utils.ParseTmpl(sdir, tmpl, tmplData)
@@ -158,7 +158,7 @@ func LoadSQL(owner string) Record {
 	tmplData := make(Record)
 	tmplData["Owner"] = owner
 	sdir := fmt.Sprintf("%s/sql", utils.STATICDIR)
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("sql area", sdir)
 	}
 	dbsql := make(Record)
@@ -540,7 +540,9 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 	var tid float64
 	err := tx.QueryRow(stm, val...).Scan(&tid)
 	if err != nil {
-		log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
+		if utils.VERBOSE > 1 {
+			log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
+		}
 	}
 	return int64(tid), err
 }
@@ -549,7 +551,9 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface{}) (int64, error) {
 	rid, err := GetID(tx, table, id, attr, val...)
 	if err != nil {
-		log.Printf("unable to find %s for %v", id, val)
+		if utils.VERBOSE > 1 {
+			log.Printf("unable to find %s for %v", id, val)
+		}
 		err = rec.Insert(tx)
 		if err != nil {
 			return 0, err
@@ -586,7 +590,7 @@ func IfExistMulti(tx *sql.Tx, table, rid string, args []string, vals ...interfac
 	if err == nil {
 		return true
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("fail to get ID from table %s %s for %v values %v", table, rid, args, vals)
 	}
 	return false
@@ -598,13 +602,13 @@ func IfExist(tx *sql.Tx, table, rid, attr string, val ...interface{}) bool {
 	fid, err := GetID(tx, table, rid, attr, val...)
 	if err == nil {
 		if fid > 0 {
-			if utils.VERBOSE > 0 {
+			if utils.VERBOSE > 1 {
 				log.Printf("%s found in %s with id=%v", attr, table, fid)
 			}
 			return true
 		}
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("fail to get ID from table %s %s for %s=%v", table, rid, attr, val)
 	}
 	return false
@@ -651,7 +655,6 @@ func ParseRuns(runs []string) ([]string, error) {
 			runs = strings.Replace(runs, "]", "", -1)
 			for _, r := range strings.Split(runs, ",") {
 				run := strings.Trim(r, " ")
-				//                 log.Println("input", r)
 				out = append(out, run)
 			}
 		} else {
@@ -821,7 +824,9 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
 		msg := fmt.Sprintf("fail to increment sequence, query='%s' error=%v", stm, err)
-		log.Println(msg)
+		if utils.VERBOSE > 1 {
+			log.Println(msg)
+		}
 		return 0, errors.New(msg)
 	}
 	return int64(pid), nil

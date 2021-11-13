@@ -64,6 +64,9 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 		log.Printf("Insert DatasetOutputModConfigs\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.DS_OUTPUT_MOD_CONF_ID, r.DATASET_ID, r.OUTPUT_MOD_CONFIG_ID)
+	if utils.VERBOSE > 0 {
+		log.Printf("unable to insert DatasetOutputModConfigs %+v", err)
+	}
 	return err
 }
 

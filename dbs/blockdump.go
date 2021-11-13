@@ -464,7 +464,9 @@ func (a *API) BlockDump() error {
 	go getDatasetConfigList(blk, &wg, &datasetConfigList)
 	wg.Wait()
 
-	log.Println("waited for all goroutines to finish")
+	if utils.VERBOSE > 1 {
+		log.Println("waited for all goroutines to finish")
+	}
 
 	// initialize BulkBlocks record
 	rec := BulkBlocks{

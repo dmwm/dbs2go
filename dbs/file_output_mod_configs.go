@@ -64,7 +64,9 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.FILE_OUTPUT_CONFIG_ID, r.FILE_ID, r.OUTPUT_MOD_CONFIG_ID)
 	if err != nil {
-		log.Println("fail to insert file_output_config record", err)
+		if utils.VERBOSE > 0 {
+			log.Println("fail to insert file_output_config record", err)
+		}
 	}
 	return err
 }
@@ -128,7 +130,9 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	// get file id for given lfn
 	fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.Lfn)
 	if err != nil {
-		log.Println("unable to find file_id for", rec.Lfn)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to find file_id for", rec.Lfn)
+		}
 		return err
 	}
 	// find output module config id
@@ -147,14 +151,18 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	tmpl["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("outputconfigs_id", tmpl)
 	if err != nil {
-		log.Println("unable to load outptuconfigs_id sql template, error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to load outptuconfigs_id sql template, error", err)
+		}
 		return err
 	}
 	stm = WhereClause(stm, conds)
 	var oid int64
 	err = tx.QueryRow(stm, args...).Scan(&oid)
 	if err != nil {
-		log.Printf("unable to find output_mod_config_id for\n%s\n%+v", stm, args)
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to find output_mod_config_id for\n%s\n%+v", stm, args)
+		}
 		return err
 	}
 
@@ -167,7 +175,9 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	}
 	err = rrr.Insert(tx)
 	if err != nil {
-		log.Println("unable to insert FileOutputModConfigs, error", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unable to insert FileOutputModConfigs, error", err)
+		}
 		return err
 	}
 
