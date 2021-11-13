@@ -22,6 +22,7 @@ var MigrationDB *sql.DB
 // exit channel
 func MigrationServer(interval, timeout int, ch <-chan bool) {
 	log.Println("Start migration server")
+	api := API{Api: "ProcessMigration"}
 
 	for {
 		select {
@@ -48,13 +49,14 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				params := make(map[string]interface{})
 				params["migration_request_url"] = r.MIGRATION_URL
 				params["migration_request_id"] = r.MIGRATION_REQUEST_ID
-				api := API{
-					Params: params,
-					Api:    "ProcessMigration",
-				}
+				api.Params = params
+				//                 api := API{
+				//                     Params: params,
+				//                     Api:    "ProcessMigration",
+				//                 }
 				log.Printf("start new migration process with %+v", params)
 				api.ProcessMigration(timeout, false)
-				//                 go api.ProcessMigration(timeout, false)
+				params = nil
 			}
 		}
 	}
