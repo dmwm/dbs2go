@@ -63,7 +63,9 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 		r.LAST_MODIFIED_BY,
 		r.RETRY_COUNT)
 	if err != nil {
-		log.Println("unabel to insert MigratinRequest", err)
+		if utils.VERBOSE > 0 {
+			log.Println("unabel to insert MigratinRequest", err)
+		}
 	}
 	return err
 }
