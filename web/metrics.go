@@ -6,10 +6,12 @@ package web
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/prometheus/procfs"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
@@ -89,6 +91,16 @@ type Mem struct {
 	Swap    Memory `json:"swap"`    // swap memory metrics from gopsutils
 }
 
+// ProcFS represents prometheus profcs metrics
+type ProcFS struct {
+	CpuTotal float64
+	Vsize    float64
+	Rss      float64
+	OpenFDs  float64
+	MaxFDs   float64
+	MaxVsize float64
+}
+
 // Metrics provide various metrics about our server
 type Metrics struct {
 	CPU          []float64               `json:"cpu"`          // cpu metrics from gopsutils
@@ -107,6 +119,7 @@ type Metrics struct {
 	RPS          float64                 `json:"rps"`          // throughput req/sec
 	RPSPhysical  float64                 `json:"rpsPhysical"`  // throughput req/sec using physical cpu
 	RPSLogical   float64                 `json:"rpsLogical"`   // throughput req/sec using logical cpu
+	ProcFS       ProcFS                  `json:"procfs"`       // metrics from prometheus procfs
 }
 
 func metrics() Metrics {
@@ -140,6 +153,34 @@ func metrics() Metrics {
 			metrics.OpenFiles = openFiles
 		}
 	}
+
+	// get stats about given process
+	var cpuTotal, vsize, rss, openFDs, maxFDs, maxVsize float64
+	if proc, err := procfs.NewProc(os.Getpid()); err == nil {
+		if stat, err := proc.Stat(); err == nil {
+			// CPUTime returns the total CPU user and system time in seconds.
+			cpuTotal = float64(stat.CPUTime())
+			vsize = float64(stat.VirtualMemory())
+			rss = float64(stat.ResidentMemory())
+		}
+		if fds, err := proc.FileDescriptorsLen(); err == nil {
+			openFDs = float64(fds)
+		}
+		if limits, err := proc.NewLimits(); err == nil {
+			maxFDs = float64(limits.OpenFiles)
+			maxVsize = float64(limits.AddressSpace)
+		}
+	} else {
+		log.Println("unable to get procfs info", err)
+	}
+	metrics.ProcFS = ProcFS{
+		CpuTotal: cpuTotal,
+		Vsize:    vsize,
+		Rss:      rss,
+		OpenFDs:  openFDs,
+		MaxFDs:   maxFDs,
+		MaxVsize: maxVsize}
+
 	metrics.Uptime = time.Since(StartTime).Seconds()
 
 	metrics.AvgGetTime = AvgGetRequestTime
@@ -198,6 +239,27 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_listen_connections\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_listen_connections gauge\n", prefix)
 	out += fmt.Sprintf("%s_listen_connections %v\n", prefix, lisCon)
+
+	// procfs metrics
+	// cpuTotal, vsize, rss, openFDs, maxFDs, maxVsize
+	out += fmt.Sprintf("# HELP %s_procfs_cputotal\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_cputotal gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_cputotal %v\n", prefix, data.ProcFS.CpuTotal)
+	out += fmt.Sprintf("# HELP %s_procfs_vsize\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_vsize gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_vsize %v\n", prefix, data.ProcFS.Vsize)
+	out += fmt.Sprintf("# HELP %s_procfs_rss\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_rss gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_rss %v\n", prefix, data.ProcFS.Rss)
+	out += fmt.Sprintf("# HELP %s_procfs_openfds\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_openfds gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_openfds %v\n", prefix, data.ProcFS.OpenFDs)
+	out += fmt.Sprintf("# HELP %s_procfs_maxfds\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_maxfds gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_maxfds %v\n", prefix, data.ProcFS.MaxFDs)
+	out += fmt.Sprintf("# HELP %s_procfs_maxvsize\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_maxvsize gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_maxvsize %v\n", prefix, data.ProcFS.MaxVsize)
 
 	// load
 	out += fmt.Sprintf("# HELP %s_load1\n", prefix)
