@@ -638,7 +638,7 @@ func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 
 	// create channel to report when operation will be completed
 	ch := make(chan bool)
-	defer close(ch)
+	//     defer close(ch)
 
 	// set default status
 	status = FAILED
@@ -690,9 +690,8 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 		log.Printf("unable to convert mid", err)
 	}
 	mid := int64(midint)
-	if utils.VERBOSE > -1 {
-		log.Println("process migration request", mid)
-	}
+	log.Println("process migration request", mid)
+
 	records, err := MigrationRequests(mid)
 	if utils.VERBOSE > 0 {
 		log.Println("found process migration request records", records)
@@ -777,6 +776,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 		Separator: a.Separator,
 	}
 	err = api.InsertBulkBlocks()
+	log.Printf("insert bulk blocks for mid %v error %v", mid, err)
 	if utils.VERBOSE > 1 {
 		log.Printf("Insert bulkblocks %+v", api)
 	}
@@ -789,9 +789,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 		*status = COMPLETED
 		updateMigrationStatus(mid, COMPLETED)
 	}
-	if utils.VERBOSE > -1 {
-		log.Printf("updated Migration request %v with status %v", mid, *status)
-	}
+	log.Printf("updated migration request %v with status %v", mid, *status)
 }
 
 // updateMigrationStatus updates migration status
