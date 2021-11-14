@@ -700,6 +700,7 @@ func (a *API) InsertBulkBlocks() error {
 		return err
 	}
 	api.Reader = bytes.NewReader(data)
+	api.Params = make(Record)
 	err = api.InsertFileParentsTxt(tx)
 	if err != nil {
 		if utils.VERBOSE > 1 {
