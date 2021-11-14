@@ -626,7 +626,131 @@ func migrationReport(req MigrationRequest, report string, status int64, err erro
 // ProcessMigration will process given migration request
 // and inject data to source DBS
 // It expects that client will provide migration_request_url and migration id
-func (a *API) ProcessMigration(timeout int, writeReport bool) error {
+func (a *API) ProcessMigration() {
+
+	var status int64
+	status = FAILED // change it if we succeed at the end
+
+	// backward compatibility with DBS migration server which uses migration_rqst_id
+	if v, ok := a.Params["migration_rqst_id"]; ok {
+		a.Params["migration_request_id"] = v
+	}
+
+	// obtain migration request record
+	val, err := getSingleValue(a.Params, "migration_request_id")
+	midint, err := strconv.Atoi(val)
+	if err != nil {
+		log.Printf("unable to convert mid", err)
+		return
+	}
+	mid := int64(midint)
+	log.Println("process migration request", mid)
+
+	records, err := MigrationRequests(mid)
+	if utils.VERBOSE > 0 {
+		log.Println("found process migration request records", records)
+	}
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("fail to fetch migration request %d, error %v", mid, err)
+		}
+		return
+	}
+	if len(records) != 1 {
+		if utils.VERBOSE > 0 {
+			log.Printf("found %d requests for mid=%d, stop processing", len(records), mid)
+		}
+		return
+	}
+	mrec := records[0]
+	// update migration status
+	updateMigrationStatus(mid, IN_PROGRESS)
+
+	// find block name for our migration id
+	stm := getSQL("migration_block")
+	stm = CleanStatement(stm)
+	var args []interface{}
+	args = append(args, mid)
+	if utils.VERBOSE > 0 {
+		utils.PrintSQL(stm, args, "execute")
+	}
+	var bid, bOrder, bStatus int64
+	var block string
+	err = DB.QueryRow(stm, args...).Scan(
+		&bid, &block, &bOrder, &bStatus,
+	)
+	if err != nil {
+		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
+		return
+	}
+
+	// obtain block details from destination DBS
+	rurl := fmt.Sprintf("%s/blockdump?block_name=%s", mrec.MIGRATION_URL, url.QueryEscape(block))
+	data, err := getData(rurl)
+	if err != nil {
+		if utils.VERBOSE > 1 {
+			log.Printf("unable to query %s/blockdump, error %v", rurl, err)
+		}
+		return
+	}
+	// NOTE: /blockdump API returns BulkBlocks record used in /bulkblocks API
+	//     var rec BlockDumpRecord
+	var brec BulkBlocks
+	err = json.Unmarshal(data, &brec)
+	if err != nil {
+		if utils.VERBOSE > 2 {
+			log.Println("blockdump data", string(data))
+		}
+		log.Printf("unable to unmarshal BulkBlocks, error %v", err)
+		return
+	}
+	cby := a.CreateBy
+	if brec.Dataset.CreateBy != "" {
+		cby = brec.Dataset.CreateBy
+	}
+	var rec Record
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		if utils.VERBOSE > 2 {
+			log.Println("blockdump data", string(data))
+		}
+		log.Printf("unable to unmarshal Record, error %v", err)
+		return
+	}
+	reader := bytes.NewReader(data)
+	writer := utils.StdoutWriter("")
+
+	// insert block dump record into source DBS
+	//     err = rec.InsertBlockDump()
+	api := &API{
+		Params:    rec,
+		Api:       "bulkblocks",
+		Writer:    writer,
+		Reader:    reader,
+		CreateBy:  cby,
+		Separator: a.Separator,
+	}
+	err = api.InsertBulkBlocks()
+	log.Printf("insert bulk blocks for mid %v error %v", mid, err)
+	if utils.VERBOSE > 2 {
+		log.Printf("Insert bulkblocks %+v", api)
+	}
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Println("insert block dump record failed with", err)
+		}
+		updateMigrationStatus(mid, FAILED)
+	} else {
+		status = COMPLETED
+		updateMigrationStatus(mid, COMPLETED)
+	}
+	log.Printf("updated migration request %v with status %v", mid, status)
+}
+
+// ProcessMigrationCtx will process given migration request
+// and inject data to source DBS with timeout context
+// It expects that client will provide migration_request_url and migration id
+func (a *API) ProcessMigrationCtx(timeout int) error {
 
 	var status int64
 	var err error
@@ -657,15 +781,9 @@ func (a *API) ProcessMigration(timeout int, writeReport bool) error {
 	report := MigrationReport{Report: msg, Status: statusString(status)}
 	var reports []MigrationReport
 	reports = append(reports, report)
-	if utils.VERBOSE > 0 {
-		log.Println(report.Report)
-	}
-	if writeReport {
-		data, err := json.Marshal(reports)
-		if err == nil {
-			a.Writer.Write(data)
-		}
-		return err
+	data, err := json.Marshal(reports)
+	if err == nil {
+		a.Writer.Write(data)
 	}
 	return err
 }
