@@ -20,17 +20,17 @@ import (
 
 // BulkBlocks represents bulk block structure used by `/bulkblocks` DBS API
 type BulkBlocks struct {
-	DatasetConfigList []DatasetConfig `json:"dataset_conf_list"`
-	FileConfigList    []FileConfig    `json:"file_conf_list"`
-	Files             []File          `json:"files"`
-	ProcessingEra     ProcessingEra   `json:"processing_era"`
-	PrimaryDataset    PrimaryDataset  `json:"primds"`
-	Dataset           Dataset         `json:"dataset"`
-	AcquisitionEra    AcquisitionEra  `json:"acquisition_era"`
-	Block             Block           `json:"block"`
-	FileParentList    []FileParent    `json:"file_parent_list"`
-	BlockParentList   []BlockParent   `json:"block_parent_list"`
-	DatasetParentList []string        `json:"dataset_parent_list"`
+	DatasetConfigList []DatasetConfig    `json:"dataset_conf_list"`
+	FileConfigList    []FileConfig       `json:"file_conf_list"`
+	Files             []File             `json:"files"`
+	ProcessingEra     ProcessingEra      `json:"processing_era"`
+	PrimaryDataset    PrimaryDataset     `json:"primds"`
+	Dataset           Dataset            `json:"dataset"`
+	AcquisitionEra    AcquisitionEra     `json:"acquisition_era"`
+	Block             Block              `json:"block"`
+	FileParentList    []FileParentRecord `json:"file_parent_list"`
+	BlockParentList   []BlockParent      `json:"block_parent_list"`
+	DatasetParentList []string           `json:"dataset_parent_list"`
 	//     DatasetParentList []DatasetParent `json:"dataset_parent_list"`
 }
 
@@ -121,13 +121,6 @@ type Block struct {
 	FileCount      int64  `json:"file_count"`
 	OriginSiteName string `json:"origin_site_name"`
 	BlockSize      int64  `json:"block_size"`
-}
-
-// FileParent represents file parent structure used in BulkBlocks structure
-type FileParent struct {
-	LogicalFileName       string `json:"logical_file_name"`
-	ThisLogicalFileName   string `json:"this_logical_file_name"`
-	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 
 // BlockParent represents block parent structure used in BulkBlocks structure

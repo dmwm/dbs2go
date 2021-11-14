@@ -331,7 +331,7 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 	}
 }
 
-type FileParentList []FileParent
+type FileParentList []FileParentRecord
 
 func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParentList) {
 	defer wg.Done()
@@ -350,7 +350,7 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	}
 	defer rows.Close()
 	for rows.Next() {
-		fileParent := FileParent{}
+		fileParent := FileParentRecord{}
 		err = rows.Scan(
 			&fileParent.LogicalFileName,
 			&fileParent.ParentLogicalFileName,
