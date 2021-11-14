@@ -390,11 +390,11 @@
   },
   "file_parent_list": [
     {
-      "logical_file_name": "/store/data/a/b/A/a/1/abcd4.root",
+      "this_logical_file_name": "/store/data/a/b/A/a/1/abcd4.root",
       "parent_logical_file_name": "/store/data/a/b/A/a/1/parent/abcd3.root"
     },
     {
-      "logical_file_name": "/store/data/a/b/A/a/1/abcd5.root",
+      "this_logical_file_name": "/store/data/a/b/A/a/1/abcd5.root",
       "parent_logical_file_name": "/store/data/a/b/A/a/1/parent/abcd2.root"
     }
   ]
