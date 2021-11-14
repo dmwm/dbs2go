@@ -6,8 +6,8 @@ FROM {{.Owner}}.MIGRATION_REQUESTS MR
 
 {{if .Oldest}}
 WHERE MR.MIGRATION_STATUS=0
-or (MR.migration_status=3 and MR.retry_count=0 and MR.last_modification_date <= :current_date-60)
-or (MR.migration_status=3 and MR.retry_count=1 and MR.last_modification_date <= :current_date-120)
-or (MR.migration_status=3 and MR.retry_count=2 and MR.last_modification_date <= :current_date-240)
+or (MR.migration_status=3 and MR.retry_count=0 and MR.last_modification_date <= {{.Date1}})
+or (MR.migration_status=3 and MR.retry_count=1 and MR.last_modification_date <= {{.Date2}})
+or (MR.migration_status=3 and MR.retry_count=2 and MR.last_modification_date <= {{.Date3}})
 ORDER BY MR.creation_date
 {{end}}

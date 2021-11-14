@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -109,7 +110,21 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	// query MigrationRequest table and fetch all non-completed requests
 	var args []interface{}
 	var conds []string
-	stm := getSQL("migration_requests")
+	tmplData := make(Record)
+	if mid == -1 {
+		tmplData["Oldest"] = true
+		tmplData["Date1"] = time.Now().Unix() - 60
+		tmplData["Date2"] = time.Now().Unix() - 120
+		tmplData["Date3"] = time.Now().Unix() - 240
+	}
+	stm, err := LoadTemplateSQL("migration_requests", tmplData)
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Println("unable to load migration_requests template", err)
+		}
+		return records, err
+	}
+
 	if mid > 0 {
 		cond := fmt.Sprintf(" MR.MIGRATION_REQUEST_ID = %s", placeholder("migration_request_id"))
 		conds = append(conds, cond)
