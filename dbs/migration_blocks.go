@@ -48,7 +48,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 	// get SQL statement from static area
 	stm := getSQL("insert_migration_blocks")
 	stm = CleanStatement(stm)
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		var args []interface{}
 		args = append(args, r.MIGRATION_BLOCK_ID)
 		args = append(args, r.MIGRATION_REQUEST_ID)

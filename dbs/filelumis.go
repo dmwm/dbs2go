@@ -248,7 +248,7 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 	if DBOWNER != "sqlite" {
 		stm = stmOra
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi values", stm, len(valueArgs))
 	}
 	if utils.VERBOSE > 2 {

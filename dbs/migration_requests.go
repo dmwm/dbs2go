@@ -129,7 +129,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	}
 	defer tx.Rollback()
 	stm = CleanStatement(stm)
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		utils.PrintSQL(stm, args, "execute")
 	}
 	rows, err := tx.Query(stm, args...)

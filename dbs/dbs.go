@@ -818,7 +818,7 @@ func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	}
 	var pid float64
 	stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("execute", stm)
 	}
 	err := tx.QueryRow(stm).Scan(&pid)

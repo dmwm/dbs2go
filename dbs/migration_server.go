@@ -40,7 +40,7 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				continue
 			}
 			if utils.VERBOSE > 0 {
-				log.Println("found %d migration requests", len(records))
+				log.Printf("found %d migration requests", len(records))
 			}
 			for _, r := range records {
 				if utils.VERBOSE > 0 {

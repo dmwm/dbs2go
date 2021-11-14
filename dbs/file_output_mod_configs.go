@@ -59,7 +59,7 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_file_output_mod_configs")
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert FileOutputModConfigs\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.FILE_OUTPUT_CONFIG_ID, r.FILE_ID, r.OUTPUT_MOD_CONFIG_ID)
@@ -170,7 +170,7 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	var rrr FileOutputModConfigs
 	rrr.FILE_ID = fid
 	rrr.OUTPUT_MOD_CONFIG_ID = oid
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert FileOutputModConfigs\n%s\n%+v", stm, rrr)
 	}
 	err = rrr.Insert(tx)

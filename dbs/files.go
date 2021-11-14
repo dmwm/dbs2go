@@ -256,7 +256,7 @@ func (r *Files) Insert(tx *sql.Tx) error {
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_files")
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert Files\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.FILE_ID, r.LOGICAL_FILE_NAME, r.IS_FILE_VALID, r.DATASET_ID, r.BLOCK_ID, r.FILE_TYPE_ID, r.CHECK_SUM, r.FILE_SIZE, r.EVENT_COUNT, r.ADLER32, r.MD5, r.AUTO_CROSS_SECTION, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
