@@ -111,6 +111,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	var args []interface{}
 	var conds []string
 	tmplData := make(Record)
+	tmplData["Owner"] = DBOWNER
 	if mid == -1 {
 		tmplData["Oldest"] = true
 		tmplData["Date1"] = time.Now().Unix() - 60
