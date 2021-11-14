@@ -126,6 +126,7 @@ type Block struct {
 // FileParent represents file parent structure used in BulkBlocks structure
 type FileParent struct {
 	LogicalFileName       string `json:"logical_file_name"`
+	ThisLogicalFileName   string `json:"this_logical_file_name"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 

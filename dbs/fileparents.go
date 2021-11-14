@@ -357,6 +357,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 // used by bulkblock API
 type FileParentRecord struct {
 	LogicalFileName       string `json:"logical_file_name"`
+	ThisLogicalFileName   string `json:"this_logical_file_name"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 
@@ -397,18 +398,22 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 		if utils.VERBOSE > 1 {
 			log.Printf("Insert FileParents record %+v", rec)
 		}
+		lfn := rec.LogicalFileName
+		if lfn == "" && rec.ThisLogicalFileName != "" {
+			lfn = rec.ThisLogicalFileName
+		}
 		// get file id for given lfn
-		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LogicalFileName)
+		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find file_id for", rec.LogicalFileName)
+				log.Println("unable to find logical_file_name file_id for", rec)
 			}
 			return err
 		}
 		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find file_id for", rec.ParentLogicalFileName)
+				log.Println("unable to find parent_logical_file_name file_id for", rec.ParentLogicalFileName)
 			}
 			return err
 		}
