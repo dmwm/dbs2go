@@ -777,7 +777,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 	}
 	err = api.InsertBulkBlocks()
 	log.Printf("insert bulk blocks for mid %v error %v", mid, err)
-	if utils.VERBOSE > 1 {
+	if utils.VERBOSE > 2 {
 		log.Printf("Insert bulkblocks %+v", api)
 	}
 	if err != nil {
