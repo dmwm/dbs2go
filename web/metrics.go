@@ -6,17 +6,16 @@ package web
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"time"
 
-	"github.com/prometheus/procfs"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
+	"github.com/vkuznet/dbs2go/utils"
 )
 
 // TotalGetRequests counts total number of GET requests received by the server
@@ -91,16 +90,6 @@ type Mem struct {
 	Swap    Memory `json:"swap"`    // swap memory metrics from gopsutils
 }
 
-// ProcFS represents prometheus profcs metrics
-type ProcFS struct {
-	CpuTotal float64
-	Vsize    float64
-	Rss      float64
-	OpenFDs  float64
-	MaxFDs   float64
-	MaxVsize float64
-}
-
 // Metrics provide various metrics about our server
 type Metrics struct {
 	CPU          []float64               `json:"cpu"`          // cpu metrics from gopsutils
@@ -119,7 +108,7 @@ type Metrics struct {
 	RPS          float64                 `json:"rps"`          // throughput req/sec
 	RPSPhysical  float64                 `json:"rpsPhysical"`  // throughput req/sec using physical cpu
 	RPSLogical   float64                 `json:"rpsLogical"`   // throughput req/sec using logical cpu
-	ProcFS       ProcFS                  `json:"procfs"`       // metrics from prometheus procfs
+	ProcFS       utils.ProcFS            `json:"procfs"`       // metrics from prometheus procfs
 }
 
 func metrics() Metrics {
@@ -154,33 +143,7 @@ func metrics() Metrics {
 		}
 	}
 
-	// get stats about given process
-	var cpuTotal, vsize, rss, openFDs, maxFDs, maxVsize float64
-	if proc, err := procfs.NewProc(os.Getpid()); err == nil {
-		if stat, err := proc.Stat(); err == nil {
-			// CPUTime returns the total CPU user and system time in seconds.
-			cpuTotal = float64(stat.CPUTime())
-			vsize = float64(stat.VirtualMemory())
-			rss = float64(stat.ResidentMemory())
-		}
-		if fds, err := proc.FileDescriptorsLen(); err == nil {
-			openFDs = float64(fds)
-		}
-		if limits, err := proc.NewLimits(); err == nil {
-			maxFDs = float64(limits.OpenFiles)
-			maxVsize = float64(limits.AddressSpace)
-		}
-	} else {
-		log.Println("unable to get procfs info", err)
-	}
-	metrics.ProcFS = ProcFS{
-		CpuTotal: cpuTotal,
-		Vsize:    vsize,
-		Rss:      rss,
-		OpenFDs:  openFDs,
-		MaxFDs:   maxFDs,
-		MaxVsize: maxVsize}
-
+	metrics.ProcFS = utils.ProcFSMetrics()
 	metrics.Uptime = time.Since(StartTime).Seconds()
 
 	metrics.AvgGetTime = AvgGetRequestTime
