@@ -221,7 +221,7 @@ type Files struct {
 	FILE_TYPE_ID           int64   `json:"file_type_id" validate:"number,gt=0"`
 	CHECK_SUM              string  `json:"check_sum" validate:"required"`
 	FILE_SIZE              int64   `json:"file_size" validate:"required,number,gt=0"`
-	EVENT_COUNT            int64   `json:"event_count" validate:"required,number"`
+	EVENT_COUNT            int64   `json:"event_count" validate:"number"`
 	ADLER32                string  `json:"adler32" validate:"required"`
 	MD5                    string  `json:"md5"`
 	AUTO_CROSS_SECTION     float64 `json:"auto_cross_section"`
