@@ -187,4 +187,5 @@ Finally, using 1K chunk size with 300K max size we achieve the following:
 ```
 
 So, it seems that `-chunk 500 -maxSize 200000` is the best performance options
-which allows to insert 4M in 5 and half minutes using 750MB of RAM.
+which allows to insert 4M in 5 and half minutes using 750MB of RAM. And, these
+set of parameters leads to 1m15s and 575MB for 1M records insertion.
