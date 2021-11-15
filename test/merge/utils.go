@@ -1,5 +1,7 @@
 package main
 
+// Author Valentin Kuznetsov <vkuznet [AT] gmail {DOT] com >
+
 import (
 	"fmt"
 	"strconv"
