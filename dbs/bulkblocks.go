@@ -601,35 +601,65 @@ func (a *API) InsertBulkBlocks() error {
 				return err
 			}
 		}
-		var chunk []FileLumi
-		for i := 0; i < len(rrr.FileLumiList); i = i + FileLumiChunkSize {
-			if i+FileLumiChunkSize < len(rrr.FileLumiList) {
-				chunk = rrr.FileLumiList[i : i+FileLumiChunkSize]
-			} else {
-				chunk = rrr.FileLumiList[i:len(rrr.FileLumiList)]
-			}
-			var fileLumiChunk []FileLumis
-			for _, r := range chunk {
+
+		// there are three methods to insert FileLumi list
+		// - via temp table
+		// - via INSERT ALL and using chunks
+		// - sequential method, i.e. record by record
+
+		// insert FileLumi list via temp table
+		if FileLumiInsertMethod == "temptable" && DBOWNER != "sqlite" {
+
+			var fileLumiList []FileLumis
+			for _, r := range rrr.FileLumiList {
 				fl := FileLumis{
 					FILE_ID:          fileID,
 					RUN_NUM:          r.RunNumber,
 					LUMI_SECTION_NUM: r.LumiSectionNumber,
 					EVENT_COUNT:      r.EventCount,
 				}
-				fileLumiChunk = append(fileLumiChunk, fl)
+				fileLumiList = append(fileLumiList, fl)
 			}
-			err := InsertFileLumisTxMany(tx, fileLumiChunk)
+			err = InsertFileLumisTxViaMerge(tx, fileLumiList)
 			if err != nil {
 				if utils.VERBOSE > 1 {
-					log.Println("unable to insert FileLumis record", err)
+					log.Println("unable to insert FileLumis records", err)
 				}
 				return err
 			}
-		}
 
-		/*
+		} else if FileLumiInsertMethod == "chunks" {
 
-			// sequential insert of file lumi records
+			// insert FileLumi list via insert chunks
+			var chunk []FileLumi
+			for i := 0; i < len(rrr.FileLumiList); i = i + FileLumiChunkSize {
+				if i+FileLumiChunkSize < len(rrr.FileLumiList) {
+					chunk = rrr.FileLumiList[i : i+FileLumiChunkSize]
+				} else {
+					chunk = rrr.FileLumiList[i:len(rrr.FileLumiList)]
+				}
+				var fileLumiChunk []FileLumis
+				for _, r := range chunk {
+					fl := FileLumis{
+						FILE_ID:          fileID,
+						RUN_NUM:          r.RunNumber,
+						LUMI_SECTION_NUM: r.LumiSectionNumber,
+						EVENT_COUNT:      r.EventCount,
+					}
+					fileLumiChunk = append(fileLumiChunk, fl)
+				}
+				err := InsertFileLumisTxMany(tx, fileLumiChunk)
+				if err != nil {
+					if utils.VERBOSE > 1 {
+						log.Println("unable to insert FileLumis record", err)
+					}
+					return err
+				}
+			}
+
+		} else {
+
+			// insert FileLumi list via sequential insert of file lumi records
 			for _, r := range rrr.FileLumiList {
 				var vals []interface{}
 				vals = append(vals, fileID)
@@ -662,8 +692,7 @@ func (a *API) InsertBulkBlocks() error {
 					return err
 				}
 			}
-
-		*/
+		}
 	}
 
 	// insert file configuration

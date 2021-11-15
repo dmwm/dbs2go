@@ -32,12 +32,13 @@ type Configuration struct {
 	MigrationProcessTimeout int    `json:"migration_process_timeout"` // migration process timeout
 
 	// db related configuration
-	DBFile               string `json:"dbfile"`                 // dbs db file with secrets
-	MaxDBConnections     int    `json:"max_db_connections"`     // maximum number of DB connections
-	MaxIdleConnections   int    `json:"max_idle_connections"`   // maximum number of idle connections
-	DBMonitoringInterval int    `json:"db_monitoring_interval"` // db mon interval in seconds
-	LexiconFile          string `json:"lexicon_file"`           // lexicon json file
-	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`   // chunk size for []FileLumi insertion
+	DBFile               string `json:"dbfile"`                  // dbs db file with secrets
+	MaxDBConnections     int    `json:"max_db_connections"`      // maximum number of DB connections
+	MaxIdleConnections   int    `json:"max_idle_connections"`    // maximum number of idle connections
+	DBMonitoringInterval int    `json:"db_monitoring_interval"`  // db mon interval in seconds
+	LexiconFile          string `json:"lexicon_file"`            // lexicon json file
+	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`    // chunk size for []FileLumi insertion
+	FileLumiInsertMethod string `json:"file_lumi_insert_methid"` // insert method for FileLumi list
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates
@@ -101,6 +102,10 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.FileLumiChunkSize == 0 {
 		Config.FileLumiChunkSize = 1000
+	}
+	if Config.FileLumiInsertMethod == "" {
+		// possible values are: temptable, chunks, linear
+		Config.FileLumiInsertMethod = "temptable"
 	}
 	return nil
 }

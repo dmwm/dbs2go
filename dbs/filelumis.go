@@ -262,3 +262,96 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 	}
 	return err
 }
+
+// InsertFileLumisTxViaMerge DBS API
+func InsertFileLumisTxViaMerge(tx *sql.Tx, records []FileLumis) error {
+	valueStrings := []string{}
+	valueArgs := []interface{}{}
+	var stm string
+	var err error
+	var valArr string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	if len(records) == 0 {
+		return errors.New("zero array of FileLumi records")
+	}
+	r := records[0]
+	if r.EVENT_COUNT != 0 {
+		stm, err = LoadTemplateSQL("insert_filelumis", tmpl)
+		valArr = "(:r,:l,:f,:e)"
+	} else {
+		stm, err = LoadTemplateSQL("insert_filelumis2", tmpl)
+		valArr = "(:r,:l,:f)"
+	}
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Println("Fail to load template", err)
+		}
+		return err
+	}
+	stm = strings.Split(stm, "VALUES")[0]
+
+	// create temp table
+	stmOra := getSQL("temp_filelumis")
+	stmOra = CleanStatement(stmOra)
+	if utils.VERBOSE > 1 {
+		args := []interface{}{}
+		utils.PrintSQL(stmOra, args, "execute")
+	}
+	_, err = tx.Exec(stmOra)
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("Unable to create temp FileLumis table, error %v", err)
+		}
+		return err
+	}
+
+	// prepare statement for insering all rows
+	stmOra = fmt.Sprintf("INSERT ALL")
+	for _, r := range records {
+		valueStrings = append(valueStrings, valArr)
+		names := "RUN_NUM,LUMI_SECTION_NUM,FILE_ID,EVENT_COUNT"
+		vals := ":r,:l,:f,:e"
+		if r.EVENT_COUNT != 0 {
+			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID, r.EVENT_COUNT)
+		} else {
+			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID)
+			names = "RUN_NUM,LUMI_SECTION_NUM,FILE_ID"
+			vals = ":r,:l,:f"
+		}
+		stmOra = fmt.Sprintf("%s\nINTO %s.TEMP_FILE_LUMIS (%s) VALUES (%s)", stmOra, DBOWNER, names, vals)
+	}
+	stmOra = fmt.Sprintf("%s\nSELECT * FROM dual", stmOra)
+	stm = stmOra
+	if utils.VERBOSE > 1 {
+		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi values", stm, len(valueArgs))
+	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 2 {
+		log.Printf("new statement\n%v\n%v", stm, valueArgs)
+	}
+	// insert all rows
+	_, err = tx.Exec(stm, valueArgs...)
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("Unable to insert FileLumis records, error %v", err)
+		}
+	}
+
+	// merge temp table back
+	stm = getSQL("merge_filelumis")
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 1 {
+		args := []interface{}{}
+		utils.PrintSQL(stm, args, "execute")
+	}
+	_, err = tx.Exec(stmOra)
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("Unable to create temp FileLumis table, error %v", err)
+		}
+		return err
+	}
+
+	return err
+}

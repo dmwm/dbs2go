@@ -64,6 +64,9 @@ var DRYRUN bool
 // FileLumiChunkSize controls chunk size for FileLumi list insertion
 var FileLumiChunkSize int
 
+// FileLumiInsertMethod controls which method to use for insertion of FileLumi list
+var FileLumiInsertMethod string
+
 // DBRecord interface allows to insert DBS record using given transaction
 type DBRecord interface {
 	Insert(tx *sql.Tx) error
