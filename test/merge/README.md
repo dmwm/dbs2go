@@ -6,7 +6,9 @@ approaches:
 - use max size along with chunk size where the former specify total
 number of insert records to be inserted via concurrent insert of chunks
 
-Below you can find all benchmark results.
+Below you can find all benchmark results for a simple case of using
+table with two integers and merging it to main table, see `main.go`
+code for more details.
 
 To compile the code just adjust `oci8.pc` file to reflect your ORACLE
 installation and build code using `go build` command.
