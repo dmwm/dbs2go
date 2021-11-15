@@ -89,15 +89,45 @@ func TestMigrateGetParentDatasets(t *testing.T) {
 	}
 	parentDataset := "/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/GEN-SIM-RAW"
 	dataset := "/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/AODSIM"
+	// GetParents finds immediate parent of the input (dataset)
 	datasets, err := dbs.GetParents(rurl, dataset)
 	if err != nil {
-		t.Error("Fail TestMigrateGetParentDatasets")
+		t.Error("Fail TestMigrateGetParentDatasets", err)
 	}
 	if len(datasets) != 1 {
 		t.Error("Wrong number of expected datasets")
 	}
 	if datasets[0] != parentDataset {
 		t.Error("Unexpected dataset")
+	}
+}
+
+// TestMigrateGetParentDatasetBlocks
+func TestMigrateGetParentDatasetBlocks(t *testing.T) {
+	rurl := "https://cmsweb.cern.ch/dbs/prod/global/DBSReader"
+	if rurl == "" {
+		return
+	}
+	parentBlocks := []string{
+		"/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/GEN-SIM-RAW#15f769b1-a371-4f5d-8d0f-d9c4a6723869",
+		"/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/GEN-SIM-RAW#53c10dee-274d-412a-82ca-6f925ac8ed72",
+		"/ZMM_13TeV_TuneCP5-pythia8/RunIIFall18GS-SNB_HP_102X_upgrade2018_realistic_v17-v2/GEN-SIM#a52529ca-c902-45c9-a372-0fadaf96a159",
+	}
+	dataset := "/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/AODSIM"
+	// GetParentDatasetBlocks find full list of parent blocks
+	pblocks, err := dbs.GetParentDatasetBlocks(rurl, dataset)
+	if err != nil {
+		t.Error("Fail TestMigrateGetParentDatasets", err)
+	}
+	log.Println("parent blocks", parentBlocks)
+	log.Println("found parent blocks", pblocks)
+	if len(pblocks) == 0 {
+		t.Error("no parent blocks are found")
+	}
+	for _, blk := range pblocks {
+		if !utils.InList(blk, parentBlocks) {
+			t.Error("block", blk, "not found in parent blocks list")
+		}
 	}
 }
 
