@@ -105,7 +105,7 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.FileLumiInsertMethod == "" {
 		// possible values are: temptable, chunks, linear
-		Config.FileLumiInsertMethod = "temptable"
+		Config.FileLumiInsertMethod = "chunks"
 	}
 	return nil
 }
