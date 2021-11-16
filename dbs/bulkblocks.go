@@ -606,9 +606,13 @@ func (a *API) InsertBulkBlocks() error {
 		// - via temp table
 		// - via INSERT ALL and using chunks
 		// - sequential method, i.e. record by record
+		// we apply the following rules:
+		// - if number of records is less FileLumiChunkSize we use sequential inserts
+		// - otherwise we choose between temptable and chunks methods, and only use
+		// temptable for ORACLE inserts
 
 		// insert FileLumi list via temp table
-		if FileLumiInsertMethod == "temptable" && DBOWNER != "sqlite" {
+		if FileLumiInsertMethod == "temptable" && DBOWNER != "sqlite" && len(rrr.FileLumiList) > FileLumiChunkSize {
 			if utils.VERBOSE > 0 {
 				log.Println("insert FileLumi list via temp table method", len(rrr.FileLumiList), "records")
 			}
@@ -631,7 +635,7 @@ func (a *API) InsertBulkBlocks() error {
 				return err
 			}
 
-		} else if FileLumiInsertMethod == "chunks" {
+		} else if FileLumiInsertMethod == "chunks" && len(rrr.FileLumiList) > FileLumiChunkSize {
 			if utils.VERBOSE > 0 {
 				log.Println("insert FileLumi list via chunks", len(rrr.FileLumiList), "records")
 			}
