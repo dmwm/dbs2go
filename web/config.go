@@ -84,7 +84,7 @@ func ParseConfig(configFile string) error {
 		return err
 	}
 	if Config.MaxDBConnections == 0 {
-		Config.MaxDBConnections = 100
+		Config.MaxDBConnections = 1000
 	}
 	if Config.MaxIdleConnections == 0 {
 		Config.MaxIdleConnections = 100
