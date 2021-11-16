@@ -97,16 +97,19 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 	log.Println("metrics RSS", rss0)
 
 	// inject some data into temp table
-	var wg sync.WaitGroup
 	if maxSize > nrec {
 		maxSize = nrec
 	}
 	for k := 0; k < nrec; k = k + maxSize {
 		t0 := time.Now()
+		var wg sync.WaitGroup
 		ngoroutines := 0
 		for i := k; i < k+maxSize; i = i + chunkSize {
 			wg.Add(1)
 			size := i + chunkSize
+			if size > (k + maxSize) {
+				size = k + maxSize
+			}
 			if size > nrec {
 				size = nrec
 			}
@@ -115,11 +118,12 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 			}
 			go insertChunk(tx, &wg, i, size, verbose)
 			ngoroutines += 1
-			if size == nrec {
-				break
-			}
 		}
-		log.Printf("process %d goroutines, step %d-%d, elapsed time %v", ngoroutines, k, k+maxSize, time.Since(t0))
+		limit := k + maxSize
+		if limit > nrec {
+			limit = nrec
+		}
+		log.Printf("process %d goroutines, step %d-%d, elapsed time %v", ngoroutines, k, limit, time.Since(t0))
 		wg.Wait()
 	}
 	log.Printf("elapsed time for inserting %d records into temp table %v", nrec, time.Since(time0))
