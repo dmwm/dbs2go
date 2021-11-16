@@ -54,6 +54,8 @@ test-utils:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run Utils
 test-migrate:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run Migrate
+test-filelumis:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -v -run FileLumisInjection
 test-lexicon-writer-pos:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_writer_positive.json go test -v -run LexiconPositive
 test-lexicon-writer-neg:
