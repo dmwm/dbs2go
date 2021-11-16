@@ -368,6 +368,9 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, records []FileLumis) error {
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 2 {
 		log.Printf("new statement\n%v\n%v", stm, valueArgs)
+	} else if utils.VERBOSE > 0 {
+		shortStatement := strings.Split(stm, "(")[0]
+		log.Printf("new statement\n%v\nwith %v value records", shortStatement, len(valueArgs))
 	}
 	_, err := tx.Exec(stm, valueArgs...)
 	if err != nil {
