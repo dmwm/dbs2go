@@ -8,6 +8,8 @@ import (
 	"io"
 	"log"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/vkuznet/dbs2go/utils"
 )
@@ -265,40 +267,15 @@ func InsertFileLumisTxMany(tx *sql.Tx, records []FileLumis) error {
 
 // InsertFileLumisTxViaMerge DBS API
 func InsertFileLumisTxViaMerge(tx *sql.Tx, records []FileLumis) error {
-	valueStrings := []string{}
-	valueArgs := []interface{}{}
-	var stm string
-	var err error
-	var valArr string
-	tmpl := make(Record)
-	tmpl["Owner"] = DBOWNER
-	if len(records) == 0 {
-		return errors.New("zero array of FileLumi records")
-	}
-	r := records[0]
-	if r.EVENT_COUNT != 0 {
-		stm, err = LoadTemplateSQL("insert_filelumis", tmpl)
-		valArr = "(:r,:l,:f,:e)"
-	} else {
-		stm, err = LoadTemplateSQL("insert_filelumis2", tmpl)
-		valArr = "(:r,:l,:f)"
-	}
-	if err != nil {
-		if utils.VERBOSE > 0 {
-			log.Println("Fail to load template", err)
-		}
-		return err
-	}
-	stm = strings.Split(stm, "VALUES")[0]
 
 	// create temp table
-	stmOra := getSQL("temp_filelumis")
-	stmOra = CleanStatement(stmOra)
+	stm := getSQL("temp_filelumis")
+	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
 		args := []interface{}{}
-		utils.PrintSQL(stmOra, args, "execute")
+		utils.PrintSQL(stm, args, "execute")
 	}
-	_, err = tx.Exec(stmOra)
+	_, err := tx.Exec(stm)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Printf("Unable to create temp FileLumis table, error %v", err)
@@ -306,36 +283,38 @@ func InsertFileLumisTxViaMerge(tx *sql.Tx, records []FileLumis) error {
 		return err
 	}
 
-	// prepare statement for insering all rows
-	stmOra = fmt.Sprintf("INSERT ALL")
-	for _, r := range records {
-		valueStrings = append(valueStrings, valArr)
-		names := "RUN_NUM,LUMI_SECTION_NUM,FILE_ID,EVENT_COUNT"
-		vals := ":r,:l,:f,:e"
-		if r.EVENT_COUNT != 0 {
-			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID, r.EVENT_COUNT)
-		} else {
-			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID)
-			names = "RUN_NUM,LUMI_SECTION_NUM,FILE_ID"
-			vals = ":r,:l,:f"
+	// prepare loop using maxSize/chunkSize insertion, see
+	// test/filelumis_test.go
+	nrec := len(records)
+	maxSize := FileLumiMaxSize     // optimal value should be around 100000
+	chunkSize := FileLumiChunkSize // optimal value should be around 500
+	if maxSize > nrec {
+		maxSize = nrec
+	}
+	for k := 0; k < nrec; k = k + maxSize {
+		t0 := time.Now()
+		var wg sync.WaitGroup
+		ngoroutines := 0
+		for i := k; i < k+maxSize; i = i + chunkSize {
+			wg.Add(1)
+			size := i + chunkSize
+			if size > (k + maxSize) {
+				size = k + maxSize
+			}
+			if size > nrec {
+				size = nrec
+			}
+			go insertFLChunk(tx, &wg, records[i:size])
+			ngoroutines += 1
 		}
-		stmOra = fmt.Sprintf("%s\nINTO %s.TEMP_FILE_LUMIS (%s) VALUES (%s)", stmOra, DBOWNER, names, vals)
-	}
-	stmOra = fmt.Sprintf("%s\nSELECT * FROM dual", stmOra)
-	stm = stmOra
-	if utils.VERBOSE > 1 {
-		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi values", stm, len(valueArgs))
-	}
-	stm = CleanStatement(stm)
-	if utils.VERBOSE > 2 {
-		log.Printf("new statement\n%v\n%v", stm, valueArgs)
-	}
-	// insert all rows
-	_, err = tx.Exec(stm, valueArgs...)
-	if err != nil {
+		limit := k + maxSize
+		if limit > nrec {
+			limit = nrec
+		}
 		if utils.VERBOSE > 0 {
-			log.Printf("Unable to insert FileLumis records, error %v", err)
+			log.Printf("process %d goroutines, step %d-%d, elapsed time %v", ngoroutines, k, limit, time.Since(t0))
 		}
+		wg.Wait()
 	}
 
 	// merge temp table back
@@ -345,7 +324,7 @@ func InsertFileLumisTxViaMerge(tx *sql.Tx, records []FileLumis) error {
 		args := []interface{}{}
 		utils.PrintSQL(stm, args, "execute")
 	}
-	_, err = tx.Exec(stmOra)
+	_, err = tx.Exec(stm)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Printf("Unable to create temp FileLumis table, error %v", err)
@@ -353,5 +332,48 @@ func InsertFileLumisTxViaMerge(tx *sql.Tx, records []FileLumis) error {
 		return err
 	}
 
+	return err
+}
+
+// helper function to insert FileLumis chunk via ORACLE INSERT ALL statement
+func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, records []FileLumis) error {
+	defer wg.Done()
+	valueStrings := []string{}
+	valueArgs := []interface{}{}
+	if len(records) == 0 {
+		msg := "zero array of FileLumi records"
+		log.Println(msg)
+		return errors.New(msg)
+	}
+
+	// prepare statement for insering all rows
+	stm := fmt.Sprintf("INSERT ALL")
+	for _, r := range records {
+		names := "RUN_NUM,LUMI_SECTION_NUM,FILE_ID,EVENT_COUNT"
+		vals := ":r,:l,:f,:e"
+		if r.EVENT_COUNT != 0 {
+			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID, r.EVENT_COUNT)
+		} else {
+			valueArgs = append(valueArgs, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID)
+			names = "RUN_NUM,LUMI_SECTION_NUM,FILE_ID"
+			vals = ":r,:l,:f"
+		}
+		valueStrings = append(valueStrings, fmt.Sprintf("(%s)", vals))
+		stm = fmt.Sprintf("%s\nINTO %s.ORA$PPT_TEMP_FILE_LUMIS (%s) VALUES (%s)", stm, DBOWNER, names, vals)
+	}
+	stm = fmt.Sprintf("%s\nSELECT * FROM dual", stm)
+	if utils.VERBOSE > 1 {
+		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi values", stm, len(valueArgs))
+	}
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 2 {
+		log.Printf("new statement\n%v\n%v", stm, valueArgs)
+	}
+	_, err := tx.Exec(stm, valueArgs...)
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("Unable to insert FileLumis records, error %v", err)
+		}
+	}
 	return err
 }
