@@ -64,6 +64,9 @@ var DRYRUN bool
 // FileLumiChunkSize controls chunk size for FileLumi list insertion
 var FileLumiChunkSize int
 
+// FileLumiMaxSize controls max size for FileLumi list insertion
+var FileLumiMaxSize int
+
 // FileLumiInsertMethod controls which method to use for insertion of FileLumi list
 var FileLumiInsertMethod string
 
