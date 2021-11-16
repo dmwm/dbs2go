@@ -651,6 +651,10 @@ func (a *API) ProcessMigration() {
 	// obtain block details from destination DBS
 	rurl := fmt.Sprintf("%s/blockdump?block_name=%s", mrec.MIGRATION_URL, url.QueryEscape(block))
 	data, err := getData(rurl)
+	if utils.VERBOSE > 1 {
+		log.Println("place call", rurl)
+		log.Println("receive data", string(data))
+	}
 	if err != nil {
 		if utils.VERBOSE > 1 {
 			log.Printf("unable to query %s/blockdump, error %v", rurl, err)
