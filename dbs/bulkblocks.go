@@ -609,6 +609,9 @@ func (a *API) InsertBulkBlocks() error {
 
 		// insert FileLumi list via temp table
 		if FileLumiInsertMethod == "temptable" && DBOWNER != "sqlite" {
+			if utils.VERBOSE > 0 {
+				log.Println("insert FileLumi list via temp table method", len(rrr.FileLumiList), "records")
+			}
 
 			var fileLumiList []FileLumis
 			for _, r := range rrr.FileLumiList {
@@ -629,6 +632,9 @@ func (a *API) InsertBulkBlocks() error {
 			}
 
 		} else if FileLumiInsertMethod == "chunks" {
+			if utils.VERBOSE > 0 {
+				log.Println("insert FileLumi list via chunks", len(rrr.FileLumiList), "records")
+			}
 
 			// insert FileLumi list via insert chunks
 			var chunk []FileLumi
@@ -658,6 +664,9 @@ func (a *API) InsertBulkBlocks() error {
 			}
 
 		} else {
+			if utils.VERBOSE > 0 {
+				log.Println("insert FileLumi list sequentially", len(rrr.FileLumiList), "records")
+			}
 
 			// insert FileLumi list via sequential insert of file lumi records
 			for _, r := range rrr.FileLumiList {
