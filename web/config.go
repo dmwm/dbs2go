@@ -39,7 +39,7 @@ type Configuration struct {
 	LexiconFile          string `json:"lexicon_file"`            // lexicon json file
 	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`    // chunk size for []FileLumi insertion
 	FileLumiMaxSize      int    `json:"file_lumi_max_size"`      // max size for []FileLumi insertion
-	FileLumiInsertMethod string `json:"file_lumi_insert_methid"` // insert method for FileLumi list
+	FileLumiInsertMethod string `json:"file_lumi_insert_method"` // insert method for FileLumi list
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates
