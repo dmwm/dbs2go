@@ -359,7 +359,7 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, records []FileLumis) error {
 			vals = ":r,:l,:f"
 		}
 		valueStrings = append(valueStrings, fmt.Sprintf("(%s)", vals))
-		stm = fmt.Sprintf("%s\nINTO %s.ORA$PPT_TEMP_FILE_LUMIS (%s) VALUES (%s)", stm, DBOWNER, names, vals)
+		stm = fmt.Sprintf("%s\nINTO ORA$PTT_TEMP_FILE_LUMIS (%s) VALUES (%s)", stm, names, vals)
 	}
 	stm = fmt.Sprintf("%s\nSELECT * FROM dual", stm)
 	if utils.VERBOSE > 1 {
