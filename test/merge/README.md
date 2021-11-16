@@ -189,3 +189,10 @@ Finally, using 1K chunk size with 300K max size we achieve the following:
 So, it seems that `-chunk 500 -maxSize 200000` is the best performance options
 which allows to insert 4M in 5 and half minutes using 750MB of RAM. And, these
 set of parameters leads to 1m15s and 575MB for 1M records insertion.
+
+### References
+[Efficient and Scalable Batch Statement Execution in Python cx_Oracle](https://blogs.oracle.com/opal/post/efficient-and-scalable-batch-statement-execution-in-python-cx_oracle)
+[ORACLE merge example](https://www.oracletutorial.com/oracle-basics/oracle-merge/)
+[How to Skip Duplicate Key Errors (ORA-00001) in Oracle Database](https://blogs.oracle.com/sql/post/how-to-skip-duplicate-key-errors-ora-00001-in-oracle-database)
+[Bulk insert with ORACLE](https://www.akadia.com/services/ora_bulk_insert.html)
+[Bulk insert in GoLang](https://betterprogramming.pub/how-to-bulk-create-and-update-the-right-way-in-golang-part-i-e15a8e5585d1)
