@@ -609,12 +609,13 @@ func (a *API) InsertBulkBlocks() error {
 		// we apply the following rules:
 		// - if number of records is less FileLumiChunkSize we use sequential inserts
 		// - otherwise we choose between temptable and chunks methods, and only use
-		// temptable for ORACLE inserts
+		// temp table name, e.g. ORA$PTT_TEMP_FILE_LUMIS, for ORACLE inserts
 
-		// insert FileLumi list via temp table
-		if FileLumiInsertMethod == "temptable" && DBOWNER != "sqlite" && len(rrr.FileLumiList) > FileLumiChunkSize {
+		// insert FileLumi list via temptable or chunks
+		if len(rrr.FileLumiList) > FileLumiChunkSize {
+
 			if utils.VERBOSE > 0 {
-				log.Println("insert FileLumi list via temp table method", len(rrr.FileLumiList), "records")
+				log.Printf("insert FileLumi list via %s method %d records", FileLumiInsertMethod, len(rrr.FileLumiList))
 			}
 
 			var fileLumiList []FileLumis
@@ -627,44 +628,12 @@ func (a *API) InsertBulkBlocks() error {
 				}
 				fileLumiList = append(fileLumiList, fl)
 			}
-			err = InsertFileLumisTxViaMerge(tx, fileLumiList)
+			err = InsertFileLumisTxViaChunks(tx, fileLumiList)
 			if err != nil {
 				if utils.VERBOSE > 1 {
 					log.Println("unable to insert FileLumis records", err)
 				}
 				return err
-			}
-
-		} else if FileLumiInsertMethod == "chunks" && len(rrr.FileLumiList) > FileLumiChunkSize {
-			if utils.VERBOSE > 0 {
-				log.Println("insert FileLumi list via chunks", len(rrr.FileLumiList), "records")
-			}
-
-			// insert FileLumi list via insert chunks
-			var chunk []FileLumi
-			for i := 0; i < len(rrr.FileLumiList); i = i + FileLumiChunkSize {
-				if i+FileLumiChunkSize < len(rrr.FileLumiList) {
-					chunk = rrr.FileLumiList[i : i+FileLumiChunkSize]
-				} else {
-					chunk = rrr.FileLumiList[i:len(rrr.FileLumiList)]
-				}
-				var fileLumiChunk []FileLumis
-				for _, r := range chunk {
-					fl := FileLumis{
-						FILE_ID:          fileID,
-						RUN_NUM:          r.RunNumber,
-						LUMI_SECTION_NUM: r.LumiSectionNumber,
-						EVENT_COUNT:      r.EventCount,
-					}
-					fileLumiChunk = append(fileLumiChunk, fl)
-				}
-				err := InsertFileLumisTxMany(tx, fileLumiChunk)
-				if err != nil {
-					if utils.VERBOSE > 1 {
-						log.Println("unable to insert FileLumis record", err)
-					}
-					return err
-				}
 			}
 
 		} else {
