@@ -126,9 +126,10 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 		log.Printf("process %d goroutines, step %d-%d, elapsed time %v", ngoroutines, k, limit, time.Since(t0))
 		wg.Wait()
 	}
-	log.Printf("elapsed time for inserting %d records into temp table %v", nrec, time.Since(time0))
+	log.Printf("totla elapsed time for inserting %d records into temp table %v", nrec, time.Since(time0))
 
 	// merge temp table into original one
+	time1 := time.Now()
 	stm = `MERGE INTO FILE_PARENTS x
 USING (SELECT THIS_FILE_ID, PARENT_FILE_ID FROM ORA$PTT_TEMP_FILE_PARENTS ) y
 ON (x.THIS_FILE_ID = y.THIS_FILE_ID AND x.PARENT_FILE_ID = y.PARENT_FILE_ID)
@@ -142,7 +143,8 @@ WHEN NOT MATCHED THEN
 	if err != nil {
 		log.Fatal("unable to insert all into temp table", err)
 	}
-	log.Printf("elapsed time for merge step %v", time.Since(time0))
+	log.Printf("elapsed time for merge step %v", time.Since(time1))
+	log.Printf("total elapsed time %v", time.Since(time0))
 
 	err = tx.Commit()
 	if err != nil {
