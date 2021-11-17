@@ -312,16 +312,8 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	if DBOWNER == "sqlite" {
 		stm = fmt.Sprintf("INSERT OR IGNORE\nINTO %s (%s) VALUES %s", table, names, strings.Join(valueStrings, ","))
 	}
-	if utils.VERBOSE > 1 {
-		short := strings.Split(stm, "INTO")
-		shortStmt := stm
-		if len(short) > 10 {
-			shortStmt = strings.Join(short[0:10], "INTO") + "..."
-		}
-		log.Printf("Insert FileLumis bulk\n%s\n%+v FileLumi values", shortStmt, len(valueArgs))
-	}
 	stm = CleanStatement(stm)
-	if utils.VERBOSE > 2 {
+	if utils.VERBOSE > 3 {
 		log.Printf("new statement\n%v\n%v", stm, valueArgs)
 	} else if utils.VERBOSE > 0 {
 		shortStatement := strings.Split(stm, "(")[0]
