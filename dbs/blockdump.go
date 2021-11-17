@@ -413,6 +413,7 @@ type BlockDumpRecord struct {
 	FILES               []string `json:"files"`
 	BLOCK_PARENT_LIST   string   `json:"block_parent_list"`
 	DATASET_PARENT_LIST string   `json:"dataset_parent_list"`
+	DS_PARENT_LIST      string   `json:"ds_parent_list"` // for compatibility with Py server
 	FILE_CONF_LIST      string   `json:"file_conf_list"`
 	FILE_PARENT_LIST    string   `json:"file_parent_list"`
 	DATASET_CONF_LIST   string   `json:"dataset_conf_list"`
@@ -478,6 +479,7 @@ func (a *API) BlockDump() error {
 		Files:             files,
 		BlockParentList:   blockParentList,
 		DatasetParentList: datasetParentList,
+		DsParentList:      datasetParentList,
 		FileConfigList:    fileConfigList,
 		FileParentList:    fileParentList,
 		DatasetConfigList: datasetConfigList,

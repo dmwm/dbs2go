@@ -13,6 +13,12 @@ code for more details.
 To compile the code just adjust `oci8.pc` file to reflect your ORACLE
 installation and build code using `go build` command.
 
+To run you are requried to provide `dbfile` which should has the following
+content:
+```
+oci8 <account>:<password>@<dbname> <dbowner>
+```
+
 ### INSERT ALL procedure with temp table
 We start with basic benchmark of inserting 1K records
 ```

@@ -31,7 +31,7 @@ type BulkBlocks struct {
 	FileParentList    []FileParentRecord `json:"file_parent_list"`
 	BlockParentList   []BlockParent      `json:"block_parent_list"`
 	DatasetParentList []string           `json:"dataset_parent_list"`
-	//     DatasetParentList []DatasetParent `json:"dataset_parent_list"`
+	DsParentList      []string           `json:"ds_parent_list"` // for backward compatibility
 }
 
 // DatasetConfig represents dataset config structure used in BulkBlocks structure
@@ -715,7 +715,14 @@ func (a *API) InsertBulkBlocks() error {
 	}
 
 	// insert dataset parent list
-	for _, ds := range rec.DatasetParentList {
+	datasetParentList := rec.DatasetParentList
+	// use both DatasetParentList and DsParentList (for backward compatibility)
+	// and compose uniq set of dataset parents
+	for _, d := range rec.DsParentList {
+		datasetParentList = append(datasetParentList, d)
+	}
+	datasetParentList = utils.List2Set(datasetParentList)
+	for _, ds := range datasetParentList {
 		// get file id for parent dataset
 		pid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", ds)
 		if err != nil {
