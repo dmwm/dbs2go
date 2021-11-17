@@ -126,7 +126,7 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 		log.Printf("process %d goroutines, step %d-%d, elapsed time %v", ngoroutines, k, limit, time.Since(t0))
 		wg.Wait()
 	}
-	log.Printf("totla elapsed time for inserting %d records into temp table %v", nrec, time.Since(time0))
+	log.Printf("total elapsed time for inserting %d records into temp table %v", nrec, time.Since(time0))
 
 	// merge temp table into original one
 	time1 := time.Now()
