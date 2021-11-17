@@ -124,9 +124,9 @@ func TestDBSWriter(t *testing.T) {
 	api = "/bulkblocks"
 	hdlr = web.BulkBlocksHandler
 	log.Println("insert bulk block")
-	insertData(t, db, "POST", api, "data/bulkblock.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/bulkblocks.json", "", hdlr)
 	log.Println("re-insert bulk block")
-	insertData(t, db, "POST", api, "data/bulkblock.json", "", hdlr)
+	insertData(t, db, "POST", api, "data/bulkblocks.json", "", hdlr)
 
 	api = "/files"
 	hdlr = web.FilesHandler
