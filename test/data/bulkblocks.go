@@ -2,9 +2,9 @@ package main
 
 // Helper code to generate large JSON files to be used by bulkblocks DBS API
 // go build
-// ./dbsdata -fname bulkblock.json -lumis 300000 -pattern 207 -ofile bulkblocks_big.json
+// ./dbsdata -fname bulkblocks.json -lumis 300000 -pattern 207 -ofile bulkblocks_big.json
 // for sqlite testing use
-// ./dbsdata -fname bulkblock.json -lumis 3000 -pattern 207 -ofile bulkblocks_sqlitebig.json -drop dataset_parent_list
+// ./dbsdata -fname bulkblocks.json -lumis 3000 -pattern 207 -ofile bulkblocks_sqlitebig.json -drop dataset_parent_list
 
 import (
 	"encoding/json"
