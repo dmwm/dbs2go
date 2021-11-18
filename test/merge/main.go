@@ -26,9 +26,11 @@ func main() {
 	flag.IntVar(&maxSize, "maxSize", 100000, "maxSize controls total number of inserted records at once")
 	var verbose int
 	flag.IntVar(&verbose, "verbose", 0, "verbose level")
+	var chunks bool
+	flag.BoolVar(&chunks, "chunks", false, "use only chunks inserts")
 	flag.Parse()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	run(dbfile, nrec, chunk, maxSize, verbose)
+	run(dbfile, nrec, chunk, maxSize, verbose, chunks)
 }
 
 // ParseDBFile function parses given file name and extracts from it dbtype and dburi
@@ -42,7 +44,7 @@ func ParseDBFile(dbfile string) (string, string, string) {
 	return arr[0], arr[1], strings.Replace(arr[2], "\n", "", -1)
 }
 
-func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
+func run(dbfile string, nrec, chunkSize, maxSize, verbose int, chunks bool) {
 	dbtype, dburi, _ := ParseDBFile(dbfile)
 
 	db, dberr := sql.Open(dbtype, dburi)
@@ -80,17 +82,23 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 	defer tx.Rollback()
 
 	time0 := time.Now()
-	// create temp table
-	stm = `CREATE PRIVATE TEMPORARY TABLE ORA$PTT_TEMP_FILE_PARENTS (THIS_FILE_ID INTEGER, PARENT_FILE_ID INTEGER) ON COMMIT DROP DEFINITION`
-	if verbose > 0 {
-		log.Println("execute", stm)
-	}
 
-	_, err = tx.Exec(stm)
-	if err != nil {
-		log.Fatal("unable to create temp table", err)
+	table := "ORA$PTT_TEMP_FILE_PARENTS"
+	if chunks {
+		table = "FILE_PARENTS"
+	} else {
+		// create temp table
+		stm = `CREATE PRIVATE TEMPORARY TABLE ORA$PTT_TEMP_FILE_PARENTS (THIS_FILE_ID INTEGER, PARENT_FILE_ID INTEGER) ON COMMIT DROP DEFINITION`
+		if verbose > 0 {
+			log.Println("execute", stm)
+		}
+
+		_, err = tx.Exec(stm)
+		if err != nil {
+			log.Fatal("unable to create temp table", err)
+		}
+		log.Println("elapsed time for creation of temp table", time.Since(time0))
 	}
-	log.Println("elapsed time for creation of temp table", time.Since(time0))
 
 	metrics := ProcFSMetrics()
 	rss0 := metrics.Rss
@@ -116,7 +124,7 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 			if verbose > 1 {
 				log.Printf("k=%d i=%d size=%d max=%d nrec=%d", k, i, size, maxSize, nrec)
 			}
-			go insertChunk(tx, &wg, i, size, verbose)
+			go insertChunk(tx, &wg, i, size, verbose, table)
 			ngoroutines += 1
 		}
 		limit := k + maxSize
@@ -128,22 +136,24 @@ func run(dbfile string, nrec, chunkSize, maxSize, verbose int) {
 	}
 	log.Printf("total elapsed time for inserting %d records into temp table %v", nrec, time.Since(time0))
 
-	// merge temp table into original one
-	time1 := time.Now()
-	stm = `MERGE INTO FILE_PARENTS x
+	if !chunks {
+		// merge temp table into original one
+		time1 := time.Now()
+		stm = `MERGE INTO FILE_PARENTS x
 USING (SELECT THIS_FILE_ID, PARENT_FILE_ID FROM ORA$PTT_TEMP_FILE_PARENTS ) y
 ON (x.THIS_FILE_ID = y.THIS_FILE_ID AND x.PARENT_FILE_ID = y.PARENT_FILE_ID)
 WHEN NOT MATCHED THEN
     INSERT(x.THIS_FILE_ID, x.PARENT_FILE_ID)
     VALUES(y.THIS_FILE_ID, y.PARENT_FILE_ID)`
-	if verbose > 0 {
-		log.Println("execute", stm)
+		if verbose > 0 {
+			log.Println("execute", stm)
+		}
+		_, err = tx.Exec(stm)
+		if err != nil {
+			log.Fatal("unable to insert all into temp table", err)
+		}
+		log.Printf("elapsed time for merge step %v", time.Since(time1))
 	}
-	_, err = tx.Exec(stm)
-	if err != nil {
-		log.Fatal("unable to insert all into temp table", err)
-	}
-	log.Printf("elapsed time for merge step %v", time.Since(time1))
 	log.Printf("total elapsed time %v", time.Since(time0))
 
 	err = tx.Commit()
@@ -158,12 +168,12 @@ WHEN NOT MATCHED THEN
 
 }
 
-func insertChunk(tx *sql.Tx, wg *sync.WaitGroup, idx, limit, verbose int) {
+func insertChunk(tx *sql.Tx, wg *sync.WaitGroup, idx, limit, verbose int, table string) {
 	defer wg.Done()
 	var args []interface{}
 	stm := "INSERT ALL"
 	for i := idx; i < limit; i++ {
-		into := `INTO ORA$PTT_TEMP_FILE_PARENTS (THIS_FILE_ID, PARENT_FILE_ID) VALUES (:fval, :pval)`
+		into := fmt.Sprintf("INTO %s (THIS_FILE_ID, PARENT_FILE_ID) VALUES (:fval, :pval)", table)
 		stm = fmt.Sprintf("%s\n%s", stm, into)
 		args = append(args, i)
 		args = append(args, i)
