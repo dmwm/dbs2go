@@ -226,7 +226,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, records []FileLumis) error {
 		}
 
 		// merge temp table
-		table = "ORA$PTT_TEMP_FILE_LUMIS"
+		table = fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
 	}
 
 	// prepare loop using maxSize/chunkSize insertion, see
