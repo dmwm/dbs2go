@@ -217,7 +217,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, records []FileLumis) error {
 		tmpl := make(Record)
 		tmpl["Owner"] = DBOWNER
 		tmpl["TempTable"] = table
-		stm, err := LoadTemplateSQL("temp_filelumis", tmpl)
+		stm, err = LoadTemplateSQL("temp_filelumis", tmpl)
 		if err != nil {
 			if utils.VERBOSE > 0 {
 				log.Printf("Unable to load temp_filelumis, error %v", err)
