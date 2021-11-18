@@ -173,6 +173,7 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
+		router.HandleFunc(basePath("/bulkblocks2"), BulkBlocks2Handler).Methods("POST")
 		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/physicsgroups"), PhysicsGroupsHandler).Methods("POST")
 		router.HandleFunc(basePath("/datasetaccesstypes"), DatasetAccessTypesHandler).Methods("POST")
@@ -323,6 +324,7 @@ func Server(configFile string) {
 	dbs.RecordValidator = validator.New()
 
 	// set configuration for []FileLumi insertion
+	dbs.FileChunkSize = Config.FileChunkSize
 	dbs.FileLumiChunkSize = Config.FileLumiChunkSize
 	dbs.FileLumiMaxSize = Config.FileLumiMaxSize
 	dbs.FileLumiInsertMethod = Config.FileLumiInsertMethod

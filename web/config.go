@@ -37,6 +37,7 @@ type Configuration struct {
 	MaxIdleConnections   int    `json:"max_idle_connections"`    // maximum number of idle connections
 	DBMonitoringInterval int    `json:"db_monitoring_interval"`  // db mon interval in seconds
 	LexiconFile          string `json:"lexicon_file"`            // lexicon json file
+	FileChunkSize        int    `json:"file_chunk_size"`         // chunk size for []File insertion
 	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`    // chunk size for []FileLumi insertion
 	FileLumiMaxSize      int    `json:"file_lumi_max_size"`      // max size for []FileLumi insertion
 	FileLumiInsertMethod string `json:"file_lumi_insert_method"` // insert method for FileLumi list
@@ -101,11 +102,14 @@ func ParseConfig(configFile string) error {
 	if Config.MetricsPrefix == "" {
 		Config.MetricsPrefix = "dbs2go"
 	}
+	if Config.FileChunkSize == 0 {
+		Config.FileChunkSize = 10
+	}
 	if Config.FileLumiChunkSize == 0 {
 		Config.FileLumiChunkSize = 500
 	}
 	if Config.FileLumiMaxSize == 0 {
-		Config.FileLumiMaxSize = 100000
+		Config.FileLumiMaxSize = 10000
 	}
 	if Config.FileLumiInsertMethod == "" {
 		// possible values are: temptable, chunks, linear
