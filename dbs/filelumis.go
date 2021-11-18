@@ -265,7 +265,16 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, records []FileLumis) error {
 
 	if FileLumiInsertMethod == "temptable" {
 		// merge temp table back
-		stm = getSQL("merge_filelumis")
+		tmpl := make(Record)
+		tmpl["Owner"] = DBOWNER
+		tmpl["TempTable"] = table
+		stm, err := LoadTemplateSQL("merge_filelumis", tmpl)
+		if err != nil {
+			if utils.VERBOSE > 0 {
+				log.Printf("Unable to load merge_filelumis, error %v", err)
+			}
+			return err
+		}
 		stm = CleanStatement(stm)
 		if utils.VERBOSE > 1 {
 			args := []interface{}{}
