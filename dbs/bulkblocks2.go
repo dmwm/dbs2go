@@ -662,8 +662,8 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 // and chunk boundaries
 func getFileIds(fid, idx, limit int64) []int64 {
 	var ids []int64
-	for i := fid; i < limit+1; i++ {
-		ids = append(ids, int64(fid+idx+i))
+	for i := idx; i < limit+1; i++ {
+		ids = append(ids, int64(fid+i))
 	}
 	return ids
 }
