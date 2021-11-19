@@ -231,22 +231,27 @@ type Files struct {
 	LAST_MODIFIED_BY       string  `json:"last_modified_by" validate:"required"`
 }
 
+// helper function to get next available FileID
+func getFileID(tx *sql.Tx) (int64, error) {
+	var err error
+	var tid int64
+	if DBOWNER == "sqlite" {
+		tid, err = LastInsertID(tx, "FILES", "file_id")
+		tid += 1
+	} else {
+		tid, err = IncrementSequence(tx, "SEQ_FL")
+	}
+	return tid, err
+}
+
 // Insert implementation of Files
 func (r *Files) Insert(tx *sql.Tx) error {
-	var tid int64
-	var err error
-	if r.FILE_ID == 0 {
-		if DBOWNER == "sqlite" {
-			tid, err = LastInsertID(tx, "FILES", "file_id")
-			r.FILE_ID = tid + 1
-		} else {
-			tid, err = IncrementSequence(tx, "SEQ_FL")
-			r.FILE_ID = tid
-		}
-		if err != nil {
-			return err
-		}
+	fileID, err := getFileID(tx)
+	if err != nil {
+		log.Println("unable to get fileID", err)
+		return err
 	}
+	r.FILE_ID = fileID
 	// set defaults and validate the record
 	r.SetDefaults()
 	err = r.Validate()
