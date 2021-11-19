@@ -2,9 +2,9 @@ package main
 
 // Helper code to generate large JSON files to be used by bulkblocks DBS API
 // go build
-// ./dbsdata -fname bulkblocks.json -lumis 300000 -pattern 207 -ofile bulkblocks_big.json
+// ./dbsdata -fname bulkblocks.json -lfns 20 -lumis 30000 -pattern 207 -ofile bulkblocks_big.json
 // for sqlite testing use
-// ./dbsdata -fname bulkblocks.json -lumis 3000 -pattern 207 -ofile bulkblocks_sqlitebig.json -drop dataset_parent_list
+// ./dbsdata -fname bulkblocks.json -lfns 20 -lumis 300 -pattern 207 -ofile bulkblocks_sqlitebig.json -drop dataset_parent_list
 
 import (
 	"encoding/json"
@@ -29,11 +29,13 @@ func main() {
 	flag.StringVar(&drop, "drop", "", "drop attribute, e.g. dataset_parent_list")
 	var lumis int
 	flag.IntVar(&lumis, "lumis", 0, "number of unique lumis to generate in bulkblock json")
+	var lfns int
+	flag.IntVar(&lfns, "lfns", 0, "number of unique lfn to generate in bulkblock json")
 	flag.Parse()
-	run(fname, pattern, lumis, drop, ofile)
+	run(fname, pattern, lfns, lumis, drop, ofile)
 }
 
-func run(fname, pattern string, lumis int, drop, ofile string) {
+func run(fname, pattern string, lfns, lumis int, drop, ofile string) {
 	data, err := os.ReadFile(fname)
 	sdata := string(data)
 	tstamp := fmt.Sprintf("%d", time.Now().Unix())
@@ -57,12 +59,23 @@ func run(fname, pattern string, lumis int, drop, ofile string) {
 		}
 		fileLumiList = append(fileLumiList, fl)
 	}
-	log.Println("generated", len(fileLumiList), "file lumi list records")
 	var files []dbs.File
-	for _, f := range rec.Files {
-		f.FileLumiList = fileLumiList
-		files = append(files, f)
+	if lfns != 0 {
+		f := rec.Files[0]
+		arr := strings.Split(f.LogicalFileName, "/")
+		base := strings.Join(arr[0:len(arr)-1], "/")
+		for i := 0; i < lfns; i++ {
+			f.LogicalFileName = fmt.Sprintf("%s/%d.root", base, i)
+			f.FileLumiList = fileLumiList
+			files = append(files, f)
+		}
+	} else {
+		for _, f := range rec.Files {
+			f.FileLumiList = fileLumiList
+			files = append(files, f)
+		}
 	}
+	log.Printf("generated %d files with %d lumis per file", len(files), len(fileLumiList))
 	rec.Files = files
 	data, err = json.Marshal(rec)
 	if err != nil {
