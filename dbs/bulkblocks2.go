@@ -432,6 +432,16 @@ func (a *API) InsertBulkBlocks2() error {
 		}
 	}
 
+	// insert all FileDataTypes fow all lfns
+	for _, rrr := range rec.Files {
+		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
+		err = ftype.Insert(tx)
+		if err != nil {
+			if utils.VERBOSE > 0 {
+				log.Println("FileDataType insert error", err)
+			}
+		}
+	}
 	// insert files
 	if utils.VERBOSE > 1 {
 		log.Println("insert files")
@@ -455,6 +465,7 @@ func (a *API) InsertBulkBlocks2() error {
 	for _, rrr := range rec.Files {
 		fileID, ok := trec.FilesMap[rrr.LogicalFileName]
 		if !ok {
+			log.Printf("unable to find fileID in FilesMap for %s", rrr.LogicalFileName)
 			return errors.New("unable to find fileID in filesMap")
 		}
 		// there are three methods to insert FileLumi list
@@ -616,9 +627,14 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	chunkSize := FileChunkSize // optimal value should be around 50
 	t0 := time.Now()
 	var wg sync.WaitGroup
-	var errBit int
 	ngoroutines := 0
 	var chunk []File
+	// get first available fileID to use
+	fileID, err := getFileID(tx)
+	if err != nil {
+		log.Println("unable to getFileID", err)
+		return err
+	}
 	for i := 0; i < len(records); i = i + chunkSize {
 		if i+chunkSize < len(records) {
 			chunk = records[i : i+chunkSize]
@@ -626,39 +642,42 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 			chunk = records[i:len(records)]
 		}
 		wg.Add(1)
-		go insertFilesChunk(tx, &wg, chunk, trec)
+		ids := getFileIds(fileID, int64(i), int64(i+chunkSize))
+		go insertFilesChunk(tx, &wg, chunk, trec, ids)
 		ngoroutines += 1
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("insertFilesTxViaChunks process %d goroutines, elapsed time %v", ngoroutines, time.Since(t0))
+		log.Printf("insertFilesViaChunks processed %d goroutines, elapsed time %v", ngoroutines, time.Since(t0))
 	}
 	wg.Wait()
-	if errBit != 0 {
-		msg := "fail to insert files chunks"
+	if trec.NErrors != 0 {
+		msg := fmt.Sprintf("fail to insert files chunks, trec +%v", trec)
 		log.Println(msg)
 		return errors.New(msg)
 	}
 	return nil
 }
 
+// helper function to get range of files ids starting from initial file id
+// and chunk boundaries
+func getFileIds(fid, idx, limit int64) []int64 {
+	var ids []int64
+	for i := fid; i < limit+1; i++ {
+		ids = append(ids, int64(fid+idx+i))
+	}
+	return ids
+}
+
 // helper function to insert files via chunks injection
-func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *TempFileRecord) {
+func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *TempFileRecord, ids []int64) {
 	defer wg.Done()
 	var rwm sync.RWMutex
-	for _, rrr := range records {
-		// get fileTypeID and insert record if it does not exists
-		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
-		fileTypeID, err := GetRecID(
-			tx,
-			&ftype,
-			"FILE_DATA_TYPES",
-			"file_type_id",
-			"file_type",
-			rrr.FileType,
-		)
+	for idx, rrr := range records {
+		lfn := rrr.LogicalFileName
+		fileTypeID, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find file_type_id for", rrr.FileType)
+				log.Println("### trec unable to find file_type_id for", rrr.FileType, "lfn", lfn, "error", err)
 			}
 			trec.NErrors += 1
 			return
@@ -667,7 +686,6 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 		if rrr.BranchHash == "" {
 			rrr.BranchHash = "branch-hash"
 		}
-		lfn := rrr.LogicalFileName
 
 		cBy := rrr.LastModifiedBy
 		if cBy == "" {
@@ -678,6 +696,7 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 			lBy = trec.CreateBy
 		}
 		r := Files{
+			FILE_ID:                ids[idx],
 			LOGICAL_FILE_NAME:      lfn,
 			IS_FILE_VALID:          trec.IsFileValid,
 			DATASET_ID:             trec.DatasetID,
@@ -698,27 +717,23 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 		fileID, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find file_id for", lfn, "will insert")
+				log.Println("trec unable to find file_id for", lfn, "will insert")
 			}
 			err = r.Insert(tx)
 			if err != nil {
 				if utils.VERBOSE > 1 {
-					log.Println("unable to insert File record", err)
+					log.Printf("### trec unable to insert File record for lfn %s, error %v", lfn, err)
 				}
 				trec.NErrors += 1
 				return
 			}
-			fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
-			if err != nil {
-				if utils.VERBOSE > 1 {
-					log.Printf("unable to find file_id for %s, error %v", lfn, err)
-				}
-				trec.NErrors += 1
-				return
-			}
-			rwm.Lock()
-			trec.FilesMap[lfn] = fileID
-			rwm.Unlock()
 		}
+		rwm.Lock()
+		trec.FilesMap[lfn] = fileID
+		if utils.VERBOSE > 1 {
+			log.Printf("trec inserted %s with fileID %d", lfn, fileID)
+			log.Printf("trec %#v", trec)
+		}
+		rwm.Unlock()
 	}
 }
