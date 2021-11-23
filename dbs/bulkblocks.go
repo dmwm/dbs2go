@@ -533,6 +533,10 @@ func (a *API) InsertBulkBlocks() error {
 	if utils.VERBOSE > 1 {
 		log.Println("insert files")
 	}
+	tempTable := fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
+	if DBOWNER == "sqlite" {
+		tempTable = "FILE_LUMIS"
+	}
 	for _, rrr := range rec.Files {
 		// get fileTypeID and insert record if it does not exists
 		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
@@ -628,7 +632,7 @@ func (a *API) InsertBulkBlocks() error {
 				}
 				fileLumiList = append(fileLumiList, fl)
 			}
-			err = InsertFileLumisTxViaChunks(tx, fileLumiList)
+			err = InsertFileLumisTxViaChunks(tx, tempTable, fileLumiList)
 			if err != nil {
 				if utils.VERBOSE > 1 {
 					log.Println("unable to insert FileLumis records", err)

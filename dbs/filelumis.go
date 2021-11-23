@@ -199,19 +199,14 @@ func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 }
 
 // InsertFileLumisTxViaChunks DBS API
-func InsertFileLumisTxViaChunks(tx *sql.Tx, records []FileLumis) error {
-
-	table := fmt.Sprintf("%s.FILE_LUMIS", DBOWNER)
-	if DBOWNER == "sqlite" {
-		table = "FILE_LUMIS"
-	}
+func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) error {
 
 	var stm string
 	var err error
 
 	if FileLumiInsertMethod == "temptable" {
 		// merge temp table
-		table = fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
+//         table = fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
 
 		// create temp table
 		tmpl := make(Record)

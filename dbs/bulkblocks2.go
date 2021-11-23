@@ -467,6 +467,10 @@ func (a *API) InsertBulkBlocks2() error {
 	if utils.VERBOSE > 1 {
 		log.Printf("trec %#v", trec)
 	}
+	tempTable := fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
+	if DBOWNER == "sqlite" {
+		tempTable = "FILE_LUMIS"
+	}
 	for _, rrr := range rec.Files {
 		lfn := rrr.LogicalFileName
 		//         fileID, ok := trec.FilesMap[lfn]
@@ -501,7 +505,7 @@ func (a *API) InsertBulkBlocks2() error {
 				}
 				fileLumiList = append(fileLumiList, fl)
 			}
-			err = InsertFileLumisTxViaChunks(tx, fileLumiList)
+			err = InsertFileLumisTxViaChunks(tx, tempTable, fileLumiList)
 			if err != nil {
 				if utils.VERBOSE > 1 {
 					log.Printf("unable to insert FileLumis records for %s, fileID %d, error %v", lfn, fileID, err)
