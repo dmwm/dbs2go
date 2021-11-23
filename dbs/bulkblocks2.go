@@ -626,11 +626,12 @@ func (a *API) InsertBulkBlocks2() error {
 func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) error {
 	chunkSize := FileChunkSize // optimal value should be around 50
 	t0 := time.Now()
-	var wg sync.WaitGroup
 	ngoroutines := 0
+	var wg sync.WaitGroup
+	var err error
 	var chunk []File
 	// get first available fileID to use
-	fileID, err := getFileID(tx)
+	//     fileID, err := getFileID(tx)
 	if err != nil {
 		log.Println("unable to getFileID", err)
 		return err
@@ -641,10 +642,16 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 		} else {
 			chunk = records[i:len(records)]
 		}
-		wg.Add(1)
-		ids := getFileIds(fileID, int64(i), int64(i+chunkSize))
-		go insertFilesChunk(tx, &wg, chunk, trec, ids)
-		ngoroutines += 1
+		//         ids := getFileIds(fileID, int64(i), int64(i+chunkSize))
+		ids, err := IncrementSequences(tx, "SEQ_FL", len(chunk))
+		if err == nil {
+			wg.Add(1)
+			go insertFilesChunk(tx, &wg, chunk, trec, ids)
+			ngoroutines += 1
+		} else {
+			log.Println("unable to increment sequences SEQ_FL")
+			trec.NErrors += 1
+		}
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("insertFilesViaChunks processed %d goroutines, elapsed time %v", ngoroutines, time.Since(t0))
