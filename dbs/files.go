@@ -246,12 +246,15 @@ func getFileID(tx *sql.Tx) (int64, error) {
 
 // Insert implementation of Files
 func (r *Files) Insert(tx *sql.Tx) error {
-	fileID, err := getFileID(tx)
-	if err != nil {
-		log.Println("unable to get fileID", err)
-		return err
+	var err error
+	if r.FILE_ID == 0 {
+		fileID, err := getFileID(tx)
+		if err != nil {
+			log.Println("unable to get fileID", err)
+			return err
+		}
+		r.FILE_ID = fileID
 	}
-	r.FILE_ID = fileID
 	// set defaults and validate the record
 	r.SetDefaults()
 	err = r.Validate()

@@ -292,7 +292,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, records []FileLumis) error {
 		_, err = tx.Exec(stm)
 		if err != nil {
 			if utils.VERBOSE > 0 {
-				log.Printf("Unable to create temp FileLumis table, error %v", err)
+				log.Printf("Unable to merge temp FileLumis table, error %v", err)
 			}
 			return err
 		}
