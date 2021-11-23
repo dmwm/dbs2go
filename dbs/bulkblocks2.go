@@ -24,7 +24,8 @@ import (
 var FileChunkSize int
 
 // FilesMap keeps track of lfn names and their file ids
-type FilesMap map[string]int64
+// type FilesMap map[string]int64
+// type FilesMap *sync.Map
 
 // TempFileRecord contains all relevant attribute to insert File records
 type TempFileRecord struct {
@@ -33,8 +34,9 @@ type TempFileRecord struct {
 	BlockID      int64
 	CreationDate int64
 	CreateBy     string
-	FilesMap     FilesMap
-	NErrors      int
+	FilesMap     sync.Map
+	//     FilesMap     FilesMap
+	NErrors int
 }
 
 // InsertBulkBlocks2 DBS API. It relies on BulkBlocks record which by itself
@@ -452,7 +454,7 @@ func (a *API) InsertBulkBlocks2() error {
 		BlockID:      blockID,
 		CreationDate: creationDate,
 		CreateBy:     a.CreateBy,
-		FilesMap:     make(FilesMap),
+		FilesMap:     sync.Map{},
 		NErrors:      0,
 	}
 	err = insertFilesViaChunks(tx, rec.Files, &trec)
@@ -467,7 +469,8 @@ func (a *API) InsertBulkBlocks2() error {
 	}
 	for _, rrr := range rec.Files {
 		lfn := rrr.LogicalFileName
-		fileID, ok := trec.FilesMap[lfn]
+		//         fileID, ok := trec.FilesMap[lfn]
+		fileID, ok := trec.FilesMap.Load(lfn)
 		if !ok {
 			log.Printf("unable to find fileID in FilesMap for %s", lfn)
 			return errors.New("unable to find fileID in filesMap")
@@ -491,7 +494,7 @@ func (a *API) InsertBulkBlocks2() error {
 			var fileLumiList []FileLumis
 			for _, r := range rrr.FileLumiList {
 				fl := FileLumis{
-					FILE_ID:          fileID,
+					FILE_ID:          fileID.(int64),
 					RUN_NUM:          r.RunNumber,
 					LUMI_SECTION_NUM: r.LumiSectionNumber,
 					EVENT_COUNT:      r.EventCount,
@@ -523,7 +526,7 @@ func (a *API) InsertBulkBlocks2() error {
 					continue
 				}
 				fl := FileLumis{
-					FILE_ID:          fileID,
+					FILE_ID:          fileID.(int64),
 					RUN_NUM:          r.RunNumber,
 					LUMI_SECTION_NUM: r.LumiSectionNumber,
 					EVENT_COUNT:      r.EventCount,
@@ -688,7 +691,7 @@ func getFileIds(fid, idx, limit int64) []int64 {
 // helper function to insert files via chunks injection
 func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *TempFileRecord, ids []int64) {
 	defer wg.Done()
-	var rwm sync.RWMutex
+	//     var rwm sync.RWMutex
 	for idx, rrr := range records {
 		lfn := rrr.LogicalFileName
 		fileTypeID, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rrr.FileType)
@@ -754,11 +757,12 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 		//                 return
 		//             }
 		//         }
-		rwm.Lock()
-		trec.FilesMap[lfn] = fileID
+		//         rwm.Lock()
+		//         trec.FilesMap[lfn] = fileID
+		trec.FilesMap.Store(lfn, fileID)
 		if utils.VERBOSE > 1 {
 			log.Printf("trec inserted %s with fileID %d", lfn, fileID)
 		}
-		rwm.Unlock()
+		//         rwm.Unlock()
 	}
 }
