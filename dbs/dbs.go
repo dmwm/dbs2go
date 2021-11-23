@@ -839,7 +839,7 @@ func IncrementSequences(tx *sql.Tx, seq string, n int) ([]int64, error) {
 // IncrementSequence API returns single unique ID for a given sequence
 func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	ids, err := IncrementSequences(tx, seq, 1)
-	if len(ids) == 1 {
+	if len(ids) == 1 && err == nil {
 		return ids[0], err
 	}
 	return 0, err

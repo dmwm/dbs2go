@@ -632,26 +632,32 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	var chunk []File
 	// get first available fileID to use
 	//     fileID, err := getFileID(tx)
+	//     if err != nil {
+	//         log.Println("unable to getFileID", err)
+	//         return err
+	//     }
+	fileIds, err := IncrementSequences(tx, "SEQ_FL", len(records))
 	if err != nil {
-		log.Println("unable to getFileID", err)
-		return err
+		msg := fmt.Sprintf("unable to get file ids, error %v", err)
+		log.Println(msg)
+		return errors.New(msg)
 	}
+	if utils.VERBOSE > 1 {
+		log.Println("get new file Ids", fileIds)
+	}
+	var ids []int64
 	for i := 0; i < len(records); i = i + chunkSize {
 		if i+chunkSize < len(records) {
 			chunk = records[i : i+chunkSize]
+			ids = fileIds[i : i+chunkSize]
 		} else {
 			chunk = records[i:len(records)]
+			ids = fileIds[i:len(records)]
 		}
 		//         ids := getFileIds(fileID, int64(i), int64(i+chunkSize))
-		ids, err := IncrementSequences(tx, "SEQ_FL", len(chunk))
-		if err == nil {
-			wg.Add(1)
-			go insertFilesChunk(tx, &wg, chunk, trec, ids)
-			ngoroutines += 1
-		} else {
-			log.Println("unable to increment sequences SEQ_FL")
-			trec.NErrors += 1
-		}
+		wg.Add(1)
+		go insertFilesChunk(tx, &wg, chunk, trec, ids)
+		ngoroutines += 1
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("insertFilesViaChunks processed %d goroutines, elapsed time %v", ngoroutines, time.Since(t0))
@@ -702,8 +708,9 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 		if lBy == "" {
 			lBy = trec.CreateBy
 		}
+		fileID := ids[idx]
 		r := Files{
-			FILE_ID:                ids[idx],
+			FILE_ID:                fileID,
 			LOGICAL_FILE_NAME:      lfn,
 			IS_FILE_VALID:          trec.IsFileValid,
 			DATASET_ID:             trec.DatasetID,
@@ -720,21 +727,29 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 			LAST_MODIFICATION_DATE: trec.CreationDate,
 			LAST_MODIFIED_BY:       lBy,
 		}
-		// insert file lumi list
-		fileID, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
+		// insert file lumi list record
+		err = r.Insert(tx)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("trec unable to find file_id for", lfn, "will insert")
+				log.Printf("### trec unable to insert File record for lfn %s, error %v", lfn, err)
 			}
-			err = r.Insert(tx)
-			if err != nil {
-				if utils.VERBOSE > 1 {
-					log.Printf("### trec unable to insert File record for lfn %s, error %v", lfn, err)
-				}
-				trec.NErrors += 1
-				return
-			}
+			trec.NErrors += 1
+			return
 		}
+		//         fileID, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
+		//         if err != nil {
+		//             if utils.VERBOSE > 1 {
+		//                 log.Println("trec unable to find file_id for", lfn, "will insert")
+		//             }
+		//             err = r.Insert(tx)
+		//             if err != nil {
+		//                 if utils.VERBOSE > 1 {
+		//                     log.Printf("### trec unable to insert File record for lfn %s, error %v", lfn, err)
+		//                 }
+		//                 trec.NErrors += 1
+		//                 return
+		//             }
+		//         }
 		rwm.Lock()
 		trec.FilesMap[lfn] = fileID
 		if utils.VERBOSE > 1 {
