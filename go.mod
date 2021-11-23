@@ -14,7 +14,7 @@ require (
 	github.com/mattn/go-oci8 v0.1.1
 	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/prometheus/procfs v0.7.3
 	github.com/shirou/gopsutil v3.21.10+incompatible
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/ulule/limiter/v3 v3.8.0
@@ -22,7 +22,7 @@ require (
 	github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/exp/errors v0.0.0-20211105205138-14c72366447f
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211107104306-e0b2ad06fe42 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/rana/ora.v4 v4.1.15
