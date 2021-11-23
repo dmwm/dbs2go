@@ -817,25 +817,32 @@ func AddParam(name, sqlName string, params Record, conds []string, args []interf
 	return conds, args
 }
 
-// IncrementSequence API
-func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
+// IncrementSequences API provide a way to get N unique IDs for given sequence name
+func IncrementSequences(tx *sql.Tx, seq string, n int) ([]int64, error) {
 	if DBOWNER == "sqlite" {
-		return 0, nil
+		return []int64{0}, nil
 	}
+	var out []int64
 	var pid float64
-	stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
-	if utils.VERBOSE > 1 {
-		log.Println("execute", stm)
-	}
-	err := tx.QueryRow(stm).Scan(&pid)
-	if err != nil {
-		msg := fmt.Sprintf("fail to increment sequence, query='%s' error=%v", stm, err)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
+	for i := 0; i < n; i++ {
+		stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
+		err := tx.QueryRow(stm).Scan(&pid)
+		if err != nil {
+			msg := fmt.Sprintf("fail to increment sequence, query='%s' error=%v", stm, err)
+			return out, errors.New(msg)
 		}
-		return 0, errors.New(msg)
+		out = append(out, int64(pid))
 	}
-	return int64(pid), nil
+	return out, nil
+}
+
+// IncrementSequence API returns single unique ID for a given sequence
+func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
+	ids, err := IncrementSequences(tx, seq, 1)
+	if len(ids) == 1 {
+		return ids[0], err
+	}
+	return 0, err
 }
 
 // LastInsertID returns last insert id of given table and idname parameter
