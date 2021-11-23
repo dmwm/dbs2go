@@ -462,10 +462,14 @@ func (a *API) InsertBulkBlocks2() error {
 		}
 		return err
 	}
+	if utils.VERBOSE > 1 {
+		log.Printf("trec %#v", trec)
+	}
 	for _, rrr := range rec.Files {
-		fileID, ok := trec.FilesMap[rrr.LogicalFileName]
+		lfn := rrr.LogicalFileName
+		fileID, ok := trec.FilesMap[lfn]
 		if !ok {
-			log.Printf("unable to find fileID in FilesMap for %s", rrr.LogicalFileName)
+			log.Printf("unable to find fileID in FilesMap for %s", lfn)
 			return errors.New("unable to find fileID in filesMap")
 		}
 		// there are three methods to insert FileLumi list
@@ -497,7 +501,7 @@ func (a *API) InsertBulkBlocks2() error {
 			err = InsertFileLumisTxViaChunks(tx, fileLumiList)
 			if err != nil {
 				if utils.VERBOSE > 1 {
-					log.Println("unable to insert FileLumis records", err)
+					log.Printf("unable to insert FileLumis records for %s, fileID %d, error %v", lfn, fileID, err)
 				}
 				return err
 			}
@@ -754,7 +758,6 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 		trec.FilesMap[lfn] = fileID
 		if utils.VERBOSE > 1 {
 			log.Printf("trec inserted %s with fileID %d", lfn, fileID)
-			log.Printf("trec %#v", trec)
 		}
 		rwm.Unlock()
 	}
