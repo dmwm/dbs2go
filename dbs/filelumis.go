@@ -205,9 +205,6 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 	var err error
 
 	if FileLumiInsertMethod == "temptable" {
-		// merge temp table
-//         table = fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
-
 		// create temp table
 		tmpl := make(Record)
 		tmpl["Owner"] = DBOWNER
@@ -226,10 +223,14 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 		}
 		_, err = tx.Exec(stm)
 		if err != nil {
-			if utils.VERBOSE > 0 {
-				log.Printf("Unable to create temp FileLumis table, error %v", err)
+			if strings.Contains(err.Error(), "ORA-00955") {
+				log.Printf("Temp table %s is already exists\n", table)
+			} else {
+				if utils.VERBOSE > 0 {
+					log.Printf("Unable to create temp FileLumis table, error %v", err)
+				}
+				return err
 			}
-			return err
 		}
 	}
 
