@@ -499,7 +499,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		return err
 	}
 	if utils.VERBOSE > 1 {
-		log.Printf("trec %#v", trec)
+		log.Printf("trec %+v", trec)
 	}
 	tempTable := fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
 	if DBOWNER == "sqlite" {
