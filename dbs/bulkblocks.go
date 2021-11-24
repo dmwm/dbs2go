@@ -41,6 +41,8 @@ type DatasetConfig struct {
 	AppName           string `json:"app_name"`
 	OutputModuleLabel string `json:"output_module_label"`
 	GlobalTag         string `json:"global_tag"`
+	CreateBy          string `json:"create_by"`
+	CreationDate      int64  `json:"creation_date"`
 }
 
 // FileConfig represents file config structure used in BulkBlocks structure
@@ -50,7 +52,9 @@ type FileConfig struct {
 	LFN               string `json:"lfn"`
 	AppName           string `json:"app_name"`
 	OutputModuleLabel string `json:"output_module_label"`
-	GlogalTag         string `json:"global_tag"`
+	GlobalTag         string `json:"global_tag"`
+	CreateBy          string `json:"create_by"`
+	CreationDate      int64  `json:"creation_date"`
 }
 
 // FileLumi represents file lumi structure used in File structure of BulkBlocks structure

@@ -319,7 +319,9 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 			&fileConfig.LFN,
 			&fileConfig.AppName,
 			&fileConfig.OutputModuleLabel,
-			&fileConfig.GlogalTag,
+			&fileConfig.GlobalTag,
+			&fileConfig.CreateBy,
+			&fileConfig.CreationDate,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -393,6 +395,8 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 			&datasetConfig.AppName,
 			&datasetConfig.OutputModuleLabel,
 			&datasetConfig.GlobalTag,
+			&datasetConfig.CreateBy,
+			&datasetConfig.CreationDate,
 		)
 		if err != nil {
 			log.Println("unable to scan rows", err)
