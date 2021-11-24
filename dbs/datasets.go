@@ -261,8 +261,10 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.DATASET_ID, r.DATASET, r.IS_DATASET_VALID, r.PRIMARY_DS_ID, r.PROCESSED_DS_ID, r.DATA_TIER_ID, r.DATASET_ACCESS_TYPE_ID, r.ACQUISITION_ERA_ID, r.PROCESSING_ERA_ID, r.PHYSICS_GROUP_ID, r.XTCROSSSECTION, r.PREP_ID, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
-	if utils.VERBOSE > 0 {
-		log.Printf("unable to insert Datasets %+v", err)
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to insert Datasets %+v", err)
+		}
 	}
 	return err
 }
