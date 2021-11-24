@@ -468,6 +468,11 @@ func (a *API) BlockDump() error {
 	if utils.VERBOSE > 1 {
 		log.Println("waited for all goroutines to finish")
 	}
+	// prepare dsParentList in form of []DatasetParent
+	var dsParentList []DatasetParent
+	for _, d := range datasetParentList {
+		dsParentList = append(dsParentList, DatasetParent{ParentDataset: d})
+	}
 
 	// initialize BulkBlocks record
 	rec := BulkBlocks{
@@ -478,8 +483,8 @@ func (a *API) BlockDump() error {
 		PrimaryDataset:    primaryDataset,
 		Files:             files,
 		BlockParentList:   blockParentList,
-		DatasetParentList: datasetParentList,
-		DsParentList:      datasetParentList,
+		DatasetParentList: datasetParentList, // used by bulkblocks API
+		DsParentList:      dsParentList,      // provided by blockdump API
 		FileConfigList:    fileConfigList,
 		FileParentList:    fileParentList,
 		DatasetConfigList: datasetConfigList,

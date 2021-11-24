@@ -628,9 +628,9 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	// insert dataset parent list
 	datasetParentList := rec.DatasetParentList
 	// use both DatasetParentList and DsParentList (for backward compatibility)
-	// and compose uniq set of dataset parents
+	// and compose unique set of dataset parents
 	for _, d := range rec.DsParentList {
-		datasetParentList = append(datasetParentList, d)
+		datasetParentList = append(datasetParentList, d.ParentDataset)
 	}
 	datasetParentList = utils.List2Set(datasetParentList)
 	for _, ds := range datasetParentList {
