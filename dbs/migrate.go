@@ -612,7 +612,10 @@ func (a *API) ProcessMigration() {
 
 	records, err := MigrationRequests(mid)
 	if utils.VERBOSE > 0 {
-		log.Println("found process migration request records", records)
+		log.Println("found process migration request records")
+		for _, r := range records {
+			log.Printf("%+v", r)
+		}
 	}
 	if err != nil {
 		if utils.VERBOSE > 0 {
