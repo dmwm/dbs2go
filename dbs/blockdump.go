@@ -59,6 +59,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		&xt,
 		&dataset.LastModificationDate,
 		&dataset.Dataset,
+		&dataset.PrepID,
 	)
 	if xt.Valid {
 		dataset.Xtcrosssection = xt.Float64
