@@ -102,7 +102,7 @@ type Dataset struct {
 	Xtcrosssection       float64 `json:"xtcrosssection"`
 	LastModificationDate int64   `json:"last_modification_date"`
 	Dataset              string  `json:"dataset"`
-	PrepID               string  `json:prep_id`
+	PrepID               string  `json:"prep_id"`
 }
 
 // AcquisitionEra represents AcquisitionEra structure use in BulkBlocks structure
