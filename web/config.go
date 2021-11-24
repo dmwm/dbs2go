@@ -41,6 +41,7 @@ type Configuration struct {
 	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`    // chunk size for []FileLumi insertion
 	FileLumiMaxSize      int    `json:"file_lumi_max_size"`      // max size for []FileLumi insertion
 	FileLumiInsertMethod string `json:"file_lumi_insert_method"` // insert method for FileLumi list
+	ConcurrentBulkBlocks bool   `json:"concurrent_bulkblocks"`   // use concurrent BulkBlocks API
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates
@@ -102,6 +103,9 @@ func ParseConfig(configFile string) error {
 	if Config.MetricsPrefix == "" {
 		Config.MetricsPrefix = "dbs2go"
 	}
+	// keep reasonable chunk/max sizes such that in total we'll have
+	// around few hundreds goroutines running at runtime, e.g.
+	// 10 files x 20 file-lumis (10000/500) = 200 goroutines
 	if Config.FileChunkSize == 0 {
 		Config.FileChunkSize = 10
 	}

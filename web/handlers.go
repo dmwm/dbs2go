@@ -398,9 +398,11 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "blocks" {
 		err = api.InsertBlocks()
 	} else if a == "bulkblocks" {
-		err = api.InsertBulkBlocks()
-	} else if a == "bulkblocks2" {
-		err = api.InsertBulkBlocks2()
+		if dbs.ConcurrentBulkBlocks {
+			err = api.InsertBulkBlocksConcurrently()
+		} else {
+			err = api.InsertBulkBlocks()
+		}
 	} else if a == "files" {
 		err = api.InsertFiles()
 	} else if a == "fileparents" {
@@ -798,14 +800,6 @@ func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) {
 		DBSPostHandler(w, r, "bulkblocks")
 	} else {
 		DBSGetHandler(w, r, "bulkblocks")
-	}
-}
-
-// BulkBlocks2Handler provides concurrent access to BulkBlocks2 DBS API
-// POST API takes no argument, the payload should be supplied as JSON
-func BulkBlocks2Handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		DBSPostHandler(w, r, "bulkblocks2")
 	}
 }
 

@@ -70,6 +70,9 @@ var FileLumiMaxSize int
 // FileLumiInsertMethod controls which method to use for insertion of FileLumi list
 var FileLumiInsertMethod string
 
+// ConcurrentBulkBlocks defines if code should use concurrent bulkblocks API
+var ConcurrentBulkBlocks bool
+
 // DBRecord interface allows to insert DBS record using given transaction
 type DBRecord interface {
 	Insert(tx *sql.Tx) error

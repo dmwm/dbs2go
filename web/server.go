@@ -173,7 +173,6 @@ func handlers() *mux.Router {
 		router.HandleFunc(basePath("/datasets"), DatasetsHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/blocks"), BlocksHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/bulkblocks"), BulkBlocksHandler).Methods("POST")
-		router.HandleFunc(basePath("/bulkblocks2"), BulkBlocks2Handler).Methods("POST")
 		router.HandleFunc(basePath("/files"), FilesHandler).Methods("POST", "PUT", "GET")
 		router.HandleFunc(basePath("/physicsgroups"), PhysicsGroupsHandler).Methods("POST")
 		router.HandleFunc(basePath("/datasetaccesstypes"), DatasetAccessTypesHandler).Methods("POST")
@@ -385,6 +384,9 @@ func Server(configFile string) {
 	// migration settings
 	dbs.MigrationProcessTimeout = Config.MigrationProcessTimeout
 	dbs.MigrationServerInterval = Config.MigrationServerInterval
+
+	// DBS bulkblocks API
+	dbs.ConcurrentBulkBlocks = Config.ConcurrentBulkBlocks
 
 	// init graphql
 	if Config.GraphQLSchema != "" {

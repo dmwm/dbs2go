@@ -39,17 +39,22 @@ type TempFileRecord struct {
 	NErrors int
 }
 
-// InsertBulkBlocks2 DBS API. It relies on BulkBlocks record which by itself
-// contains series of other records. The logic of this API is the following:
-// we read dataset_conf_list part of the record and insert output config data,
-// then we insert recursively PrimaryDSTypes, PrimaryDataset, ProcessingEras,
-// AcquisitionEras, ..., Datasets, Blocks, Files, FileLumis, FileCofig list,
-// and dataset parent lists.
-// for Python logic please refer to:
-// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
-// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
+// InsertBulkBlocksConcurrently DBS API provides concurrent bulk blocks
+// insertion. It inherits the same logic as BulkBlocks API but perform
+// Files and FileLumis injection concurrently via chunk of record.
+// It relies on the following parameters:
+// - FileChunkSize defines number of concurrent goroutines executing injection into
+//   FILES table
+// - FileLumiChunkSize/FileLumiMaxSize defines concurrent injection into
+//   FILE_LUMIS table. The former specifies chunk size while latter total number of
+//   records to be inserted at once to ORABLE DB
+// - FileLumiInsertMethod defines which method to use for workflow execution, so far
+//   we support temptable, chunks, and sequential methods. The temptable uses
+//   ORACLE TEMPTABLE approach, chunks uses direct tables, and sequential method
+//   fallback to record by record injection (no goroutines).
+//
 // gocyclo:ignore
-func (a *API) InsertBulkBlocks2() error {
+func (a *API) InsertBulkBlocksConcurrently() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
