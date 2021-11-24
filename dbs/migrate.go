@@ -630,6 +630,7 @@ func (a *API) ProcessMigration() {
 		return
 	}
 	mrec := records[0]
+
 	// update migration status
 	updateMigrationStatus(mid, IN_PROGRESS)
 
@@ -738,35 +739,6 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 	// set default status
 	status = FAILED
 
-	// execute slow operation in background
-	go a.processMigration(ch, &status)
-
-	// the slow operation will either finish or timeout
-	select {
-	case <-ctx.Done():
-		msg = fmt.Sprintf("Process migration function timeout")
-		err = errors.New(msg)
-	case <-ch:
-		msg = fmt.Sprintf("migration request status %v", status)
-	}
-	report := MigrationReport{Report: msg, Status: statusString(status)}
-	var reports []MigrationReport
-	reports = append(reports, report)
-	data, err := json.Marshal(reports)
-	if err == nil {
-		a.Writer.Write(data)
-	}
-	return err
-}
-
-// processMigration will process given migration report
-// and inject data to source DBS
-func (a *API) processMigration(ch chan<- bool, status *int64) {
-	// report on channel that we are done with this workflow
-	defer func() {
-		ch <- true
-	}()
-
 	// backward compatibility with DBS migration server which uses migration_rqst_id
 	if v, ok := a.Params["migration_rqst_id"]; ok {
 		a.Params["migration_request_id"] = v
@@ -786,18 +758,56 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 		log.Println("found process migration request records", records)
 	}
 	if err != nil {
+		msg := fmt.Sprintf("fail to fetch migration request %d, error %v", mid, err)
 		if utils.VERBOSE > 0 {
-			log.Printf("fail to fetch migration request %d, error %v", mid, err)
+			log.Println(msg)
 		}
-		return
+		return errors.New(msg)
 	}
 	if len(records) != 1 {
+		msg := fmt.Sprintf("found %d requests for mid=%d, stop processing", len(records), mid)
 		if utils.VERBOSE > 0 {
-			log.Printf("found %d requests for mid=%d, stop processing", len(records), mid)
+			log.Println(msg)
 		}
-		return
+		return errors.New(msg)
 	}
 	mrec := records[0]
+
+	// execute slow operation in background
+	go a.processMigration(ch, &status, mrec)
+
+	// the slow operation will either finish or timeout
+	select {
+	case <-ctx.Done():
+		msg = fmt.Sprintf("Process migration function timeout")
+		err = errors.New(msg)
+	case <-ch:
+		msg = fmt.Sprintf("migration request completed with status %v", status)
+		log.Println(msg)
+	}
+	reports := []MigrationReport{migrationReport(mrec, msg, status, err)}
+	if a.Writer != nil {
+		data, err := json.Marshal(reports)
+		if err == nil {
+			a.Writer.Write(data)
+		} else {
+			data := fmt.Sprintf("fail to marshal migration record %+v, status %v error %v", mrec, status, err)
+			a.Writer.Write([]byte(data))
+		}
+	}
+	return err
+}
+
+// processMigration will process given migration report
+// and inject data to source DBS
+func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequest) {
+	// report on channel that we are done with this workflow
+	defer func() {
+		ch <- true
+	}()
+
+	mid := mrec.MIGRATION_REQUEST_ID
+
 	// update migration status
 	updateMigrationStatus(mid, IN_PROGRESS)
 
@@ -811,7 +821,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 	}
 	var bid, bOrder, bStatus int64
 	var block string
-	err = DB.QueryRow(stm, args...).Scan(
+	err := DB.QueryRow(stm, args...).Scan(
 		&bid, &block, &bOrder, &bStatus,
 	)
 	if err != nil {
@@ -828,7 +838,6 @@ func (a *API) processMigration(ch chan<- bool, status *int64) {
 		}
 	}
 	// NOTE: /blockdump API returns BulkBlocks record used in /bulkblocks API
-	//     var rec BlockDumpRecord
 	var brec BulkBlocks
 	err = json.Unmarshal(data, &brec)
 	if err != nil {
