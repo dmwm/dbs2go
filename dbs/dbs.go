@@ -822,10 +822,14 @@ func AddParam(name, sqlName string, params Record, conds []string, args []interf
 
 // IncrementSequences API provide a way to get N unique IDs for given sequence name
 func IncrementSequences(tx *sql.Tx, seq string, n int) ([]int64, error) {
-	if DBOWNER == "sqlite" {
-		return []int64{0}, nil
-	}
 	var out []int64
+	if DBOWNER == "sqlite" {
+		ts := time.Now().UnixNano()
+		for i := 0; i < n; i++ {
+			out = append(out, ts+int64(i))
+		}
+		return out, nil
+	}
 	var pid float64
 	for i := 0; i < n; i++ {
 		stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
