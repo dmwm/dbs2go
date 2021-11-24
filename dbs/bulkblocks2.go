@@ -345,28 +345,43 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	}
 	// get datasetID
 	if utils.VERBOSE > 1 {
-		log.Println("get dataset ID")
+		log.Printf("get dataset ID for %+v", dataset)
 	}
-	datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
+	datasetID, err = GetRecID(
+		tx,
+		&dataset,
+		"DATASETS",
+		"dataset_id",
+		"dataset",
+		rec.Dataset.Dataset,
+	)
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find dataset_id for", rec.Dataset.Dataset, "will insert")
+			log.Println("unable to insert dataset record", err)
 		}
-		err = dataset.Insert(tx)
-		if err != nil {
-			if utils.VERBOSE > 1 {
-				log.Println("unable to insert dataset record", err)
-			}
-			return err
-		}
-		datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
-		if err != nil {
-			if utils.VERBOSE > 1 {
-				log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
-			}
-			return err
-		}
+		return err
 	}
+	//     datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
+	//     if err != nil {
+	//         if utils.VERBOSE > 1 {
+	//             log.Println("unable to find dataset_id for", rec.Dataset.Dataset, "will insert")
+	//         }
+	//         err = dataset.Insert(tx)
+	//         if err != nil {
+	//             if utils.VERBOSE > 1 {
+	//                 log.Println("unable to insert dataset record", err)
+	//             }
+	//             return err
+	//         }
+	//         datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
+	//         if err != nil {
+	//             if utils.VERBOSE > 1 {
+	//                 log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
+	//             }
+	//             return err
+	//         }
+	//     }
+
 	// get outputModConfigID using datasetID
 	// since we already inserted records from DatasetConfigList
 	for _, r := range rec.DatasetConfigList {
@@ -442,12 +457,26 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	// insert all FileDataTypes fow all lfns
 	for _, rrr := range rec.Files {
 		ftype := FileDataTypes{FILE_TYPE: rrr.FileType}
-		err = ftype.Insert(tx)
+		//         err = ftype.Insert(tx)
+		_, err = GetRecID(
+			tx,
+			&ftype,
+			"FILE_DATA_TYPES",
+			"file_type_id",
+			"file_type",
+			rrr.FileType,
+		)
 		if err != nil {
-			if utils.VERBOSE > 0 {
-				log.Println("FileDataType insert error", err)
+			if utils.VERBOSE > 1 {
+				log.Println("unable to find file_type_id for", ftype)
 			}
+			return err
 		}
+		//         if err != nil {
+		//             if utils.VERBOSE > 0 {
+		//                 log.Println("FileDataType insert error", err)
+		//             }
+		//         }
 	}
 	// insert files
 	if utils.VERBOSE > 1 {
