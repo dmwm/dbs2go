@@ -215,6 +215,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	if rec.CREATION_DATE == 0 {
 		rec.CREATION_DATE = time.Now().Unix()
 	}
+	if rec.CREATE_BY == "" {
+		rec.CREATE_BY = a.CreateBy
+	}
 	arec := ApplicationExecutables{APP_NAME: rec.APP_NAME}
 	rrec := ReleaseVersions{RELEASE_VERSION: rec.RELEASE_VERSION}
 	prec := ParameterSetHashes{PSET_HASH: rec.PSET_HASH, PSET_NAME: rec.PSET_NAME}
