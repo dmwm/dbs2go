@@ -113,6 +113,7 @@ type Dataset struct {
 type AcquisitionEra struct {
 	AcquisitionEraName string `json:"acquisition_era_name"`
 	StartDate          int64  `json:"start_date"`
+	EndDate            int64  `json:"end_date"`
 	CreateBy           string `json:"create_by"`
 	Description        string `json:"description"`
 }
@@ -288,10 +289,14 @@ func (a *API) InsertBulkBlocks() error {
 	if rec.AcquisitionEra.CreateBy == "" {
 		rec.AcquisitionEra.CreateBy = a.CreateBy
 	}
+	endDate := rec.AcquisitionEra.EndDate
+	if endDate == 0 {
+		endDate = time.Now().Unix() // TODO: figure out logic of endDate
+	}
 	aera := AcquisitionEras{
 		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
 		START_DATE:           rec.AcquisitionEra.StartDate,
-		END_DATE:             0,
+		END_DATE:             endDate,
 		CREATION_DATE:        creationDate,
 		CREATE_BY:            rec.AcquisitionEra.CreateBy,
 		DESCRIPTION:          rec.AcquisitionEra.Description,
