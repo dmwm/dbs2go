@@ -41,6 +41,7 @@ func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code i
 	var out []dbs.Record
 	out = append(out, rec)
 	data, _ := json.Marshal(out)
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(data)
 	return int64(len(data))
