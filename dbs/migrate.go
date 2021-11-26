@@ -936,24 +936,46 @@ type MigrationRemoveRequest struct {
 	CREATE_BY            string `json:"create_by"`
 }
 
+// removeMigrationReport DBS API
+func (a *API) removeMigrationReport(rid int64, message string, err error) {
+	msg := fmt.Sprintf("Migration request %d, %s", rid, message)
+	reports := []MigrationReport{MigrationReport{Report: msg, Error: err}}
+	if a.Writer != nil {
+		data, err := json.Marshal(reports)
+		if err == nil {
+			a.Writer.Write(data)
+		} else {
+			data := fmt.Sprintf("fail to marshal migration report record error %v", err)
+			a.Writer.Write([]byte(data))
+		}
+	}
+}
+
 // RemoveMigration DBS API
 func (a *API) RemoveMigration() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		log.Println("unable to readl data", err)
+		msg := "unable to read data"
+		log.Println(msg, err)
+		a.removeMigrationReport(0, msg, err)
 		return err
 	}
 	rec := MigrationRemoveRequest{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		log.Println("unable to decode data", err)
+		msg := "unable to decode data"
+		log.Println(msg, err)
+		a.removeMigrationReport(0, msg, err)
 		return err
 	}
+	mid := rec.MIGRATION_REQUEST_ID
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		log.Println("unable to get DB transaction", err)
+		msg := "unable to get DB transaction"
+		log.Println(msg, err)
+		a.removeMigrationReport(mid, msg, err)
 		return err
 	}
 	defer tx.Rollback()
@@ -971,10 +993,11 @@ func (a *API) RemoveMigration() error {
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
+		a.removeMigrationReport(mid, msg, err)
 		return errors.New(msg)
 	}
 	if utils.VERBOSE > 0 {
-		log.Println("found request ID", tid, "to remove")
+		log.Printf("found %d records to remove for request ID %d", tid, mid)
 	}
 
 	if tid > 0 {
@@ -985,15 +1008,24 @@ func (a *API) RemoveMigration() error {
 			if utils.VERBOSE > 0 {
 				log.Println(msg)
 			}
+			a.removeMigrationReport(mid, msg, err)
 			return errors.New(msg)
 		}
 		err = tx.Commit()
 		if err != nil {
-			log.Println("unable to commit transaction", err)
+			msg := "unable to commit transaction"
+			log.Println(msg, err)
+			a.removeMigrationReport(mid, msg, err)
 			return err
 		}
+		a.removeMigrationReport(mid, "remove successfull", nil)
+		return nil
 	}
-	return nil
+	msg := "Invalid request. Sucessfully processed or processing requests cannot be removed"
+	msg += ", or the requested migration did not exist"
+	msg += ", or the requestor for removing and creating has to be the same user."
+	a.removeMigrationReport(mid, msg, errors.New(msg))
+	return errors.New(msg)
 }
 
 // MigrationStatusRequest defines status request structure
