@@ -271,6 +271,11 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	if r.Header.Get("Accept") == "application/ndjson" {
 		sep = ""
 	}
+	if sep != "" {
+		w.Header().Add("Content-Type", "application/json")
+	} else {
+		w.Header().Add("Content-Type", "application/ndjson")
+	}
 
 	params := make(dbs.Record)
 	for k, v := range r.URL.Query() {
@@ -333,6 +338,11 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
 		sep = ""
+	}
+	if sep != "" {
+		w.Header().Add("Content-Type", "application/json")
+	} else {
+		w.Header().Add("Content-Type", "application/ndjson")
 	}
 
 	headerContentType := r.Header.Get("Content-Type")
@@ -442,6 +452,11 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {
 		sep = ""
+	}
+	if sep != "" {
+		w.Header().Add("Content-Type", "application/json")
+	} else {
+		w.Header().Add("Content-Type", "application/ndjson")
 	}
 
 	params, err := parseParams(r)
