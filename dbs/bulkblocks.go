@@ -38,6 +38,7 @@ type BulkBlocks struct {
 type DatasetConfig struct {
 	ReleaseVersion    string `json:"release_version"`
 	PsetHash          string `json:"pset_hash"`
+	PsetName          string `json:"pset_name"`
 	AppName           string `json:"app_name"`
 	OutputModuleLabel string `json:"output_module_label"`
 	GlobalTag         string `json:"global_tag"`
@@ -66,22 +67,25 @@ type FileLumi struct {
 
 // File represents file structure used in BulkBlocks structure
 type File struct {
-	CheckSum         string     `json:"check_sum"`
-	FileLumiList     []FileLumi `json:"file_lumi_list"`
-	Adler32          string     `json:"adler32"`
-	FileSize         int64      `json:"file_size"`
-	EventCount       int64      `json:"event_count"`
-	FileType         string     `json:"file_type"`
-	BranchHash       string     `json:"branch_hash"`
-	LastModifiedBy   string     `json:"last_modified_by"`
-	LogicalFileName  string     `json:"logical_file_name"`
-	MD5              string     `json:"md5"`
-	AutoCrossSection float64    `json:"auto_cross_section"`
+	CheckSum             string     `json:"check_sum"`
+	FileLumiList         []FileLumi `json:"file_lumi_list"`
+	Adler32              string     `json:"adler32"`
+	FileSize             int64      `json:"file_size"`
+	EventCount           int64      `json:"event_count"`
+	FileType             string     `json:"file_type"`
+	BranchHash           string     `json:"branch_hash"`
+	LastModifiedBy       string     `json:"last_modified_by"`
+	LastModificationDate int64      `json:"last_modification_date"`
+	LogicalFileName      string     `json:"logical_file_name"`
+	MD5                  string     `json:"md5"`
+	AutoCrossSection     float64    `json:"auto_cross_section"`
+	IsFileValid          int64      `json:"is_file_valid"`
 }
 
 // ProcessingEra represents processing era structure used in BulkBlocks structure
 type ProcessingEra struct {
 	CreateBy          string `json:"create_by"`
+	CreationDate      int64  `json:"creation_date"`
 	ProcessingVersion int64  `json:"processing_version"`
 	Description       string `json:"description"`
 }
@@ -96,6 +100,7 @@ type PrimaryDataset struct {
 
 // Dataset represents dataset structure used in BulkBlocks structure
 type Dataset struct {
+	DatasetID            int64   `json:"dataset_id"`
 	CreateBy             string  `json:"create_by"`
 	CreationDate         int64   `json:"creation_date"`
 	PhysicsGroupName     string  `json:"physics_group_name"`
@@ -113,6 +118,7 @@ type Dataset struct {
 type AcquisitionEra struct {
 	AcquisitionEraName string `json:"acquisition_era_name"`
 	StartDate          int64  `json:"start_date"`
+	CreationDate       int64  `json:"creation_date"`
 	EndDate            int64  `json:"end_date"`
 	CreateBy           string `json:"create_by"`
 	Description        string `json:"description"`
@@ -120,13 +126,17 @@ type AcquisitionEra struct {
 
 // Block represents Block structure used in BulkBlocks structure
 type Block struct {
-	CreateBy       string `json:"create_by"`
-	CreationDate   int64  `json:"creation_date"`
-	OpenForWriting int64  `json:"open_for_writing"`
-	BlockName      string `json:"block_name"`
-	FileCount      int64  `json:"file_count"`
-	OriginSiteName string `json:"origin_site_name"`
-	BlockSize      int64  `json:"block_size"`
+	BlockID              int64  `json:"block_id"`
+	DatasetID            int64  `json:"dataset_id"`
+	CreateBy             string `json:"create_by"`
+	CreationDate         int64  `json:"creation_date"`
+	OpenForWriting       int64  `json:"open_for_writing"`
+	BlockName            string `json:"block_name"`
+	FileCount            int64  `json:"file_count"`
+	OriginSiteName       string `json:"origin_site_name"`
+	BlockSize            int64  `json:"block_size"`
+	LastModifiedBy       string `json:"last_modified_by"`
+	LastModificationDate int64  `json:"last_modification_date"`
 }
 
 // BlockParent represents block parent structure used in BulkBlocks structure

@@ -24,6 +24,8 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 	}
 
 	err := DB.QueryRow(stm, args...).Scan(
+		&block.BlockID,
+		&block.DatasetID,
 		&block.CreateBy,
 		&block.CreationDate,
 		&block.OpenForWriting,
@@ -31,6 +33,8 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 		&block.FileCount,
 		&block.OriginSiteName,
 		&block.BlockSize,
+		&block.LastModifiedBy,
+		&block.LastModificationDate,
 	)
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
@@ -128,6 +132,7 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	err := DB.QueryRow(stm, args...).Scan(
 		&acquisitionEra.AcquisitionEraName,
 		&acquisitionEra.StartDate,
+		&acquisitionEra.CreationDate,
 		&cby,
 		&desc,
 	)
@@ -172,9 +177,11 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			&file.FileType,
 			&bhash,
 			&file.LastModifiedBy,
+			&file.LastModificationDate,
 			&file.LogicalFileName,
 			&md5,
 			&file.AutoCrossSection,
+			&file.IsFileValid,
 		)
 		if bhash.Valid {
 			file.BranchHash = bhash.String
@@ -391,6 +398,7 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 		datasetConfig := DatasetConfig{}
 		err = rows.Scan(
 			&datasetConfig.ReleaseVersion,
+			&datasetConfig.PsetName,
 			&datasetConfig.PsetHash,
 			&datasetConfig.AppName,
 			&datasetConfig.OutputModuleLabel,
