@@ -153,6 +153,7 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	}
 }
 
+// FileList represents list of File records
 type FileList []File
 
 func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
@@ -238,6 +239,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	}
 }
 
+// BlockParentList represents BlockParent records
 type BlockParentList []BlockParent
 
 func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockParentList) {
@@ -273,6 +275,7 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 	}
 }
 
+// DatasetParentList represents list of dataset parents
 type DatasetParentList []string
 
 func getDatasetParentList(blk string, wg *sync.WaitGroup, datasetParentList *DatasetParentList) {
@@ -305,6 +308,7 @@ func getDatasetParentList(blk string, wg *sync.WaitGroup, datasetParentList *Dat
 	}
 }
 
+// FileConfigList represents FileConfig records
 type FileConfigList []FileConfig
 
 func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfigList) {
@@ -346,6 +350,7 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 	}
 }
 
+// FileParentList represents FileParent records
 type FileParentList []FileParentRecord
 
 func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParentList) {
@@ -381,6 +386,7 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	}
 }
 
+// DatasetConfigList represents DatasetConfig records
 type DatasetConfigList []DatasetConfig
 
 func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *DatasetConfigList) {
