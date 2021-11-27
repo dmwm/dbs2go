@@ -52,6 +52,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 	}
 
 	var xt sql.NullFloat64
+	var pid sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
 		&dataset.DatasetID,
 		&dataset.CreateBy,
@@ -64,10 +65,13 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		&xt,
 		&dataset.LastModificationDate,
 		&dataset.Dataset,
-		&dataset.PrepID,
+		&pid,
 	)
 	if xt.Valid {
 		dataset.Xtcrosssection = xt.Float64
+	}
+	if pid.Valid {
+		dataset.PrepID = pid.String
 	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
