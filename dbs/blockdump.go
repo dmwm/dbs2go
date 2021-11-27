@@ -401,9 +401,10 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 	defer rows.Close()
 	for rows.Next() {
 		datasetConfig := DatasetConfig{}
+		var pname sql.NullString
 		err = rows.Scan(
 			&datasetConfig.ReleaseVersion,
-			&datasetConfig.PsetName,
+			&pname,
 			&datasetConfig.PsetHash,
 			&datasetConfig.AppName,
 			&datasetConfig.OutputModuleLabel,
@@ -414,6 +415,9 @@ func getDatasetConfigList(blk string, wg *sync.WaitGroup, datasetConfigList *Dat
 		if err != nil {
 			log.Println("unable to scan rows", err)
 			return
+		}
+		if pname.Valid {
+			datasetConfig.PsetName = pname.String
 		}
 		*datasetConfigList = append(*datasetConfigList, datasetConfig)
 	}
