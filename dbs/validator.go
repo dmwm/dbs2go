@@ -303,10 +303,9 @@ func CheckPattern(key, value string) error {
 					log.Printf("CheckPattern key=%s value='%s' found match %s", key, value, pat)
 				}
 				return nil
-			} else {
-				if utils.VERBOSE > 0 {
-					log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
-				}
+			}
+			if utils.VERBOSE > 0 {
+				log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
 			}
 		}
 		return errors.New("invalid pattern for key=" + key)
