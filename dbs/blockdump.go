@@ -53,6 +53,7 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 
 	var xt sql.NullFloat64
 	err := DB.QueryRow(stm, args...).Scan(
+		&dataset.DatasetID,
 		&dataset.CreateBy,
 		&dataset.CreationDate,
 		&dataset.PhysicsGroupName,
