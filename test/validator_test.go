@@ -136,7 +136,7 @@ func validationSuccess(t *testing.T, rec dbs.DBRecord) {
 	log.Printf("Validate %+v", rec)
 	err := rec.Validate()
 	if err == nil {
-		log.Println("Validation is successfull")
+		log.Println("Validation is successful")
 	} else {
 		t.Fatal(err)
 	}

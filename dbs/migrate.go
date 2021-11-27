@@ -1003,7 +1003,7 @@ func (a *API) RemoveMigration() error {
 		}
 		return nil
 	}
-	msg := "Invalid request. Sucessfully processed or processing requests cannot be removed"
+	msg := "Invalid request. Successfully processed or processing requests cannot be removed"
 	msg += ", or the requested migration did not exist"
 	msg += ", or the requestor for removing and creating has to be the same user."
 	return errors.New(msg)

@@ -11,7 +11,7 @@ import (
 
 var totalRequests uint64
 
-// helper function to immitate chunk insertion
+// helper function to imitate chunk insertion
 func insertChunk(wg *sync.WaitGroup, idx, limit int) {
 	defer wg.Done()
 	var args []interface{}
