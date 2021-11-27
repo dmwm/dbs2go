@@ -161,7 +161,7 @@ type DatasetParent struct {
 // /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
 // /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
 //
-// gocyclo:ignore
+//gocyclo:ignore
 func (a *API) InsertBulkBlocks() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)

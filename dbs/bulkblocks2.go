@@ -53,7 +53,7 @@ type TempFileRecord struct {
 //   ORACLE TEMPTABLE approach, chunks uses direct tables, and sequential method
 //   fallback to record by record injection (no goroutines).
 //
-// gocyclo:ignore
+//gocyclo:ignore
 func (a *API) InsertBulkBlocksConcurrently() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)

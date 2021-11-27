@@ -261,6 +261,7 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 }
 
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
+//gocyclo:ignore
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	atomic.AddUint64(&TotalPutRequests, 1)
 	time0 := time.Now()
@@ -329,6 +330,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 }
 
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
+//gocyclo:ignore
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	atomic.AddUint64(&TotalPostRequests, 1)
 	time0 := time.Now()

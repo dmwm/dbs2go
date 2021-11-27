@@ -367,6 +367,7 @@ type DatasetRecord struct {
 }
 
 // InsertDatasets DBS API
+//gocyclo:ignore
 func (a *API) InsertDatasets() error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
@@ -509,6 +510,7 @@ func (a *API) InsertDatasets() error {
 }
 
 // UpdateDatasets DBS API
+//gocyclo:ignore
 func (a *API) UpdateDatasets() error {
 
 	// get accessTypeID from Access dataset types table

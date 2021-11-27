@@ -15,6 +15,7 @@ import (
 )
 
 // FileLumis API
+//gocyclo:ignore
 func (a *API) FileLumis() error {
 	var args []interface{}
 	var conds []string
@@ -199,6 +200,7 @@ func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 }
 
 // InsertFileLumisTxViaChunks DBS API
+//gocyclo:ignore
 func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) error {
 
 	var stm string

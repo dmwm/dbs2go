@@ -161,6 +161,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 }
 
 // helper function to validate string parameters
+//gocyclo:ignore
 func strType(key string, val interface{}) error {
 	var v string
 	switch vvv := val.(type) {
