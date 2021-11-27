@@ -64,7 +64,7 @@ type RequestStats struct {
 	NumLogicalCores   int
 }
 
-// update RequestStatus
+// Update RequestStatus metrics
 func (r *RequestStats) Update() {
 	r.TotalGetRequests = TotalGetRequests
 	r.TotalPostRequests = TotalPostRequests
