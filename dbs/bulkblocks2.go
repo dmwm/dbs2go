@@ -696,7 +696,7 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 			chunk = records[i : i+chunkSize]
 			ids = fileIds[i : i+chunkSize]
 		} else {
-			chunk = records[i:len(records)]
+			chunk = records[i:]
 			ids = fileIds[i:len(records)]
 		}
 		//         ids := getFileIds(fileID, int64(i), int64(i+chunkSize))
