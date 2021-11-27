@@ -33,6 +33,9 @@ func testLexicon(t *testing.T, test string) {
 		t.Fatal(errors.New("Please setup DBS_LEXICON_FILE env"))
 	}
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
+	if err != nil {
+		t.Fatal(err)
+	}
 	sampleFile := os.Getenv("DBS_LEXICON_SAMPLE_FILE")
 	if sampleFile == "" {
 		t.Fatal(errors.New("Please setup DBS_LEXICON_SAMPLE_FILE env"))
@@ -88,6 +91,9 @@ func TestValidator(t *testing.T) {
 		t.Error(errors.New("Please setup DBS_LEXICON_FILE env"))
 	}
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
+	if err != nil {
+		t.Fatal(err)
+	}
 	dbs.LexiconPatterns = lexPatterns
 
 	var req *http.Request

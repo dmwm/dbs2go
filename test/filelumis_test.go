@@ -22,17 +22,9 @@ func insertChunk(wg *sync.WaitGroup, idx, limit int) {
 		args = append(args, i)
 		args = append(args, i)
 		atomic.AddUint64(&totalRequests, 1)
-		//         s := fmt.Sprintf("%d", i)
-		//         if len(s) == 1 {
-		//             s = fmt.Sprintf("000%s", s)
-		//         } else if len(s) == 2 {
-		//             s = fmt.Sprintf("00%s", s)
-		//         } else if len(s) == 3 {
-		//             s = fmt.Sprintf("0%s", s)
-		//         }
-		//         fmt.Println("idx", s)
 	}
 	stm = fmt.Sprintf("%s\nSELECT * FROM dual", stm)
+	log.Println("execute", stm)
 	// here stm represents final statement
 	// instead of doing tx.Exec we'll sleep
 	time.Sleep(10 * time.Millisecond)

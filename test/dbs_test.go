@@ -66,9 +66,8 @@ func TestDBSUtilParseRuns(t *testing.T) {
 	runs, err = dbs.ParseRuns(input)
 	if err == nil {
 		t.Error("invalid run number should be detected for input", input)
-		//     } else {
-		//         fmt.Printf("runs input %+v, parsed runs %+v, error %v\n", input, runs, err)
 	}
+	fmt.Printf("runs input %+v, parsed runs %+v\n", input, runs)
 }
 
 // TestDBSGetID

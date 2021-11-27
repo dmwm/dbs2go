@@ -56,7 +56,6 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				api.ProcessMigration()
 				metrics = utils.ProcFSMetrics()
 				log.Printf("migration process %+v finished in %v metrics %+v", params, time.Since(time0), metrics)
-				params = nil
 			}
 		}
 	}

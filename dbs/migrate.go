@@ -606,6 +606,10 @@ func (a *API) ProcessMigration() {
 
 	// obtain migration request record
 	val, err := getSingleValue(a.Params, "migration_request_id")
+	if err != nil {
+		log.Printf("unable to get migration_request_id", err)
+		return
+	}
 	midint, err := strconv.Atoi(val)
 	if err != nil {
 		log.Printf("unable to convert mid", err)
@@ -750,9 +754,14 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 
 	// obtain migration request record
 	val, err := getSingleValue(a.Params, "migration_request_id")
+	if err != nil {
+		log.Printf("unable to get migration_request_id", err)
+		return err
+	}
 	midint, err := strconv.Atoi(val)
 	if err != nil {
 		log.Printf("unable to convert mid", err)
+		return err
 	}
 	mid := int64(midint)
 	log.Println("process migration request", mid)

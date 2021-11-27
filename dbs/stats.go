@@ -62,9 +62,21 @@ func DBStats() (DBInfo, error) {
 	defer tx.Rollback()
 
 	dbInfo.FullSize, err = fullSize(tx, tmpl)
+	if err != nil {
+		log.Println("unable to get full size info", err)
+	}
 	dbInfo.IndexSize, err = indexSize(tx, tmpl)
+	if err != nil {
+		log.Println("unable to get index size info", err)
+	}
 	dbInfo.Schemas, err = schemasSize(tx, tmpl)
+	if err != nil {
+		log.Println("unable to get schemas size info", err)
+	}
 	dbInfo.Tables, err = tablesSize(tx, tmpl)
+	if err != nil {
+		log.Println("unable to get tables size info", err)
+	}
 
 	err = tx.Commit()
 	if err != nil {
