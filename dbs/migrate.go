@@ -336,10 +336,9 @@ func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
 			log.Printf("no parent datasets found for %s in %s", dataset, rurl)
 		}
 		return out, nil
-	} else {
-		if utils.VERBOSE > 1 {
-			log.Printf("process %d dataset", len(umap))
-		}
+	}
+	if utils.VERBOSE > 1 {
+		log.Printf("process %d dataset", len(umap))
 	}
 	// collect results from goroutines
 	exit := false
