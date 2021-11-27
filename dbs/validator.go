@@ -160,8 +160,8 @@ func (o StrPattern) Check(key string, val interface{}) error {
 	return errors.New(msg)
 }
 
-// helper function to validate string parameters
 //gocyclo:ignore
+// helper function to validate string parameters
 func strType(key string, val interface{}) error {
 	var v string
 	switch vvv := val.(type) {

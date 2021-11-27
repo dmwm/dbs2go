@@ -177,6 +177,7 @@ type BlockResponse struct {
 }
 
 // GetParentBlocks returns parent blocks for given url and block name
+//gocyclo:ignore
 func GetParentBlocks(rurl, block string) ([]string, error) {
 	out := []string{}
 	if utils.VERBOSE > 1 {
@@ -295,6 +296,7 @@ type DatasetResponse struct {
 }
 
 // GetParentDatasetBlocks returns full list of parent blocks associated with given dataset
+//gocyclo:ignore
 func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
 	out := []string{}
 	parentDatasets, err := GetParents(rurl, dataset)
@@ -440,6 +442,7 @@ func (a *API) SubmitMigration() error {
 }
 
 // helper function to start migration request and return list of migration ids
+//gocyclo:ignore
 func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	var err error
 	status := int64(PENDING)
@@ -590,6 +593,7 @@ func migrationReport(req MigrationRequest, report string, status int64, err erro
 // ProcessMigration will process given migration request
 // and inject data to source DBS
 // It expects that client will provide migration_request_url and migration id
+//gocyclo:ignore
 func (a *API) ProcessMigration() {
 
 	var status int64
