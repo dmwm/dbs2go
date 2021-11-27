@@ -1,5 +1,11 @@
 package dbs
 
+import (
+	"log"
+
+	"github.com/vkuznet/dbs2go/utils"
+)
+
 // ParentDatasetFileLumiIds API
 func (a *API) ParentDatasetFileLumiIds() error {
 	var args []interface{}
@@ -21,6 +27,12 @@ func (a *API) ParentDatasetFileLumiIds() error {
 
 	// add where clause
 	//     stm = WhereClause(stm, conds)
+
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 0 {
+		utils.PrintSQL(stm, args, "execute")
+		log.Println("conds", conds)
+	}
 
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)
