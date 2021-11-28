@@ -61,6 +61,7 @@ type FileParents struct {
 }
 
 // Insert implementation of FileParents
+//gocyclo:ignore
 func (r *FileParents) Insert(tx *sql.Tx) error {
 	var tid int64
 	var err error
@@ -255,6 +256,7 @@ type FileParentBlockRecord struct {
 }
 
 // InsertFileParentsBlockTxt DBS API
+//gocyclo:ignore
 func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert2.py
@@ -361,6 +363,7 @@ type FileParentRecord struct {
 }
 
 // InsertFileParentsTxt DBS API is used by bulkblocks API
+//gocyclo:ignore
 func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert.py

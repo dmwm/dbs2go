@@ -6,6 +6,7 @@ import (
 )
 
 // BlockSummaries DBS API
+//gocyclo:ignore
 func (a *API) BlockSummaries() error {
 	var stm string
 	var args []interface{}

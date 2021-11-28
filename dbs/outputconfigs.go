@@ -180,6 +180,7 @@ type OutputConfigRecord struct {
 }
 
 // InsertOutputConfigsTx DBS API
+//gocyclo:ignore
 func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	// implement the following logic
 	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSOutputConfig.py

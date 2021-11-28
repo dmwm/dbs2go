@@ -132,6 +132,7 @@ func TestMigrateGetParentDatasetBlocks(t *testing.T) {
 }
 
 // TestMigrate
+//gocyclo:ignore
 func TestMigrate(t *testing.T) {
 	// initialize DB for testing
 	db := initDB(false)

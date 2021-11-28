@@ -26,6 +26,7 @@ func TestLexiconNegative(t *testing.T) {
 }
 
 // testLexicon
+//gocyclo:ignore
 func testLexicon(t *testing.T, test string) {
 	// set DBS lexicon patterns
 	lexiconFile := os.Getenv("DBS_LEXICON_FILE")
