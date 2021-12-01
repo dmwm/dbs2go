@@ -188,28 +188,31 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 // ServerInfoHandler provides basic functionality of status response
 func ServerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	//     var records []dbs.Record
+	var records []dbs.Record
 	rec := make(dbs.Record)
 	rec["server"] = ServerInfo
-	// DBS test107 regex r'^(3+\.[0-9]+\.[0-9]+[\.\-a-z0-9]*$)'
 	rec["dbs_version"] = GitVersion
-	//     records = append(records, rec)
-	//     data, err := json.Marshal(records)
-	data, err := json.Marshal(rec)
+	records = append(records, rec)
+	data, err := json.Marshal(records)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Write(data)
 }
 
 // ApisHandler provides list of supporter apis by the DBS server
 func ApisHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := json.Marshal(webRoutes)
+	var records []dbs.Record
+	for api, methods := range webRoutes {
+		rec := make(dbs.Record)
+		rec["api"] = api
+		rec["methods"] = methods
+		records = append(records, rec)
+	}
+	data, err := json.Marshal(records)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Write(data)
 }
 
