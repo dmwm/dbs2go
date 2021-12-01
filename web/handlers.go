@@ -160,15 +160,29 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 
 // StatusHandler provides basic functionality of status response
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
+	// we will use DBS DataTiers API to check status of DBS
+	params := make(dbs.Record)
+	writer := utils.StdoutWriter("")
+	api := &dbs.API{
+		Writer: writer,
+		Params: params,
+		Api:    "dataters",
+	}
 	var records []dbs.Record
 	rec := make(dbs.Record)
-	rec["status"] = http.StatusOK
+	err := api.DataTiers()
+	if err == nil {
+		rec["status"] = http.StatusOK
+		w.WriteHeader(http.StatusOK)
+	} else {
+		rec["status"] = http.StatusInternalServerError
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	records = append(records, rec)
 	data, err := json.Marshal(records)
 	if err != nil {
 		log.Fatalf("Fail to marshal records, %v", err)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Write(data)
 }
 
