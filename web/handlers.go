@@ -160,13 +160,20 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 
 // StatusHandler provides basic functionality of status response
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
-	// we will use DBS DataTiers API to check status of DBS
+	// we will use DBS DatasetAccessTypes API to check status of DBS
 	params := make(dbs.Record)
-	writer := utils.StdoutWriter("")
+	writer := utils.DevNullWriter("")
 	api := &dbs.API{
 		Writer: writer,
 		Params: params,
-		Api:    "dataters",
+		Api:    "datasetaccesstypes",
+	}
+	if Config.ServerType == "DBSMigrate" || Config.ServerType == "DBSMigration" {
+		api = &dbs.API{
+			Writer: writer,
+			Params: params,
+			Api:    "total",
+		}
 	}
 	var records []dbs.Record
 	rec := make(dbs.Record)
