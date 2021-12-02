@@ -1,6 +1,82 @@
 ### DBS Migration Server
 
-The architecture of DBS Migration server can be found in the
+The architecture of DBS Migrate and DBS Migration servers can be found in the
 following diagram:
 
 ![DBS Migration server](images/DBS_MigrationServer.png)
+
+The DBS migration servers has the following responsibility:
+- *DBS migrate* server is HTTP service which access end-user request
+to submit and check status of migration requests. It has the following set
+of APIs:
+  - `/submit` accepts migration (HTTP POST) request
+  - `/process` performs processing given migration request
+  - `/remove` removes migration request
+  - `/status` fetches status of given migraton request
+  - `/total` shows total number of migration requests in a system
+  - `/serverinfo` provides server information
+- *DBS migration* server runs as a daemon to process migraton requests
+from underlying DB backend on periodic basis
+
+### Examples
+Post migration request:
+```
+# migration document
+cat > m.json << EOF
+{
+    "migration_url": "https://.../dbs/prod/global/DBSReader",
+    "migraton_input": "/a/b/c#123"
+}
+EOF
+
+# submit migration request
+curl -H "Content-Type: application/json" -d@PWD/m.json \
+    http://localhost:9898/dbs2go-migrate/submit
+```
+
+Process migration request
+```
+# migration document
+cat > m.json << EOF
+{
+    "migration_rqst_id":65023
+}
+EOF
+
+# submit migration request
+curl -H "Content-Type: application/json" -d@PWD/m.json \
+    http://localhost:9898/dbs2go-migrate/process
+```
+
+Fetch status of migration request
+```
+curl http://localhost:9898/dbs2go-migrate/status
+
+[
+{"create_by":"giffels","creation_date":1391014486,"last_modification_date":1391014924,"last_modified_by":"giffels","migration_input":"/GluGluToHToWWTo2LAndTau2Nu_M-90_7TeV-powheg-pythia6/Fall11-PU_S6_START42_V14B-v1/AODSIM","migration_request_id":5002,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
+,{"create_by":"giffels","creation_date":1391014486,"last_modification_date":1391014949,"last_modified_by":"giffels","migration_input":"/ZZTo2e2mu_8TeV_mll8_mZZ95-160-powheg15-pythia6/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM","migration_request_id":10001,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
+,{"create_by":"giffels","creation_date":1391014499,"last_modification_date":1391014965,"last_modified_by":"giffels","migration_input":"/CIToMuMu_Con_Lambda-19_M-800_TuneZ2star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V19E-v1/AODSIM","migration_request_id":5004,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
+...
+
+# or you can fetch status info of single request
+curl http://localhost:9898/dbs2go-migrate/status?migration_request_id=10005
+[
+{"create_by":"giffels","creation_date":1391014552,"last_modification_date":1391015023,"last_modified_by":"giffels","migration_input":"/ZJetToEE_Pt-170to230_TuneEE3C_8TeV_herwigpp/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM","migration_request_id":10005,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
+]
+```
+
+Get total number of migraton requests in a system:
+```
+curl http://localhost:9898/dbs2go-migrate/total
+[
+{"count":2319}
+]
+```
+Remove migraton request from a system:
+```
+curl -v -H "Content-type: application/json" \
+    -d@$PWD/mig_request.json \
+    http://localhost:9898/dbs2go-migrate/remove
+
+[{"api":"remove","error":"Invalid request. Successfully processed or processing requests cannot be removed, or the requested migration did not exist, or the requestor for removing and creating has to be the same user.","exception":400,"method":"POST","type":"HTTPError"}]
+```
