@@ -163,6 +163,9 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	// we will use DBS DatasetAccessTypes API to check status of DBS
 	params := make(dbs.Record)
 	writer := utils.DevNullWriter("")
+	var err error
+	var records []dbs.Record
+	rec := make(dbs.Record)
 	api := &dbs.API{
 		Writer: writer,
 		Params: params,
@@ -174,10 +177,10 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 			Params: params,
 			Api:    "total",
 		}
+		err = api.TotalMigration() // we'll use total migration call to check status of DB
+	} else {
+		err = api.DatasetAccessTypes() // we'll use dataaccesstypes API to check status of DB
 	}
-	var records []dbs.Record
-	rec := make(dbs.Record)
-	err := api.DataTiers()
 	if err == nil {
 		rec["status"] = http.StatusOK
 		w.WriteHeader(http.StatusOK)
