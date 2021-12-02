@@ -187,6 +187,7 @@ func handlers() *mux.Router {
 	}
 
 	// aux APIs used by all DBS servers
+	router.HandleFunc(basePath("/healthz"), StatusHandler).Methods("GET")
 	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
 	router.HandleFunc(basePath("/apis"), ApisHandler).Methods("GET")

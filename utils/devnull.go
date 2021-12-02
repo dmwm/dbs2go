@@ -17,7 +17,7 @@ func (s DevNullWriter) Header() http.Header {
 // Write implements Write API of http.ResponseWriter interface
 func (s DevNullWriter) Write(b []byte) (int, error) {
 	v := string(b)
-	if VERBOSE > 0 {
+	if VERBOSE > 2 {
 		fmt.Println("/dev/null: ", v)
 	}
 	return len(v), nil
@@ -25,7 +25,7 @@ func (s DevNullWriter) Write(b []byte) (int, error) {
 
 // WriteHeader implements WriteHeader API of http.ResponseWriter interface
 func (s DevNullWriter) WriteHeader(statusCode int) {
-	if VERBOSE > 0 {
+	if VERBOSE > 2 {
 		fmt.Println("/dev/null statusCode", statusCode)
 	}
 }
