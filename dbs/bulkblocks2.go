@@ -43,15 +43,16 @@ type TempFileRecord struct {
 // insertion. It inherits the same logic as BulkBlocks API but perform
 // Files and FileLumis injection concurrently via chunk of record.
 // It relies on the following parameters:
+//
 // - FileChunkSize defines number of concurrent goroutines executing injection into
-//   FILES table
+// FILES table
 // - FileLumiChunkSize/FileLumiMaxSize defines concurrent injection into
-//   FILE_LUMIS table. The former specifies chunk size while latter total number of
-//   records to be inserted at once to ORABLE DB
+// FILE_LUMIS table. The former specifies chunk size while latter total number of
+// records to be inserted at once to ORABLE DB
 // - FileLumiInsertMethod defines which method to use for workflow execution, so far
-//   we support temptable, chunks, and sequential methods. The temptable uses
-//   ORACLE TEMPTABLE approach, chunks uses direct tables, and sequential method
-//   fallback to record by record injection (no goroutines).
+// we support temptable, chunks, and sequential methods. The temptable uses
+// ORACLE TEMPTABLE approach, chunks uses direct tables, and sequential method
+// fallback to record by record injection (no goroutines).
 //
 //gocyclo:ignore
 func (a *API) InsertBulkBlocksConcurrently() error {
