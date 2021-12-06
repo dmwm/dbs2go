@@ -29,13 +29,13 @@ import (
 // HTTP context, input HTTP GET paramers, separator for writer,
 // create by and api string values passed at run-time.
 type API struct {
-	Reader    io.Reader
-	Writer    http.ResponseWriter
-	Context   context.Context
-	Params    Record
-	Separator string
-	CreateBy  string
-	Api       string
+	Reader    io.Reader           // reader to read data payload
+	Writer    http.ResponseWriter // writer to write results back to client
+	Context   context.Context     // HTTP context
+	Params    Record              // HTTP input parameters
+	Separator string              // string separator for ndjson format
+	CreateBy  string              // create by value from run-time
+	Api       string              // api name
 }
 
 // String provides string representation of API struct
