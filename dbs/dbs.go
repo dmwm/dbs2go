@@ -76,12 +76,14 @@ var FileLumiInsertMethod string
 // ConcurrentBulkBlocks defines if code should use concurrent bulkblocks API
 var ConcurrentBulkBlocks bool
 
-// DBRecord interface allows to insert DBS record using given transaction
+// DBRecord interface represents general DB record used by DBS APIs.
+// Each DBS API represents specific Table in back-end DB. And, each individual
+// DBS API implements logic for its own DB records
 type DBRecord interface {
-	Insert(tx *sql.Tx) error
-	Validate() error
-	SetDefaults()
-	Decode(r io.Reader) error
+	Insert(tx *sql.Tx) error  // used to insert given record to DB
+	Validate() error          // used to validate given record
+	SetDefaults()             // used to set proper defaults for given record
+	Decode(r io.Reader) error // used to decode given record
 }
 
 // DecodeValidatorError provides uniform error representation
