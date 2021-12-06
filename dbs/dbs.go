@@ -24,7 +24,10 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-// API structure represents DBS API
+// API structure represents DBS API. Each API has reader (to read
+// HTTP POST payload), HTTP writer to write results back to client,
+// HTTP context, input HTTP GET paramers, separator for writer,
+// create by and api string values passed at run-time.
 type API struct {
 	Reader    io.Reader
 	Writer    http.ResponseWriter

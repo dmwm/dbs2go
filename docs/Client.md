@@ -17,4 +17,10 @@ curl -L -k --key ~/.globus/userkey.pem --cert ~/.globus/usercert.pem \
     -d@/tmp/upload.json \
      https://xxx.cern.ch/dbs2go/fileArray
 
+# example of POST API, to upload b.json.gz file to bulkblocks API
+curl -L -k --key ~/.globus/userkey.pem --cert ~/.globus/usercert.pem \
+    -H "Content-type: application/json" -H "Accept: application/json" \
+    -H "Content-Encoding: gzip" --data-binary @$PWD/b.json.gz \
+     https://xxx.cern.ch/dbs2go/bulkblocks
+
 ```

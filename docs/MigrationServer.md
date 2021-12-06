@@ -14,6 +14,10 @@ of APIs:
   - `/remove` removes migration request
   - `/status` fetches status of given migraton request
   - `/total` shows total number of migration requests in a system
+  - `/apis` provides information about existing APIs provided by this server
+  - `/healthz` provides health status of DBS server, each server implements
+  different query (e.g. DBS reader/writer uses datasetaccesstypes API,
+  while migration server look-up number of records in migraton block table)
   - `/serverinfo` provides server information
 - *DBS migration* server runs as a daemon to process migraton requests
 from underlying DB backend on periodic basis
