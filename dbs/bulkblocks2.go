@@ -709,7 +709,7 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	}
 	wg.Wait()
 	if trec.NErrors != 0 {
-		msg := fmt.Sprintf("fail to insert files chunks, trec +%v", trec)
+		msg := fmt.Sprintf("fail to insert files chunks, trec %+v", trec)
 		log.Println(msg)
 		return errors.New(msg)
 	}
