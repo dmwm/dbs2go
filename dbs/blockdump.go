@@ -13,6 +13,7 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
+// helper function to get block information
 func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 	defer wg.Done()
 	var args []interface{}
@@ -41,6 +42,8 @@ func getBlock(blk string, wg *sync.WaitGroup, block *Block) {
 		return
 	}
 }
+
+// helper function to get dataset information
 func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 	defer wg.Done()
 	var args []interface{}
@@ -78,6 +81,8 @@ func getDataset(blk string, wg *sync.WaitGroup, dataset *Dataset) {
 		return
 	}
 }
+
+// helper function to get primary dataset information
 func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDataset) {
 	defer wg.Done()
 	var args []interface{}
@@ -99,6 +104,8 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 		return
 	}
 }
+
+// helper function to get procesing era information
 func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingEra) {
 	defer wg.Done()
 	var args []interface{}
@@ -123,6 +130,8 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 		return
 	}
 }
+
+// helper function to get acquisition era information
 func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *AcquisitionEra) {
 	defer wg.Done()
 	var args []interface{}
@@ -156,6 +165,7 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 // FileList represents list of File records
 type FileList []File
 
+// helper function to get file list information
 func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	defer wg.Done()
 	var args []interface{}
@@ -242,6 +252,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 // BlockParentList represents BlockParent records
 type BlockParentList []BlockParent
 
+// helper function to get block parents information
 func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockParentList) {
 	defer wg.Done()
 	var args []interface{}
@@ -278,6 +289,7 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 // DatasetParentList represents list of dataset parents
 type DatasetParentList []string
 
+// helper function to get dataset parents information
 func getDatasetParentList(blk string, wg *sync.WaitGroup, datasetParentList *DatasetParentList) {
 	defer wg.Done()
 	var args []interface{}
@@ -447,17 +459,6 @@ type BlockDumpRecord struct {
 	DATASET_CONF_LIST   string   `json:"dataset_conf_list"`
 }
 
-// TODO: see dumpBlock function in
-// ../../Server/Python/src/dbs/business/DBSBlock.py (blockDump)
-// ../../Server/Python/src/dbs/business/DBSBlockInsert.py (putBlock)
-/*
-The BlockDump python API returns the following dict
-   result = dict(block=block, dataset=dataset, primds=primds,
-                 files=files, block_parent_list=bparent,
-                 ds_parent_list=dsparent, file_conf_list=fconfig_list,
-                 file_parent_list=fparent_list2, dataset_conf_list=dconfig_list)
-*/
-
 // BlockDump DBS API
 func (a *API) BlockDump() error {
 
@@ -478,6 +479,8 @@ func (a *API) BlockDump() error {
 	var fileParentList FileParentList
 	var blockParentList BlockParentList
 	var datasetParentList DatasetParentList
+
+	// get concurrently all necessary information required for block dump
 	var wg sync.WaitGroup
 	wg.Add(11) // wait for 11 goroutines below
 	go getBlock(blk, &wg, &block)

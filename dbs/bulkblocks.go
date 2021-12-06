@@ -151,16 +151,18 @@ type DatasetParent struct {
 	ParentDataset string `json:"parent_dataset"`
 }
 
+/*
+ * for Python logic please refer to:
+ * /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
+ * /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
+ */
+
 // InsertBulkBlocks DBS API. It relies on BulkBlocks record which by itself
 // contains series of other records. The logic of this API is the following:
 // we read dataset_conf_list part of the record and insert output config data,
 // then we insert recursively PrimaryDSTypes, PrimaryDataset, ProcessingEras,
 // AcquisitionEras, ..., Datasets, Blocks, Files, FileLumis, FileCofig list,
 // and dataset parent lists.
-// for Python logic please refer to:
-// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
-// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
-//
 //gocyclo:ignore
 func (a *API) InsertBulkBlocks() error {
 	// read input data

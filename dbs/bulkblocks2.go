@@ -361,26 +361,6 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		}
 		return err
 	}
-	//     datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
-	//     if err != nil {
-	//         if utils.VERBOSE > 1 {
-	//             log.Println("unable to find dataset_id for", rec.Dataset.Dataset, "will insert")
-	//         }
-	//         err = dataset.Insert(tx)
-	//         if err != nil {
-	//             if utils.VERBOSE > 1 {
-	//                 log.Println("unable to insert dataset record", err)
-	//             }
-	//             return err
-	//         }
-	//         datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
-	//         if err != nil {
-	//             if utils.VERBOSE > 1 {
-	//                 log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
-	//             }
-	//             return err
-	//         }
-	//     }
 
 	// get outputModConfigID using datasetID
 	// since we already inserted records from DatasetConfigList
@@ -472,11 +452,6 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 			}
 			return err
 		}
-		//         if err != nil {
-		//             if utils.VERBOSE > 0 {
-		//                 log.Println("FileDataType insert error", err)
-		//             }
-		//         }
 	}
 	// insert files
 	if utils.VERBOSE > 1 {
@@ -675,12 +650,6 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	var wg sync.WaitGroup
 	var err error
 	var chunk []File
-	// get first available fileID to use
-	//     fileID, err := getFileID(tx)
-	//     if err != nil {
-	//         log.Println("unable to getFileID", err)
-	//         return err
-	//     }
 	fileIds, err := IncrementSequences(tx, "SEQ_FL", len(records))
 	if err != nil {
 		msg := fmt.Sprintf("unable to get file ids, error %v", err)
@@ -781,26 +750,9 @@ func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *Temp
 			trec.NErrors += 1
 			return
 		}
-		//         fileID, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
-		//         if err != nil {
-		//             if utils.VERBOSE > 1 {
-		//                 log.Println("trec unable to find file_id for", lfn, "will insert")
-		//             }
-		//             err = r.Insert(tx)
-		//             if err != nil {
-		//                 if utils.VERBOSE > 1 {
-		//                     log.Printf("### trec unable to insert File record for lfn %s, error %v", lfn, err)
-		//                 }
-		//                 trec.NErrors += 1
-		//                 return
-		//             }
-		//         }
-		//         rwm.Lock()
-		//         trec.FilesMap[lfn] = fileID
 		trec.FilesMap.Store(lfn, fileID)
 		if utils.VERBOSE > 1 {
 			log.Printf("trec inserted %s with fileID %d", lfn, fileID)
 		}
-		//         rwm.Unlock()
 	}
 }
