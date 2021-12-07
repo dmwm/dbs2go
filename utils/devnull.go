@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -18,7 +18,7 @@ func (s DevNullWriter) Header() http.Header {
 func (s DevNullWriter) Write(b []byte) (int, error) {
 	v := string(b)
 	if VERBOSE > 2 {
-		fmt.Println("/dev/null: ", v)
+		log.Println("/dev/null: ", v)
 	}
 	return len(v), nil
 }
@@ -26,6 +26,6 @@ func (s DevNullWriter) Write(b []byte) (int, error) {
 // WriteHeader implements WriteHeader API of http.ResponseWriter interface
 func (s DevNullWriter) WriteHeader(statusCode int) {
 	if VERBOSE > 2 {
-		fmt.Println("/dev/null statusCode", statusCode)
+		log.Println("/dev/null statusCode", statusCode)
 	}
 }

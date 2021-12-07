@@ -9,6 +9,5 @@
     "hkey": "",
     "updateDNs": 60,
     "log_file": "/tmp/dbs2go.log",
-    "print_monit_record": true,
     "verbose": 0
 }

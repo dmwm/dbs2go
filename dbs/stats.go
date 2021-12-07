@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/vkuznet/dbs2go/utils"
@@ -95,7 +94,7 @@ func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
-		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+		log.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err := tx.Query(stm)
 	if err != nil {
@@ -122,7 +121,7 @@ func indexSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
-		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+		log.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err := tx.Query(stm)
 	if err != nil {
@@ -151,7 +150,7 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
-		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+		log.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err := tx.Query(stm)
 	if err != nil {
@@ -175,7 +174,7 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
-		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+		log.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err = tx.Query(stm)
 	if err != nil {
@@ -208,7 +207,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
-		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+		log.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err := tx.Query(stm)
 	if err != nil {
@@ -233,7 +232,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
-		fmt.Printf("### SQL statement ###\n%s\n\n", stm)
+		log.Printf("### SQL statement ###\n%s\n\n", stm)
 	}
 	rows, err = tx.Query(stm)
 	if err != nil {

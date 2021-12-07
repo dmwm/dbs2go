@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -17,11 +17,11 @@ func (s StdoutWriter) Header() http.Header {
 // Write implements Write API of http.ResponseWriter interface
 func (s StdoutWriter) Write(b []byte) (int, error) {
 	v := string(b)
-	fmt.Println(v)
+	log.Println(v)
 	return len(v), nil
 }
 
 // WriteHeader implements WriteHeader API of http.ResponseWriter interface
 func (s StdoutWriter) WriteHeader(statusCode int) {
-	fmt.Println("statusCode", statusCode)
+	log.Println("statusCode", statusCode)
 }
