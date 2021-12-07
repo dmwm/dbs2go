@@ -196,6 +196,8 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
 
 	// for all requests
+	router.Use(headerMiddleware)
+	// for all requests
 	router.Use(logging.LoggingMiddleware)
 	// for all requests perform first auth/authz action
 	router.Use(authMiddleware)

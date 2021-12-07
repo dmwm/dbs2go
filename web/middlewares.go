@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"runtime"
+	"time"
 
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
@@ -82,4 +84,15 @@ func limitMiddleware(next http.Handler) http.Handler {
 	return limiterMiddleware.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
 	}))
+}
+
+// response header middleware
+func headerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		goVersion := runtime.Version()
+		tstamp := time.Now().Format("2006-02-01")
+		server := fmt.Sprintf("dbs2go (%s %s)", goVersion, tstamp)
+		w.Header().Add("Server", server)
+		next.ServeHTTP(w, r)
+	})
 }
