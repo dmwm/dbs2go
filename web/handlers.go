@@ -49,9 +49,12 @@ func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code i
 
 // helper function to extract user name or DN
 func createBy(r *http.Request) string {
-	cby := r.Header.Get("Cms-Authn-Login")
+	cby := r.Header.Get("Cms-Auth-Cert")
 	if cby == "" {
-		cby = r.Header.Get("Cms-Authn-Dn")
+		cby = r.Header.Get("Cms-Authn-Login")
+		if cby == "" {
+			cby = r.Header.Get("Cms-Authn-Dn")
+		}
 	}
 	if cby == "" {
 		return "DBS-workflow"
