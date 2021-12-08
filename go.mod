@@ -3,7 +3,7 @@ module github.com/vkuznet/dbs2go
 go 1.17
 
 require (
-	github.com/dmwm/cmsauth v0.0.0-20211208182414-63bf334a3d9d
+	github.com/dmwm/cmsauth v0.0.0-20211208190746-4666f3e7a7aa
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gorilla/csrf v1.7.1
 	github.com/gorilla/mux v1.8.0
