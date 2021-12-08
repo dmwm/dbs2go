@@ -93,6 +93,7 @@ type Mem struct {
 // Metrics provide various metrics about our server
 type Metrics struct {
 	CPU          []float64               `json:"cpu"`          // cpu metrics from gopsutils
+	CpuPercent   float64                 `json:"cpu_pct"`      // cpu percent
 	Connections  []net.ConnectionStat    `json:"connections"`  // connections metrics from gopsutils
 	Load         load.AvgStat            `json:"load"`         // load metrics from gopsutils
 	Memory       Mem                     `json:"memory"`       // memory metrics from gopsutils
@@ -141,6 +142,12 @@ func metrics() Metrics {
 		if err == nil {
 			metrics.OpenFiles = openFiles
 		}
+	}
+
+	// get cpu percent
+	cpuPct, err := process.Percent(time.Duration(1 * time.Second))
+	if err == nil {
+		metrics.CpuPercent = cpuPct
 	}
 
 	metrics.ProcFS = utils.ProcFSMetrics()
@@ -223,6 +230,7 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_procfs_maxvsize\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_procfs_maxvsize gauge\n", prefix)
 	out += fmt.Sprintf("%s_procfs_maxvsize %v\n", prefix, data.ProcFS.MaxVsize)
+
 	// procfs /proc/stat metrics
 	out += fmt.Sprintf("# HELP %s_procfs_sumusercpus\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_procfs_sumusercpus gauge\n", prefix)
@@ -230,6 +238,11 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_procfs_sumsystemcpus\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_procfs_sumsystemcpus gauge\n", prefix)
 	out += fmt.Sprintf("%s_procfs_sumsystemcpus %v\n", prefix, data.ProcFS.SumSystemCPUs)
+
+	// cpu percent
+	out += fmt.Sprintf("# HELP %s_cpu_pct\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_cpu_pct gauge\n", prefix)
+	out += fmt.Sprintf("%s_cpu_pct %v\n", prefix, data.CpuPercent)
 
 	// load
 	out += fmt.Sprintf("# HELP %s_load1\n", prefix)
