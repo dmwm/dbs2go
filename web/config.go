@@ -25,6 +25,8 @@ type Configuration struct {
 	LimiterPeriod string `json:"rate"`           // limiter rate value
 	MetricsPrefix string `json:"metrics_prefix"` // metrics prefix used for prometheus
 	ServerType    string `json:"server_type"`    // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
+	Etag          string `json:"etag"`           // etag value to use for ETag generation
+	CacheControl  string `json:"cache_control"`  // Cache-Control value, e.g. max-age=300
 
 	// Migration server settings
 	MigrationDBFile         string `json:"migration_dbfile"`          // dbfile with secrets

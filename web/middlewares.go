@@ -1,12 +1,14 @@
 package web
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"runtime"
+	"strings"
 	"time"
 
 	limiter "github.com/ulule/limiter/v3"
@@ -86,6 +88,20 @@ func limitMiddleware(next http.Handler) http.Handler {
 	}))
 }
 
+// helper function to get hash of the string, provided by https://github.com/amalfra/etag
+func getHash(str string) string {
+	return fmt.Sprintf("%x", sha1.Sum([]byte(str)))
+}
+
+// Generates an Etag for given string, provided by https://github.com/amalfra/etag
+func Etag(str string, weak bool) string {
+	tag := fmt.Sprintf("\"%d-%s\"", len(str), getHash(str))
+	if weak {
+		tag = "W/" + tag
+	}
+	return tag
+}
+
 // response header middleware
 func headerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +109,20 @@ func headerMiddleware(next http.Handler) http.Handler {
 		tstamp := time.Now().Format("2006-02-01")
 		server := fmt.Sprintf("dbs2go (%s %s)", goVersion, tstamp)
 		w.Header().Add("Server", server)
+
+		// settng Etag and its expiration
+		if r.Method == "GET" && Config.Etag != "" && Config.CacheControl != "" {
+			etag := Etag(Config.Etag, false)
+			w.Header().Set("Etag", etag)
+			w.Header().Set("Cache-Control", Config.CacheControl) // 5 minutes
+			if match := r.Header.Get("If-None-Match"); match != "" {
+				if strings.Contains(match, etag) {
+					w.WriteHeader(http.StatusNotModified)
+					return
+				}
+			}
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
