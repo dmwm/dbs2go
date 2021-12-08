@@ -46,6 +46,17 @@ func authMiddleware(next http.Handler) http.Handler {
 		if Config.Verbose > 2 {
 			log.Printf("Auth layer status: %v headers: %+v\n", status, r.Header)
 		}
+
+		// check if user has proper roles to DBS (non GET) APIs
+		if r.Method != "GET" && Config.CMSRole != "" && Config.CMSGroup != "" {
+			status = CMSAuth.CheckCMSAuthz(r.Header, Config.CMSRole, Config.CMSGroup, "")
+			if !status {
+				log.Printf("ERROR: fail to authorize used with role=%v and group=%v, HTTP headers %+v\n", Config.CMSRole, Config.CMSGroup, r.Header)
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+		}
+
 		// Call the next handler
 		next.ServeHTTP(w, r)
 	})

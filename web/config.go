@@ -27,6 +27,8 @@ type Configuration struct {
 	ServerType    string `json:"server_type"`    // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
 	Etag          string `json:"etag"`           // etag value to use for ETag generation
 	CacheControl  string `json:"cache_control"`  // Cache-Control value, e.g. max-age=300
+	CMSRole       string `json:"cms_role"`       // cms role for write access
+	CMSGroup      string `json:"cms_group"`      // cms group for write access
 
 	// Migration server settings
 	MigrationDBFile         string `json:"migration_dbfile"`          // dbfile with secrets
