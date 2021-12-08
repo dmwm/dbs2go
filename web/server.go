@@ -301,10 +301,26 @@ func Server(configFile string) {
 	}
 	log.SetOutput(new(logging.LogWriter))
 	if Config.LogFile != "" {
-		rl, err := rotatelogs.New(Config.LogFile + "-%Y%m%d")
+		logName := Config.LogFile
+		hostname := os.Getenv("HOSTNAME")
+		if hostname == "" {
+			hostname, err = os.Hostname()
+			if err != nil {
+				hostname = "localhost"
+			}
+		}
+		if strings.HasSuffix(logName, ".log") {
+			logName = fmt.Sprintf("%s-%s.log", strings.Split(logName, ".log")[0], hostname)
+		} else {
+			logName = fmt.Sprintf("%s-%s.log", logName, hostname)
+		}
+		//         rl, err := rotatelogs.New(Config.LogFile + "-%Y%m%d")
+		rl, err := rotatelogs.New(logName + "-%Y%m%d")
 		if err == nil {
 			rotlogs := logging.RotateLogWriter{RotateLogs: rl}
 			log.SetOutput(rotlogs)
+		} else {
+			log.Println("ERROR: unable to get rotatelogs", err)
 		}
 	}
 	// initialize logging module
