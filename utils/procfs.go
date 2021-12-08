@@ -9,12 +9,16 @@ import (
 
 // ProcFS represents prometheus profcs metrics
 type ProcFS struct {
-	CpuTotal float64
-	Vsize    float64
-	Rss      float64
-	OpenFDs  float64
-	MaxFDs   float64
-	MaxVsize float64
+	CpuTotal      float64
+	Vsize         float64
+	Rss           float64
+	OpenFDs       float64
+	MaxFDs        float64
+	MaxVsize      float64
+	UserCPUs      []float64
+	SystemCPUs    []float64
+	SumUserCPUs   float64
+	SumSystemCPUs float64
 }
 
 // ProcFSMetrics returns procfs (prometheus) metrics
@@ -38,6 +42,7 @@ func ProcFSMetrics() ProcFS {
 	} else {
 		log.Println("unable to get procfs info", err)
 	}
+
 	metrics := ProcFS{
 		CpuTotal: cpuTotal,
 		Vsize:    vsize,
@@ -45,6 +50,27 @@ func ProcFSMetrics() ProcFS {
 		OpenFDs:  openFDs,
 		MaxFDs:   maxFDs,
 		MaxVsize: maxVsize,
+	}
+
+	// collect info from /proc/stat
+	fs, err := procfs.NewFS("/proc")
+	if err != nil {
+		log.Println("unable to get /proc info", err)
+	} else {
+		stats, err := fs.Stat()
+		if err != nil {
+			log.Println("unable to get /proc/stat info", err)
+		} else {
+			var userCpus, sysCpus []float64
+			for _, v := range stats.CPU {
+				userCpus = append(userCpus, v.User)
+				sysCpus = append(sysCpus, v.User)
+			}
+			metrics.UserCPUs = userCpus
+			metrics.SystemCPUs = sysCpus
+			metrics.SumUserCPUs = stats.CPUTotal.User
+			metrics.SumSystemCPUs = stats.CPUTotal.System
+		}
 	}
 	return metrics
 }

@@ -223,6 +223,13 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_procfs_maxvsize\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_procfs_maxvsize gauge\n", prefix)
 	out += fmt.Sprintf("%s_procfs_maxvsize %v\n", prefix, data.ProcFS.MaxVsize)
+	// procfs /proc/stat metrics
+	out += fmt.Sprintf("# HELP %s_procfs_sumusercpus\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_sumusercpus gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_sumusercpus %v\n", prefix, data.ProcFS.SumUserCPUs)
+	out += fmt.Sprintf("# HELP %s_procfs_sumsystemcpus\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_procfs_sumsystemcpus gauge\n", prefix)
+	out += fmt.Sprintf("%s_procfs_sumsystemcpus %v\n", prefix, data.ProcFS.SumSystemCPUs)
 
 	// load
 	out += fmt.Sprintf("# HELP %s_load1\n", prefix)
