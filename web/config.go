@@ -17,7 +17,7 @@ type Configuration struct {
 	StaticDir     string `json:"staticdir"`      // location of static directory
 	Base          string `json:"base"`           // dbs base path
 	Verbose       int    `json:"verbose"`        // verbosity level
-	LogFile       string `json:"log_file"`       // server log file or log area
+	LogFile       string `json:"log_file"`       // server log file (should ends with .log) or log area
 	UTC           bool   `json:"utc"`            // report logger time in UTC
 	MonitType     string `json:"monit_type"`     // monit record type
 	MonitProducer string `json:"monit_producer"` // monit record producer

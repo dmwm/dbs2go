@@ -312,8 +312,10 @@ func Server(configFile string) {
 		if strings.HasSuffix(logName, ".log") {
 			logName = fmt.Sprintf("%s-%s.log", strings.Split(logName, ".log")[0], hostname)
 		} else {
-			logName = fmt.Sprintf("%s-%s.log", logName, hostname)
+			// it is log dir
+			logName = fmt.Sprintf("%s/%s.log", logName, hostname)
 		}
+		logName = strings.Replace(logName, "//", "/", -1)
 		//         rl, err := rotatelogs.New(Config.LogFile + "-%Y%m%d")
 		rl, err := rotatelogs.New(logName + "-%Y%m%d")
 		if err == nil {
