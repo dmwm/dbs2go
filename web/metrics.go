@@ -305,6 +305,9 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_post_requests reports total number of HTTP POST requests\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_post_requests counter\n", prefix)
 	out += fmt.Sprintf("%s_post_requests %v\n", prefix, data.PostRequests)
+	out += fmt.Sprintf("# HELP %s_put_requests reports total number of HTTP POST requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_put_requests counter\n", prefix)
+	out += fmt.Sprintf("%s_put_requests %v\n", prefix, data.PutRequests)
 
 	// throughput, rps, rps physical cpu, rps logical cpu
 	out += fmt.Sprintf("# HELP %s_rps reports request per second average\n", prefix)
