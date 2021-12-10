@@ -411,6 +411,12 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		CreateBy:  cby,
 		Api:       a,
 	}
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		gw := gzip.NewWriter(w)
+		defer gw.Close()
+		api.Writer = utils.GzipWriter{GzipWriter: gw, Writer: w}
+	}
 	if a == "fileArray" || a == "datasetlist" || a == "fileparentsbylumi" || a == "filelumis" || a == "blockparents" || a == "process" {
 		params, err = parsePayload(r)
 		if err != nil {
@@ -505,6 +511,12 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 		Params:    params,
 		Separator: sep,
 		Api:       a,
+	}
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		gw := gzip.NewWriter(w)
+		defer gw.Close()
+		api.Writer = utils.GzipWriter{GzipWriter: gw, Writer: w}
 	}
 	if utils.VERBOSE > 0 {
 		log.Println(api.String())
