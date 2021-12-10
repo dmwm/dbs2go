@@ -6,7 +6,8 @@ import (
 )
 
 // GzipWriter provides the same functionality as http.ResponseWriter
-// to cover unit tests of DBS APIs. It prints given data directly to stdout.
+// It compresses data using compress/zip writer and provides headers
+// from given http.ResponseWriter
 type GzipWriter struct {
 	GzipWriter *gzip.Writer
 	Writer     http.ResponseWriter
