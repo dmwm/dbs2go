@@ -188,6 +188,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 		rec["status"] = http.StatusOK
 		w.WriteHeader(http.StatusOK)
 	} else {
+		log.Println("/healthz StatusHandler error", err)
 		rec["status"] = http.StatusInternalServerError
 		w.WriteHeader(http.StatusInternalServerError)
 	}
