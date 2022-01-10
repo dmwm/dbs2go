@@ -150,19 +150,24 @@ func (a *API) Datasets() error {
 	conds, args = AddParam("ldate", "D.LAST_MODIFICATION_DATE", a.Params, conds, args)
 	minDate = getValues(a.Params, "min_ldate")
 	maxDate = getValues(a.Params, "max_ldate")
-	if len(minDate) == 1 && len(maxDate) == 1 {
-		_, minval := OperatorValue(minDate[0])
-		_, maxval := OperatorValue(maxDate[0])
-		if minval != "0" && maxval != "0" {
+	if len(minDate) == 1 || len(maxDate) == 1 {
+		var minval, maxval string
+		if len(minDate) == 1 {
+			_, minval = OperatorValue(minDate[0])
+		}
+		if len(maxDate) == 1 {
+			_, maxval = OperatorValue(maxDate[0])
+		}
+		if minval != "" && maxval != "" {
 			cond := fmt.Sprintf(" D.CREATION_DATE BETWEEN %s and %s", placeholder("min_ldate"), placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 			args = append(args, maxval)
-		} else if minval != "0" && maxval == "0" {
+		} else if minval != "" {
 			cond := fmt.Sprintf(" D.CREATION_DATE > %s", placeholder("min_ldate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
-		} else if minval == "0" && maxval != "0" {
+		} else if maxval != "" {
 			cond := fmt.Sprintf(" D.CREATION_DATE < %s", placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, maxval)
