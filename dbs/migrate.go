@@ -167,6 +167,55 @@ func prepareMigrationList(rurl, input string) []string {
 	return pblocks
 }
 
+// helper function to check blocks at source destination for provided
+// blocks list
+func prepareMigrationListAtSource(rurl string, blocks []string) []string {
+	// get list of parent blocks of previous parents
+	srcBlocks := []string{}
+	ch := make(chan BlockResponse)
+	umap := make(map[int]struct{})
+	for idx, blk := range blocks {
+		umap[idx] = struct{}{}
+		go func(i int, b string) {
+			blks, err := GetBlocks(rurl, b)
+			ch <- BlockResponse{Index: i, Block: b, Blocks: blks, Error: err}
+		}(idx, blk)
+	}
+	if len(umap) == 0 {
+		// no parent blocks
+		if utils.VERBOSE > 1 {
+			log.Printf("no blocks found %v in %s", blocks, rurl)
+		}
+		return srcBlocks
+	}
+	// collect results from goroutines
+	exit := false
+	for {
+		select {
+		case r := <-ch:
+			if r.Error != nil {
+				if utils.VERBOSE > 1 {
+					log.Printf("unable to fetch blocks for url=%s block=%s error=%v", rurl, r.Block, r.Error)
+				}
+			} else {
+				for _, blk := range r.Blocks {
+					srcBlocks = append(srcBlocks, blk)
+				}
+			}
+			delete(umap, r.Index)
+		default:
+			if len(umap) == 0 {
+				exit = true
+			}
+			time.Sleep(time.Duration(100) * time.Millisecond) // wait for response
+		}
+		if exit {
+			break
+		}
+	}
+	return srcBlocks
+}
+
 // BlockResponse represents block response structure used in GetParentBlocks
 type BlockResponse struct {
 	Index   int
@@ -461,7 +510,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	// get parent blocks at destination DBS instance for given input
 	dstParentBlocks = prepareMigrationList(rurl, input)
 	// get parent blocks at source DBS instance for given input
-	srcParentBlocks = prepareMigrationList(localhost, input)
+	//     srcParentBlocks = prepareMigrationList(localhost, input)
+	srcParentBlocks = prepareMigrationListAtSource(localhost, dstParentBlocks)
 	dstParentBlocks = utils.List2Set(dstParentBlocks)
 	srcParentBlocks = utils.List2Set(srcParentBlocks)
 	if utils.VERBOSE > 0 {
