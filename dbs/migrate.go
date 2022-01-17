@@ -1187,6 +1187,7 @@ func (a *API) CleanupMigrationRequests(offset int64) error {
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	tmplData["Value"] = time.Now().Unix() - offset
+	tmplData["FailDate"] = time.Now().Unix() - 2*7*60*60 // 2 weeks
 	stm, err := LoadTemplateSQL("cleanup_migration_requests", tmplData)
 	if err != nil {
 		log.Println("unable to load cleanup_migration_requests template", err)
