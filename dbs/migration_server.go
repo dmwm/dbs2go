@@ -17,6 +17,12 @@ var MigrationServerInterval int
 // MigrationDB points to migration DB
 var MigrationDB *sql.DB
 
+// MigrationCleanupInterval defines migration cleanup server interval
+var MigrationCleanupInterval int
+
+// MigrationCleanupOffset defines offset in seconds to delete migration requests
+var MigrationCleanupOffset int64
+
 // MigrationServer represent migration server.
 // it accepts migration process timeout used by ProcessMigration API and
 // exit channel
@@ -60,4 +66,25 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 		}
 	}
 	log.Println("Exit migration server")
+}
+
+// MigrationCleanupServer represents migration cleanup daemon..
+func MigrationCleanupServer(interval int, offset int64, ch <-chan bool) {
+	log.Println("Start migration cleanup server")
+	api := API{Api: "CleanupMigrationRequests"}
+
+	for {
+		select {
+		case v := <-ch:
+			if v == true {
+				log.Println("Received notification to stop migration cleanup server")
+				return
+			}
+		default:
+			time.Sleep(time.Duration(interval) * time.Second)
+			// perform clean up query
+			api.CleanupMigrationRequests(offset)
+		}
+	}
+	log.Println("Exit migration cleanup server")
 }

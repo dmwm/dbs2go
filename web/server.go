@@ -405,6 +405,8 @@ func Server(configFile string) {
 	// migration settings
 	dbs.MigrationProcessTimeout = Config.MigrationProcessTimeout
 	dbs.MigrationServerInterval = Config.MigrationServerInterval
+	dbs.MigrationCleanupInterval = Config.MigrationCleanupInterval
+	dbs.MigrationCleanupOffset = Config.MigrationCleanupOffset
 
 	// DBS bulkblocks API
 	dbs.ConcurrentBulkBlocks = Config.ConcurrentBulkBlocks
@@ -488,6 +490,7 @@ func Server(configFile string) {
 	migDone := make(chan bool)
 	if Config.ServerType == "DBSMigration" {
 		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
+		go dbs.MigrationCleanupServer(dbs.MigrationCleanupInterval, dbs.MigrationCleanupOffset, migDone)
 	}
 
 	// properly stop our HTTP and Migration Servers

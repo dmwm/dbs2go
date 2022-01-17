@@ -31,9 +31,11 @@ type Configuration struct {
 	CMSGroup      string `json:"cms_group"`      // cms group for write access
 
 	// Migration server settings
-	MigrationDBFile         string `json:"migration_dbfile"`          // dbfile with secrets
-	MigrationServerInterval int    `json:"migration_server_interval"` // migration process interval
-	MigrationProcessTimeout int    `json:"migration_process_timeout"` // migration process timeout
+	MigrationDBFile          string `json:"migration_dbfile"`           // dbfile with secrets
+	MigrationServerInterval  int    `json:"migration_server_interval"`  // migration process interval
+	MigrationProcessTimeout  int    `json:"migration_process_timeout"`  // migration process timeout
+	MigrationCleanupInterval int    `json:"migration_cleanup_interval"` // migration cleanup interval
+	MigrationCleanupOffset   int64  `json:"migration_cleanup_offset"`   // migration cleanup offset
 
 	// db related configuration
 	DBFile               string `json:"dbfile"`                  // dbs db file with secrets
@@ -103,6 +105,12 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MigrationServerInterval == 0 {
 		Config.MigrationServerInterval = 60 // in seconds
+	}
+	if Config.MigrationCleanupInterval == 0 {
+		Config.MigrationCleanupInterval = 600 // in seconds
+	}
+	if Config.MigrationCleanupOffset == 0 {
+		Config.MigrationCleanupOffset = 3 * 30 * 24 * 60 * 60 // 3 months in seconds
 	}
 	if Config.MetricsPrefix == "" {
 		Config.MetricsPrefix = "dbs2go"

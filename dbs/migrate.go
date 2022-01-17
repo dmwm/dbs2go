@@ -1130,3 +1130,42 @@ func (a *API) TotalMigration() error {
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)
 }
+
+// CleanupMigrationRequests clean-ups migration requests in DB
+func (a *API) CleanupMigrationRequests(offset int64) error {
+	tmplData := make(Record)
+	tmplData["Owner"] = DBOWNER
+	tmplData["Value"] = time.Now().Unix() - offset
+	stm, err := LoadTemplateSQL("cleanup_migration_requests", tmplData)
+	if err != nil {
+		log.Println("unable to load cleanup_migration_requests template", err)
+		return err
+	}
+
+	// start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Println("unable to get DB transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+	stm = CleanStatement(stm)
+	if utils.VERBOSE > 0 {
+		var args []interface{}
+		utils.PrintSQL(stm, args, "execute")
+	}
+
+	_, err = tx.Exec(stm)
+	if err != nil {
+		log.Printf("unable to execute %s, error %v", stm, err)
+		return err
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Println("unable to commit transaction", err)
+		return err
+	}
+	return nil
+}
