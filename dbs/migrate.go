@@ -439,7 +439,7 @@ func statusString(status int64) string {
 	} else if status == FAILED {
 		s = "FAILED"
 	} else if status == TERM_FAILED {
-		s = "TEERMINATED"
+		s = "TERMINATED"
 	}
 	return s
 }
@@ -689,7 +689,7 @@ func (a *API) ProcessMigration() {
 	mrec := records[0]
 
 	// update migration status
-	updateMigrationStatus(mid, IN_PROGRESS)
+	updateMigrationStatus(mrec, IN_PROGRESS)
 
 	// find block name for our migration id
 	stm := getSQL("migration_block")
@@ -768,10 +768,10 @@ func (a *API) ProcessMigration() {
 		if utils.VERBOSE > 0 {
 			log.Println("insert block dump record failed with", err)
 		}
-		updateMigrationStatus(mid, FAILED)
+		updateMigrationStatus(mrec, FAILED)
 	} else {
 		status = COMPLETED
-		updateMigrationStatus(mid, COMPLETED)
+		updateMigrationStatus(mrec, COMPLETED)
 	}
 	log.Printf("updated migration request %v with status %v", mid, status)
 }
@@ -871,7 +871,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 	mid := mrec.MIGRATION_REQUEST_ID
 
 	// update migration status
-	updateMigrationStatus(mid, IN_PROGRESS)
+	updateMigrationStatus(mrec, IN_PROGRESS)
 
 	// find block name for our migration id
 	stm := getSQL("migration_block")
@@ -944,16 +944,16 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 		if utils.VERBOSE > 0 {
 			log.Println("insert block dump record failed with", err)
 		}
-		updateMigrationStatus(mid, FAILED)
+		updateMigrationStatus(mrec, FAILED)
 	} else {
 		*status = COMPLETED
-		updateMigrationStatus(mid, COMPLETED)
+		updateMigrationStatus(mrec, COMPLETED)
 	}
 	log.Printf("updated migration request %v with status %v", mid, *status)
 }
 
 // updateMigrationStatus updates migration status
-func updateMigrationStatus(mid int64, status int) error {
+func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
@@ -970,14 +970,20 @@ func updateMigrationStatus(mid int64, status int) error {
 	}
 	defer tx.Rollback()
 	stm = CleanStatement(stm)
+	mid := mrec.MIGRATION_REQUEST_ID
+	retryCount := mrec.RETRY_COUNT
+	if status == FAILED || status == TERM_FAILED {
+		retryCount += 1
+	}
 	if utils.VERBOSE > 0 {
 		var args []interface{}
 		args = append(args, status)
+		args = append(args, retryCount)
 		args = append(args, mid)
 		utils.PrintSQL(stm, args, "execute")
 	}
 
-	_, err = tx.Exec(stm, status, mid)
+	_, err = tx.Exec(stm, status, retryCount, mid)
 	if err != nil {
 		log.Printf("unable to execute %s, error %v", stm, err)
 		return err
@@ -1129,6 +1135,51 @@ func (a *API) TotalMigration() error {
 
 	// use generic query API to fetch the results from DB
 	return executeAll(a.Writer, a.Separator, stm, args...)
+}
+
+// CancelMigration clean-ups migration requests in DB
+func (a *API) CancelMigration() error {
+	// backward compatibility with DBS migration server which uses migration_rqst_id
+	if v, ok := a.Params["migration_rqst_id"]; ok {
+		a.Params["migration_request_id"] = v
+	}
+
+	// obtain migration request record
+	val, err := getSingleValue(a.Params, "migration_request_id")
+	if err != nil {
+		log.Printf("unable to get migration_request_id", err)
+		return err
+	}
+	midint, err := strconv.Atoi(val)
+	if err != nil {
+		log.Printf("unable to convert mid", err)
+		return err
+	}
+	mid := int64(midint)
+	log.Println("process migration request", mid)
+
+	records, err := MigrationRequests(mid)
+	if utils.VERBOSE > 0 {
+		log.Println("found process migration request records")
+		for _, r := range records {
+			log.Printf("%+v", r)
+		}
+	}
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("fail to fetch migration request %d, error %v", mid, err)
+		}
+		return err
+	}
+	if len(records) != 1 {
+		if utils.VERBOSE > 0 {
+			log.Printf("found %d requests for mid=%d, stop processing", len(records), mid)
+		}
+		return err
+	}
+	mrec := records[0]
+	updateMigrationStatus(mrec, TERM_FAILED)
+	return nil
 }
 
 // CleanupMigrationRequests clean-ups migration requests in DB

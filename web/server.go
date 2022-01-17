@@ -101,6 +101,7 @@ func handlers() *mux.Router {
 	if Config.ServerType == "DBSMigrate" {
 		router.HandleFunc(basePath("/submit"), MigrationSubmitHandler).Methods("POST")
 		router.HandleFunc(basePath("/process"), MigrationProcessHandler).Methods("POST")
+		router.HandleFunc(basePath("/cancel"), MigrationCancelHandler).Methods("POST")
 		router.HandleFunc(basePath("/remove"), MigrationRemoveHandler).Methods("POST")
 		router.HandleFunc(basePath("/status"), MigrationStatusHandler).Methods("GET")
 		router.HandleFunc(basePath("/total"), MigrationTotalHandler).Methods("GET")

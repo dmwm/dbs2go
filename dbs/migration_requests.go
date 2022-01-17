@@ -114,9 +114,11 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	tmplData["Owner"] = DBOWNER
 	if mid == -1 {
 		tmplData["Oldest"] = true
-		tmplData["Date1"] = time.Now().Unix() - 60
-		tmplData["Date2"] = time.Now().Unix() - 120
-		tmplData["Date3"] = time.Now().Unix() - 240
+		tmplData["Date1"] = time.Now().Unix() - 1*60*60        // failed during 1h
+		tmplData["Date2"] = time.Now().Unix() - 2*60*60        // failed during 2h
+		tmplData["Date3"] = time.Now().Unix() - 3*60*60        // failed during 3h
+		tmplData["ProgressDate"] = time.Now().Unix() - 3*60*60 // in progress during 3h
+		tmplData["PendingDate"] = time.Now().Unix() - 3*60*60  // pending during 3h
 	}
 	stm, err := LoadTemplateSQL("migration_requests", tmplData)
 	if err != nil {

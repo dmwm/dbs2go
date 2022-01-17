@@ -469,6 +469,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		err = api.BlockParents()
 	} else if a == "submit" {
 		err = api.SubmitMigration()
+	} else if a == "cancel" {
+		err = api.CancelMigration()
 	} else if a == "process" {
 		err = api.ProcessMigrationCtx(dbs.MigrationProcessTimeout)
 	} else if a == "remove" {
@@ -866,30 +868,36 @@ func BulkBlocksHandler(w http.ResponseWriter, r *http.Request) {
 
 // Migration server handlers
 
-// MigrationSubmitHandler provides access to Submit DBS API
+// MigrationSubmitHandler provides access to SubmitMigration DBS API
 // POST API takes no argument, the payload should be supplied as JSON
 func MigrationSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "submit")
 }
 
-// MigrationProcessHandler provides access to Process DBS API
+// MigrationProcessHandler provides access to ProcessMigration DBS API
 // POST API takes no argument, the payload should be supplied as JSON
 func MigrationProcessHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "process")
 }
 
-// MigrationRemoveHandler provides access to Remove DBS API
+// MigrationRemoveHandler provides access to RemoveMigration DBS API
 // POST API takes no argument, the payload should be supplied as JSON
 func MigrationRemoveHandler(w http.ResponseWriter, r *http.Request) {
 	DBSPostHandler(w, r, "remove")
 }
 
-// MigrationStatusHandler provides access to Status DBS API
+// MigrationCancelHandler provides access to CancelMigration DBS API
+// POST API takes no argument, the payload should be supplied as JSON
+func MigrationCancelHandler(w http.ResponseWriter, r *http.Request) {
+	DBSPostHandler(w, r, "cancel")
+}
+
+// MigrationStatusHandler provides access to StatusMigration DBS API
 func MigrationStatusHandler(w http.ResponseWriter, r *http.Request) {
 	DBSGetHandler(w, r, "status")
 }
 
-// MigrationTotalHandler provides access to Status DBS API
+// MigrationTotalHandler provides access to TotalMigration DBS API
 func MigrationTotalHandler(w http.ResponseWriter, r *http.Request) {
 	DBSGetHandler(w, r, "total")
 }
