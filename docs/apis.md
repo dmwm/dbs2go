@@ -463,9 +463,13 @@ DBS POST API counterparts:
   - updates acquisition eras information to DBS
 
 #### DBS Migration server APIs
-The DBS Migration server has its own set of APIs. They are listed below:
+The DBS Migration server consists of two independent servers:
+- DBS Migrate server which provides public APIs for end-users
+- DBS Migration server which periodically process migration requests
 
-##### DBS Migration server GET APIs
+The DBS Migrate server APIs are listed below:
+
+##### DBS Migrate server GET APIs
 - `/status`
   - returns status of DBS migration requests
   - arguments: None
@@ -476,7 +480,7 @@ The DBS Migration server has its own set of APIs. They are listed below:
   - returns server information about DBS server
   - arguments: None
 
-##### DBS Migration server POST APIs
+##### DBS Migrate server POST APIs
 - `/submit`
   - submits migration request to DBS server
   - inputs, for exact definition see [MigrationRequest](../dbs/migration_requests.go) struct, e.g.
@@ -498,10 +502,32 @@ The DBS Migration server has its own set of APIs. They are listed below:
   - inputs
 ```
 {"migration_request_id": 123}
+or
+{"migration_rqst_id": 123}
 ```
 - `/remove`
-  - removes given request from DBS server
+  - removes given request from DBS migration server
   - inputs
 ```
-{"migration_request_id": 123}
+{"migration_rqst_id": 123, "create_by": "user"}
 ```
+- `/cancel`
+  - cancels given request from DBS migration server
+  - inputs
+```
+{"migration_rqst_id": 123}
+```
+
+It also has the following set of DBS APIs to perform internal look-up of the
+data:
+- GET APIs: `/blocks`, `/blockparents` and `/datasetparents`
+- POST APIs: `/bulkblocks`
+
+### DBS Migration server
+It is not visible on cmsweb by default, but internally it has the following APIs:
+- `/status`
+  - returns status of DBS migration requests
+  - arguments: None
+- GET APIs: `/blocks`
+- PUT APIs: `/blocks`
+- POST APIs: `/blocks`, `/bulkblocks`
