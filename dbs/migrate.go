@@ -1046,7 +1046,7 @@ func (a *API) RemoveMigration() error {
 		return errors.New(msg)
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("found %d records to remove for request ID %d", tid, mid)
+		log.Printf("found %v records to remove for request ID %d", tid, mid)
 	}
 
 	if tid > 0 {
@@ -1067,9 +1067,10 @@ func (a *API) RemoveMigration() error {
 		}
 		return nil
 	}
-	msg := "Invalid request. Successfully processed or processing requests cannot be removed"
-	msg += ", or the requested migration did not exist"
-	msg += ", or the requestor for removing and creating has to be the same user."
+	msg := fmt.Sprintf("Invalid request, requestID=%v with create_by=%s is not found", rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+	//     msg := "Invalid request. Successfully processed or processing requests cannot be removed"
+	//     msg += ", or the requested migration did not exist"
+	//     msg += ", or the requestor for removing and creating has to be the same user."
 	return errors.New(msg)
 }
 
