@@ -15,4 +15,5 @@ documentation:
   - [DBS Migration server](docs/MigrationServer.md)
 - [DBS client](docs/Client.md)
 - [DBS APIs](docs/apis.md)
+- [Debugging and Profiling DBS server](docs/Debug.md)
 - [DBS GraphQL](graphql/README.md)
