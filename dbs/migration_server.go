@@ -30,6 +30,7 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 	log.Println("Start migration server")
 	api := API{Api: "ProcessMigration"}
 
+	lastCall := time.Now()
 	for {
 		select {
 		case v := <-ch:
@@ -38,7 +39,14 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				return
 			}
 		default:
-			time.Sleep(time.Duration(interval) * time.Second)
+			time.Sleep(time.Duration(1) * time.Second)
+			if time.Since(lastCall).Seconds() < float64(interval) {
+				continue
+			}
+			if utils.VERBOSE > 0 {
+				log.Println("call MigrationRequests")
+			}
+			lastCall = time.Now() // update last call time stamp
 			// look-up all available migration requests
 			records, err := MigrationRequests(-1)
 			if err != nil {
@@ -73,6 +81,7 @@ func MigrationCleanupServer(interval int, offset int64, ch <-chan bool) {
 	log.Println("Start migration cleanup server")
 	api := API{Api: "CleanupMigrationRequests"}
 
+	lastCall := time.Now()
 	for {
 		select {
 		case v := <-ch:
@@ -81,9 +90,16 @@ func MigrationCleanupServer(interval int, offset int64, ch <-chan bool) {
 				return
 			}
 		default:
-			time.Sleep(time.Duration(interval) * time.Second)
+			time.Sleep(time.Duration(1) * time.Second)
+			if time.Since(lastCall).Seconds() < float64(interval) {
+				continue // we did not exceed our interval since last call
+			}
+			if utils.VERBOSE > 0 {
+				log.Println("call CleanupMigrationRequest")
+			}
 			// perform clean up query
 			api.CleanupMigrationRequests(offset)
+			lastCall = time.Now() // update last call time stamp
 		}
 	}
 	log.Println("Exit migration cleanup server")
