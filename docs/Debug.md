@@ -87,3 +87,19 @@ server.
 
 #### DBS profile graph
 ![DBS Server profile](images/heap.png)
+
+#### DBS Flame graph
+```
+# install go-torch
+go install github.com/uber/go-torch@latest
+
+# install flamegraph
+git clone --depth 1 https://github.com/brendangregg/FlameGraph
+export PATH=$PATH:$PWD/FlameGraph
+
+# run go-torch to generate FlameGraph (replace XXXX with concrete port number):
+go-torch -u http://dbs2go-global-r.dbs:XXXX --seconds 10
+
+# it will produce torch.svg FlameGraph file which you can view
+# or convert into another graphics format
+```
