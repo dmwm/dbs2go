@@ -489,9 +489,10 @@ func Server(configFile string) {
 	}
 
 	migDone := make(chan bool)
+	clpDone := make(chan bool)
 	if Config.ServerType == "DBSMigration" {
 		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
-		go dbs.MigrationCleanupServer(dbs.MigrationCleanupInterval, dbs.MigrationCleanupOffset, migDone)
+		go dbs.MigrationCleanupServer(dbs.MigrationCleanupInterval, dbs.MigrationCleanupOffset, clpDone)
 	}
 
 	// properly stop our HTTP and Migration Servers
@@ -511,6 +512,10 @@ func Server(configFile string) {
 	// send notification to stop migration server
 	if Config.ServerType == "DBSMigration" {
 		migDone <- true
+	}
+	// send notification to stop cleanup migration server
+	if Config.ServerType == "DBSMigration" {
+		clpDone <- true
 	}
 
 	// add extra timeout for shutdown service stuff
