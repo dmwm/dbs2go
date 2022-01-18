@@ -65,3 +65,25 @@ kubectl -n dbs exec -ti <dbs2g-global-r-pod> -- /bin/bash
 # access pprof for dbs2go-global-r service on port XXXX
 $ go tool pprof http://dbs2go-global-r.dbs:XXXX/debug/pprof/heap
 ```
+
+#### Generating profiling graphs
+With `pprof` you may generate Go server graphs like this:
+```
+# to generate plots you need dot tool which comes from Graphiz
+# install Graphiz on Debian based system (if it is not installed in your image):
+apt-get install graphviz
+
+# generate profile graph (replace XXXX with appropriate port number)
+go tool pprof -png http://dbs2go-global-r.dbs:XXXX/debug/pprof/profile > profile.png
+
+# generate heap graph
+go tool pprof -png http://dbs2go-global-r.dbs:XXXX/debug/pprof/heap > heap.png
+```
+Below you can see both heap and profile graphs generated for cmsweb testbed DBS
+server.
+
+#### DBS heap graph
+![DBS Server heap](images/heap.png)
+
+#### DBS profile graph
+![DBS Server profile](images/heap.png)
