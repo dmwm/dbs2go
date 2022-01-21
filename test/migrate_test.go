@@ -220,3 +220,124 @@ func TestMigrate(t *testing.T) {
 		}
 	}
 }
+
+// TestMigrateRemove tests remove migration APIs
+//gocyclo:ignore
+func TestMigrateRemove(t *testing.T) {
+	// initialize DB for testing
+	db := initDB(false)
+	defer db.Close()
+	utils.VERBOSE = 1
+
+	// setup HTTP request
+	migFile := "data/mig_request4remove.json"
+	data, err := os.ReadFile(migFile)
+	if err != nil {
+		log.Printf("ERROR: unable to read %s error %v", migFile, err.Error())
+		t.Fatal(err.Error())
+	}
+	reader := bytes.NewReader(data)
+
+	// submit migration request
+	rr, err := respRecorder("POST", "/dbs2go/submit", reader, web.MigrationSubmitHandler)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// unmarshal received records
+	var reports []dbs.MigrationReport
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &reports)
+	if err != nil {
+		t.Fatalf("unable to unmarshal received data '%s', error %v", string(data), err)
+	}
+	log.Println("Received data", string(data))
+	var rids []int64
+	for _, rrr := range reports {
+		req := rrr.MigrationRequest
+		if req.MIGRATION_STATUS != 0 {
+			t.Fatalf("invalid return status of migration request %+v", rrr)
+		}
+		rids = append(rids, req.MIGRATION_REQUEST_ID)
+	}
+	if len(rids) != 1 {
+		t.Fatalf("wrong number of migration requests: found %d but expect only 1", len(rids))
+	}
+
+	// prepare cancel request
+	request := make(map[string]int64)
+	request["migration_rqst_id"] = rids[0]
+	data, err = json.Marshal(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reader = bytes.NewReader(data)
+
+	// remove migration request
+	rr, err = respRecorder("POST", "/dbs2go/cancel", reader, web.MigrationCancelHandler)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// fetch all available migration requests
+	rr, err = respRecorder("GET", "dbs2go/status", reader, web.MigrationStatusHandler)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var statusRecords []dbs.MigrationRequest
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &statusRecords)
+	if err != nil {
+		t.Fatalf("unable to unmarshal received data '%s', error %v", string(data), err)
+	}
+	log.Println("Received data", string(data))
+	// we should expect one cancelled request
+	var foundCancelledRequest bool
+	var removeRecords []dbs.MigrationRemoveRequest
+	var sids []int64
+	for _, rrr := range statusRecords {
+		sids = append(sids, rrr.MIGRATION_REQUEST_ID)
+		mstatus := rrr.MIGRATION_STATUS
+		if mstatus == 9 {
+			foundCancelledRequest = true
+		}
+		// prepare migration request records to be used later in /remove API
+		rec := dbs.MigrationRemoveRequest{
+			MIGRATION_REQUEST_ID: rrr.MIGRATION_REQUEST_ID,
+			CREATE_BY:            rrr.CREATE_BY,
+		}
+		removeRecords = append(removeRecords, rec)
+	}
+	if !foundCancelledRequest {
+		t.Fatal("we did not found cancelled migration request")
+	}
+
+	// remove migration request
+	for _, rec := range removeRecords {
+		data, err := json.Marshal(rec)
+		if err != nil {
+			t.Fatal(err)
+		}
+		reader = bytes.NewReader(data)
+		rr, err = respRecorder("POST", "/dbs2go/remove", reader, web.MigrationRemoveHandler)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data = rr.Body.Bytes()
+		log.Println("/remove output", string(data))
+	}
+
+	// check again status of migration, now we should see it is empty
+	rr, err = respRecorder("GET", "dbs2go/status", reader, web.MigrationStatusHandler)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &statusRecords)
+	if err != nil {
+		t.Fatalf("unable to unmarshal received data '%s', error %v", string(data), err)
+	}
+	if len(statusRecords) != 0 {
+		t.Fatalf("wrong number of migration records, received %v, but expect 0", statusRecords)
+	}
+}

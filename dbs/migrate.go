@@ -72,7 +72,7 @@ const (
 	IN_PROGRESS
 	COMPLETED
 	FAILED
-	TERM_FAILED
+	TERM_FAILED = 9
 )
 
 // MigrateURL holds URL of DBSMigrate server
@@ -1140,23 +1140,21 @@ func (a *API) TotalMigration() error {
 
 // CancelMigration clean-ups migration requests in DB
 func (a *API) CancelMigration() error {
-	// backward compatibility with DBS migration server which uses migration_rqst_id
-	if v, ok := a.Params["migration_rqst_id"]; ok {
-		a.Params["migration_request_id"] = v
-	}
 
-	// obtain migration request record
-	val, err := getSingleValue(a.Params, "migration_request_id")
+	// our API expect JSON payload with MigrationRemoveRequest structure
+	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		log.Printf("unable to get migration_request_id", err)
+		log.Println("fail to read data", err)
 		return err
 	}
-	midint, err := strconv.Atoi(val)
+	var r MigrationRemoveRequest
+	err = json.Unmarshal(data, &r)
 	if err != nil {
-		log.Printf("unable to convert mid", err)
+		log.Println("untable to unmarshal input data", err)
 		return err
 	}
-	mid := int64(midint)
+	mid := r.MIGRATION_REQUEST_ID
+
 	log.Println("process migration request", mid)
 
 	records, err := MigrationRequests(mid)
