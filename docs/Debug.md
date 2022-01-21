@@ -107,3 +107,8 @@ go-torch http://dbs2go-global-r.dbs:XXXX/debug/pprof/heap --seconds 120 --colors
 # it will produce torch.svg FlameGraph file which you can view
 # or convert into another graphics format
 ```
+
+### References
+- [Go pprof](http://docscn.studygolang.com/pkg/runtime/pprof/)
+- [How to do performance analysis using pprof and
+go-torch](https://developpaper.com/golang-how-to-do-performance-analysis-using-pprof-and-go-torch/)
