@@ -33,3 +33,8 @@ setup.sh
 dbs.db
 TODO.md
 tmp
+reader.json
+writer.json
+migrate.json
+migration.json
+test/data/dbsdata
