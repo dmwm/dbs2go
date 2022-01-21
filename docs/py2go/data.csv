@@ -1,0 +1,11 @@
+Task,Percentage,Implementation
+Memory allocation,98,Current (Python)
+Memory allocation,2,New (GoLang)
+Read query time,90,Current (Python)
+Read query time,10,New (GoLang)
+Image size,90,Current (Python)
+Image size,10,New (GoLang)
+# vulnerabilities/image,97,Current (Python)
+# vulnerabilities/image,3,New (GoLang)
+Lines of code,60,Current (Python)
+Lines of code,40,New (GoLang)
