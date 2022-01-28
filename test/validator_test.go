@@ -156,7 +156,7 @@ func validationFailure(t *testing.T, rec dbs.DBRecord) {
 	if err == nil {
 		t.Fatal("No error is raised for invalid record")
 	} else {
-		log.Println("Validator error", err)
+		log.Println(err)
 	}
 }
 
