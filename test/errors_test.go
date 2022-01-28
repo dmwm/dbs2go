@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/vkuznet/dbs2go/dbs"
@@ -10,7 +11,7 @@ import (
 
 func helper() error {
 	err := errors.New("test")
-	return dbs.Error(err, dbs.GenericError, "", "helper")
+	return dbs.Error(err, dbs.GenericError, "message", "helper")
 }
 
 var ErrorTest = errors.New("test")
@@ -40,4 +41,20 @@ func TestDBSError(t *testing.T) {
 	} else {
 		t.Error("err is not wrapper around ErrorTest")
 	}
+
+	// print wrapper error
+	err3 := dbs.Error(dbsErr, dbs.ParseError, "wrapper", "TestDBSError")
+	if !strings.Contains(err3.Error(), "TestDBSError") {
+		t.Error("error does not contain reason")
+	}
+	if !strings.Contains(err3.Error(), "helper") {
+		t.Error("error does not contain reason for underlying helper function")
+	}
+	fmt.Println("Wrapped error:", err3.Error())
+
+	err4 := dbs.Error(nil, dbs.GenericError, "nil wrapper", "TestDBSError")
+	if !strings.Contains(err4.Error(), "Error:nil") {
+		t.Error("error does not contain nil error")
+	}
+	fmt.Println("Wrapped error:", err4.Error())
 }
