@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -15,7 +14,7 @@ func (a *API) FileChildren() error {
 
 	if len(a.Params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filechildren.FileChildren")
 	}
 
 	blocks := getValues(a.Params, "block_name")
@@ -27,7 +26,7 @@ func (a *API) FileChildren() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("filechildren", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.filechildren.FileChildren")
 	}
 
 	lfns := getValues(a.Params, "logical_file_name")
@@ -51,7 +50,11 @@ func (a *API) FileChildren() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.filechildren.FileChildren")
+	}
+	return nil
 }
 
 // InsertFileChildren DBS API
