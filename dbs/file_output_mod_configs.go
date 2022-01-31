@@ -17,7 +17,11 @@ func (a *API) FileOutputModConfigs() error {
 	stm := getSQL("file_output_mod_configs")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.file_output_mod_configs.FileOutputModConfigs")
+	}
+	return nil
 }
 
 // FileOutputModConfigs represents file output mod config DBS DB table
@@ -40,7 +44,7 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 			r.FILE_OUTPUT_CONFIG_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.file_output_mod_configs.Insert")
 		}
 	}
 	// check if record already exists in DB
@@ -55,7 +59,7 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.file_output_mod_configs.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_file_output_mod_configs")
@@ -67,8 +71,9 @@ func (r *FileOutputModConfigs) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("fail to insert file_output_config record", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.file_output_mod_configs.Insert")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of FileOutputModConfigs
@@ -89,7 +94,7 @@ func (r *FileOutputModConfigs) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.file_output_mod_configs.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -97,7 +102,7 @@ func (r *FileOutputModConfigs) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.file_output_mod_configs.Decode")
 	}
 	return nil
 }
@@ -118,13 +123,13 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 	var rec FileOutputModConfigRecord
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 
 	// get file id for given lfn
@@ -133,7 +138,7 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find file_id for", rec.Lfn)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 	// find output module config id
 	var args []interface{}
@@ -154,7 +159,7 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load outptuconfigs_id sql template, error", err)
 		}
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 	stm = WhereClause(stm, conds)
 	var oid int64
@@ -163,7 +168,7 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to find output_mod_config_id for\n%s\n%+v", stm, args)
 		}
-		return err
+		return Error(err, QueryErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 
 	// init all foreign Id's in output config record
@@ -178,8 +183,8 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert FileOutputModConfigs, error", err)
 		}
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 
-	return err
+	return nil
 }
