@@ -5,7 +5,6 @@ package web
 import (
 	"compress/gzip"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -28,17 +27,56 @@ func requestURI(r *http.Request) string {
 	return uri
 }
 
+// HTTPError represents HTTP error structure
+type HTTPError struct {
+	Method         string `json:"method"`           // HTTP method
+	HTTPCode       int    `json:"code"`             // HTTP status code from IANA
+	Timestamp      string `json:"timestamp"`        // timestamp of the error
+	Path           string `json:"path"`             // URL path
+	Referer        string `json:"referer"`          // http referer
+	UserAgent      string `json:"user_agent"`       // http user-agent field
+	XForwardedHost string `json:"x_forwarded_host"` // http.Request X-Forwarded-Host
+	XForwardedFor  string `json:"x_forwarded_for"`  // http.Request X-Forwarded-For
+	RemoteAddr     string `json:"remote_addr"`      // http.Request remote address
+}
+
+// ServerError represents HTTP server error structure
+type ServerError struct {
+	DBSError  error     `json:"error"`     // DBS error
+	HTTPError HTTPError `json:"http"`      // HTTP section of the error
+	Exception int       `json:"exception"` // for compatibility with Python server
+	Type      string    `json:"type"`      // for compatibility with Python server
+}
+
 // responseMsg helper function to provide response to end-user
-func responseMsg(w http.ResponseWriter, r *http.Request, msg, api string, code int) int64 {
-	rec := make(dbs.Record)
-	rec["error"] = msg
-	rec["api"] = api
-	rec["method"] = r.Method
-	rec["exception"] = code
-	rec["type"] = "HTTPError"
-	log.Printf("ERROR: method=%s api=%s code=%d %s", r.Method, api, code, msg)
+func responseMsg(w http.ResponseWriter, r *http.Request, err error, code int) int64 {
+	path := r.RequestURI
+	uri, e := url.QueryUnescape(r.RequestURI)
+	if e == nil {
+		path = uri
+	}
+	hrec := HTTPError{
+		Method:         r.Method,
+		Timestamp:      time.Now().String(),
+		HTTPCode:       code,
+		Path:           path,
+		Referer:        r.Referer(),
+		RemoteAddr:     r.RemoteAddr,
+		XForwardedFor:  r.Header.Get("X-Forwarded-For"),
+		XForwardedHost: r.Header.Get("X-Forwarded-Host"),
+	}
+	rec := ServerError{
+		HTTPError: hrec,
+		DBSError:  err,
+		Exception: code,
+		Type:      "HTTPError",
+	}
+
+	log.Printf(err.Error())
+	// if we want to use JSON record output we'll use
 	//     data, _ := json.Marshal(rec)
-	var out []dbs.Record
+	// otherwise we'll use list of JSON records
+	var out []ServerError
 	out = append(out, rec)
 	data, _ := json.Marshal(out)
 	w.Header().Add("Content-Type", "application/json")
@@ -140,7 +178,7 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 	status := http.StatusOK
 	params, err := parseParams(r)
 	if err != nil {
-		responseMsg(w, r, fmt.Sprintf("%v", err), "dummy", http.StatusBadRequest)
+		responseMsg(w, r, err, http.StatusBadRequest)
 		return
 	}
 	api := &dbs.API{
@@ -264,7 +302,7 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 	params := make(dbs.Record)
 	err := decoder.Decode(&params)
 	if err != nil {
-		return nil, err
+		return nil, dbs.Error(err, dbs.DecodeErrorCode, "unable to decode HTTP post payload", "web.parsePayload")
 	}
 	if utils.VERBOSE > 0 {
 		log.Println("HTTP POST payload\n", params)
@@ -317,7 +355,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	if a == "files" || a == "datasets" {
 		postParams, err := parsePayload(r)
 		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			responseMsg(w, r, err, http.StatusInternalServerError)
 			return
 		}
 		for k, v := range postParams {
@@ -355,7 +393,7 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 		err = api.UpdateFiles()
 	}
 	if err != nil {
-		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+		responseMsg(w, r, err, http.StatusInternalServerError)
 		return
 	}
 }
@@ -381,7 +419,8 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	headerContentType := r.Header.Get("Content-Type")
 	if headerContentType != "application/json" {
 		msg := fmt.Sprintf("unsupported Content-Type: '%s'", headerContentType)
-		responseMsg(w, r, msg, "DBSPostHandler", http.StatusUnsupportedMediaType)
+		e := dbs.Error(dbs.ContentTypeErr, dbs.ContentTypeErrorCode, msg, "web.DBSPostHandler")
+		responseMsg(w, r, e, http.StatusUnsupportedMediaType)
 		return
 	}
 	defer r.Body.Close()
@@ -398,8 +437,10 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		r.Header.Del("Content-Length")
 		reader, err := gzip.NewReader(r.Body)
 		if err != nil {
-			log.Println("unable to get gzip reader", err)
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			msg := "unable to get gzip reader"
+			log.Println(msg, err)
+			e := dbs.Error(err, dbs.ReaderErrorCode, msg, "web.DBSPostHandler")
+			responseMsg(w, r, e, http.StatusInternalServerError)
 			return
 		}
 		body = utils.GzipReader{reader, r.Body}
@@ -421,7 +462,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	if a == "fileArray" || a == "datasetlist" || a == "fileparentsbylumi" || a == "filelumis" || a == "blockparents" || a == "process" {
 		params, err = parsePayload(r)
 		if err != nil {
-			responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusInternalServerError)
+			responseMsg(w, r, err, http.StatusInternalServerError)
 			return
 		}
 		api.Params = params
@@ -477,7 +518,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 		err = api.RemoveMigration()
 	}
 	if err != nil {
-		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		responseMsg(w, r, err, http.StatusBadRequest)
 		return
 	}
 }
@@ -502,7 +543,7 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 
 	params, err := parseParams(r)
 	if err != nil {
-		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		responseMsg(w, r, err, http.StatusBadRequest)
 		return
 	}
 	if utils.VERBOSE > 0 {
@@ -589,19 +630,19 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	} else if a == "total" {
 		err = api.TotalMigration()
 	} else {
-		msg := fmt.Sprintf("not implemented API %s", api)
-		err = errors.New(msg)
+		err = dbs.NotImplementedApiErr
 	}
 	if err != nil {
-		responseMsg(w, r, fmt.Sprintf("%v", err), a, http.StatusBadRequest)
+		responseMsg(w, r, err, http.StatusBadRequest)
 		return
 	}
 }
 
 // NotImplementedHandler returns server status error
 func NotImplementedHandler(w http.ResponseWriter, r *http.Request, api string) {
-	log.Println("NotImplementedAPI", api)
-	responseMsg(w, r, "not implemented", api, http.StatusInternalServerError)
+	msg := fmt.Sprintf("unable to execute api '%s", api)
+	err := dbs.Error(dbs.NotImplementedApiErr, dbs.NotImplementedApiCode, msg, "web.NotImplementedHandler")
+	responseMsg(w, r, err, http.StatusInternalServerError)
 }
 
 // DatatiersHandler provides access to DataTiers DBS API.
