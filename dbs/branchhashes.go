@@ -25,7 +25,7 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 		tid, err = LastInsertID(tx, "BRANCH_HASHES", "branch_hash_id")
 		r.BRANCH_HASH_ID = tid + 1
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.branchhashes.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -33,7 +33,7 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.branchhashes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_branch_hashes")
@@ -41,7 +41,10 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 		log.Printf("Insert BranchHashes\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.BRANCH_HASH_ID, r.BRANCH_HASH, r.CONTENT)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.branchhashes.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of BranchHashes
@@ -69,7 +72,7 @@ func (r *BranchHashes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.branchhashes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -77,12 +80,16 @@ func (r *BranchHashes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.branchhashes.Decode")
 	}
 	return nil
 }
 
 // InsertBranchHashes DBS API
 func (a *API) InsertBranchHashes() error {
-	return insertRecord(&BranchHashes{}, a.Reader)
+	err := insertRecord(&BranchHashes{}, a.Reader)
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.branchhashes.InsertBranchHashes")
+	}
+	return nil
 }
