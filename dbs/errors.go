@@ -1,42 +1,69 @@
 package dbs
 
 import (
+	"errors"
 	"fmt"
 )
 
+// DatabaseErr represents generic database error
+var DatabaseErr = errors.New("database error")
+
+// InvalidParamErr represents generic error for invalid input parameter
+var InvalidParamErr = errors.New("invalid parameter(s)")
+
+// ConcurrencyErr represents generic concurrency error
+var ConcurrencyErr = errors.New("concurrency error")
+
+// RecordErr represents generic record error
+var RecordErr = errors.New("record error")
+
+// ValidationErr represents generic validation error
+var ValidationErr = errors.New("validation error")
+
+// ContentTypeErr represents generic content-type error
+var ContentTypeErr = errors.New("content-type error")
+
+// NotImplementedApiErr represents generic not implemented api error
+var NotImplementedApiErr = errors.New("not implemented api error")
+
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
-	GenericError      = iota + 100 // generic DBS error
-	DatabaseError                  // 101 database error
-	TransactionError               // 102 transaction error
-	QueryError                     // 103 query error
-	RowsScanError                  // 104 row scan error
-	SessionError                   // 105 db session error
-	CommitError                    // 106 db commit error
-	ParseError                     // 107 parser error
-	LoadError                      // 108 loading error, e.g. load template
-	GetIDError                     // 109 get id db error
-	InsertError                    // 110 db insert error
-	LastInsertError                // 111 db last insert error
-	ValidateError                  // 112 validation error
-	PatternError                   // 113 pattern error
-	DecodeError                    // 114 decode error
-	EncodeError                    // 115 encode error
-	ContentTypeError               // 116 content type error
-	ParametersError                // 117 parameters error
-	NotImplementedApi              // 118 not implemented API error
-	ReaderError                    // 119 io reader error
-	WriterError                    // 120 io writer error
-	UnmarshalError                 // 121 json unmarshal error
-	MarshalError                   // 122 marshal error
+	GenericErrorCode        = iota + 100 // generic DBS error
+	DatabaseErrorCode                    // 101 database error
+	TransactionErrorCode                 // 102 transaction error
+	QueryErrorCode                       // 103 query error
+	RowsScanErrorCode                    // 104 row scan error
+	SessionErrorCode                     // 105 db session error
+	CommitErrorCode                      // 106 db commit error
+	ParseErrorCode                       // 107 parser error
+	LoadErrorCode                        // 108 loading error, e.g. load template
+	GetIDErrorCode                       // 109 get id db error
+	InsertErrorCode                      // 110 db insert error
+	UpdateErrorCode                      // 111 update error
+	LastInsertErrorCode                  // 112 db last insert error
+	ValidateErrorCode                    // 113 validation error
+	PatternErrorCode                     // 114 pattern error
+	DecodeErrorCode                      // 115 decode error
+	EncodeErrorCode                      // 116 encode error
+	ContentTypeErrorCode                 // 117 content type error
+	ParametersErrorCode                  // 118 parameters error
+	NotImplementedApiCode                // 119 not implemented API error
+	ReaderErrorCode                      // 120 io reader error
+	WriterErrorCode                      // 121 io writer error
+	UnmarshalErrorCode                   // 122 json unmarshal error
+	MarshalErrorCode                     // 123 marshal error
+	HttpRequestErrorCode                 // 124 HTTP request error
+	MigrationErrorCode                   // 125 Migration error
+	RemoveErrorCode                      // 126 remove error
+	InvalidRequestErrorCode              // 127 invalid request error
 )
 
 // DBSError represents common structure for DBS errors
 type DBSError struct {
 	Reason   string `json:"reason"`   // error string
 	Message  string `json:"message"`  // additional message describing the issue
-	Code     int    `json:"code"`     // DBS error code
 	Function string `json:"function"` // DBS function
+	Code     int    `json:"code"`     // DBS error code
 }
 
 // Error function implements details of DBS error message

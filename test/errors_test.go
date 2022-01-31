@@ -11,7 +11,7 @@ import (
 
 func helper() error {
 	err := errors.New("test")
-	return dbs.Error(err, dbs.GenericError, "message", "helper")
+	return dbs.Error(err, dbs.GenericErrorCode, "message", "helper")
 }
 
 var ErrorTest = errors.New("test")
@@ -43,7 +43,7 @@ func TestDBSError(t *testing.T) {
 	}
 
 	// print wrapper error
-	err3 := dbs.Error(dbsErr, dbs.ParseError, "wrapper", "TestDBSError")
+	err3 := dbs.Error(dbsErr, dbs.ParseErrorCode, "wrapper", "TestDBSError")
 	if !strings.Contains(err3.Error(), "TestDBSError") {
 		t.Error("error does not contain reason")
 	}
@@ -52,7 +52,7 @@ func TestDBSError(t *testing.T) {
 	}
 	fmt.Println("Wrapped error:", err3.Error())
 
-	err4 := dbs.Error(nil, dbs.GenericError, "nil wrapper", "TestDBSError")
+	err4 := dbs.Error(nil, dbs.GenericErrorCode, "nil wrapper", "TestDBSError")
 	if !strings.Contains(err4.Error(), "Error:nil") {
 		t.Error("error does not contain nil error")
 	}
