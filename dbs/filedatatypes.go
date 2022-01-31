@@ -17,7 +17,11 @@ func (a *API) FileDataTypes() error {
 	stm := getSQL("file_data_types")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.filedatatypes.FileDataTypes")
+	}
+	return nil
 }
 
 // FileDataTypes represents File Data Types DBS DB table
@@ -39,7 +43,7 @@ func (r *FileDataTypes) Insert(tx *sql.Tx) error {
 			r.FILE_TYPE_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.filedatatypes.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -47,7 +51,7 @@ func (r *FileDataTypes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.filedatatypes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_file_data_types")
@@ -55,7 +59,10 @@ func (r *FileDataTypes) Insert(tx *sql.Tx) error {
 		log.Printf("Insert FileDataTypes\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.FILE_TYPE_ID, r.FILE_TYPE)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.filedatatypes.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of FileDataTypes
@@ -76,7 +83,7 @@ func (r *FileDataTypes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.filedatatypes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -84,12 +91,16 @@ func (r *FileDataTypes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.filedatatypes.Decode")
 	}
 	return nil
 }
 
 // InsertFileDataTypes DBS API
 func (a *API) InsertFileDataTypes() error {
-	return insertRecord(&FileDataTypes{}, a.Reader)
+	err := insertRecord(&FileDataTypes{}, a.Reader)
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.filedatatypes.InsertFileDataTypes")
+	}
+	return nil
 }
