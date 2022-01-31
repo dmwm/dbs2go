@@ -1,9 +1,5 @@
 package dbs
 
-import (
-	"errors"
-)
-
 // DatasetChildren API
 func (a *API) DatasetChildren() error {
 	var args []interface{}
@@ -13,7 +9,7 @@ func (a *API) DatasetChildren() error {
 	datasetchildren := getValues(a.Params, "dataset")
 	if len(datasetchildren) > 1 {
 		msg := "The datasetchildren API does not support list of datasetchildren"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasetchildren.DatasetChildren")
 	} else if len(datasetchildren) == 1 {
 		conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 	}
@@ -23,7 +19,11 @@ func (a *API) DatasetChildren() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.datasetchildren.DatasetChildren")
+	}
+	return nil
 }
 
 // InsertDatasetChildren DBS API
