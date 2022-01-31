@@ -50,14 +50,16 @@ func tlsCerts(key, cert string) ([]tls.Certificate, error) {
 		// use local implementation of LoadX409KeyPair instead of tls one
 		x509cert, err := x509proxy.LoadX509Proxy(uproxy)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse X509 proxy: %v", err)
+			msg := "failed to parse X509 proxy"
+			return nil, Error(err, InvalidRequestErrorCode, msg, "dbs.utils.tlsCerts")
 		}
 		certs := []tls.Certificate{x509cert}
 		return certs, nil
 	}
 	x509cert, err := tls.LoadX509KeyPair(ucert, uckey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse user X509 certificate: %v", err)
+		msg := "failed to parse user X509 certificate"
+		return nil, Error(err, GenericErrorCode, msg, "dbs.utils.tlsCerts")
 	}
 	certs := []tls.Certificate{x509cert}
 	return certs, nil
@@ -96,15 +98,18 @@ func getData(rurl string) ([]byte, error) {
 	req, err := http.NewRequest("GET", rurl, nil)
 	if err != nil {
 		log.Printf("unable to get data for %s, error %v, http request %+v", rurl, err, req)
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.utils.getData")
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.utils.getData")
 	}
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
-	return data, err
+	if err != nil {
+		return data, Error(err, ReaderErrorCode, "", "dbs.utils.getData")
+	}
+	return data, nil
 }
