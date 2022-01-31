@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -36,7 +35,7 @@ func FlatLumis(val interface{}) ([]string, error) {
 		var r [][]int
 		err := json.Unmarshal([]byte(lumis), &r)
 		if err != nil {
-			return out, err
+			return out, Error(err, UnmarshalErrorCode, "", "dbs.filearray.FlatLumis")
 		}
 		for _, v := range r {
 			if len(v) == 2 {
@@ -60,13 +59,13 @@ func (a *API) FileArray() error {
 	if lumis, ok := a.Params["lumi_list"]; ok {
 		lumiList, err := FlatLumis(lumis)
 		if err != nil {
-			return err
+			return Error(err, ParametersErrorCode, "", "dbs.filearray.FileArray")
 		}
 		a.Params["lumi_list"] = lumiList
 	}
 	if len(a.Params) == 0 {
-		msg := "filearray api requires input parameers"
-		return errors.New(msg)
+		msg := "filearray api requires input parameters"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filearray.FileArray")
 	}
 	return a.Files()
 }
