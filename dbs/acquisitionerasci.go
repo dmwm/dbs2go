@@ -1,10 +1,5 @@
 package dbs
 
-import (
-	"errors"
-	"fmt"
-)
-
 // AcquisitionErasCi DBS API
 func (a *API) AcquisitionErasCi() error {
 	// variables we'll use in where clause
@@ -28,17 +23,20 @@ func (a *API) AcquisitionErasCi() error {
 	// use generic query API to fetch the results from DB
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		msg := "unable to get DB transaction"
+		return Error(err, TransactionErrorCode, msg, "dbs.acquisitionerasci.AcquisitionErasCi")
 	}
 	defer tx.Rollback()
 	if err := executeSessions(tx, preSession); err != nil {
-		return err
+		return Error(err, SessionErrorCode, "", "dbs.acquisitionerasci.AcquisitionErasCi")
 	}
 
 	e := executeAll(a.Writer, a.Separator, stm, args...)
 	if err := executeSessions(tx, postSession); err != nil {
-		return err
+		return Error(err, SessionErrorCode, "", "dbs.acquisitionerasci.AcquisitionErasCi")
 	}
-	return e
+	if e != nil {
+		return Error(e, QueryErrorCode, "", "dbs.acquisitionerasci.AcquisitionErasCi")
+	}
+	return nil
 }
