@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -17,21 +16,21 @@ func (a *API) RunSummaries() error {
 	//     runs := getValues(a.Params, "run_num")
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return err
+		return Error(err, ParseErrorCode, "", "dbs.runsummaries.RunSummaries")
 	}
 
 	dataset := getValues(a.Params, "dataset")
 	if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
-			return errors.New(msg)
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.runsummaries.RunSummaries")
 		}
 		tmpl["Dataset"] = true
 		conds, args = AddParam("dataset", "DS.DATASET", a.Params, conds, args)
 	}
 	stm, err := LoadTemplateSQL("runsummaries", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.runsummaries.RunSummaries")
 	}
 
 	if len(runs) > 1 {
@@ -47,10 +46,14 @@ func (a *API) RunSummaries() error {
 		conds, args = AddParam("run_num", "FL.RUN_NUM", a.Params, conds, args)
 	} else {
 		msg := fmt.Sprintf("No arguments for runsummaries API")
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.runsummaries.RunSummaries")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.runsummaries.RunSummaries")
+	}
+	return nil
 }
