@@ -17,7 +17,11 @@ func (a *API) DatasetOutputModConfigs() error {
 	stm := getSQL("dataset_output_mod_configs")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.dataset_output_configs.DatasetOutputModConfigs")
+	}
+	return nil
 }
 
 // DatasetOutputModConfigs represents dataset output mod configs DBS DB table
@@ -40,7 +44,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 			r.DS_OUTPUT_MOD_CONF_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.dataset_output_configs.Insert")
 		}
 	}
 	// check if our data already exist in DB
@@ -56,7 +60,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.dataset_output_configs.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_output_mod_configs")
@@ -67,7 +71,10 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("unable to insert DatasetOutputModConfigs %+v", err)
 	}
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.dataset_output_configs.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of DatasetOutputModConfigs
@@ -88,7 +95,7 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.dataset_output_configs.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -96,12 +103,16 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.dataset_output_configs.Decode")
 	}
 	return nil
 }
 
 // InsertDatasetOutputModConfigs DBS API
 func (a *API) InsertDatasetOutputModConfigs() error {
-	return insertRecord(&DatasetOutputModConfigs{}, a.Reader)
+	err := insertRecord(&DatasetOutputModConfigs{}, a.Reader)
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.dataset_output_configs.InsertDatasetOutputModConfigs")
+	}
+	return nil
 }
