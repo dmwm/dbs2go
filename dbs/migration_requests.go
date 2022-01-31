@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -38,7 +37,7 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 			r.MIGRATION_REQUEST_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.migration_requests.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -46,7 +45,7 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.migration_requests.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_migration_requests")
@@ -67,8 +66,9 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert MigratinRequest", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.migration_requests.Insert")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of MigrationRequest
@@ -90,7 +90,7 @@ func (r *MigrationRequest) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.migration_requests.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -98,7 +98,7 @@ func (r *MigrationRequest) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.migration_requests.Decode")
 	}
 	return nil
 }
@@ -125,7 +125,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load migration_requests template", err)
 		}
-		return records, err
+		return records, Error(err, LoadErrorCode, "", "dbs.migration_requests.MigrationRequests")
 	}
 
 	if mid > 0 {
@@ -136,14 +136,14 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	}
 
 	if MigrationDB == nil {
-		return records, errors.New("MigrationDB access is closed")
+		msg := "Migration DB access is closed"
+		return records, Error(DatabaseErr, DatabaseErrorCode, msg, "dbs.migration_requests.MigrationRequests")
 	}
 
 	// execute sql statement
 	tx, err := MigrationDB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return records, errors.New(msg)
+		return records, Error(err, TransactionErrorCode, "", "dbs.migration_requests.MigrationRequests")
 	}
 	defer tx.Rollback()
 	stm = CleanStatement(stm)
@@ -152,8 +152,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	}
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
-		return records, errors.New(msg)
+		return records, Error(err, QueryErrorCode, "", "dbs.migration_requests.MigrationRequests")
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -171,8 +170,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 			&migRetryCount,
 		)
 		if err != nil {
-			msg := fmt.Sprintf("unable to scan DB results %s", err)
-			return records, errors.New(msg)
+			return records, Error(err, RowsScanErrorCode, "", "dbs.migration_requests.MigrationRequests")
 		}
 		rec := MigrationRequest{
 			MIGRATION_REQUEST_ID:   mid,
@@ -188,8 +186,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 		records = append(records, rec)
 	}
 	if err = rows.Err(); err != nil {
-		msg := fmt.Sprintf("rows error %v", err)
-		return records, errors.New(msg)
+		return records, Error(err, RowsScanErrorCode, "", "dbs.migration_requests.MigrationRequests")
 	}
 	return records, nil
 }
