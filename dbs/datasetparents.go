@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 
@@ -22,7 +21,11 @@ func (a *API) DatasetParents() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.datasetparents.DatasetParents")
+	}
+	return nil
 }
 
 // DatasetParents represents Dataset Parents DBS DB table
@@ -37,7 +40,7 @@ func (r *DatasetParents) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.datasetparents.Insert")
 	}
 	// check if record exists in DB
 	if IfExist(tx, "DATASET_PARENTS", "this_dataset_id", "this_dataset_id", r.THIS_DATASET_ID) {
@@ -56,8 +59,9 @@ func (r *DatasetParents) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert DatasetParents record, error", err)
 		}
+		return Error(err, QueryErrorCode, "", "dbs.datasetparents.Insert")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of DatasetParents
@@ -66,10 +70,12 @@ func (r *DatasetParents) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if r.THIS_DATASET_ID == 0 {
-		return errors.New("missing this_dataset_id")
+		msg := "missing this_dataset_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasetparents.Validate")
 	}
 	if r.PARENT_DATASET_ID == 0 {
-		return errors.New("missing parent_dataset_id")
+		msg := "missing parent_dataset_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasetparents.Validate")
 	}
 	return nil
 }
@@ -84,7 +90,7 @@ func (r *DatasetParents) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.datasetparents.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -92,7 +98,7 @@ func (r *DatasetParents) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.datasetparents.Decode")
 	}
 	return nil
 }
