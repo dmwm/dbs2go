@@ -19,7 +19,11 @@ func (a *API) PrimaryDSTypes() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.primarydstypes.PrimaryDSTypes")
+	}
+	return nil
 }
 
 // PrimaryDSTypes represents primary ds types DBS DB table
@@ -35,7 +39,7 @@ func (r *PrimaryDSTypes) Insert(tx *sql.Tx) error {
 		// there is no SEQ_XXX for this table, will use LastInsertId
 		pid, err := LastInsertID(tx, "PRIMARY_DS_TYPES", "primary_ds_type_id")
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.primarydstypes.Insert")
 		}
 		r.PRIMARY_DS_TYPE_ID = pid + 1
 	}
@@ -44,12 +48,15 @@ func (r *PrimaryDSTypes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.primarydstypes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_primary_ds_types")
 	_, err = tx.Exec(stm, r.PRIMARY_DS_TYPE_ID, r.PRIMARY_DS_TYPE)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.primarydstypes.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of PrimaryDSTypes
@@ -70,7 +77,7 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.primarydstypes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -78,12 +85,16 @@ func (r *PrimaryDSTypes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.primarydstypes.Decode")
 	}
 	return nil
 }
 
 // InsertPrimaryDSTypes DBS API
 func (a *API) InsertPrimaryDSTypes() error {
-	return insertRecord(&PrimaryDSTypes{}, a.Reader)
+	err := insertRecord(&PrimaryDSTypes{}, a.Reader)
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.primarydstypes.InsertPrimaryDSTypes")
+	}
+	return nil
 }
