@@ -56,7 +56,7 @@ func DBStats() (DBInfo, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return dbInfo, err
+		return dbInfo, Error(err, TransactionErrorCode, "", "dbs.stats.DBStats")
 	}
 	defer tx.Rollback()
 
@@ -80,7 +80,7 @@ func DBStats() (DBInfo, error) {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return dbInfo, err
+		return dbInfo, Error(err, CommitErrorCode, "", "dbs.stats.DBStats")
 	}
 
 	return dbInfo, nil
@@ -90,7 +90,7 @@ func DBStats() (DBInfo, error) {
 func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	stm, err := LoadTemplateSQL("stats_db_size", tmpl)
 	if err != nil {
-		return 0, err
+		return 0, Error(err, LoadErrorCode, "", "dbs.stats.fullSize")
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
@@ -99,14 +99,14 @@ func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
-		return 0, err
+		return 0, Error(err, QueryErrorCode, "", "dbs.stats.fullSize")
 	}
 	var totalSize float64
 	for rows.Next() {
 		var size float64
 		if err := rows.Scan(&size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
-			return 0, err
+			return 0, Error(err, RowsScanErrorCode, "", "dbs.stats.fullSize")
 		}
 		totalSize += size
 	}
@@ -117,7 +117,7 @@ func fullSize(tx *sql.Tx, tmpl Record) (float64, error) {
 func indexSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	stm, err := LoadTemplateSQL("stats_db_indexes", tmpl)
 	if err != nil {
-		return 0, err
+		return 0, Error(err, LoadErrorCode, "", "dbs.stats.indexSize")
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
@@ -126,14 +126,14 @@ func indexSize(tx *sql.Tx, tmpl Record) (float64, error) {
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
-		return 0, err
+		return 0, Error(err, QueryErrorCode, "", "dbs.stats.indexSize")
 	}
 	var totalSize float64
 	for rows.Next() {
 		var size float64
 		if err := rows.Scan(&size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
-			return 0, err
+			return 0, Error(err, RowsScanErrorCode, "", "dbs.stats.indexSize")
 		}
 		totalSize += size
 	}
@@ -146,7 +146,7 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	var schemaIndexes []SchemaIndex
 	stm, err := LoadTemplateSQL("stats_schemas_indexes", tmpl)
 	if err != nil {
-		return schemas, err
+		return schemas, Error(err, LoadErrorCode, "", "dbs.stats.schemaSize")
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
@@ -155,14 +155,14 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
-		return schemas, err
+		return schemas, Error(err, QueryErrorCode, "", "dbs.stats.schemaSize")
 	}
 	for rows.Next() {
 		var owner string
 		var size float64
 		if err := rows.Scan(&owner, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
-			return schemas, err
+			return schemas, Error(err, RowsScanErrorCode, "", "dbs.stats.schemaSize")
 		}
 		schema := SchemaIndex{Owner: owner, Size: size}
 		schemaIndexes = append(schemaIndexes, schema)
@@ -170,7 +170,7 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 
 	stm, err = LoadTemplateSQL("stats_schemas_size", tmpl)
 	if err != nil {
-		return schemas, err
+		return schemas, Error(err, LoadErrorCode, "", "dbs.stats.schemaSize")
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
@@ -179,14 +179,14 @@ func schemasSize(tx *sql.Tx, tmpl Record) ([]SchemaInfo, error) {
 	rows, err = tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
-		return schemas, err
+		return schemas, Error(err, QueryErrorCode, "", "dbs.stats.schemaSize")
 	}
 	for rows.Next() {
 		var owner string
 		var size float64
 		if err := rows.Scan(&owner, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
-			return schemas, err
+			return schemas, Error(err, RowsScanErrorCode, "", "dbs.stats.schemaSize")
 		}
 		schema := SchemaInfo{Owner: owner, Size: size}
 		for _, s := range schemaIndexes {
@@ -203,7 +203,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	var tables []TableInfo
 	stm, err := LoadTemplateSQL("stats_tables_indexes", tmpl)
 	if err != nil {
-		return tables, err
+		return tables, Error(err, LoadErrorCode, "", "dbs.stats.tablesSize")
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
@@ -212,7 +212,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	rows, err := tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
-		return tables, err
+		return tables, Error(err, QueryErrorCode, "", "dbs.stats.tablesSize")
 	}
 	for rows.Next() {
 		var owner string
@@ -221,14 +221,14 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 		var size float64
 		if err := rows.Scan(&owner, &table, &index, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
-			return tables, err
+			return tables, Error(err, RowsScanErrorCode, "", "dbs.stats.tablesSize")
 		}
 		t := TableIndex{Owner: owner, Table: table, Index: index, Size: size}
 		tableIndexes = append(tableIndexes, t)
 	}
 	stm, err = LoadTemplateSQL("stats_tables_size", tmpl)
 	if err != nil {
-		return tables, err
+		return tables, Error(err, LoadErrorCode, "", "dbs.stats.tablesSize")
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
@@ -237,7 +237,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	rows, err = tx.Query(stm)
 	if err != nil {
 		log.Printf("unable to execute query %s, error %v", stm, err)
-		return tables, err
+		return tables, Error(err, QueryErrorCode, "", "dbs.stats.tablesSize")
 	}
 	for rows.Next() {
 		var owner string
@@ -246,7 +246,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 		var size float64
 		if err := rows.Scan(&owner, &table, &nrows, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
-			return tables, err
+			return tables, Error(err, RowsScanErrorCode, "", "dbs.stats.tablesSize")
 		}
 		tinfo := TableInfo{Owner: owner, Table: table, Rows: nrows, Size: size}
 		for _, t := range tableIndexes {
