@@ -16,7 +16,7 @@ func (a *API) ParentDatasetFileLumiIds() error {
 	// create our SQL statement
 	stm, err := LoadTemplateSQL("parentdatasetfilelumiids", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.parentdatasetfilelumi.ParentDatasetFileLumiIds")
 	}
 
 	// add dataset condition
@@ -35,5 +35,9 @@ func (a *API) ParentDatasetFileLumiIds() error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.parentdatasetfilelumi.ParentDatasetFileLumiIds")
+	}
+	return nil
 }
