@@ -30,12 +30,16 @@ func (a *API) OutputModules() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("outputmodule", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.outputmodules.OutputModules")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.outputmodules.OutputModules")
+	}
+	return nil
 }
 
 // InsertOutputModules DBS API
