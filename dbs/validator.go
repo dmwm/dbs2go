@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/vkuznet/dbs2go/utils"
-	"golang.org/x/exp/errors"
 )
 
 // DBS string parameters
@@ -83,13 +82,13 @@ func LoadPatterns(fname string) (map[string]LexiconPattern, error) {
 	data, err := ioutil.ReadFile(fname)
 	if err != nil {
 		log.Printf("Unable to read, file '%s', error: %v\n", fname, err)
-		return nil, err
+		return nil, Error(err, ReaderErrorCode, "", "dbs.validator.LoadPatterns")
 	}
 	var records []Lexicon
 	err = json.Unmarshal(data, &records)
 	if err != nil {
 		log.Printf("Unable to parse, file '%s', error: %v\n", fname, err)
-		return nil, err
+		return nil, Error(err, UnmarshalErrorCode, "", "dbs.validator.LoadPatterns")
 	}
 	// fetch and compile all patterns
 	pmap := make(map[string]LexiconPattern)
@@ -135,7 +134,8 @@ func (o StrPattern) Check(key string, val interface{}) error {
 	case string:
 		v = vvv
 	default:
-		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
+		msg := fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val)
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
 	}
 	if len(o.Patterns) == 0 {
 		// nothing to match in patterns
@@ -148,7 +148,8 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		if utils.VERBOSE > 0 {
 			log.Println("lexicon str pattern", o)
 		}
-		return errors.New(fmt.Sprintf("length of %s exceed %d characters", v, o.Len))
+		msg := fmt.Sprintf("length of %s exceed %d characters", v, o.Len)
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
 	}
 	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
 	for _, pat := range o.Patterns {
@@ -157,7 +158,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 			return nil
 		}
 	}
-	return errors.New(msg)
+	return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
 }
 
 //gocyclo:ignore
@@ -168,84 +169,63 @@ func strType(key string, val interface{}) error {
 	case string:
 		v = vvv
 	default:
-		return errors.New(fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val))
+		msg := fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val)
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.strType")
 	}
+	mapKeys := make(map[string]string)
+	mapKeys["dataset"] = "dataset"
+	mapKeys["block_name"] = "block_name"
+	mapKeys["logical_file_name"] = "logical_file_name"
+	mapKeys["create_by"] = "user"
+	mapKeys["last_modified_by"] = "user"
+	mapKeys["primary_ds_name"] = "primary_dataset"
+	mapKeys["processed_ds_name"] = "processed_dataset"
+	mapKeys["processing_version"] = "processing_version"
+	mapKeys["app_name"] = "application"
+	mapKeys["data_tier_name"] = "data_tier_name"
+	mapKeys["dataset"] = "dataset"
+	mapKeys["release_version"] = "cmssw_version"
+	var allowedWildCardKeys = []string{
+		"primary_ds_name",
+		"processed_ds_name",
+		"processing_version",
+		"app_name",
+		"data_tier_name",
+		"release_version",
+	}
+
 	var patterns []*regexp.Regexp
 	var length int
-	if key == "dataset" {
-		if p, ok := LexiconPatterns["dataset"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-	}
-	if key == "block_name" {
-		if p, ok := LexiconPatterns["block_name"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-	}
-	if key == "create_by" || key == "last_modified_by" {
-		if p, ok := LexiconPatterns["user"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-	}
-	if key == "logical_file_name" {
-		if p, ok := LexiconPatterns["lfn"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-		if strings.Contains(v, "[") {
-			if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
-				v = strings.Replace(v, "'", "\"", -1)
-			}
-			var records []string
-			err := json.Unmarshal([]byte(v), &records)
-			if err != nil {
-				return err
-			}
-			for _, r := range records {
-				err := StrPattern{Patterns: patterns, Len: length}.Check(key, r)
-				if err != nil {
-					return err
+
+	for k, lkey := range mapKeys {
+		if key == k {
+			if utils.InList(k, allowedWildCardKeys) {
+				if v == "" && val == "*" { // when someone passed wildcard
+					return nil
 				}
 			}
+			if p, ok := LexiconPatterns[lkey]; ok {
+				patterns = p.Patterns
+				length = p.Lexicon.Length
+			}
 		}
-	}
-	if key == "primary_ds_name" {
-		if v == "" && val == "*" { // when someone passed wildcard
-			return nil
-		}
-		if p, ok := LexiconPatterns["primary_dataset"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-	}
-	if key == "processed_ds_name" {
-		if v == "" && val == "*" { // when someone passed wildcard
-			return nil
-		}
-		if p, ok := LexiconPatterns["processed_dataset"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-	}
-	if key == "app_name" {
-		if v == "" && val == "*" { // when someone passed wildcard
-			return nil
-		}
-		if p, ok := LexiconPatterns["application"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
-		}
-	}
-	if key == "release_version" {
-		if v == "" && val == "*" { // when someone passed wildcard
-			return nil
-		}
-		if p, ok := LexiconPatterns["cmssw_version"]; ok {
-			patterns = p.Patterns
-			length = p.Lexicon.Length
+		if key == "logical_file_name" {
+			if strings.Contains(v, "[") {
+				if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
+					v = strings.Replace(v, "'", "\"", -1)
+				}
+				var records []string
+				err := json.Unmarshal([]byte(v), &records)
+				if err != nil {
+					return Error(err, UnmarshalErrorCode, "", "dbs.validator.strType")
+				}
+				for _, r := range records {
+					err := StrPattern{Patterns: patterns, Len: length}.Check(key, r)
+					if err != nil {
+						return Error(err, PatternErrorCode, "", "dbs.validator.strType")
+					}
+				}
+			}
 		}
 	}
 	return StrPattern{Patterns: patterns, Len: length}.Check(key, val)
@@ -272,17 +252,17 @@ func Validate(r *http.Request) error {
 			for _, v := range vvv {
 				if utils.InList(k, strParameters) {
 					if err := strType(k, v); err != nil {
-						return err
+						return Error(err, ValidateErrorCode, "not str type", "dbs.Validate")
 					}
 				}
 				if utils.InList(k, intParameters) {
 					if err := intType(k, v); err != nil {
-						return err
+						return Error(err, ValidateErrorCode, "not int type", "dbs.Validate")
 					}
 				}
 				if utils.InList(k, mixParameters) {
 					if err := mixType(k, v); err != nil {
-						return err
+						return Error(err, ValidateErrorCode, "not mix type", "dbs.Validate")
 					}
 				}
 			}
@@ -308,7 +288,8 @@ func CheckPattern(key, value string) error {
 				log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
 			}
 		}
-		return errors.New("invalid pattern for key=" + key)
+		msg := fmt.Sprintf("invalid pattern for key=%s", key)
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.CheckPattern")
 	}
 	return nil
 }
@@ -320,15 +301,15 @@ func ValidatePostPayload(rec Record) error {
 		if key == "data_tier_name" {
 			if vvv, ok := val.(string); ok {
 				if err := CheckPattern("data_tier_name", vvv); err != nil {
-					return err
+					return Error(err, PatternErrorCode, "wrong data_tier_name pattern", "dbs.ValidaatePostPayload")
 				}
 			}
 		} else if key == "creation_date" || key == "last_modification_date" {
 			v, err := utils.CastInt(val)
 			if err != nil {
-				return errors.New(errMsg)
+				return Error(err, PatternErrorCode, errMsg, "dbs.ValidaatePostPayload")
 			} else if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", v)); !matched {
-				return errors.New(errMsg)
+				return Error(InvalidParamErr, PatternErrorCode, errMsg, "dbs.ValidaatePostPayload")
 			}
 		}
 	}
