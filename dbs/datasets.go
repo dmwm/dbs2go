@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -34,7 +33,7 @@ func (a *API) Datasets() error {
 	// whose bind parameters should appear first
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return err
+		return Error(err, ParametersErrorCode, "", "dbs.datasets.Datasets")
 	}
 	if len(runs) > 0 {
 		tmpl["Runs"] = true
@@ -203,7 +202,7 @@ func (a *API) Datasets() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("datasets", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.datasets.Datasets")
 	}
 	cols := []string{"dataset_id", "dataset", "prep_id", "xtcrosssection", "creation_date", "create_by", "last_modification_date", "last_modified_by", "primary_ds_name", "primary_ds_type", "processed_ds_name", "data_tier_name", "dataset_access_type", "acquisition_era_name", "processing_version", "physics_group_name"}
 	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}
@@ -215,7 +214,11 @@ func (a *API) Datasets() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return execute(a.Writer, a.Separator, stm, cols, vals, args...)
+	err = execute(a.Writer, a.Separator, stm, cols, vals, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.datasets.Datasets")
+	}
+	return nil
 }
 
 // Datasets represents Datasets DBS DB table
@@ -251,7 +254,7 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 			r.DATASET_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.datasets.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -259,7 +262,7 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.datasets.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_datasets")
@@ -271,56 +274,70 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to insert Datasets %+v", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.datasets.Insert")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of Datasets
 //gocyclo:ignore
 func (r *Datasets) Validate() error {
 	if err := CheckPattern("dataset", r.DATASET); err != nil {
-		return err
+		return Error(err, PatternErrorCode, "", "dbs.datasets.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return errors.New("invalid pattern for creation date")
+		msg := "invalid pattern for creation date"
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.IS_DATASET_VALID != 0 {
 		if r.IS_DATASET_VALID != 1 {
-			return errors.New("wrong is_dataset_valid value")
+			msg := "wrong is_dataset_valid value"
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 		}
 	}
 	if r.CREATION_DATE == 0 {
-		return errors.New("missing creation_date")
+		msg := "missing creation_date"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.CREATE_BY == "" {
-		return errors.New("missing create_by")
+		msg := "missing create_by"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.LAST_MODIFICATION_DATE == 0 {
-		return errors.New("missing last_modification_date")
+		msg := "missing last_modification_date"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.LAST_MODIFIED_BY == "" {
-		return errors.New("missing last_modified_by")
+		msg := "missing last_modified_by"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.PRIMARY_DS_ID == 0 {
-		return errors.New("incorrect primary_ds_id")
+		msg := "incorrect primary_ds_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.PROCESSED_DS_ID == 0 {
-		return errors.New("incorrect processed_ds_id")
+		msg := "incorrect processed_ds_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.DATA_TIER_ID == 0 {
-		return errors.New("incorrect data_tier_id")
+		msg := "incorrect data_tier_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.DATASET_ACCESS_TYPE_ID == 0 {
-		return errors.New("incorrect dataset_access_type_id")
+		msg := "incorrect dataset_access_type_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.ACQUISITION_ERA_ID == 0 {
-		return errors.New("incorrect acquisition_era_id")
+		msg := "incorrect acquisition_era_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.PROCESSING_ERA_ID == 0 {
-		return errors.New("incorrect processing_era_id")
+		msg := "incorrect processing_era_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	if r.PHYSICS_GROUP_ID == 0 {
-		return errors.New("incorrect physics_group_id")
+		msg := "incorrect physics_group_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.Validate")
 	}
 	return nil
 }
@@ -341,7 +358,7 @@ func (r *Datasets) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.datasets.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -349,7 +366,7 @@ func (r *Datasets) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.datasets.Decode")
 	}
 	return nil
 }
@@ -398,13 +415,13 @@ func (a *API) InsertDatasets() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	rec := DatasetRecord{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	// set dependent's records
 	dsrec := Datasets{DATASET: rec.DATASET, XTCROSSSECTION: rec.XTCROSSSECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY, IS_DATASET_VALID: 1}
@@ -412,8 +429,8 @@ func (a *API) InsertDatasets() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		msg := fmt.Sprintf("unable to get DB transaction")
+		return Error(err, TransactionErrorCode, msg, "dbs.datasets.InsertDatasets")
 	}
 	defer tx.Rollback()
 
@@ -431,12 +448,12 @@ func (a *API) InsertDatasets() error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	//     primType, err := GetID(tx, "PRIMARY_DS_TYPE", "primary_ds_type_id", "primary_ds_type", rec.PRIMARY_DS_TYPE)
 	//     if err != nil {
 	//         log.Println("unable to find primary_ds_type_id for", rec.PRIMARY_DS_TYPE)
-	//         return err
+	//         return Error(err, GetIDError, "", "dbs.datasets.InsertDatasets")
 	//     }
 	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
 	if err != nil {
@@ -446,11 +463,11 @@ func (a *API) InsertDatasets() error {
 		prec := ProcessedDatasets{PROCESSED_DS_NAME: rec.PROCESSED_DS_NAME}
 		err := prec.Insert(tx)
 		if err != nil {
-			return err
+			return Error(err, InsertErrorCode, "", "dbs.datasets.InsertDatasets")
 		}
 		procId, err = GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
 		if err != nil {
-			return err
+			return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 		}
 	}
 	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER_NAME)
@@ -458,35 +475,35 @@ func (a *API) InsertDatasets() error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find data_tier_id for", rec.DATA_TIER_NAME)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	daccId, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA_NAME)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	peraId, err := GetID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP_NAME)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 
 	// assign all Id's in dataset DB record
@@ -500,14 +517,14 @@ func (a *API) InsertDatasets() error {
 	dsrec.PHYSICS_GROUP_ID = pgrpId
 	err = dsrec.Insert(tx)
 	if err != nil {
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("fail to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
@@ -552,13 +569,16 @@ func (a *API) UpdateDatasets() error {
 
 	// validate input parameters
 	if dataset == "" {
-		return errors.New("invalid dataset parameter")
+		msg := "invalid dataset parameter"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
 	if createBy == "" {
-		return errors.New("invalid create_by parameter")
+		msg := "invalid create_by parameter"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
 	if datasetAccessType == "" {
-		return errors.New("invalid datasetAccessType parameter")
+		msg := "invalid datasetAccessType parameter"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
 	if datasetAccessType == "VALID" {
 		isValidDataset = 1
@@ -575,7 +595,7 @@ func (a *API) UpdateDatasets() error {
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return err
+		return Error(err, TransactionErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
 	defer tx.Rollback()
 	accessTypeID, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", datasetAccessType)
@@ -583,21 +603,21 @@ func (a *API) UpdateDatasets() error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find dataset_access_type_id for", datasetAccessType)
 		}
-		return err
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
 	_, err = tx.Exec(stm, createBy, date, accessTypeID, isValidDataset, dataset)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to update %v", err)
 		}
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
