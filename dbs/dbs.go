@@ -90,11 +90,18 @@ type DBRecord interface {
 // of DBRecord validation errors
 func DecodeValidatorError(r, err interface{}) error {
 	if err != nil {
-		msg := fmt.Sprintf("ERROR:\n%+v", r)
+		msg := fmt.Sprintf("DBS structure")
+		d, e := json.MarshalIndent(r, "", "   ")
+		if e == nil {
+			msg = fmt.Sprintf("%s JSON representation\n%v", msg, string(d))
+		} else {
+			msg = fmt.Sprintf("%s\n%+v", msg, r)
+		}
 		for _, err := range err.(validator.ValidationErrors) {
 			msg = fmt.Sprintf("%s\nkey=%v type=%v value=%v, constrain %v %v", msg, err.Field(), err.Type(), err.Value(), err.ActualTag(), err.Param())
 		}
-		return errors.New(msg)
+		log.Println(msg)
+		return Error(ValidationErr, DecodeErrorCode, "", "dbs.DecodeValidatorError")
 	}
 	return nil
 }
@@ -108,8 +115,9 @@ func Date() int64 {
 func insertRecord(rec DBRecord, r io.Reader) error {
 	err := rec.Decode(r)
 	if err != nil {
-		log.Println("fail to decode record", err)
-		return err
+		msg := fmt.Sprintf("fail to decode record")
+		log.Println(msg)
+		return Error(err, DecodeErrorCode, msg, "dbs.insertRecord")
 	}
 	if utils.VERBOSE > 2 {
 		log.Printf("insertRecord %+v", rec)
@@ -118,8 +126,7 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		log.Println("unable to get DB transaction", err)
-		return err
+		return Error(err, TransactionErrorCode, "", "dbs.insertRecord")
 	}
 	defer tx.Rollback()
 
@@ -129,8 +136,9 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	}
 	err = rec.Insert(tx)
 	if err != nil {
-		log.Printf("unable to insert %+v, %v", rec, err)
-		return err
+		msg := fmt.Sprintf("unable to insert %+v", rec)
+		log.Println(msg)
+		return Error(err, InsertErrorCode, "", "dbs.insertRecord")
 	}
 
 	// commit transaction
@@ -139,8 +147,7 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	}
 	err = tx.Commit()
 	if err != nil {
-		log.Println("unable to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.insertRecord")
 	}
 	return nil
 }
@@ -156,7 +163,7 @@ func LoadTemplateSQL(tmpl string, tmplData Record) (string, error) {
 	}
 	stm, err := utils.ParseTmpl(sdir, tmpl, tmplData)
 	if err != nil {
-		return "", err
+		return "", Error(err, LoadErrorCode, "", "dbs.LoadTemplateSQL")
 	}
 	if owner, ok := tmplData["Owner"]; ok && owner == "sqlite" {
 		stm = strings.Replace(stm, "sqlite.", "", -1)
@@ -196,17 +203,20 @@ func LoadSQL(owner string) Record {
 func GetTestData() error {
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
 	}
 	defer tx.Rollback()
 	_, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", "GEN-RAW")
 	if err != nil {
-		log.Println("unable to GetID from DATATIERS table, error", err)
-		return err
+		msg := fmt.Sprintf("unable to GetID from DATATIERS table")
+		log.Println(msg)
+		return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
 	}
 	err = tx.Commit()
-	return err
+	if err != nil {
+		return Error(err, CommitErrorCode, "", "dbs.GetTestData")
+	}
+	return nil
 }
 
 // helper function to get SQL statement from DBSQL dict for a given key
@@ -253,7 +263,7 @@ func getSingleValue(params Record, key string) (string, error) {
 		return values[0], nil
 	}
 	msg := fmt.Sprintf("no list is allowed for provided key: %s", key)
-	return "", errors.New(msg)
+	return "", Error(InvalidParamErr, ParseErrorCode, msg, "dbs.getSingleValue")
 }
 
 // WhereClause function construct proper SQL statement from given statement and list of conditions
@@ -337,14 +347,14 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 	// execute transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		return Error(err, TransactionErrorCode, "", "dbs.executeAll")
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
-		return errors.New(msg)
+		msg := fmt.Sprintf("unable to query statement: %v", stm)
+		log.Println(msg)
+		return Error(err, QueryErrorCode, "", "dbs.executeAll")
 	}
 	defer rows.Close()
 
@@ -365,8 +375,7 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 		}
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
-			msg := fmt.Sprintf("unable to scan DB results %s", err)
-			return errors.New(msg)
+			return Error(err, RowsScanErrorCode, "", "dbs.executeAll")
 		}
 		if rowCount != 0 && w != nil {
 			// add separator line to our output
@@ -414,14 +423,13 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 			}
 			err = enc.Encode(rec)
 			if err != nil {
-				return err
+				return Error(err, EncodeErrorCode, "", "dbs.executeAll")
 			}
 		}
 		rowCount += 1
 	}
 	if err = rows.Err(); err != nil {
-		msg := fmt.Sprintf("rows error %v", err)
-		return errors.New(msg)
+		return Error(err, RowsScanErrorCode, "", "dbs.executeAll")
 	}
 	// make sure we write proper response if no result written
 	if sep != "" && !writtenResults {
@@ -449,14 +457,14 @@ func execute(w io.Writer, sep, stm string, cols []string, vals []interface{}, ar
 	// execute transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to obtain transaction %v", err)
-		return errors.New(msg)
+		return Error(err, TransactionErrorCode, "", "dbs.execute")
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		msg := fmt.Sprintf("DB.Query, query='%s' args='%v' error=%v", stm, args, err)
-		return errors.New(msg)
+		msg := fmt.Sprintf("DB.Query, query='%s' args='%v'", stm, args)
+		log.Println(msg)
+		return Error(err, QueryErrorCode, "", "dbs.execute")
 	}
 	defer rows.Close()
 
@@ -466,8 +474,9 @@ func execute(w io.Writer, sep, stm string, cols []string, vals []interface{}, ar
 	for rows.Next() {
 		err := rows.Scan(vals...)
 		if err != nil {
-			msg := fmt.Sprintf("rows.Scan, vals='%v', error=%v", vals, err)
-			return errors.New(msg)
+			msg := fmt.Sprintf("rows.Scan, vals='%v'", vals)
+			log.Println(msg)
+			return Error(err, RowsScanErrorCode, "", "dbs.execute")
 		}
 		if rowCount != 0 && w != nil {
 			// add separator line to our output
@@ -511,13 +520,13 @@ func execute(w io.Writer, sep, stm string, cols []string, vals []interface{}, ar
 			}
 			err = enc.Encode(rec)
 			if err != nil {
-				return err
+				return Error(err, EncodeErrorCode, "", "dbs.execute")
 			}
 		}
 		rowCount += 1
 	}
 	if err = rows.Err(); err != nil {
-		return err
+		return Error(err, RowsScanErrorCode, "", "dbs.execute")
 	}
 	// make sure we write proper response if no result written
 	if sep != "" && !writtenResults {
@@ -535,8 +544,9 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 	for _, s := range sessions {
 		_, err := tx.Exec(s)
 		if err != nil {
-			log.Printf("DB error\n### %s\n%v", s, err)
-			return err
+			msg := fmt.Sprintf("DB session statement")
+			log.Println(msg, "\n###", s)
+			return Error(err, SessionErrorCode, "", "dbs.executeSession")
 		}
 	}
 	return nil
@@ -559,8 +569,9 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 		if utils.VERBOSE > 1 {
 			log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
 		}
+		return int64(tid), Error(err, QueryErrorCode, "", "dbs.GetID")
 	}
-	return int64(tid), err
+	return int64(tid), nil
 }
 
 // GetRecID function fetches table primary id for a given value and insert it if necessary
@@ -572,14 +583,14 @@ func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface
 		}
 		err = rec.Insert(tx)
 		if err != nil {
-			return 0, err
+			return 0, Error(err, InsertErrorCode, "", "dbs.GetRecID")
 		}
 		rid, err = GetID(tx, table, id, attr, val...)
 		if err != nil {
-			return 0, err
+			return 0, Error(err, InsertErrorCode, "", "dbs.GetRecID")
 		}
 	}
-	return rid, err
+	return rid, nil
 }
 
 // IfExistMulti checks if given rid exists in given table for provided value conditions
@@ -651,17 +662,17 @@ func ParseRuns(runs []string) ([]string, error) {
 			arr := strings.Split(v, "-")
 			if len(arr) != 2 {
 				msg := fmt.Sprintf("fail to parse run-range '%s'", v)
-				return out, errors.New(msg)
+				return out, Error(InvalidParamErr, ParseErrorCode, msg, "dbs.ParseRuns")
 			}
 			minValR := strings.Trim(arr[0], " ")
 			minR, err := strconv.Atoi(minValR)
 			if err != nil {
-				return out, err
+				return out, Error(err, ParseErrorCode, "fail to convert min run value", "dbs.ParseRuns")
 			}
 			maxValR := strings.Trim(arr[1], " ")
 			maxR, err := strconv.Atoi(maxValR)
 			if err != nil {
-				return out, err
+				return out, Error(err, ParseErrorCode, "fail to convert max run value", "dbs.ParseRuns")
 			}
 			for r := minR; r <= maxR; r++ {
 				out = append(out, fmt.Sprintf("%d", r))
@@ -676,7 +687,7 @@ func ParseRuns(runs []string) ([]string, error) {
 		} else {
 			msg := fmt.Sprintf("invalid run input parameter %s", v)
 			err := errors.New(msg)
-			return out, err
+			return out, Error(err, ParseErrorCode, "fail to parse run input", "dbs.ParseRuns")
 		}
 	}
 	return out, nil
@@ -842,8 +853,9 @@ func IncrementSequences(tx *sql.Tx, seq string, n int) ([]int64, error) {
 		stm := fmt.Sprintf("select %s.%s.nextval as val from dual", DBOWNER, seq)
 		err := tx.QueryRow(stm).Scan(&pid)
 		if err != nil {
-			msg := fmt.Sprintf("fail to increment sequence, query='%s' error=%v", stm, err)
-			return out, errors.New(msg)
+			msg := fmt.Sprintf("fail to increment sequence, query='%s'", stm)
+			log.Println(msg)
+			return out, Error(err, QueryErrorCode, "", "dbs.IncrementSequences")
 		}
 		out = append(out, int64(pid))
 	}
@@ -854,9 +866,9 @@ func IncrementSequences(tx *sql.Tx, seq string, n int) ([]int64, error) {
 func IncrementSequence(tx *sql.Tx, seq string) (int64, error) {
 	ids, err := IncrementSequences(tx, seq, 1)
 	if len(ids) == 1 && err == nil {
-		return ids[0], err
+		return ids[0], nil
 	}
-	return 0, err
+	return 0, Error(err, LastInsertErrorCode, "", "dbs.IncrementSequence")
 }
 
 // LastInsertID returns last insert id of given table and idname parameter
@@ -871,8 +883,9 @@ func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 	}
 	err := tx.QueryRow(stm).Scan(&pid)
 	if err != nil {
-		msg := fmt.Sprintf("tx.Exec, query='%s' error=%v", stm, err)
-		return 0, errors.New(msg)
+		msg := fmt.Sprintf("fail to process query='%s'", stm)
+		log.Println(msg)
+		return 0, Error(err, QueryErrorCode, "", "dbs.LastInsertID")
 	}
 	return int64(pid.Float64), nil
 }
@@ -889,7 +902,7 @@ func RunsConditions(runs []string, table string) (string, []string, []interface{
 			pruns, e := ParseRuns([]string{rrr})
 			if e != nil {
 				msg := "unable to parse runs input"
-				return token, conds, args, errors.New(msg)
+				return token, conds, args, Error(e, ParseErrorCode, msg, "dbs.RunsConditions")
 			}
 			for _, v := range pruns {
 				runList = append(runList, v)
