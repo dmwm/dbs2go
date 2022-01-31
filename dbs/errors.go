@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+// GenericErr represents generic dbs error
+var GenericErr = errors.New("dbs error")
+
 // DatabaseErr represents generic database error
 var DatabaseErr = errors.New("database error")
 
