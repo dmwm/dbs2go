@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -24,7 +23,11 @@ func (a *API) PrimaryDatasets() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.primarydatasets.PrimaryDataset")
+	}
+	return nil
 }
 
 // PrimaryDatasets represents Primary Datasets DBS DB table
@@ -49,7 +52,7 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 			r.PRIMARY_DS_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.primarydatasets.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -57,7 +60,7 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.primarydatasets.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_primary_datasets")
@@ -69,8 +72,9 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unablt to insert PrimaryDatasets", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.primarydatasets.Insert")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of PrimaryDatasets
@@ -79,7 +83,8 @@ func (r *PrimaryDatasets) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return errors.New("invalid pattern for creation date")
+		msg := "invalid pattern for creation date"
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.primarydatasets.Validate")
 	}
 	return nil
 }
@@ -97,7 +102,7 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.primarydatasets.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -105,7 +110,7 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.primarydatasets.Decode")
 	}
 	return nil
 }
@@ -131,13 +136,13 @@ func (a *API) InsertPrimaryDatasets() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	rec := PrimaryDatasetRecord{CREATE_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	pdst := rec.PRIMARY_DS_TYPE
 	pdsname := rec.PRIMARY_DS_NAME
@@ -151,8 +156,7 @@ func (a *API) InsertPrimaryDatasets() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		return Error(err, TransactionErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	defer tx.Rollback()
 
@@ -173,7 +177,7 @@ func (a *API) InsertPrimaryDatasets() error {
 		// insert PrimaryDSType record
 		err = trec.Insert(tx)
 		if err != nil {
-			return err
+			return Error(err, InsertErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
 		}
 		pdstID = trec.PRIMARY_DS_TYPE_ID
 	}
@@ -182,14 +186,14 @@ func (a *API) InsertPrimaryDatasets() error {
 	prec.PRIMARY_DS_TYPE_ID = pdstID
 	err = prec.Insert(tx)
 	if err != nil {
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("fail to insert primarydatasets", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
