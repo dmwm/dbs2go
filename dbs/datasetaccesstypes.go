@@ -21,7 +21,11 @@ func (a *API) DatasetAccessTypes() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.datasetaccesstypes.DatasetAccessTypes")
+	}
+	return nil
 }
 
 // DatasetAccessTypes represents Dataset Access Types DBS DB table
@@ -48,7 +52,7 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 			r.DATASET_ACCESS_TYPE_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.datasetaccesstypes.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -56,7 +60,7 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.datasetaccesstypes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_access_types")
@@ -67,7 +71,10 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("unable to insert DatasetAccessTypes %+v", err)
 	}
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.datasetaccesstypes.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of DatasetAccessTypes
@@ -88,7 +95,7 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.datasetaccesstypes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -96,7 +103,7 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.datasetaccesstypes.Insert")
 	}
 	return nil
 }
@@ -105,7 +112,7 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 func (a *API) InsertDatasetAccessTypes() error {
 	err := insertRecord(&DatasetAccessTypes{}, a.Reader)
 	if err != nil {
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.datasetaccesstypes.InsertDatasetAccessTypes")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
