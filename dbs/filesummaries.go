@@ -24,7 +24,7 @@ func (a *API) FileSummaries() error {
 	}
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return err
+		return Error(err, ParseErrorCode, "", "dbs.filesummaries.FileSummaries")
 	}
 	if len(runs) > 0 {
 		token, runsCond, runsBinds := runsClause("fl", runs)
@@ -43,14 +43,14 @@ func (a *API) FileSummaries() error {
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4block_run", tmpl)
 			if e != nil {
-				return e
+				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4block_run")
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4block_norun", tmpl)
 			if e != nil {
-				return e
+				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4block_norun")
@@ -64,14 +64,14 @@ func (a *API) FileSummaries() error {
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4dataset_run", tmpl)
 			if e != nil {
-				return e
+				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4dataset_run")
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4dataset_norun", tmpl)
 			if e != nil {
-				return e
+				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 			//             stm += getSQL("filesummaries4dataset_norun")
@@ -83,7 +83,11 @@ func (a *API) FileSummaries() error {
 	//     stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.filesummaries.FileSummaries")
+	}
+	return nil
 }
 
 // InsertFileSummaries DBS API
