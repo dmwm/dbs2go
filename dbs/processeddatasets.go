@@ -17,7 +17,11 @@ func (a *API) ProcessedDatasets() error {
 	stm := getSQL("processed_datasets")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.processeddatasets.ProcessedDatasets")
+	}
+	return nil
 }
 
 // ProcessedDatasets represents Processed Datasets DBS DB table
@@ -39,7 +43,7 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 			r.PROCESSED_DS_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.processeddatasets.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -47,7 +51,7 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.processeddatasets.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_processed_datasets")
@@ -55,7 +59,10 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 		log.Printf("Insert ProcessedDatasets\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.PROCESSED_DS_ID, r.PROCESSED_DS_NAME)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.processeddatasets.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of ProcessedDatasets
@@ -64,7 +71,7 @@ func (r *ProcessedDatasets) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if err := CheckPattern("processed_ds_name", r.PROCESSED_DS_NAME); err != nil {
-		return err
+		return Error(err, PatternErrorCode, "", "dbs.processeddatasets.Validate")
 	}
 	return nil
 }
@@ -79,7 +86,7 @@ func (r *ProcessedDatasets) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.processeddatasets.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -87,12 +94,16 @@ func (r *ProcessedDatasets) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.processeddatasets.Decode")
 	}
 	return nil
 }
 
 // InsertProcessedDatasets DBS API
 func (a *API) InsertProcessedDatasets() error {
-	return insertRecord(&ProcessedDatasets{}, a.Reader)
+	err := insertRecord(&ProcessedDatasets{}, a.Reader)
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.processeddatasets.InsertProcessedDatasets")
+	}
+	return nil
 }
