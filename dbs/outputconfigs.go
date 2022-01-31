@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -24,7 +23,7 @@ func (a *API) OutputConfigs() error {
 	blockID := getValues(a.Params, "block_id")
 	if len(blockID) > 1 {
 		msg := "The outputconfigs API does not support list of block_id"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.outputconfigs.OutputConfigs")
 	} else if len(blockID) == 1 {
 		_, bid = OperatorValue(blockID[0])
 	}
@@ -50,12 +49,16 @@ func (a *API) OutputConfigs() error {
 	}
 	stm, err := LoadTemplateSQL("outputconfigs", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.outputconfigs.OutputConfigs")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.outputconfigs.OutputConfigs")
+	}
+	return nil
 }
 
 // OutputConfigs represents Output Configs DBS DB table
@@ -84,7 +87,7 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 			r.OUTPUT_MOD_CONFIG_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.outputconfigs.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -92,7 +95,7 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.outputconfigs.Insert")
 	}
 
 	// check if our data already exist in DB
@@ -117,8 +120,9 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert into OutputConfigs, error", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.outputconfigs.Insert")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of OutputConfigs
@@ -127,7 +131,8 @@ func (r *OutputConfigs) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return errors.New("invalid pattern for creation date")
+		msg := "invalid pattern for creation date"
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.outputconfigs.Validate")
 	}
 	return nil
 }
@@ -145,7 +150,7 @@ func (r *OutputConfigs) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.outputconfigs.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -153,7 +158,7 @@ func (r *OutputConfigs) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.outputconfigs.Decode")
 	}
 	return nil
 }
@@ -192,13 +197,13 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 	}
 	rec := OutputConfigRecord{CREATE_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 	}
 
 	// check if our data already exist in DB
@@ -233,7 +238,7 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 		}
 		err = arec.Insert(tx)
 		if err != nil {
-			return err
+			return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 		}
 	}
 	psetID, err = GetRecID(tx, &prec, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH)
@@ -243,7 +248,7 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 		}
 		err = prec.Insert(tx)
 		if err != nil {
-			return err
+			return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 		}
 	}
 	relID, err = GetRecID(tx, &rrec, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION)
@@ -253,7 +258,7 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 		}
 		err = rrec.Insert(tx)
 		if err != nil {
-			return err
+			return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 		}
 	}
 
@@ -266,8 +271,9 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert OutputConfigs record, error", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 	}
-	return err
+	return nil
 }
 
 // InsertOutputConfigs DBS API
@@ -281,8 +287,7 @@ func (a *API) InsertOutputConfigs() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		return Error(err, TransactionErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 	}
 	defer tx.Rollback()
 
@@ -291,14 +296,14 @@ func (a *API) InsertOutputConfigs() error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert output configs", err)
 		}
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
