@@ -3,8 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"log"
 	"strings"
@@ -464,7 +462,7 @@ func (a *API) BlockDump() error {
 
 	blk, err := getSingleValue(a.Params, "block_name")
 	if err != nil {
-		return err
+		return Error(err, ParametersErrorCode, "", "dbs.blockdump.BlockDump")
 	}
 
 	// fill out BulkBlock record via async calls
@@ -525,8 +523,9 @@ func (a *API) BlockDump() error {
 	data, err := json.Marshal(rec)
 	if err == nil {
 		a.Writer.Write(data)
+		return nil
 	}
-	return err
+	return Error(err, MarshalErrorCode, "", "dbs.blockdump.BlockDump")
 }
 
 // InsertBlockDump insert block dump record into DBS
@@ -534,8 +533,8 @@ func (r *BlockDumpRecord) InsertBlockDump() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction %v", err)
-		return errors.New(msg)
+		msg := "unable to get DB transaction"
+		return Error(err, TransactionErrorCode, msg, "dbs.blockdump.InsertBlockDump")
 	}
 	defer tx.Rollback()
 
@@ -549,7 +548,7 @@ func (r *BlockDumpRecord) InsertBlockDump() error {
 			r.BLOCK_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.blockdump.InsertBlockDump")
 		}
 	}
 	// set defaults and validate the record
@@ -557,7 +556,7 @@ func (r *BlockDumpRecord) InsertBlockDump() error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.blockdump.InsertBlockDump")
 	}
 	// logic of insertion
 	// - insert dataset_conf_list
@@ -572,9 +571,9 @@ func (r *BlockDumpRecord) InsertBlockDump() error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("fail to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.blockdump.InsertBlockDump")
 	}
-	return err
+	return nil
 }
 
 // Validate implementation of Blocks
@@ -583,10 +582,11 @@ func (r *BlockDumpRecord) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if err := CheckPattern("block", r.BLOCK_NAME); err != nil {
-		return err
+		return Error(err, PatternErrorCode, "", "dbs.blockdump.Validate")
 	}
 	if strings.Contains(r.BLOCK_NAME, "*") || strings.Contains(r.BLOCK_NAME, "%") {
-		return errors.New("block name contains pattern")
+		msg := "block name contains pattern"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockdump.Validate")
 	}
 	return nil
 }
@@ -601,7 +601,7 @@ func (r *BlockDumpRecord) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.blockdump.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -609,7 +609,7 @@ func (r *BlockDumpRecord) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.blockdump.Decode")
 	}
 	return nil
 }
