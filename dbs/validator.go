@@ -134,7 +134,9 @@ func (o StrPattern) Check(key string, val interface{}) error {
 	case string:
 		v = vvv
 	default:
-		msg := fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val)
+		msg := fmt.Sprintf(
+			"invalid type of input parameter '%s' for value '%+v' type '%T'",
+			key, val, val)
 		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
 	}
 	if len(o.Patterns) == 0 {
@@ -169,7 +171,9 @@ func strType(key string, val interface{}) error {
 	case string:
 		v = vvv
 	default:
-		msg := fmt.Sprintf("invalid type of input parameter '%s' for value '%+v' type '%T'", key, val, val)
+		msg := fmt.Sprintf(
+			"invalid type of input parameter '%s' for value '%+v' type '%T'",
+			key, val, val)
 		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.strType")
 	}
 	mapKeys := make(map[string]string)

@@ -538,7 +538,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	if err != nil {
 		msg = fmt.Sprintf("%s, unable to get DB connection", mstr)
 		log.Println(msg)
-		return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, TransactionErrorCode, "", "dbs.migrate.startMigrationRequest")
+		return []MigrationReport{migrationReport(req, msg, status, err)},
+			Error(err, TransactionErrorCode, "", "dbs.migrate.startMigrationRequest")
 	}
 	defer tx.Rollback()
 
@@ -567,7 +568,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 		if err != nil {
 			msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
 			log.Println(msg)
-			return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
+			return []MigrationReport{migrationReport(req, msg, status, err)},
+				Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
 
 		// get inserted migration ID
@@ -577,7 +579,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 			if utils.VERBOSE > 1 {
 				log.Println(msg)
 			}
-			return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, GetIDErrorCode, "", "dbs.migrate.SubmitMigration")
+			return []MigrationReport{migrationReport(req, msg, status, err)},
+				Error(err, GetIDErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
 
 		// set migration record
@@ -600,7 +603,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 			if utils.VERBOSE > 1 {
 				log.Println(msg)
 			}
-			return []MigrationReport{migrationReport(rec, msg, status, err)}, Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
+			return []MigrationReport{migrationReport(rec, msg, status, err)},
+				Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
 		reports = append(reports, migrationReport(rec, msg, status, nil))
 		ids = append(ids, rid)
@@ -611,7 +615,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	if err != nil {
 		msg = fmt.Sprintf("%s unable to commit transaction error %v", mstr, err)
 		log.Println(msg)
-		return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, CommitErrorCode, "", "dbs.migrate.SubmitMigration")
+		return []MigrationReport{migrationReport(req, msg, status, err)},
+			Error(err, CommitErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
 
 	if utils.VERBOSE > 0 {
@@ -845,7 +850,9 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 		if err == nil {
 			a.Writer.Write(data)
 		} else {
-			data := fmt.Sprintf("fail to marshal migration record %+v, status %v error %v", mrec, status, err)
+			data := fmt.Sprintf(
+				"fail to marshal migration record %+v, status %v error %v",
+				mrec, status, err)
 			a.Writer.Write([]byte(data))
 		}
 	}
@@ -1062,10 +1069,9 @@ func (a *API) RemoveMigration() error {
 		}
 		return nil
 	}
-	msg := fmt.Sprintf("Invalid request, requestID=%v with create_by=%s is not found", rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
-	//     msg := "Invalid request. Successfully processed or processing requests cannot be removed"
-	//     msg += ", or the requested migration did not exist"
-	//     msg += ", or the requestor for removing and creating has to be the same user."
+	msg := fmt.Sprintf(
+		"Invalid request, requestID=%v with create_by=%s is not found",
+		rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
 	return Error(InvalidRequestErr, InvalidRequestErrorCode, msg, "dbs.migrate.RemoveMigration")
 }
 

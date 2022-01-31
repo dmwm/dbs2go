@@ -174,7 +174,9 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	}
 
 	// insert relationship between dataset and parent dataset
-	datasetParents := DatasetParents{THIS_DATASET_ID: thisDatasetID, PARENT_DATASET_ID: parentDatasetID}
+	datasetParents := DatasetParents{
+		THIS_DATASET_ID:   thisDatasetID,
+		PARENT_DATASET_ID: parentDatasetID}
 	err = datasetParents.Insert(tx)
 	if err != nil {
 		if utils.VERBOSE > 1 {
@@ -286,7 +288,11 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	if len(rec.ChildParentIDList) == 0 {
 		msg := "InsertFileParentsBlock API requires child_parent_id_list"
 		log.Println(msg)
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparents.InsertFileParentsBlockTxt")
+		return Error(
+			InvalidParamErr,
+			ParametersErrorCode,
+			msg,
+			"dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 
 	// obtain file parent ids for a given block name

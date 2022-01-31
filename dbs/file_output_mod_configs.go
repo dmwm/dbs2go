@@ -123,13 +123,21 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
+		return Error(
+			err,
+			ReaderErrorCode,
+			"",
+			"dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 	var rec FileOutputModConfigRecord
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
+		return Error(
+			err,
+			UnmarshalErrorCode,
+			"",
+			"dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 
 	// get file id for given lfn
@@ -138,7 +146,11 @@ func (a *API) InsertFileOutputModConfigs(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find file_id for", rec.Lfn)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.file_output_mod_configs.InsertFileOutputModConfigs")
+		return Error(
+			err,
+			GetIDErrorCode,
+			"",
+			"dbs.file_output_mod_configs.InsertFileOutputModConfigs")
 	}
 	// find output module config id
 	var args []interface{}

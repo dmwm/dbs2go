@@ -65,7 +65,10 @@ func (a *API) Blocks() error {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
 		if minval != "0" && maxval != "0" {
-			cond := fmt.Sprintf(" B.CREATION_DATE BETWEEN %s and %s", placeholder("min_cdate"), placeholder("max_cdate"))
+			cond := fmt.Sprintf(
+				" B.CREATION_DATE BETWEEN %s and %s",
+				placeholder("min_cdate"),
+				placeholder("max_cdate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 			args = append(args, maxval)
@@ -88,7 +91,9 @@ func (a *API) Blocks() error {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
 		if minval != "0" && maxval != "0" {
-			cond := fmt.Sprintf(" B.CREATION_DATE BETWEEN %s and %s", placeholder("min_ldate"), placeholder("max_ldate"))
+			cond := fmt.Sprintf(
+				" B.CREATION_DATE BETWEEN %s and %s",
+				placeholder("min_ldate"), placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 			args = append(args, maxval)
@@ -190,10 +195,18 @@ func (r *Blocks) Validate() error {
 		return Error(err, PatternErrorCode, "", "dbs.blocks.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return Error(InvalidParamErr, PatternErrorCode, "invalid pattern for creation date", "dbs.blocks.Validate")
+		return Error(
+			InvalidParamErr,
+			PatternErrorCode,
+			"invalid pattern for creation date",
+			"dbs.blocks.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.LAST_MODIFICATION_DATE)); !matched {
-		return Error(InvalidParamErr, PatternErrorCode, "invalid pattern for last modification date", "dbs.blocks.Validate")
+		return Error(
+			InvalidParamErr,
+			PatternErrorCode,
+			"invalid pattern for last modification date",
+			"dbs.blocks.Validate")
 	}
 	return nil
 }

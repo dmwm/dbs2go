@@ -63,7 +63,12 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 	}
 
 	// check if our data already exist in DB
-	if IfExist(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", r.PROCESSING_VERSION) {
+	if IfExist(
+		tx,
+		"PROCESSING_ERAS",
+		"processing_era_id",
+		"processing_version",
+		r.PROCESSING_VERSION) {
 		return nil
 	}
 

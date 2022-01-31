@@ -125,7 +125,12 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load migration_requests template", err)
 		}
-		return records, Error(err, LoadErrorCode, "", "dbs.migration_requests.MigrationRequests")
+		return records,
+			Error(
+				err,
+				LoadErrorCode,
+				"",
+				"dbs.migration_requests.MigrationRequests")
 	}
 
 	if mid > 0 {
@@ -137,13 +142,23 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 
 	if MigrationDB == nil {
 		msg := "Migration DB access is closed"
-		return records, Error(DatabaseErr, DatabaseErrorCode, msg, "dbs.migration_requests.MigrationRequests")
+		return records,
+			Error(
+				DatabaseErr,
+				DatabaseErrorCode,
+				msg,
+				"dbs.migration_requests.MigrationRequests")
 	}
 
 	// execute sql statement
 	tx, err := MigrationDB.Begin()
 	if err != nil {
-		return records, Error(err, TransactionErrorCode, "", "dbs.migration_requests.MigrationRequests")
+		return records,
+			Error(
+				err,
+				TransactionErrorCode,
+				"",
+				"dbs.migration_requests.MigrationRequests")
 	}
 	defer tx.Rollback()
 	stm = CleanStatement(stm)

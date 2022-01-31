@@ -59,7 +59,8 @@ func (a *API) Datasets() error {
 	datasets := getValues(a.Params, "dataset")
 	if len(datasets) > 1 {
 		cond := fmt.Sprintf("D.DATASET in %s", TokenCondition())
-		token, binds := TokenGenerator(datasets, 100, "dataset_token") // 100 is max for # of allowed datasets
+		// 100 is max for # of allowed datasets
+		token, binds := TokenGenerator(datasets, 100, "dataset_token")
 		tmpl["TokenGenerator"] = token
 		conds = append(conds, cond)
 		for _, v := range binds {
@@ -132,7 +133,10 @@ func (a *API) Datasets() error {
 		_, minval := OperatorValue(minDate[0])
 		_, maxval := OperatorValue(maxDate[0])
 		if minval != "0" && maxval != "0" {
-			cond := fmt.Sprintf(" D.CREATION_DATE BETWEEN %s and %s", placeholder("min_cdate"), placeholder("max_cdate"))
+			cond := fmt.Sprintf(
+				" D.CREATION_DATE BETWEEN %s and %s",
+				placeholder("min_cdate"),
+				placeholder("max_cdate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 			args = append(args, maxval)
@@ -158,7 +162,10 @@ func (a *API) Datasets() error {
 			_, maxval = OperatorValue(maxDate[0])
 		}
 		if minval != "" && maxval != "" {
-			cond := fmt.Sprintf(" D.CREATION_DATE BETWEEN %s and %s", placeholder("min_ldate"), placeholder("max_ldate"))
+			cond := fmt.Sprintf(
+				" D.CREATION_DATE BETWEEN %s and %s",
+				placeholder("min_ldate"),
+				placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 			args = append(args, maxval)
@@ -488,7 +495,12 @@ func (a *API) InsertDatasets() error {
 	}
 
 	// get all necessary IDs from different tables
-	primId, err := GetID(tx, "PRIMARY_DATASETS", "primary_ds_id", "primary_ds_name", rec.PRIMARY_DS_NAME)
+	primId, err := GetID(
+		tx,
+		"PRIMARY_DATASETS",
+		"primary_ds_id",
+		"primary_ds_name",
+		rec.PRIMARY_DS_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find primary_ds_id for", rec.PRIMARY_DS_NAME)
@@ -500,7 +512,12 @@ func (a *API) InsertDatasets() error {
 	//         log.Println("unable to find primary_ds_type_id for", rec.PRIMARY_DS_TYPE)
 	//         return Error(err, GetIDError, "", "dbs.datasets.InsertDatasets")
 	//     }
-	procId, err := GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
+	procId, err := GetID(
+		tx,
+		"PROCESSED_DATASETS",
+		"processed_ds_id",
+		"processed_ds_name",
+		rec.PROCESSED_DS_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find processed_ds_id for", rec.PROCESSED_DS_NAME)
@@ -510,40 +527,69 @@ func (a *API) InsertDatasets() error {
 		if err != nil {
 			return Error(err, InsertErrorCode, "", "dbs.datasets.InsertDatasets")
 		}
-		procId, err = GetID(tx, "PROCESSED_DATASETS", "processed_ds_id", "processed_ds_name", rec.PROCESSED_DS_NAME)
+		procId, err = GetID(tx,
+			"PROCESSED_DATASETS",
+			"processed_ds_id",
+			"processed_ds_name",
+			rec.PROCESSED_DS_NAME)
 		if err != nil {
 			return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 		}
 	}
-	tierId, err := GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", rec.DATA_TIER_NAME)
+	tierId, err := GetID(
+		tx,
+		"DATA_TIERS",
+		"data_tier_id",
+		"data_tier_name",
+		rec.DATA_TIER_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find data_tier_id for", rec.DATA_TIER_NAME)
 		}
 		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
-	daccId, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", rec.DATASET_ACCESS_TYPE)
+	daccId, err := GetID(
+		tx,
+		"DATASET_ACCESS_TYPES",
+		"dataset_access_type_id",
+		"dataset_access_type",
+		rec.DATASET_ACCESS_TYPE)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find dataset_access_type_id for", rec.DATASET_ACCESS_TYPE)
 		}
 		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
-	aeraId, err := GetID(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", rec.ACQUISITION_ERA_NAME)
+	aeraId, err := GetID(
+		tx,
+		"ACQUISITION_ERAS",
+		"acquisition_era_id",
+		"acquisition_era_name",
+		rec.ACQUISITION_ERA_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find acquisition_era_id for", rec.ACQUISITION_ERA_NAME)
 		}
 		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
-	peraId, err := GetID(tx, "PROCESSING_ERAS", "processing_era_id", "processing_version", rec.PROCESSING_VERSION)
+	peraId, err := GetID(
+		tx,
+		"PROCESSING_ERAS",
+		"processing_era_id",
+		"processing_version",
+		rec.PROCESSING_VERSION)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find processing_era_id for", rec.PROCESSING_VERSION)
 		}
 		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
-	pgrpId, err := GetID(tx, "PHYSICS_GROUPS", "physics_group_id", "physics_group_name", rec.PHYSICS_GROUP_NAME)
+	pgrpId, err := GetID(
+		tx,
+		"PHYSICS_GROUPS",
+		"physics_group_id",
+		"physics_group_name",
+		rec.PHYSICS_GROUP_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find physics_group_id for", rec.PHYSICS_GROUP_NAME)
@@ -643,7 +689,12 @@ func (a *API) UpdateDatasets() error {
 		return Error(err, TransactionErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
 	defer tx.Rollback()
-	accessTypeID, err := GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", datasetAccessType)
+	accessTypeID, err := GetID(
+		tx,
+		"DATASET_ACCESS_TYPES",
+		"dataset_access_type_id",
+		"dataset_access_type",
+		datasetAccessType)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find dataset_access_type_id for", datasetAccessType)

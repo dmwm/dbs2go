@@ -271,7 +271,9 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 			limit = nrec
 		}
 		if utils.VERBOSE > 0 {
-			log.Printf("process %d goroutines, step %d-%d, elapsed time %v", ngoroutines, k, limit, time.Since(t0))
+			log.Printf(
+				"process %d goroutines, step %d-%d, elapsed time %v",
+				ngoroutines, k, limit, time.Since(t0))
 		}
 		wg.Wait()
 	}
@@ -335,7 +337,9 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	}
 	stm = fmt.Sprintf("%s\nSELECT * FROM dual", stm)
 	if DBOWNER == "sqlite" {
-		stm = fmt.Sprintf("INSERT OR IGNORE\nINTO %s (%s) VALUES %s", table, names, strings.Join(valueStrings, ","))
+		stm = fmt.Sprintf(
+			"INSERT OR IGNORE\nINTO %s (%s) VALUES %s",
+			table, names, strings.Join(valueStrings, ","))
 	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 3 {

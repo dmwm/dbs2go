@@ -40,7 +40,9 @@ type API struct {
 
 // String provides string representation of API struct
 func (a *API) String() string {
-	return fmt.Sprintf("API=%s params=%+v createBy=%s separator='%s'", a.Api, a.Params, a.CreateBy, a.Separator)
+	return fmt.Sprintf(
+		"API=%s params=%+v createBy=%s separator='%s'",
+		a.Api, a.Params, a.CreateBy, a.Separator)
 }
 
 // RecordValidator pointer to validator Validate method
@@ -98,7 +100,9 @@ func DecodeValidatorError(r, err interface{}) error {
 			msg = fmt.Sprintf("%s\n%+v", msg, r)
 		}
 		for _, err := range err.(validator.ValidationErrors) {
-			msg = fmt.Sprintf("%s\nkey=%v type=%v value=%v, constrain %v %v", msg, err.Field(), err.Type(), err.Value(), err.ActualTag(), err.Param())
+			msg = fmt.Sprintf(
+				"%s\nkey=%v type=%v value=%v, constrain %v %v",
+				msg, err.Field(), err.Type(), err.Value(), err.ActualTag(), err.Param())
 		}
 		log.Println(msg)
 		return Error(ValidationErr, DecodeErrorCode, "", "dbs.DecodeValidatorError")
@@ -440,7 +444,12 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 
 // similar to executeAll function but it takes explicit set of columns and values
 //gocyclo:ignore
-func execute(w io.Writer, sep, stm string, cols []string, vals []interface{}, args ...interface{}) error {
+func execute(
+	w io.Writer,
+	sep, stm string,
+	cols []string,
+	vals []interface{}, args ...interface{}) error {
+
 	stm = CleanStatement(stm)
 	if DRYRUN {
 		utils.PrintSQL(stm, args, "")
@@ -785,7 +794,9 @@ func runsClause(table string, runs []string) (string, string, []string) {
 		if strings.Contains(r, "-") { // run-range argument
 			rr := strings.Split(r, "-")
 			if len(runs) == 1 {
-				cond := fmt.Sprintf(" %s.RUN_NUM between %s and %s ", table, placeholder("minrun"), placeholder("maxrun"))
+				cond := fmt.Sprintf(
+					" %s.RUN_NUM between %s and %s ",
+					table, placeholder("minrun"), placeholder("maxrun"))
 				conds = append(conds, cond)
 				args = append(args, rr[0])
 				args = append(args, rr[1])
@@ -819,7 +830,12 @@ func runsClause(table string, runs []string) (string, string, []string) {
 }
 
 // AddParam adds single parameter to SQL statement
-func AddParam(name, sqlName string, params Record, conds []string, args []interface{}) ([]string, []interface{}) {
+func AddParam(
+	name, sqlName string,
+	params Record,
+	conds []string,
+	args []interface{}) ([]string, []interface{}) {
+
 	vals := getValues(params, name)
 	if len(vals) == 1 {
 		op, val := OperatorValue(vals[0])

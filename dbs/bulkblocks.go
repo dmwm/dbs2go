@@ -628,7 +628,9 @@ func (a *API) InsertBulkBlocks() error {
 		if len(rrr.FileLumiList) > FileLumiChunkSize {
 
 			if utils.VERBOSE > 0 {
-				log.Printf("insert FileLumi list via %s method %d records", FileLumiInsertMethod, len(rrr.FileLumiList))
+				log.Printf(
+					"insert FileLumi list via %s method %d records",
+					FileLumiInsertMethod, len(rrr.FileLumiList))
 			}
 
 			var fileLumiList []FileLumis

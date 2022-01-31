@@ -74,7 +74,9 @@ type DBSError struct {
 
 // Error function implements details of DBS error message
 func (e *DBSError) Error() string {
-	return fmt.Sprintf("<DBSError Code:%d Func:%s Msg:%s Error:%v>", e.Code, e.Function, e.Message, e.Reason)
+	return fmt.Sprintf(
+		"<DBSError Code:%d Func:%s Msg:%s Error:%v>",
+		e.Code, e.Function, e.Message, e.Reason)
 }
 
 // helper function to create dbs error

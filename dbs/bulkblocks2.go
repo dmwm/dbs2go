@@ -495,7 +495,9 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if len(rrr.FileLumiList) > FileLumiChunkSize {
 
 			if utils.VERBOSE > 0 {
-				log.Printf("insert FileLumi list via %s method %d records", FileLumiInsertMethod, len(rrr.FileLumiList))
+				log.Printf(
+					"insert FileLumi list via %s method %d records",
+					FileLumiInsertMethod, len(rrr.FileLumiList))
 			}
 
 			var fileLumiList []FileLumis
@@ -511,7 +513,9 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 			err = InsertFileLumisTxViaChunks(tx, tempTable, fileLumiList)
 			if err != nil {
 				if utils.VERBOSE > 1 {
-					log.Printf("unable to insert FileLumis records for %s, fileID %d, error %v", lfn, fileID, err)
+					log.Printf(
+						"unable to insert FileLumis records for %s, fileID %d, error %v",
+						lfn, fileID, err)
 				}
 				return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 			}
@@ -668,7 +672,9 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 		ngoroutines += 1
 	}
 	if utils.VERBOSE > 0 {
-		log.Printf("insertFilesViaChunks processed %d goroutines, elapsed time %v", ngoroutines, time.Since(t0))
+		log.Printf(
+			"insertFilesViaChunks processed %d goroutines, elapsed time %v",
+			ngoroutines, time.Since(t0))
 	}
 	wg.Wait()
 	if trec.NErrors != 0 {
@@ -690,7 +696,12 @@ func getFileIds(fid, idx, limit int64) []int64 {
 }
 
 // helper function to insert files via chunks injection
-func insertFilesChunk(tx *sql.Tx, wg *sync.WaitGroup, records []File, trec *TempFileRecord, ids []int64) {
+func insertFilesChunk(
+	tx *sql.Tx,
+	wg *sync.WaitGroup,
+	records []File,
+	trec *TempFileRecord, ids []int64) {
+
 	defer wg.Done()
 	//     var rwm sync.RWMutex
 	for idx, rrr := range records {

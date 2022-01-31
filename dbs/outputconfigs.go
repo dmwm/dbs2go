@@ -105,7 +105,12 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 	vals = append(vals, r.RELEASE_VERSION_ID)
 	vals = append(vals, r.OUTPUT_MODULE_LABEL)
 	vals = append(vals, r.GLOBAL_TAG)
-	args := []string{"app_exec_id", "parameter_set_hash_id", "release_version_id", "output_module_label", "global_tag"}
+	args := []string{
+		"app_exec_id",
+		"parameter_set_hash_id",
+		"release_version_id",
+		"output_module_label",
+		"global_tag"}
 	if IfExistMulti(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", args, vals...) {
 		return nil
 	}
@@ -217,7 +222,12 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 	vals = append(vals, rec.RELEASE_VERSION)
 	vals = append(vals, rec.OUTPUT_MODULE_LABEL)
 	vals = append(vals, rec.GLOBAL_TAG)
-	args := []string{"app_name", "pset_hash", "release_version", "output_module_label", "global_tag"}
+	args := []string{
+		"app_name",
+		"pset_hash",
+		"release_version",
+		"output_module_label",
+		"global_tag"}
 	if IfExistMulti(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", args, vals...) {
 		return nil
 	}
@@ -240,7 +250,13 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 
 	// get and insert (if necessary) records IDs
 	var appID, psetID, relID int64
-	appID, err = GetRecID(tx, &arec, "APPLICATION_EXECUTABLES", "app_exec_id", "app_name", arec.APP_NAME)
+	appID, err = GetRecID(
+		tx,
+		&arec,
+		"APPLICATION_EXECUTABLES",
+		"app_exec_id",
+		"app_name",
+		arec.APP_NAME)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find app_exec_id", err, "will insert")
@@ -250,7 +266,13 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 			return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 		}
 	}
-	psetID, err = GetRecID(tx, &prec, "PARAMETER_SET_HASHES", "parameter_set_hash_id", "pset_hash", prec.PSET_HASH)
+	psetID, err = GetRecID(
+		tx,
+		&prec,
+		"PARAMETER_SET_HASHES",
+		"parameter_set_hash_id",
+		"pset_hash",
+		prec.PSET_HASH)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find parameter_set_hash_id", err)
@@ -260,7 +282,13 @@ func (a *API) InsertOutputConfigsTx(tx *sql.Tx) error {
 			return Error(err, InsertErrorCode, "", "dbs.outputconfigs.InsertOutputConfigs")
 		}
 	}
-	relID, err = GetRecID(tx, &rrec, "RELEASE_VERSIONS", "release_version_id", "release_version", rrec.RELEASE_VERSION)
+	relID, err = GetRecID(
+		tx,
+		&rrec,
+		"RELEASE_VERSIONS",
+		"release_version_id",
+		"release_version",
+		rrec.RELEASE_VERSION)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to find release_version_id", err)

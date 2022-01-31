@@ -38,7 +38,12 @@ type DatasetAccessTypes struct {
 func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 
 	// check if our data already exist in DB
-	if IfExist(tx, "DATASET_ACCESS_TYPES", "dataset_access_type_id", "dataset_access_type", r.DATASET_ACCESS_TYPE) {
+	if IfExist(
+		tx,
+		"DATASET_ACCESS_TYPES",
+		"dataset_access_type_id",
+		"dataset_access_type",
+		r.DATASET_ACCESS_TYPE) {
 		return nil
 	}
 	var tid int64

@@ -46,7 +46,12 @@ type AcquisitionEras struct {
 func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 
 	// check if our data already exist in DB
-	if IfExist(tx, "ACQUISITION_ERAS", "acquisition_era_id", "acquisition_era_name", r.ACQUISITION_ERA_NAME) {
+	if IfExist(
+		tx,
+		"ACQUISITION_ERAS",
+		"acquisition_era_id",
+		"acquisition_era_name",
+		r.ACQUISITION_ERA_NAME) {
 		return nil
 	}
 
