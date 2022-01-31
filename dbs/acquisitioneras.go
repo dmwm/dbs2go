@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -25,7 +24,11 @@ func (a *API) AcquisitionEras() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.acquisitioners.AcquisitionEras")
+	}
+	return nil
 }
 
 // AcquisitionEras represents Acquisition Eras DBS DB table
@@ -58,15 +61,16 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 			r.ACQUISITION_ERA_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.acquisitioneras.Insert")
 		}
 	}
 	// set defaults and validate the record
 	r.SetDefaults()
 	err = r.Validate()
 	if err != nil {
-		log.Println("unable to validate record", err)
-		return err
+		msg := "unable to validate record"
+		log.Println(msg, err)
+		return Error(err, ValidateErrorCode, "", "dbs.acquisitioneras.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_acquisition_eras")
@@ -77,7 +81,10 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("unable to insert AcquisitionEras +v", stm, err)
 	}
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.acquisitioneras.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of AcquisitionEras
@@ -86,7 +93,8 @@ func (r *AcquisitionEras) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
-		return errors.New("invalid pattern for creation date")
+		msg := "invalid pattern for creation date"
+		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.acquisitioneras.Validate")
 	}
 	return nil
 }
@@ -110,7 +118,7 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.acquisitioneras.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -118,7 +126,7 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.acquisitioneras.Decode")
 	}
 	return nil
 }
@@ -134,7 +142,7 @@ func (a *API) InsertAcquisitionEras() error {
 
 	err := insertRecord(&AcquisitionEras{CREATE_BY: a.CreateBy}, a.Reader)
 	if err != nil {
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.acquisitioneras.InsertAcquisitionEras")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
@@ -160,10 +168,14 @@ func (a *API) UpdateAcquisitionEras() error {
 
 	// validate input params
 	if endDate == 0 {
-		return errors.New("invalid end_date parameter")
+		msg := "invalid end_date parameter"
+		e := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.UpdateAckquisitionEras")
+		return e
 	}
 	if aera == "" {
-		return errors.New("invalid end_date parameter")
+		msg := "invalid ackquisition_era_name parameter"
+		e := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.UpdateAckquisitionEras")
+		return e
 	}
 
 	// get SQL statement from static area
@@ -175,22 +187,25 @@ func (a *API) UpdateAcquisitionEras() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		log.Println("unable to get DB transaction", err)
-		return err
+		e := Error(err, TransactionErrorCode, "", "dbs.UpdateAckquisitionEras")
+		log.Println(e)
+		return e
 	}
 	defer tx.Rollback()
 
 	_, err = tx.Exec(stm, endDate, aera)
 	if err != nil {
-		log.Printf("unable to update %v", err)
-		return err
+		e := Error(err, InsertErrorCode, "", "dbs.UpdateAckquisitionEras")
+		log.Println(e)
+		return e
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		log.Println("unable to commit transaction", err)
-		return err
+		e := Error(err, CommitErrorCode, "", "dbs.UpdateAckquisitionEras")
+		log.Println(e)
+		return e
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
