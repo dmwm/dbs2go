@@ -22,7 +22,11 @@ func (a *API) PhysicsGroups() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.physicsgroups.PhysicsGroups")
+	}
+	return nil
 }
 
 // PhysicsGroups represents Physics Groups DBS DB table
@@ -48,7 +52,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 			r.PHYSICS_GROUP_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.physicsgroups.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -56,7 +60,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.physicsgroups.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_physics_groups")
@@ -64,7 +68,10 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 		log.Printf("Insert PhysicsGroups\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.PHYSICS_GROUP_ID, r.PHYSICS_GROUP_NAME)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.physicsgroups.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of PhysicsGroups
@@ -85,7 +92,7 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.physicsgroups.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -98,7 +105,7 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 		if utils.VERBOSE > 0 {
 			log.Printf("fail to decode data %v, error %v", string(data), err)
 		}
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.physicsgroups.Decode")
 	}
 	return nil
 }
@@ -107,7 +114,7 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 func (a *API) InsertPhysicsGroups() error {
 	err := insertRecord(&PhysicsGroups{}, a.Reader)
 	if err != nil {
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.physicsgroups.InsertPhysicsGroups")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
