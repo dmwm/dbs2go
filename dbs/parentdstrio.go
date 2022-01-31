@@ -8,5 +8,9 @@ func (a *API) ParentDSTrio() error {
 	stm := getSQL("datasetchildren")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.parentdstrio.ParentDSTrio")
+	}
+	return nil
 }
