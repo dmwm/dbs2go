@@ -13,12 +13,6 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-/* NOTES: we should use bulk insert
- * see Server/Python/src/dbs/dao/Oracle/File/Insert2.py
- *     Server/Python/src/dbs/business/DBSBlockInsert.py
- *     Server/Python/src/dbs/dao/Oracle/FileLumi/Insert.py
- */
-
 // FileChunkSize controls size of chunk for []File insertion
 var FileChunkSize int
 

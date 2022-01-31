@@ -11,12 +11,6 @@ import (
 	"github.com/vkuznet/dbs2go/utils"
 )
 
-/* NOTES: we should use bulk insert
- * see Server/Python/src/dbs/dao/Oracle/File/Insert2.py
- *     Server/Python/src/dbs/business/DBSBlockInsert.py
- *     Server/Python/src/dbs/dao/Oracle/FileLumi/Insert.py
- */
-
 // BulkBlocks represents bulk block structure used by `/bulkblocks` DBS API
 type BulkBlocks struct {
 	DatasetConfigList []DatasetConfig    `json:"dataset_conf_list"`
@@ -149,12 +143,6 @@ type DatasetParent struct {
 	ThisDatasetID string `json:"this_dataset_id"`
 	ParentDataset string `json:"parent_dataset"`
 }
-
-/*
- * for Python logic please refer to:
- * /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSBlockInsert.py
- * /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/web/DBSWriterModel.py
- */
 
 // InsertBulkBlocks DBS API. It relies on BulkBlocks record which by itself
 // contains series of other records. The logic of this API is the following:

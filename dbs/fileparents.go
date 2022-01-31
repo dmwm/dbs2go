@@ -263,9 +263,6 @@ type FileParentBlockRecord struct {
 // InsertFileParentsBlockTxt DBS API
 //gocyclo:ignore
 func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert2.py
-
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
@@ -371,9 +368,6 @@ type FileParentRecord struct {
 // InsertFileParentsTxt DBS API is used by bulkblocks API
 //gocyclo:ignore
 func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/dao/Oracle/FileParent/Insert.py
-
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {

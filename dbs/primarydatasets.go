@@ -131,13 +131,6 @@ type PrimaryDatasetRecord struct {
 
 // InsertPrimaryDatasets DBS API
 func (a *API) InsertPrimaryDatasets() error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSPrimaryDataset.py
-	// intput values: primary_ds_name, primary_ds_type, creation_date, create_by
-	// insert primary_ds_type and get primary_ds_type_id
-	// businput["primary_ds_id"] = self.sm.increment(conn, "SEQ_PDS")
-	// insert primary_ds_name, creation_date, create_by, primary_ds_id
-
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {

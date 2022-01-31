@@ -396,28 +396,18 @@ type PyFileRecord struct {
 	Records []FileRecord `json:"files"`
 }
 
-// InsertFiles DBS API
+// InsertFiles DBS API implements the following logic:
+//
+// - extract dataset id for given dataset
+// - extract output mod config for given dataset
+// - get block information for given block
+// - get file type id for given file type
+// - loop over file parents and insert associative information into file tables
+// - insert block parentage info
+// - insert dataset parentage info
+// - update block's info
 //gocyclo:ignore
 func (a *API) InsertFiles() error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSFile.py
-	//
-	// dataset_id = self.datasetid.execute(conn, dataset=f["dataset"])
-	// dsconfigs = [x['output_mod_config_id'] for x in self.dsconfigids.execute(conn, dataset=f["dataset"])]
-	// block_info = self.blocklist.execute(conn, block_name=f["block_name"])
-	// file_type_id = self.ftypeid.execute( conn, f.get("file_type", "EDM"))
-	// self.filein.execute(conn, filein, transaction=tran)
-	// fcdao["output_mod_config_id"] = self.outconfigid.execute(conn, fc["app_name"],
-	// self.flumiin.execute(conn, flumis2insert, transaction=tran)
-	// self.fparentin.execute(conn, fparents2insert, transaction=tran)
-	// self.fconfigin.execute(conn, fconfigs2insert, transaction=tran)
-	// self.blkparentin.execute(conn, bkParentage2insert, transaction=tran)
-	// self.dsparentin.execute(conn, dsParentage2insert, transaction=tran)
-	// blkParams = self.blkstats.execute(conn, block_id, transaction=tran)
-	// self.blkstatsin.execute(conn, blkParams, transaction=tran)
-
-	//     return InsertValues("insert_files", values)
-
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
@@ -453,7 +443,19 @@ func (a *API) InsertFiles() error {
 		rec.IS_FILE_VALID = int64(isFileValid)
 
 		// set dependent's records
-		frec := Files{LOGICAL_FILE_NAME: rec.LOGICAL_FILE_NAME, IS_FILE_VALID: rec.IS_FILE_VALID, CHECK_SUM: rec.CHECK_SUM, FILE_SIZE: rec.FILE_SIZE, EVENT_COUNT: rec.EVENT_COUNT, ADLER32: rec.ADLER32, MD5: rec.MD5, AUTO_CROSS_SECTION: rec.AUTO_CROSS_SECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
+		frec := Files{
+			LOGICAL_FILE_NAME:      rec.LOGICAL_FILE_NAME,
+			IS_FILE_VALID:          rec.IS_FILE_VALID,
+			CHECK_SUM:              rec.CHECK_SUM,
+			FILE_SIZE:              rec.FILE_SIZE,
+			EVENT_COUNT:            rec.EVENT_COUNT,
+			ADLER32:                rec.ADLER32,
+			MD5:                    rec.MD5,
+			AUTO_CROSS_SECTION:     rec.AUTO_CROSS_SECTION,
+			CREATION_DATE:          rec.CREATION_DATE,
+			CREATE_BY:              rec.CREATE_BY,
+			LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
+			LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
 
 		// start transaction
 		tx, err := DB.Begin()

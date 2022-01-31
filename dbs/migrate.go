@@ -32,23 +32,14 @@ import (
 
 /*
 
-DBS Migration APIs, see Python counterpart here:
-Server/Python/src/dbs/web/DBSMigrateModel.py
-Server/Python/src/dbs/business/DBSMigrate.py
-and various bisuness dao, e.g.
-Server/Python/src/dbs/dao/Oracle/MigrationBlock
+DBS Migration APIs:
 
-Yhe DBS migration server is here:
-Server/Python/src/dbs/components/migration/DBSMigrationServer.py
-
-Submit should submit migration request
-(see insertMigrationRequest python API)
-
-Status checks migration request
-(see listMigrationRequests python API)
-
-Remove removes migration request
-(see removeMigrationRequest API)
+- submit should submit migration request
+- status checks migration request
+- remove removes migration request
+- process processes migration requests
+- totat reports number of migration requests
+- cleanup clean migration DB
 
 DBS migration status codes:
         migration_status:

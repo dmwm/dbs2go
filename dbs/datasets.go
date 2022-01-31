@@ -438,28 +438,17 @@ type DatasetRecord struct {
 	LAST_MODIFIED_BY       string  `json:"last_modified_by" validate:"required"`
 }
 
-// InsertDatasets DBS API
+// InsertDatasets DBS API implements the following logic:
+//
+// - take given input and insert
+// - primary dataset info
+// - acquisition era info
+// - physics group info
+// - processing era info
+// - output module config info
+// - insert dataset info
 //gocyclo:ignore
 func (a *API) InsertDatasets() error {
-	// implement the following logic
-	// /Users/vk/CMS/DMWM/GIT/DBS/Server/Python/src/dbs/business/DBSDataset.py
-	// input values: dataset, primary_ds_name(name), processed_ds(name), data_tier(name),
-	// acquisition_era(name), processing_version
-	// optional:
-	// physics_group(name), xtcrosssection, creation_date, create_by, last_modification_date, last_modified_by
-	// dsdaoinput["dataset_id"] = self.sm.increment(conn, "SEQ_DS")
-	// logic:
-	// dsdaoinput["physics_group_id"] = self.phygrpid.execute(conn, businput["physics_group_name"])
-	// dsdaoinput["processing_era_id"] = self.proceraid.execute(conn, businput["processing_version"])
-	// dsdaoinput["acquisition_era_id"] = self.acqeraid.execute(conn, businput["acquisition_era_name"])
-	// self.datasetin.execute(conn, dsdaoinput, tran)
-	// dsoutconfdaoin["output_mod_config_id"] = self.outconfigid.execute ...
-	// self.datasetoutmodconfigin.execute(conn, dsoutconfdaoin, tran
-
-	//     args := make(Record)
-	//     args["Owner"] = DBOWNER
-	//     return InsertTemplateValues("insert_datasets", args, values)
-
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
@@ -473,7 +462,14 @@ func (a *API) InsertDatasets() error {
 		return Error(err, UnmarshalErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
 	// set dependent's records
-	dsrec := Datasets{DATASET: rec.DATASET, XTCROSSSECTION: rec.XTCROSSSECTION, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY, IS_DATASET_VALID: 1}
+	dsrec := Datasets{
+		DATASET:                rec.DATASET,
+		XTCROSSSECTION:         rec.XTCROSSSECTION,
+		CREATION_DATE:          rec.CREATION_DATE,
+		CREATE_BY:              rec.CREATE_BY,
+		LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
+		LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY,
+		IS_DATASET_VALID:       1}
 
 	// start transaction
 	tx, err := DB.Begin()
