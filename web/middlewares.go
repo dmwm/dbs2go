@@ -2,7 +2,6 @@ package web
 
 import (
 	"crypto/sha1"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -74,17 +73,11 @@ func validateMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			uri, e := url.QueryUnescape(r.RequestURI)
 			if e == nil {
-				log.Printf("HTTP %s %s validation error %v\n", r.Method, uri, err)
+				log.Printf("HTTP %s %s %v\n", r.Method, uri, err)
 			} else {
-				log.Printf("HTTP %s %v validation error %v\n", r.Method, r.RequestURI, err)
+				log.Printf("HTTP %s %v %v\n", r.Method, r.RequestURI, err)
 			}
-			w.WriteHeader(http.StatusBadRequest)
-			rec := make(dbs.Record)
-			rec["error"] = fmt.Sprintf("Validation error %v", err)
-			output := []dbs.Record{rec}
-			if r, e := json.Marshal(output); e == nil {
-				w.Write(r)
-			}
+			responseMsg(w, r, err, http.StatusBadRequest)
 			return
 		}
 		// Call the next handler
