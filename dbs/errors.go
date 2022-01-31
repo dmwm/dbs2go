@@ -26,6 +26,9 @@ var ContentTypeErr = errors.New("content-type error")
 // NotImplementedApiErr represents generic not implemented api error
 var NotImplementedApiErr = errors.New("not implemented api error")
 
+// InvalidRequestErr represents generic invalid request error
+var InvalidRequestErr = errors.New("invalid request error")
+
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
 	GenericErrorCode        = iota + 100 // generic DBS error
