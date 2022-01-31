@@ -15,7 +15,7 @@ func (a *API) BlockFileLumiIds() error {
 	// create our SQL statement
 	stm, err := LoadTemplateSQL("blockfilelumiids", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.blockfilelumi.BlockFileLumiIds")
 	}
 
 	// add block condition
@@ -39,7 +39,11 @@ func (a *API) BlockFileLumiIds() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.blockfilelumi.BlockFileLumiIds")
+	}
+	return nil
 
 	/*
 		// if we extract explicitly all info from rows then this API
