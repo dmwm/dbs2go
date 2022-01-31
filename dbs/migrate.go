@@ -103,12 +103,12 @@ func GetBlocks(rurl, val string) ([]string, error) {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to get data for %s, error %v", rurl, err)
 		}
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetBlocks")
 	}
 	var rec []Blocks
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
-		return out, err
+		return out, Error(err, UnmarshalErrorCode, "", "dbs.migrate.GetBlocks")
 	}
 	for _, v := range rec {
 		out = append(out, v.BLOCK_NAME)
@@ -126,13 +126,13 @@ func GetParents(rurl, val string) ([]string, error) {
 	}
 	data, err := getData(rurl)
 	if err != nil {
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetParents")
 	}
 	var rec []map[string]interface{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Printf("unable to unmarshal data url=%s data=%s error=%v", rurl, string(data), err)
-		return out, err
+		return out, Error(err, UnmarshalErrorCode, "", "dbs.migrate.GetParents")
 	}
 	for _, v := range rec {
 		if strings.Contains(val, "#") {
@@ -240,7 +240,7 @@ func GetParentBlocks(rurl, block string) ([]string, error) {
 		if utils.VERBOSE > 1 {
 			log.Println("unable to get list of blocks at remote url", rurl, err)
 		}
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetParentsBlock")
 	}
 	// add block parents to final list
 	for _, blk := range srcblocks {
@@ -318,16 +318,16 @@ func processDatasetBlocks(rurl, dataset string) ([]string, error) {
 	out := []string{}
 	srcblks, err := GetBlocks(rurl, dataset)
 	if err != nil {
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.processDatasetBlocks")
 	}
 	if len(srcblks) == 0 {
 		msg := fmt.Sprintf("No blocks in the required dataset %s found at source %s", dataset, rurl)
-		return out, errors.New(msg)
+		return out, Error(GenericErr, GenericErrorCode, msg, "dbs.migrate.processDatasetBlocks")
 	}
 	localhost := fmt.Sprintf("%s%s", utils.Localhost, utils.BASE)
 	dstblks, err := GetBlocks(localhost, dataset)
 	if err != nil {
-		return srcblks, err
+		return srcblks, Error(err, HttpRequestErrorCode, "", "dbs.migrate.processDatasetBlocks")
 	}
 	for _, blk := range srcblks {
 		if !utils.InList(blk, dstblks) {
@@ -350,7 +350,7 @@ func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
 	out := []string{}
 	parentDatasets, err := GetParents(rurl, dataset)
 	if err != nil {
-		return out, err
+		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetParentDatasetBlocks")
 	}
 	ch := make(chan DatasetResponse)
 	umap := make(map[string]struct{})
@@ -451,7 +451,7 @@ func (a *API) SubmitMigration() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("unable to read from reader", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
 	tstamp := time.Now().Unix()
 	rec := MigrationRequest{
@@ -464,7 +464,7 @@ func (a *API) SubmitMigration() error {
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("unable to unmarshal migration request", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
@@ -475,18 +475,19 @@ func (a *API) SubmitMigration() error {
 		if utils.VERBOSE > 1 {
 			log.Println(msg)
 		}
-		return err
+		return Error(err, MigrationErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
 	reports, err := startMigrationRequest(rec)
 	if err != nil {
 		log.Println("unable to start migration request", err)
-		return err
+		return Error(err, MigrationErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
 	data, err = json.Marshal(reports)
-	if err == nil {
-		a.Writer.Write(data)
+	if err != nil {
+		return Error(err, MarshalErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
-	return err
+	a.Writer.Write(data)
+	return nil
 }
 
 // helper function to start migration request and return list of migration ids
@@ -546,7 +547,7 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	if err != nil {
 		msg = fmt.Sprintf("%s, unable to get DB connection", mstr)
 		log.Println(msg)
-		return []MigrationReport{migrationReport(req, msg, status, err)}, err
+		return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, TransactionErrorCode, "", "dbs.migrate.startMigrationRequest")
 	}
 	defer tx.Rollback()
 
@@ -575,7 +576,7 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 		if err != nil {
 			msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
 			log.Println(msg)
-			return []MigrationReport{migrationReport(req, msg, status, err)}, err
+			return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
 
 		// get inserted migration ID
@@ -585,7 +586,7 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 			if utils.VERBOSE > 1 {
 				log.Println(msg)
 			}
-			return []MigrationReport{migrationReport(req, msg, status, err)}, err
+			return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, GetIDErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
 
 		// set migration record
@@ -608,7 +609,7 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 			if utils.VERBOSE > 1 {
 				log.Println(msg)
 			}
-			return []MigrationReport{migrationReport(rec, msg, status, err)}, err
+			return []MigrationReport{migrationReport(rec, msg, status, err)}, Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
 		reports = append(reports, migrationReport(rec, msg, status, nil))
 		ids = append(ids, rid)
@@ -619,7 +620,7 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	if err != nil {
 		msg = fmt.Sprintf("%s unable to commit transaction error %v", mstr, err)
 		log.Println(msg)
-		return []MigrationReport{migrationReport(req, msg, status, err)}, err
+		return []MigrationReport{migrationReport(req, msg, status, err)}, Error(err, CommitErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
 
 	if utils.VERBOSE > 0 {
@@ -805,12 +806,12 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 	val, err := getSingleValue(a.Params, "migration_request_id")
 	if err != nil {
 		log.Printf("unable to get migration_request_id", err)
-		return err
+		return Error(err, ParametersErrorCode, "", "dbs.migrate.ProcessMigrationCtx")
 	}
 	midint, err := strconv.Atoi(val)
 	if err != nil {
 		log.Printf("unable to convert mid", err)
-		return err
+		return Error(err, ParseErrorCode, "", "dbs.migrate.ProcessMigrationCtx")
 	}
 	mid := int64(midint)
 	log.Println("process migration request", mid)
@@ -824,14 +825,14 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 		if utils.VERBOSE > 0 {
 			log.Println(msg)
 		}
-		return errors.New(msg)
+		return Error(err, MigrationErrorCode, msg, "dbs.migrate.ProcessMigrationCtx")
 	}
 	if len(records) != 1 {
 		msg := fmt.Sprintf("found %d requests for mid=%d, stop processing", len(records), mid)
 		if utils.VERBOSE > 0 {
 			log.Println(msg)
 		}
-		return errors.New(msg)
+		return Error(errors.New(msg), MigrationErrorCode, "", "dbs.migrate.ProcessMigrationCtx")
 	}
 	mrec := records[0]
 
@@ -857,7 +858,10 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 			a.Writer.Write([]byte(data))
 		}
 	}
-	return err
+	if err != nil {
+		return Error(err, MigrationErrorCode, "", "dbs.migrate.ProcessMigrationCtx")
+	}
+	return nil
 }
 
 // processMigration will process given migration report
@@ -959,14 +963,14 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
 	if err != nil {
 		log.Println("unable to load update_migration_status template", err)
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.migrate.updateMigrationStatus")
 	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return err
+		return Error(err, TransactionErrorCode, "", "dbs.migrate.updateMigrationStatus")
 	}
 	defer tx.Rollback()
 	stm = CleanStatement(stm)
@@ -986,14 +990,14 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	_, err = tx.Exec(stm, status, retryCount, mid)
 	if err != nil {
 		log.Printf("unable to execute %s, error %v", stm, err)
-		return err
+		return Error(err, UpdateErrorCode, "", "dbs.migrate.updateMigrationStatus")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.migrate.updateMigrationStatus")
 	}
 	return nil
 }
@@ -1010,14 +1014,14 @@ func (a *API) RemoveMigration() error {
 	if err != nil {
 		msg := "unable to read data"
 		log.Println(msg, err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.migrate.RemoveMigration")
 	}
 	rec := MigrationRemoveRequest{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		msg := "unable to decode data"
 		log.Println(msg, err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.RemoveMigration")
 	}
 	mid := rec.MIGRATION_REQUEST_ID
 
@@ -1026,7 +1030,7 @@ func (a *API) RemoveMigration() error {
 	if err != nil {
 		msg := "unable to get DB transaction"
 		log.Println(msg, err)
-		return err
+		return Error(err, TransactionErrorCode, "", "dbs.migrate.RemoveMigration")
 	}
 	defer tx.Rollback()
 
@@ -1043,7 +1047,7 @@ func (a *API) RemoveMigration() error {
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
-		return errors.New(msg)
+		return Error(err, QueryErrorCode, "", "dbs.migrate.RemoveMigration")
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf("found %v records to remove for request ID %d", tid, mid)
@@ -1057,13 +1061,13 @@ func (a *API) RemoveMigration() error {
 			if utils.VERBOSE > 0 {
 				log.Println(msg)
 			}
-			return errors.New(msg)
+			return Error(err, RemoveErrorCode, "", "dbs.migrate.RemoveMigration")
 		}
 		err = tx.Commit()
 		if err != nil {
 			msg := "unable to commit transaction"
 			log.Println(msg, err)
-			return err
+			return Error(err, CommitErrorCode, "", "dbs.migrate.RemoveMigration")
 		}
 		return nil
 	}
@@ -1071,7 +1075,7 @@ func (a *API) RemoveMigration() error {
 	//     msg := "Invalid request. Successfully processed or processing requests cannot be removed"
 	//     msg += ", or the requested migration did not exist"
 	//     msg += ", or the requestor for removing and creating has to be the same user."
-	return errors.New(msg)
+	return Error(InvalidRequestErr, InvalidRequestErrorCode, msg, "dbs.migrate.RemoveMigration")
 }
 
 // MigrationStatusRequest defines status request structure
@@ -1125,7 +1129,11 @@ func (a *API) StatusMigration() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.migrate.StatusMigration")
+	}
+	return nil
 }
 
 // TotalMigration DBS API
@@ -1135,7 +1143,11 @@ func (a *API) TotalMigration() error {
 	stm := getSQL("migration_total_count")
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.migrate.TotalMigration")
+	}
+	return nil
 }
 
 // CancelMigration clean-ups migration requests in DB
@@ -1145,13 +1157,13 @@ func (a *API) CancelMigration() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.migrate.CancelMigration")
 	}
 	var r MigrationRemoveRequest
 	err = json.Unmarshal(data, &r)
 	if err != nil {
 		log.Println("untable to unmarshal input data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.CancelMigration")
 	}
 	mid := r.MIGRATION_REQUEST_ID
 
@@ -1168,13 +1180,13 @@ func (a *API) CancelMigration() error {
 		if utils.VERBOSE > 0 {
 			log.Printf("fail to fetch migration request %d, error %v", mid, err)
 		}
-		return err
+		return Error(err, MigrationErrorCode, "", "dbs.migrate.CancelMigration")
 	}
 	if len(records) != 1 {
 		if utils.VERBOSE > 0 {
 			log.Printf("found %d requests for mid=%d, stop processing", len(records), mid)
 		}
-		return err
+		return Error(err, MigrationErrorCode, "", "dbs.migrate.CancelMigration")
 	}
 	mrec := records[0]
 	updateMigrationStatus(mrec, TERM_FAILED)
@@ -1190,14 +1202,14 @@ func (a *API) CleanupMigrationRequests(offset int64) error {
 	stm, err := LoadTemplateSQL("cleanup_migration_requests", tmplData)
 	if err != nil {
 		log.Println("unable to load cleanup_migration_requests template", err)
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.migrate.CleanupMigrationRequests")
 	}
 
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return err
+		return Error(err, TransactionErrorCode, "", "dbs.migrate.CleanupMigrationRequests")
 	}
 	defer tx.Rollback()
 	stm = CleanStatement(stm)
@@ -1209,14 +1221,14 @@ func (a *API) CleanupMigrationRequests(offset int64) error {
 	_, err = tx.Exec(stm)
 	if err != nil {
 		log.Printf("unable to execute %s, error %v", stm, err)
-		return err
+		return Error(err, RemoveErrorCode, "", "dbs.migrate.CleanupMigrationRequests")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return err
+		return Error(err, CommitErrorCode, "", "dbs.migrate.CleanupMigrationRequests")
 	}
 	return nil
 }
