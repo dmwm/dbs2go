@@ -72,7 +72,13 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert ProcessingEras\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.PROCESSING_ERA_ID, r.PROCESSING_VERSION, r.CREATION_DATE, r.CREATE_BY, r.DESCRIPTION)
+	_, err = tx.Exec(
+		stm,
+		r.PROCESSING_ERA_ID,
+		r.PROCESSING_VERSION,
+		r.CREATION_DATE,
+		r.CREATE_BY,
+		r.DESCRIPTION)
 	if err != nil {
 		return Error(err, InsertErrorCode, "", "dbs.processingeras.Insert")
 	}

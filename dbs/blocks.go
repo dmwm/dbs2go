@@ -159,7 +159,19 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Blocks\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.BLOCK_ID, r.BLOCK_NAME, r.DATASET_ID, r.OPEN_FOR_WRITING, r.ORIGIN_SITE_NAME, r.BLOCK_SIZE, r.FILE_COUNT, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	_, err = tx.Exec(
+		stm,
+		r.BLOCK_ID,
+		r.BLOCK_NAME,
+		r.DATASET_ID,
+		r.OPEN_FOR_WRITING,
+		r.ORIGIN_SITE_NAME,
+		r.BLOCK_SIZE,
+		r.FILE_COUNT,
+		r.CREATION_DATE,
+		r.CREATE_BY,
+		r.LAST_MODIFICATION_DATE,
+		r.LAST_MODIFIED_BY)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("fail to insert block", err)
@@ -234,13 +246,15 @@ type BlockRecord struct {
 }
 
 // InsertBlocks DBS API
+// implement the following logic
+// input values: blockname
+// optional values: open_for_writing, origin_site(name), block_size,
+// file_count, creation_date, create_by, last_modification_date, last_modified_by
+// It insert given data in the following steps:
+// - obtain dataset_id from given ds_name
+// - increment block id
+// - insert block input
 func (a *API) InsertBlocks() error {
-	// implement the following logic
-	// input values: blockname
-	// optional values: open_for_writing, origin_site(name), block_size, file_count, creation_date, create_by, last_modification_date, last_modified_by
-	// blkinput["dataset_id"] = self.datasetid.execute(conn,  ds_name, tran)
-	// blkinput["block_id"] =  self.sm.increment(conn, "SEQ_BK", tran)
-	// self.blockin.execute(conn, blkinput, tran)
 
 	// read given input
 	data, err := io.ReadAll(a.Reader)
@@ -261,7 +275,16 @@ func (a *API) InsertBlocks() error {
 	}
 
 	// set dependent's records
-	brec := Blocks{BLOCK_NAME: rec.BLOCK_NAME, OPEN_FOR_WRITING: rec.OPEN_FOR_WRITING, ORIGIN_SITE_NAME: rec.ORIGIN_SITE_NAME, BLOCK_SIZE: rec.BLOCK_SIZE, FILE_COUNT: rec.FILE_COUNT, CREATION_DATE: rec.CREATION_DATE, CREATE_BY: rec.CREATE_BY, LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE, LAST_MODIFIED_BY: rec.LAST_MODIFIED_BY}
+	brec := Blocks{
+		BLOCK_NAME:             rec.BLOCK_NAME,
+		OPEN_FOR_WRITING:       rec.OPEN_FOR_WRITING,
+		ORIGIN_SITE_NAME:       rec.ORIGIN_SITE_NAME,
+		BLOCK_SIZE:             rec.BLOCK_SIZE,
+		FILE_COUNT:             rec.FILE_COUNT,
+		CREATION_DATE:          rec.CREATION_DATE,
+		CREATE_BY:              rec.CREATE_BY,
+		LAST_MODIFICATION_DATE: rec.LAST_MODIFICATION_DATE,
+		LAST_MODIFIED_BY:       rec.LAST_MODIFIED_BY}
 
 	// start transaction
 	tx, err := DB.Begin()

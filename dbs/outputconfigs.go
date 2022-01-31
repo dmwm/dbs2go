@@ -115,7 +115,17 @@ func (r *OutputConfigs) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert OutputConfigs\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.OUTPUT_MOD_CONFIG_ID, r.APP_EXEC_ID, r.RELEASE_VERSION_ID, r.PARAMETER_SET_HASH_ID, r.OUTPUT_MODULE_LABEL, r.GLOBAL_TAG, r.SCENARIO, r.CREATION_DATE, r.CREATE_BY)
+	_, err = tx.Exec(
+		stm,
+		r.OUTPUT_MOD_CONFIG_ID,
+		r.APP_EXEC_ID,
+		r.RELEASE_VERSION_ID,
+		r.PARAMETER_SET_HASH_ID,
+		r.OUTPUT_MODULE_LABEL,
+		r.GLOBAL_TAG,
+		r.SCENARIO,
+		r.CREATION_DATE,
+		r.CREATE_BY)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert into OutputConfigs, error", err)

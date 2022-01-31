@@ -204,8 +204,40 @@ func (a *API) Datasets() error {
 	if err != nil {
 		return Error(err, LoadErrorCode, "", "dbs.datasets.Datasets")
 	}
-	cols := []string{"dataset_id", "dataset", "prep_id", "xtcrosssection", "creation_date", "create_by", "last_modification_date", "last_modified_by", "primary_ds_name", "primary_ds_type", "processed_ds_name", "data_tier_name", "dataset_access_type", "acquisition_era_name", "processing_version", "physics_group_name"}
-	vals := []interface{}{new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullFloat64), new(sql.NullInt64), new(sql.NullString), new(sql.NullInt64), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullString), new(sql.NullInt64), new(sql.NullString)}
+	cols := []string{
+		"dataset_id",
+		"dataset",
+		"prep_id",
+		"xtcrosssection",
+		"creation_date",
+		"create_by",
+		"last_modification_date",
+		"last_modified_by",
+		"primary_ds_name",
+		"primary_ds_type",
+		"processed_ds_name",
+		"data_tier_name",
+		"dataset_access_type",
+		"acquisition_era_name",
+		"processing_version",
+		"physics_group_name"}
+	vals := []interface{}{
+		new(sql.NullInt64),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullFloat64),
+		new(sql.NullInt64),
+		new(sql.NullString),
+		new(sql.NullInt64),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullString),
+		new(sql.NullInt64),
+		new(sql.NullString)}
 	if strings.ToLower(detail) != "true" {
 		//         stm = getSQL("datasets_short")
 		cols = []string{"dataset"}
@@ -269,7 +301,24 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert Datasets\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.DATASET_ID, r.DATASET, r.IS_DATASET_VALID, r.PRIMARY_DS_ID, r.PROCESSED_DS_ID, r.DATA_TIER_ID, r.DATASET_ACCESS_TYPE_ID, r.ACQUISITION_ERA_ID, r.PROCESSING_ERA_ID, r.PHYSICS_GROUP_ID, r.XTCROSSSECTION, r.PREP_ID, r.CREATION_DATE, r.CREATE_BY, r.LAST_MODIFICATION_DATE, r.LAST_MODIFIED_BY)
+	_, err = tx.Exec(
+		stm,
+		r.DATASET_ID,
+		r.DATASET,
+		r.IS_DATASET_VALID,
+		r.PRIMARY_DS_ID,
+		r.PROCESSED_DS_ID,
+		r.DATA_TIER_ID,
+		r.DATASET_ACCESS_TYPE_ID,
+		r.ACQUISITION_ERA_ID,
+		r.PROCESSING_ERA_ID,
+		r.PHYSICS_GROUP_ID,
+		r.XTCROSSSECTION,
+		r.PREP_ID,
+		r.CREATION_DATE,
+		r.CREATE_BY,
+		r.LAST_MODIFICATION_DATE,
+		r.LAST_MODIFIED_BY)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to insert Datasets %+v", err)

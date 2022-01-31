@@ -67,7 +67,13 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert PrimaryDatasets\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.PRIMARY_DS_ID, r.PRIMARY_DS_NAME, r.PRIMARY_DS_TYPE_ID, r.CREATION_DATE, r.CREATE_BY)
+	_, err = tx.Exec(
+		stm,
+		r.PRIMARY_DS_ID,
+		r.PRIMARY_DS_NAME,
+		r.PRIMARY_DS_TYPE_ID,
+		r.CREATION_DATE,
+		r.CREATE_BY)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Println("unablt to insert PrimaryDatasets", err)

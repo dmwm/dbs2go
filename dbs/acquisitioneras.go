@@ -77,7 +77,15 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert AcquisitionEras\n%s\n%+v", stm, r)
 	}
-	_, err = tx.Exec(stm, r.ACQUISITION_ERA_ID, r.ACQUISITION_ERA_NAME, r.START_DATE, r.END_DATE, r.CREATION_DATE, r.CREATE_BY, r.DESCRIPTION)
+	_, err = tx.Exec(
+		stm,
+		r.ACQUISITION_ERA_ID,
+		r.ACQUISITION_ERA_NAME,
+		r.START_DATE,
+		r.END_DATE,
+		r.CREATION_DATE,
+		r.CREATE_BY,
+		r.DESCRIPTION)
 	if utils.VERBOSE > 0 {
 		log.Printf("unable to insert AcquisitionEras +v", stm, err)
 	}
