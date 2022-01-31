@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -66,14 +65,14 @@ func (a *API) FileLumis() error {
 		log.Println("### stm", stm)
 	}
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.filelumis.FileLumis")
 	}
 
 	// generate run_num token
 	runs := getValues(a.Params, "run_num")
 	t, c, na, e := RunsConditions(runs, "FL")
 	if e != nil {
-		return e
+		return Error(e, ParametersErrorCode, "", "dbs.filelumis.FileLumis")
 	}
 	if t != "" {
 		stm = fmt.Sprintf("%s %s", t, stm)
@@ -93,7 +92,7 @@ func (a *API) FileLumis() error {
 	if _, ok := a.Params["runList"]; ok {
 		if len(runs) > 1 && len(lfns) > 1 {
 			msg := "filelumis API supports single list of lfns or run numbers"
-			return errors.New(msg)
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filelumis.FileLumis")
 		}
 	}
 
@@ -110,7 +109,11 @@ func (a *API) FileLumis() error {
 	}
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.filelumis.FileLumis")
+	}
+	return nil
 }
 
 // FileLumis represents File Lumis DBS DB table
@@ -127,7 +130,7 @@ func (r *FileLumis) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.filelumis.Insert")
 	}
 	// get SQL statement from static area
 	var stm string
@@ -141,7 +144,10 @@ func (r *FileLumis) Insert(tx *sql.Tx) error {
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert FileLumis\n%s\n%+v", stm, r)
 	}
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.filelumis.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of FileLumis
@@ -162,7 +168,7 @@ func (r *FileLumis) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.filelumis.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -170,7 +176,7 @@ func (r *FileLumis) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.filelumis.Decode")
 	}
 	return nil
 }
@@ -181,22 +187,22 @@ func (a *API) InsertFileLumisTx(tx *sql.Tx) error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.filelumis.InsertFileLumisTx")
 	}
 	rec := FileLumis{}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.filelumis.InsertFileLumisTx")
 	}
 	err = rec.Insert(tx)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to insert %+v, %v", rec, err)
 		}
-		return err
+		return Error(err, InsertErrorCode, "", "dbs.filelumis.InsertFileLumisTx")
 	}
-	return err
+	return nil
 }
 
 // InsertFileLumisTxViaChunks DBS API
@@ -216,7 +222,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 			if utils.VERBOSE > 0 {
 				log.Printf("Unable to load temp_filelumis, error %v", err)
 			}
-			return err
+			return Error(err, LoadErrorCode, "", "dbs.filelumis.InsertFileLumisTxViaChunks")
 		}
 		stm = CleanStatement(stm)
 		if utils.VERBOSE > 1 {
@@ -231,7 +237,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 			if strings.Contains(err.Error(), "ORA-00955") {
 				log.Printf("Temp table %s is already exists\n", table)
 			} else {
-				return err
+				return Error(err, InsertErrorCode, "", "dbs.filelumis.InsertFileLumisTxViaChunks")
 			}
 		}
 	}
@@ -280,7 +286,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 			if utils.VERBOSE > 0 {
 				log.Printf("Unable to load merge_filelumis, error %v", err)
 			}
-			return err
+			return Error(err, LoadErrorCode, "", "dbs.filelumis.InsertFileLumisTxViaChunks")
 		}
 		stm = CleanStatement(stm)
 		if utils.VERBOSE > 1 {
@@ -292,11 +298,14 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 			if utils.VERBOSE > 0 {
 				log.Printf("Unable to merge temp FileLumis table, error %v", err)
 			}
-			return err
+			return Error(err, InsertErrorCode, "", "dbs.filelumis.InsertFileLumisTxViaChunks")
 		}
 	}
 
-	return err
+	if err != nil {
+		return Error(err, GenericErrorCode, "", "dbs.filelumis.InsertFileLumisTxViaChunks")
+	}
+	return nil
 }
 
 // helper function to insert FileLumis chunk via ORACLE INSERT ALL statement
@@ -307,12 +316,12 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	if len(records) == 0 {
 		msg := "zero array of FileLumi records"
 		log.Println(msg)
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filelumis.insertFLChunk")
 	}
 	if FileLumiInsertMethod == "temptable" && DBOWNER == "sqlite" {
 		msg := "unable to use temp table with sqlite backend"
 		log.Println(msg)
-		return errors.New(msg)
+		return Error(DatabaseErr, DatabaseErrorCode, msg, "dbs.filelumis.insertFLChunk")
 	}
 
 	// prepare statement for insering all rows
@@ -340,6 +349,7 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 		if utils.VERBOSE > 0 {
 			log.Printf("Unable to insert FileLumis records, error %v", err)
 		}
+		return Error(err, InsertErrorCode, "", "dbs.filelumis.insertFLChunk")
 	}
-	return err
+	return nil
 }
