@@ -19,7 +19,7 @@ func (a *API) Runs() error {
 	dataset := getValues(a.Params, "dataset")
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return err
+		return Error(err, ParseErrorCode, "", "dbs.runs.Runs")
 	}
 	if len(lfn) == 1 {
 		tmpl["Lfn"] = true
@@ -31,7 +31,7 @@ func (a *API) Runs() error {
 
 	stm, err := LoadTemplateSQL("runs", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.runs.Runs")
 	}
 
 	if len(runs) > 1 {
@@ -68,7 +68,11 @@ func (a *API) Runs() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.runs.Runs")
+	}
+	return nil
 }
 
 // InsertRuns DBS API
