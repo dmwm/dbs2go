@@ -13,5 +13,9 @@ func (a *API) BlockChildren() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.blockchildren.BlockChildren")
+	}
+	return nil
 }
