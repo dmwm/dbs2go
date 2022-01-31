@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 
@@ -19,7 +18,7 @@ func (a *API) BlockParents() error {
 	blockparent := getValues(a.Params, "block_name")
 	if len(blockparent) > 1 {
 		msg := "Unsupported list of blockparent"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockparents.BlockParents")
 	} else if len(blockparent) == 1 {
 		conds, args = AddParam("block_name", "BC.BLOCK_NAME", a.Params, conds, args)
 	}
@@ -28,7 +27,11 @@ func (a *API) BlockParents() error {
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err := executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.blockparents.BlockParents")
+	}
+	return nil
 }
 
 // BlockParents structure represents block parents table in DBS DB
@@ -43,7 +46,7 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.blockparents.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_fileparents")
@@ -51,7 +54,10 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 		log.Printf("Insert BlockParents\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.THIS_BLOCK_ID, r.PARENT_BLOCK_ID)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.blockparents.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of BlockParents
@@ -60,10 +66,12 @@ func (r *BlockParents) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if r.THIS_BLOCK_ID == 0 {
-		return errors.New("missing this_block_id")
+		msg := "missing this_block_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockparents.Validate")
 	}
 	if r.PARENT_BLOCK_ID == 0 {
-		return errors.New("missing parent_block_id")
+		msg := "missing parent_block_id"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockparents.Validate")
 	}
 	return nil
 }
@@ -78,7 +86,7 @@ func (r *BlockParents) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.blockparents.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -86,7 +94,7 @@ func (r *BlockParents) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.blockparents.Decode")
 	}
 	return nil
 }
