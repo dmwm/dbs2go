@@ -18,12 +18,16 @@ func (a *API) DataTypes() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("datatypes", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.datatypes.DataTypes")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.datatypes.DataTypes")
+	}
+	return nil
 }
 
 // InsertDataTypes DBS API
