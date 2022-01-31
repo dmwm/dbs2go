@@ -3,7 +3,6 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 
@@ -23,7 +22,7 @@ func (a *API) ReleaseVersions() error {
 	releaseversions := getValues(a.Params, "release_version")
 	if len(releaseversions) > 1 {
 		msg := "The releaseversions API does not support list of releaseversions"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.releaseversions.ReleaseVersions")
 	} else if len(releaseversions) == 1 {
 		conds, args = AddParam("release_version", "RV.RELEASE_VERSION", a.Params, conds, args)
 	}
@@ -39,12 +38,16 @@ func (a *API) ReleaseVersions() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("releaseversions", tmpl)
 	if err != nil {
-		return err
+		return Error(err, LoadErrorCode, "", "dbs.releaseversions.ReleaseVersions")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.releaseversions.ReleaseVersions")
+	}
+	return nil
 }
 
 // ReleaseVersions represents Relases Versions DBS DB table
@@ -66,7 +69,7 @@ func (r *ReleaseVersions) Insert(tx *sql.Tx) error {
 			r.RELEASE_VERSION_ID = tid
 		}
 		if err != nil {
-			return err
+			return Error(err, LastInsertErrorCode, "", "dbs.releaseversions.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -74,7 +77,7 @@ func (r *ReleaseVersions) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return err
+		return Error(err, ValidateErrorCode, "", "dbs.releaseversions.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_release_versions")
@@ -82,7 +85,10 @@ func (r *ReleaseVersions) Insert(tx *sql.Tx) error {
 		log.Printf("Insert ReleaseVersions\n%s\n%+v", stm, r)
 	}
 	_, err = tx.Exec(stm, r.RELEASE_VERSION_ID, r.RELEASE_VERSION)
-	return err
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.releaseversions.Insert")
+	}
+	return nil
 }
 
 // Validate implementation of ReleaseVersions
@@ -103,7 +109,7 @@ func (r *ReleaseVersions) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return err
+		return Error(err, ReaderErrorCode, "", "dbs.releaseversions.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -111,12 +117,16 @@ func (r *ReleaseVersions) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return err
+		return Error(err, UnmarshalErrorCode, "", "dbs.releaseversions.Decode")
 	}
 	return nil
 }
 
 // InsertReleaseVersions DBS API
 func (a *API) InsertReleaseVersions() error {
-	return insertRecord(&ReleaseVersions{}, a.Reader)
+	err := insertRecord(&ReleaseVersions{}, a.Reader)
+	if err != nil {
+		return Error(err, InsertErrorCode, "", "dbs.releaseversions.InsertReleaseVersions")
+	}
+	return nil
 }
