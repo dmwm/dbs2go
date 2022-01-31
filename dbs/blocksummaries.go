@@ -1,7 +1,6 @@
 package dbs
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -17,7 +16,7 @@ func (a *API) BlockSummaries() error {
 
 	if len(a.Params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 	}
 
 	// parse arguments
@@ -28,7 +27,7 @@ func (a *API) BlockSummaries() error {
 		blk := block[0]
 		if strings.Contains(blk, "*") {
 			msg := "wild-card block value is not allowed"
-			return errors.New(msg)
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 		}
 		var blocks []string
 		if len(block) > 1 {
@@ -57,17 +56,17 @@ func (a *API) BlockSummaries() error {
 			stm, err = LoadTemplateSQL("blocksummaries4block_detail", tmpl)
 		}
 		if err != nil {
-			return err
+			return Error(err, LoadErrorCode, "", "dbs.blocksummaries.BlockSummaries")
 		}
 	}
 	dataset := getValues(a.Params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return errors.New(msg)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 	} else if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
-			return errors.New(msg)
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 		}
 		_, val := OperatorValue(dataset[0])
 		if detailErr != nil {
@@ -81,9 +80,13 @@ func (a *API) BlockSummaries() error {
 			args = append(args, val)
 		}
 		if err != nil {
-			return err
+			return Error(err, LoadErrorCode, "", "dbs.blocksummaries.BlockSummaries")
 		}
 	}
 	// use generic query API to fetch the results from DB
-	return executeAll(a.Writer, a.Separator, genSQL+stm, args...)
+	err = executeAll(a.Writer, a.Separator, genSQL+stm, args...)
+	if err != nil {
+		return Error(err, QueryErrorCode, "", "dbs.blocksummaries.BlockSummaries")
+	}
+	return nil
 }
