@@ -33,7 +33,6 @@ type HTTPError struct {
 	HTTPCode       int    `json:"code"`             // HTTP status code from IANA
 	Timestamp      string `json:"timestamp"`        // timestamp of the error
 	Path           string `json:"path"`             // URL path
-	Referer        string `json:"referer"`          // http referer
 	UserAgent      string `json:"user_agent"`       // http user-agent field
 	XForwardedHost string `json:"x_forwarded_host"` // http.Request X-Forwarded-Host
 	XForwardedFor  string `json:"x_forwarded_for"`  // http.Request X-Forwarded-For
@@ -60,10 +59,10 @@ func responseMsg(w http.ResponseWriter, r *http.Request, err error, code int) in
 		Timestamp:      time.Now().String(),
 		HTTPCode:       code,
 		Path:           path,
-		Referer:        r.Referer(),
 		RemoteAddr:     r.RemoteAddr,
 		XForwardedFor:  r.Header.Get("X-Forwarded-For"),
 		XForwardedHost: r.Header.Get("X-Forwarded-Host"),
+		UserAgent:      r.Header.Get("User-agent"),
 	}
 	rec := ServerError{
 		HTTPError: hrec,
