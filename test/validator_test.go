@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -82,6 +83,30 @@ func testLexicon(t *testing.T, test string) {
 		}
 	}
 
+}
+
+// TestValidatorStrPattern
+func TestValidatorStrPattern(t *testing.T) {
+	var patterns []*regexp.Regexp
+	pat, err := regexp.Compile(`/([a-zA-Z0-9])+/([a-zA-Z0-9])+/([a-zA-Z0-9])+\.root$`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	patterns = append(patterns, pat)
+	lfns := `["/lkjsdflkjsdlf/lksjdflkjsdf/file.root", "/lksjdfkljsd/klsdjflsdj/file2.root"]`
+	strPattern := dbs.StrPattern{
+		Patterns: patterns,
+		Len:      10,
+	}
+	err = strPattern.Check("logical_file_name", lfns)
+	if err == nil {
+		t.Fatal("fail to check length of LFN")
+	}
+	strPattern.Len = 1000
+	err = strPattern.Check("logical_file_name", lfns)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 // TestValidator

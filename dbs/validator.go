@@ -152,11 +152,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		}
 		// check for list of LFNs
 		if key == "logical_file_name" {
-			fileList := strings.Replace(v, "[", "", -1)
-			fileList = strings.Replace(v, "]", "", -1)
-			fileList = strings.Replace(v, "'", "", -1)
-			lfns := strings.Split(fileList, ",")
-			for _, lfn := range lfns {
+			for _, lfn := range lfnList(v) {
 				if len(lfn) > o.Len {
 					msg := fmt.Sprintf("length of LFN %s exceed %d characters", lfn, o.Len)
 					return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
@@ -167,6 +163,23 @@ func (o StrPattern) Check(key string, val interface{}) error {
 			return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
 		}
 	}
+	if key == "logical_file_name" {
+		for _, vvv := range lfnList(v) {
+			msg := fmt.Sprintf("unable to match '%s' value '%s' from LFN list", key, vvv)
+			var pass bool
+			for _, pat := range o.Patterns {
+				if matched := pat.MatchString(vvv); matched {
+					// if at least one pattern matched we'll return
+					pass = true
+					break
+				}
+			}
+			if !pass {
+				return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+			}
+		}
+		return nil
+	}
 	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
 	for _, pat := range o.Patterns {
 		if matched := pat.MatchString(v); matched {
@@ -175,6 +188,20 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		}
 	}
 	return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+}
+
+// helper function to convert input value into list of list
+// we need it to properly match LFN list
+func lfnList(v string) []string {
+	fileList := strings.Replace(v, "[", "", -1)
+	fileList = strings.Replace(fileList, "]", "", -1)
+	fileList = strings.Replace(fileList, "'", "", -1)
+	fileList = strings.Replace(fileList, "\"", "", -1)
+	var lfns []string
+	for _, val := range strings.Split(fileList, ",") {
+		lfns = append(lfns, strings.Trim(val, " "))
+	}
+	return lfns
 }
 
 //gocyclo:ignore
