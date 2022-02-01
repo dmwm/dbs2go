@@ -150,8 +150,22 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		if utils.VERBOSE > 0 {
 			log.Println("lexicon str pattern", o)
 		}
-		msg := fmt.Sprintf("length of %s exceed %d characters", v, o.Len)
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+		// check for list of LFNs
+		if key == "logical_file_name" {
+			fileList := strings.Replace(v, "[", "", -1)
+			fileList = strings.Replace(v, "]", "", -1)
+			fileList = strings.Replace(v, "'", "", -1)
+			lfns := strings.Split(fileList, ",")
+			for _, lfn := range lfns {
+				if len(lfn) > o.Len {
+					msg := fmt.Sprintf("length of LFN %s exceed %d characters", lfn, o.Len)
+					return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+				}
+			}
+		} else {
+			msg := fmt.Sprintf("length of %s exceed %d characters", v, o.Len)
+			return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+		}
 	}
 	msg := fmt.Sprintf("unable to match '%s' value '%s'", key, val)
 	for _, pat := range o.Patterns {
