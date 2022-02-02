@@ -45,6 +45,7 @@ type ServerError struct {
 	HTTPError HTTPError `json:"http"`      // HTTP section of the error
 	Exception int       `json:"exception"` // for compatibility with Python server
 	Type      string    `json:"type"`      // for compatibility with Python server
+	Message   string    `json:"message"`   // for compatibility with Python server
 }
 
 // responseMsg helper function to provide response to end-user
@@ -67,8 +68,9 @@ func responseMsg(w http.ResponseWriter, r *http.Request, err error, code int) in
 	rec := ServerError{
 		HTTPError: hrec,
 		DBSError:  err,
-		Exception: code,
-		Type:      "HTTPError",
+		Exception: code,        // for compatibility with Python server
+		Type:      "HTTPError", // for compatibility with Python server
+		Message:   err.Error(), // for compatibility with Python server
 	}
 
 	log.Printf(err.Error())
