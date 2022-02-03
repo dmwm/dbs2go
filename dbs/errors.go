@@ -3,6 +3,7 @@ package dbs
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // GenericErr represents generic dbs error
@@ -74,9 +75,13 @@ type DBSError struct {
 
 // Error function implements details of DBS error message
 func (e *DBSError) Error() string {
+	sep := ": "
+	if strings.Contains(e.Reason, "DBSError") { // nested error
+		sep += "nested "
+	}
 	return fmt.Sprintf(
-		"<DBSError Code:%d Func:%s Msg:%s Error:%v>",
-		e.Code, e.Function, e.Message, e.Reason)
+		"DBSError Code:%d Func:%s Msg:%s Error%s%v",
+		e.Code, e.Function, e.Message, sep, e.Reason)
 }
 
 // helper function to create dbs error
