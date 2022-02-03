@@ -80,8 +80,70 @@ func (e *DBSError) Error() string {
 		sep += "nested "
 	}
 	return fmt.Sprintf(
-		"DBSError Code:%d Func:%s Msg:%s Error%s%v",
-		e.Code, e.Function, e.Message, sep, e.Reason)
+		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v",
+		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason)
+}
+
+func (e *DBSError) Explain() string {
+	switch e.Code {
+	case GenericErrorCode:
+		return "Generic DBS error"
+	case TransactionErrorCode:
+		return "DBS DB transaction error"
+	case QueryErrorCode:
+		return "DBS DB query error, e.g. mailformed SQL statement"
+	case RowsScanErrorCode:
+		return "DBS DB row scane error, e.g. fail to get DB record from a database"
+	case SessionErrorCode:
+		return "DBS DB session error"
+	case CommitErrorCode:
+		return "DBS DB transaction commit error"
+	case ParseErrorCode:
+		return "DBS parser error, e.g. mailformed input parameter to the query"
+	case LoadErrorCode:
+		return "DBS file load error, e.g. fail to load DB template"
+	case GetIDErrorCode:
+		return "DBS DB ID error for provided entity, e.g. there is no record in DB for provided value"
+	case InsertErrorCode:
+		return "DBS DB insert record error"
+	case UpdateErrorCode:
+		return "DBS DB update record error"
+	case LastInsertErrorCode:
+		return "DBS DB laster insert record error, e.g. fail to obtain last inserted ID"
+	case ValidateErrorCode:
+		return "DBS validation error, e.g. input parameter does not match lexicon rules"
+	case PatternErrorCode:
+		return "DBS validation error when wrong pattern is provided"
+	case DecodeErrorCode:
+		return "DBS decode record failure, e.g. mailformed JSON"
+	case EncodeErrorCode:
+		return "DBS encode record failure, e.g. unable to convert structure to JSON"
+	case ContentTypeErrorCode:
+		return "Wrong Content-Type HTTP header in HTTP request"
+	case ParametersErrorCode:
+		return "DBS invalid parameter for the DBS API"
+	case NotImplementedApiCode:
+		return "DBS Not implemented API error"
+	case ReaderErrorCode:
+		return "DBS reader I/O error, e.g. unable to read HTTP POST payload"
+	case WriterErrorCode:
+		return "DBS writer I/O error, e.g. unable to write record to HTTP response"
+	case UnmarshalErrorCode:
+		return "DBS unable to parse JSON record"
+	case MarshalErrorCode:
+		return "DBS unable to convert record to JSON"
+	case HttpRequestErrorCode:
+		return "invalid HTTP request"
+	case MigrationErrorCode:
+		return "DBS Migration error"
+	case RemoveErrorCode:
+		return "Unable to remove record from DB"
+	case InvalidRequestErrorCode:
+		return "Invalid HTTP request"
+	default:
+		return "Not defined"
+	}
+	return "Not defined"
 }
 
 // helper function to create dbs error
