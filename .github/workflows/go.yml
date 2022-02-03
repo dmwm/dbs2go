@@ -32,4 +32,4 @@ jobs:
         sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" test/merge/main.go
         mkdir -p $GOPATH/src/github.com/vkuznet
         cp -r ../dbs2go $GOPATH/src/github.com/vkuznet
-        make test
+        make test-github
