@@ -49,9 +49,11 @@ func (a *API) FileLumis() error {
 
 	validFileOnly := getValues(a.Params, "validFileOnly")
 	if len(validFileOnly) == 1 {
-		tmpl["ValidFileOnly"] = true
-		conds = append(conds, "F.IS_FILE_VALID = 1")
-		conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
+		if validFileOnly[0] == "1" {
+			tmpl["ValidFileOnly"] = true
+			conds = append(conds, "F.IS_FILE_VALID = 1")
+			conds = append(conds, "DT.DATASET_ACCESS_TYPE in ('VALID', 'PRODUCTION') ")
+		}
 	}
 
 	blocks := getValues(a.Params, "block_name")
