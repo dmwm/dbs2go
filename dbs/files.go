@@ -120,8 +120,14 @@ func (a *API) Files() error {
 		stm = fmt.Sprintf("%s %s", token, stm)
 		cond := fmt.Sprintf(" F.LOGICAL_FILE_NAME in %s", TokenCondition())
 		conds = append(conds, cond)
+		// since token comes first in SQL statement we should
+		// put binding args first as well
+		var newArgs []interface{}
 		for _, v := range binds {
-			args = append(args, v)
+			newArgs = append(newArgs, v)
+		}
+		for _, v := range args {
+			newArgs = append(newArgs, v)
 		}
 	} else if len(lfns) == 1 {
 		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
