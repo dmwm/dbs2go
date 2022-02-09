@@ -3,6 +3,7 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 
@@ -13,21 +14,33 @@ import (
 func (a *API) BlockParents() error {
 	var args []interface{}
 	var conds []string
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	tmpl["TokenGenerator"] = ""
 
 	// parse dataset argument
 	blockparent := getValues(a.Params, "block_name")
 	if len(blockparent) > 1 {
-		msg := "Unsupported list of blockparent"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockparents.BlockParents")
+		cond := fmt.Sprintf("BC.BLOCK_NAME in %s", TokenCondition())
+		// 100 is max for # of allowed blocks
+		token, binds := TokenGenerator(blockparent, 100, "block_token")
+		tmpl["TokenGenerator"] = token
+		conds = append(conds, cond)
+		for _, v := range binds {
+			args = append(args, v)
+		}
 	} else if len(blockparent) == 1 {
 		conds, args = AddParam("block_name", "BC.BLOCK_NAME", a.Params, conds, args)
 	}
 	// get SQL statement from static area
-	stm := getSQL("blockparent")
+	stm, err := LoadTemplateSQL("blockparent", tmpl)
+	if err != nil {
+		return Error(err, LoadErrorCode, "", "dbs.blockparents.BlockParents")
+	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
-	err := executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
 		return Error(err, QueryErrorCode, "", "dbs.blockparents.BlockParents")
 	}
