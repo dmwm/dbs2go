@@ -179,9 +179,16 @@ func (a *API) Files() error {
 		}
 		cond := fmt.Sprintf(" FL.LUMI_SECTION_NUM in %s", TokenCondition())
 		conds = append(conds, cond)
+		// since token comes first in SQL statement we should
+		// put binding args first as well
+		var newArgs []interface{}
 		for _, v := range binds {
-			args = append(args, v)
+			newArgs = append(newArgs, v)
 		}
+		for _, v := range args {
+			newArgs = append(newArgs, v)
+		}
+		args = newArgs
 		tmpl["LumiGenerator"] = token
 	} else if len(lumis) == 1 {
 		conds, args = AddParam("lumi_list", "FL.LUMI_SECTION_NUM", a.Params, conds, args)
