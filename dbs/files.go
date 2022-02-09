@@ -129,6 +129,7 @@ func (a *API) Files() error {
 		for _, v := range args {
 			newArgs = append(newArgs, v)
 		}
+		args = newArgs
 	} else if len(lfns) == 1 {
 		conds, args = AddParam("logical_file_name", "F.LOGICAL_FILE_NAME", a.Params, conds, args)
 	}
