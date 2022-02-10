@@ -272,6 +272,17 @@ func strType(key string, val interface{}) error {
 				}
 			}
 		}
+		if key == "block_name" {
+			arr := strings.Split(v, "#")
+			if len(arr) != 2 {
+				msg := "wrong parts in block name"
+				return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.strType")
+			}
+			if len(arr[1]) != 36 {
+				msg := "wrong length of block hash"
+				return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.strType")
+			}
+		}
 	}
 	return StrPattern{Patterns: patterns, Len: length}.Check(key, val)
 }
