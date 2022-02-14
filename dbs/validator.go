@@ -273,18 +273,42 @@ func strType(key string, val interface{}) error {
 			}
 		}
 		if key == "block_name" {
-			arr := strings.Split(v, "#")
-			if len(arr) != 2 {
-				msg := "wrong parts in block name"
-				return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.strType")
-			}
-			if len(arr[1]) > 36 {
-				msg := "wrong length of block hash"
-				return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.strType")
+			if strings.Contains(v, "[") {
+				if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
+					v = strings.Replace(v, "'", "\"", -1)
+				}
+				// split input into pieces
+				input := strings.Replace(v, "[", "", -1)
+				input = strings.Replace(input, "]", "", -1)
+				for _, vvv := range strings.Split(input, ",") {
+					err := checkBlockHash(strings.Trim(vvv, " "))
+					if err != nil {
+						return err
+					}
+				}
+			} else {
+				err := checkBlockHash(v)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
 	return StrPattern{Patterns: patterns, Len: length}.Check(key, val)
+}
+
+// helper function to check block hash
+func checkBlockHash(blk string) error {
+	arr := strings.Split(blk, "#")
+	if len(arr) != 2 {
+		msg := fmt.Sprintf("wrong parts in block name %s", blk)
+		return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.checkBlockHash")
+	}
+	if len(arr[1]) > 36 {
+		msg := fmt.Sprintf("wrong length of block hash %s", blk)
+		return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.checkBlockHash")
+	}
+	return nil
 }
 
 // helper function to validate int parameters

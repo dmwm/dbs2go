@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"testing"
@@ -141,6 +142,46 @@ func TestValidator(t *testing.T) {
 	err = dbs.Validate(req)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+// TestValidatorBlocksAPI
+func TestValidatorBlocksAPI(t *testing.T) {
+	// set DBS lexicon patterns
+	lexiconFile := os.Getenv("DBS_LEXICON_FILE")
+	if lexiconFile == "" {
+		t.Error(errors.New("Please setup DBS_LEXICON_FILE env"))
+	}
+	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbs.LexiconPatterns = lexPatterns
+
+	var req *http.Request
+	host := "http://localhost:8111/dbs2go"
+	blk := "/unittest_web_primary_ds_name_15789/acq_era_15789-v5790/GEN-SIM-RAW#15789"
+	rurl := host + "/blocks?block_name=" + url.QueryEscape(blk)
+	req, _ = http.NewRequest("GET", rurl, nil)
+	err = dbs.Validate(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// invalid block name
+	blk = "/unittest_web_primary_ds_name_15789/acq_era_15789-v5790/GEN-SIM-RAW#15789-sldkfjskldf-klsdjfklsd-sldkfjslkdf-lksjdflksjd"
+	rurl = host + "/blocks?block_name=" + url.QueryEscape(blk)
+	req, _ = http.NewRequest("GET", rurl, nil)
+	err = dbs.Validate(req)
+	if err == nil {
+		t.Fatal(err)
+	}
+	blocks := []string{blk, blk}
+	b, _ := json.Marshal(blocks)
+	rurl = host + "/blocksummaries?block_name=" + url.QueryEscape(string(b))
+	req, _ = http.NewRequest("GET", rurl, nil)
+	err = dbs.Validate(req)
+	if err == nil {
+		t.Fatal(err)
 	}
 }
 
