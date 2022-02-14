@@ -278,7 +278,7 @@ func strType(key string, val interface{}) error {
 				msg := "wrong parts in block name"
 				return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.strType")
 			}
-			if len(arr[1]) != 36 {
+			if len(arr[1]) > 36 {
 				msg := "wrong length of block hash"
 				return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.strType")
 			}
