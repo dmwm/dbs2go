@@ -212,9 +212,11 @@ func GetTestData() error {
 	defer tx.Rollback()
 	_, err = GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type", "dataset_access_type", "VALID")
 	if err != nil {
-		msg := fmt.Sprintf("unable to GetID from DATATIERS table")
-		log.Println(msg)
-		return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
+		if !strings.Contains(err.Error(), "no rows in result set") {
+			msg := fmt.Sprintf("unable to GetID from DATASET_ACCESS_TYPES table")
+			log.Println(msg)
+			return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
+		}
 	}
 	err = tx.Commit()
 	if err != nil {
