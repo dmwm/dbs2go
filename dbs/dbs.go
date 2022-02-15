@@ -210,7 +210,7 @@ func GetTestData() error {
 		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
 	}
 	defer tx.Rollback()
-	_, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", "GEN-RAW")
+	_, err = GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type", "dataset_access_type", "VALID")
 	if err != nil {
 		msg := fmt.Sprintf("unable to GetID from DATATIERS table")
 		log.Println(msg)
