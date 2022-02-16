@@ -205,19 +205,19 @@ func LoadSQL(owner string) Record {
 // So far we can ask for a data tier id of specific tier since this table
 // is very small and query execution will be really fast.
 func GetTestData() error {
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	var args []interface{}
+	args = append(args, "VALID")
+	stm, err := LoadTemplateSQL("test_db", tmpl)
+	if err != nil {
+		return Error(err, LoadErrorCode, "", "dbs.GetTestData")
+	}
 	tx, err := DB.Begin()
 	if err != nil {
 		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
 	}
 	defer tx.Rollback()
-	var stm string
-	if DBOWNER == "sqlite" {
-		stm = fmt.Sprintf("SELECT DATASET_ACCESS_TYPE FROM DATASET_ACCESS_TYPES WHERE DATASET_ACCESS_TYPE = ?")
-	} else {
-		stm = fmt.Sprintf("SELECT T.DATASET_ACCESS_TYPE FROM %s.DATASET_ACCESS_TYPES T WHERE T.DATASET_ACCESS_TYPES = :dataset_access_type", DBOWNER)
-	}
-	var args []interface{}
-	args = append(args, "VALID")
 	var dtype string
 	err = tx.QueryRow(stm, args...).Scan(&dtype)
 	if err != nil {
