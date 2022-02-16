@@ -213,6 +213,9 @@ func GetTestData() error {
 	if err != nil {
 		return Error(err, LoadErrorCode, "", "dbs.GetTestData")
 	}
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 	tx, err := DB.Begin()
 	if err != nil {
 		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
