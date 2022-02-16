@@ -270,15 +270,17 @@ func dbMonitor(dbtype, dburi string, interval int) {
 		err := dbs.GetTestData()
 		if err != nil {
 			// if we get ORA error we should restart DB connection
-			log.Println("unable to get test data query, error", err)
+			log.Println("dbMonitor: unable to get test data query, error", err)
 			if dbs.DB != nil {
 				dbs.DB.Close()
 			}
 			db, dberr := dbInit(dbtype, dburi)
-			if dberr != nil {
-				log.Println("unable to init DB access, error", dberr)
+			if dberr == nil {
+				log.Println("dbMonitor: reset DB connection")
+				dbs.DB = db
+			} else {
+				log.Println("dbMonitor: unable to init DB access, error", dberr)
 			}
-			dbs.DB = db
 		}
 		time.Sleep(time.Duration(interval) * time.Second)
 	}

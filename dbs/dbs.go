@@ -205,20 +205,35 @@ func LoadSQL(owner string) Record {
 // So far we can ask for a data tier id of specific tier since this table
 // is very small and query execution will be really fast.
 func GetTestData() error {
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	var args []interface{}
+	args = append(args, "VALID")
+	stm, err := LoadTemplateSQL("test_db", tmpl)
+	if err != nil {
+		return Error(err, LoadErrorCode, "", "dbs.GetTestData")
+	}
+	if utils.VERBOSE > 1 {
+		utils.PrintSQL(stm, args, "execute")
+	}
 	tx, err := DB.Begin()
 	if err != nil {
 		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
 	}
 	defer tx.Rollback()
-	_, err = GetID(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", "GEN-RAW")
+	var dtype string
+	err = tx.QueryRow(stm, args...).Scan(&dtype)
 	if err != nil {
-		msg := fmt.Sprintf("unable to GetID from DATATIERS table")
+		msg := fmt.Sprintf("unable to query statement: %v, error %v", stm, err)
 		log.Println(msg)
-		return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
+		if !strings.Contains(err.Error(), "no rows in result set") {
+			msg := fmt.Sprintf("unable to GetID from DATASET_ACCESS_TYPES table")
+			log.Println(msg)
+			return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
+		}
 	}
-	err = tx.Commit()
-	if err != nil {
-		return Error(err, CommitErrorCode, "", "dbs.GetTestData")
+	if dtype != "VALID" {
+		return Error(err, GenericErrorCode, "invalid dataset access type", "dbs.GetTestData")
 	}
 	return nil
 }

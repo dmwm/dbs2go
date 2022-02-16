@@ -66,8 +66,8 @@ The DBS business and DAO logic resides within
 The individual file, e.g.
 [tiers.go](https://github.com/vkuznet/dbs2go/blob/master/dbs/tiers.go)
 holds full implemenation for that specific api `/tiers` used by DBS server.
-It includes a `DataTiers` DBS API, a `DataTiers` struct representing
-associative DBS Table, Each DBS API implements `DBRecord` interface (found in
+It includes corresponding data strcut, e.g. `DataTiers`, which represent associative
+DBS table. Each DBS API implements `DBRecord` interface (found in
 [dbs/dbs.go](https://github.com/vkuznet/dbs2go/blob/master/dbs/dbs.go)):
 ```
 type DBRecord interface {
@@ -84,3 +84,118 @@ the `/tiers` DBS API, representing by `dbs/tiers.go` codebase contains
 `DataTiers` struct which implements the above interface for `DataTiers`
 table, i.e. it allows to insert, validate, set defaults and decode
 records representing `DataTiers` data.
+
+The look-up API, e.g. `/datatiers`, fetches data from corresponding DB table.
+The workflow is the following:
+- prepare SQL statement based on provided set of parameters
+  - you may find individual SQL templates in
+    [static/sql](https://github.com/dmwm/dbs2go/tree/master/static/sql) area,
+    e.g. data tiers SQL can be found
+    [here](https://github.com/dmwm/dbs2go/blob/master/static/sql/tiers.sql),
+    while SQL statement associated with insertion is located
+    [here](https://github.com/dmwm/dbs2go/blob/master/static/sql/insert_tiers.sql)
+- validate and compose binding variables for SQL query
+- pass individual SQL statment along with its binding parameters to execute API
+  - there are two set of APIs:
+  `executeAll` and `execute`
+  presented in [dbs/dbs.go](https://github.com/dmwm/dbs2go/blob/master/dbs/dbs.go)
+  module. The former takes prepared SQL statement along with binding
+  arguments, while later takes in addition explicit set of columns to fetch.
+  Both APIs place request to underlying DB and write results directly
+  to provided writer (e.g. HTTP response). This architecture allows to
+  keep memory usage at minimum and scale regardless of number of fetch rows.
+  The results are streamed back to the client.
+
+### DBS errors
+The DBS code provides standard set of erros and corresponding error codes.
+They are located in `dbs/errors.go`:
+```
+        GenericErrorCode        = iota + 100 // generic DBS error
+        DatabaseErrorCode                    // 101 database error
+        TransactionErrorCode                 // 102 transaction error
+        QueryErrorCode                       // 103 query error
+        RowsScanErrorCode                    // 104 row scan error
+        SessionErrorCode                     // 105 db session error
+        CommitErrorCode                      // 106 db commit error
+        ParseErrorCode                       // 107 parser error
+        LoadErrorCode                        // 108 loading error, e.g. load template
+        GetIDErrorCode                       // 109 get id db error
+        InsertErrorCode                      // 110 db insert error
+        UpdateErrorCode                      // 111 update error
+        LastInsertErrorCode                  // 112 db last insert error
+        ValidateErrorCode                    // 113 validation error
+        PatternErrorCode                     // 114 pattern error
+        DecodeErrorCode                      // 115 decode error
+        EncodeErrorCode                      // 116 encode error
+        ContentTypeErrorCode                 // 117 content type error
+        ParametersErrorCode                  // 118 parameters error
+        NotImplementedApiCode                // 119 not implemented API error
+        ReaderErrorCode                      // 120 io reader error
+        WriterErrorCode                      // 121 io writer error
+        UnmarshalErrorCode                   // 122 json unmarshal error
+        MarshalErrorCode                     // 123 marshal error
+        HttpRequestErrorCode                 // 124 HTTP request error
+        MigrationErrorCode                   // 125 Migration error
+        RemoveErrorCode                      // 126 remove error
+        InvalidRequestErrorCode              // 127 invalid request error
+```
+The DBS web handler wraps each DBS error in HTTP failure request with two
+common structures: `HTTPError` and `DBSError` which are part of `ServerError`
+```
+// HTTPError represents HTTP error structure
+type HTTPError struct {
+        Method         string `json:"method"`           // HTTP method
+        HTTPCode       int    `json:"code"`             // HTTP status code from IANA
+        Timestamp      string `json:"timestamp"`        // timestamp of the error
+        Path           string `json:"path"`             // URL path
+        UserAgent      string `json:"user_agent"`       // http user-agent field
+        XForwardedHost string `json:"x_forwarded_host"` // http.Request X-Forwarded-Host
+        XForwardedFor  string `json:"x_forwarded_for"`  // http.Request X-Forwarded-For
+        RemoteAddr     string `json:"remote_addr"`      // http.Request remote address
+}
+
+// ServerError represents HTTP server error structure
+type ServerError struct {
+        DBSError  error     `json:"error"`     // DBS error
+        HTTPError HTTPError `json:"http"`      // HTTP section of the error
+        Exception int       `json:"exception"` // for compatibility with Python server
+        Type      string    `json:"type"`      // for compatibility with Python server
+        Message   string    `json:"message"`   // for compatibility with Python server
+}
+```
+
+On a client side a particular error will look like this:
+
+```
+curl .. http://.../dbs2go/datatiers?data_tier_name=1
+
+[
+  {
+    "error": {
+      "reason": "DBSError Code:114 Description:DBS validation error when wrong pattern is provided Function:dbs.validator.Check Message:unable to match 'data_tier_name' value '1' Error: invalid parameter(s)",
+      "message": "not str type",
+      "function": "dbs.Validate",
+      "code": 113
+    },
+    "http": {
+      "method": "GET",
+      "code": 400,
+      "timestamp": "2022-02-04 14:47:47.058650325 +0000 UTC m=+86568.954530362",
+      "path": "/dbs2go/datatiers?data_tier_name=1",
+      "user_agent": "curl/7.59.0",
+      "x_forwarded_host": "cmsweb-testbed.cern.ch",
+      "x_forwarded_for": "188.185.79.81",
+      "remote_addr": "188.184.75.219:20274"
+    },
+    "exception": 400,
+    "type": "HTTPError",
+    "message": "DBSError Code:113 Description:DBS validation error, e.g. input parameter does not match lexicon rules Function:dbs.Validate Message:not str type Error: nested DBSError Code:114 Description:DBS validation error when wrong pattern is provided Function:dbs.validator.Check Message:unable to match 'data_tier_name' value '1' Error: invalid parameter(s)"
+  }
+]
+```
+
+The returned HTTP response contains all relevant information to identify DBS
+error, its code, and user client info (such as host, user-agent, etc).
+
+Each DBSError may be wrapped into another one to provide relevant information
+how error was originated (similar to Python traceback).
