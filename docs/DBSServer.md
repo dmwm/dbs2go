@@ -19,7 +19,7 @@ Here is architecture of the DBS server:
 ![DBS Server Architecture](images/DBSServer.png)
 
 ### Repository structure and code logic
-[dns2go](https://github.com/vkuznet/dbs2go) has the following structure:
+[dbs2go](https://github.com/vkuznet/dbs2go) has the following structure:
 - [dbs](https://github.com/vkuznet/dbs2go/tree/master/dbs)
   folder contains all business and DAO objects
 - [static](https://github.com/vkuznet/dbs2go/tree/master/static) area contains 
@@ -66,8 +66,8 @@ The DBS business and DAO logic resides within
 The individual file, e.g.
 [tiers.go](https://github.com/vkuznet/dbs2go/blob/master/dbs/tiers.go)
 holds full implemenation for that specific api `/tiers` used by DBS server.
-It includes a `DataTiers` DBS API, a `DataTiers` struct representing
-associative DBS Table, Each DBS API implements `DBRecord` interface (found in
+It includes corresponding data strcut, e.g. `DataTiers`, which represent associative
+DBS table. Each DBS API implements `DBRecord` interface (found in
 [dbs/dbs.go](https://github.com/vkuznet/dbs2go/blob/master/dbs/dbs.go)):
 ```
 type DBRecord interface {
@@ -84,3 +84,24 @@ the `/tiers` DBS API, representing by `dbs/tiers.go` codebase contains
 `DataTiers` struct which implements the above interface for `DataTiers`
 table, i.e. it allows to insert, validate, set defaults and decode
 records representing `DataTiers` data.
+
+The look-up API, e.g. `/datatiers`, fetches data from corresponding DB table.
+The workflow is the following:
+- prepare SQL statement based on provided set of parameters
+  - you may find individual SQL templates in
+    [static/sql](https://github.com/dmwm/dbs2go/tree/master/static/sql) area,
+    e.g. data tiers SQL can be found
+    [here](https://github.com/dmwm/dbs2go/blob/master/static/sql/tiers.sql),
+    while SQL statement associated with insertion is located
+    [here](https://github.com/dmwm/dbs2go/blob/master/static/sql/insert_tiers.sql)
+- validate and compose binding variables for SQL query
+- pass individual SQL statment along with its binding parameters to execute API
+  - there are two execute APIs:
+  `executeAll` and `execute`
+  presented in [dbs/dbs.go](https://github.com/dmwm/dbs2go/blob/master/dbs/dbs.go)
+  module. The former takes prepared SQL statement along with binding
+  arguments, while later takes in addition explicit set of columns to fetch.
+  Both APIs place request to underlying DB and write results directly
+  to provided writer (e.g. HTTP response). This architecture allows to
+  keep memory usage at minimum and scale regardless of number of fetch rows.
+  The results are streamed back to the client.
