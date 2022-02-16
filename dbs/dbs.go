@@ -210,17 +210,27 @@ func GetTestData() error {
 		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
 	}
 	defer tx.Rollback()
-	_, err = GetID(tx, "DATASET_ACCESS_TYPES", "dataset_access_type", "dataset_access_type", "VALID")
+	var stm string
+	if DBOWNER == "sqlite" {
+		stm = fmt.Sprintf("SELECT DATASET_ACCESS_TYPE FROM DATASET_ACCESS_TYPES WHERE DATASET_ACCESS_TYPE = ?")
+	} else {
+		stm = fmt.Sprintf("SELECT T.DATASET_ACCESS_TYPE FROM %s.DATASET_ACCESS_TYPES T WHERE T.DATASET_ACCESS_TYPES = :dataset_access_type", DBOWNER)
+	}
+	var args []interface{}
+	args = append(args, "VALID")
+	var dtype string
+	err = tx.QueryRow(stm, args...).Scan(&dtype)
 	if err != nil {
+		msg := fmt.Sprintf("unable to query statement: %v, error %v", stm, err)
+		log.Println(msg)
 		if !strings.Contains(err.Error(), "no rows in result set") {
 			msg := fmt.Sprintf("unable to GetID from DATASET_ACCESS_TYPES table")
 			log.Println(msg)
 			return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
 		}
 	}
-	err = tx.Commit()
-	if err != nil {
-		return Error(err, CommitErrorCode, "", "dbs.GetTestData")
+	if dtype != "VALID" {
+		return Error(err, GenericErrorCode, "invalid dataset access type", "dbs.GetTestData")
 	}
 	return nil
 }
