@@ -17,7 +17,7 @@ import (
 )
 
 // limiter middleware pointer
-var limiterMiddleware *stdlib.Middleware
+var LimiterMiddleware *stdlib.Middleware
 
 // initialize Limiter middleware pointer
 func initLimiter(period string) {
@@ -29,7 +29,7 @@ func initLimiter(period string) {
 	}
 	store := memory.NewStore()
 	instance := limiter.New(store, rate)
-	limiterMiddleware = stdlib.NewMiddleware(instance)
+	LimiterMiddleware = stdlib.NewMiddleware(instance)
 }
 
 // helper to auth/authz incoming requests to the server
@@ -87,7 +87,7 @@ func validateMiddleware(next http.Handler) http.Handler {
 
 // limit middleware limits incoming requests
 func limitMiddleware(next http.Handler) http.Handler {
-	return limiterMiddleware.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return LimiterMiddleware.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
 	}))
 }

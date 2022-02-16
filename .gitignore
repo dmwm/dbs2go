@@ -38,3 +38,4 @@ writer.json
 migrate.json
 migration.json
 test/data/dbsdata
+.env

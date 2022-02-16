@@ -68,5 +68,7 @@ test-lexicon-reader-pos:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_positive.json go test -v -run LexiconPositive
 test-lexicon-reader-neg:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_negative.json go test -v -run LexiconNegative
+test-integration:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json go test -v -run Integration
 bench:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -run Benchmark -bench=.

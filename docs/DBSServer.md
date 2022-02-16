@@ -19,12 +19,12 @@ Here is architecture of the DBS server:
 ![DBS Server Architecture](images/DBSServer.png)
 
 ### Repository structure and code logic
-[dns2go](https://github.com/vkuznet/dbs2go) has the following structure:
+[dbs2go](https://github.com/vkuznet/dbs2go) has the following structure:
 - [dbs](https://github.com/vkuznet/dbs2go/tree/master/dbs)
   folder contains all business and DAO objects
 - [static](https://github.com/vkuznet/dbs2go/tree/master/static) area contains 
   - [SQL templates](https://github.com/vkuznet/dbs2go/tree/master/static/sql)
-  - [HTPP templates](https://github.com/vkuznet/dbs2go/tree/master/static/templates)
+  - [HTTP templates](https://github.com/vkuznet/dbs2go/tree/master/static/templates)
   - [CSS](https://github.com/vkuznet/dbs2go/tree/master/static/css)
   - [DB schemas](https://github.com/vkuznet/dbs2go/tree/master/static/schema)
   - [images](https://github.com/vkuznet/dbs2go/tree/master/static/images)
