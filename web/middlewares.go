@@ -16,7 +16,7 @@ import (
 	"github.com/vkuznet/dbs2go/dbs"
 )
 
-// limiter middleware pointer
+// LimiterMiddleware provides limiter middleware pointer
 var LimiterMiddleware *stdlib.Middleware
 
 // initialize Limiter middleware pointer

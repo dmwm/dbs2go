@@ -93,7 +93,7 @@ func basePath(api string) string {
 	return utils.BasePath(Config.Base, api)
 }
 
-// helper funtion to setup all HTTP routes
+// Handlers provides helper function to setup all HTTP routes
 func Handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
