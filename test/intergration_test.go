@@ -183,7 +183,7 @@ func remapRecord(t *testing.T, record dbs.DBRecord) map[string]interface{} {
 }
 
 // TestDBSIntegration Tests both DBSReader and DBSWriter Endpoints
-func TestDBSIntegration(t *testing.T) {
+func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
