@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -31,9 +32,13 @@ func initTestLimiter(t *testing.T, period string) {
 }
 
 // configures the test server with basic parameters
-func configTestServer(t *testing.T, serverType string, lexiconFile string) {
+func runTestServer(t *testing.T, serverType string, lexiconFile string) *httptest.Server {
+	dbfile := os.Getenv("DBS_DB_FILE")
+	if dbfile == "" {
+		t.Fatal("no DBS_DB_FILE env variable, please define")
+	}
 	web.Config.Base = "/dbs"
-	web.Config.DBFile = "../dbfile"
+	web.Config.DBFile = dbfile
 	web.Config.LexiconFile = lexiconFile
 	web.Config.ServerCrt = ""
 	web.Config.ServerKey = ""
@@ -42,6 +47,10 @@ func configTestServer(t *testing.T, serverType string, lexiconFile string) {
 	web.Config.Verbose = 0
 
 	initTestLimiter(t, "100-S")
+
+	ts := httptest.NewServer(web.Handlers())
+
+	return ts
 }
 
 // injects dbs records
@@ -116,6 +125,63 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 	return r
 }
 
+// compares received response to expected
+func verifyResponse(t *testing.T, received []dbs.Record, expected map[string]interface{}, fields []string) {
+	for _, r := range received {
+		for _, f := range fields {
+			if r[f] != expected[f] {
+				if strings.Contains(f, "id") || f == "creation_date" {
+					if r[f] == nil {
+						t.Fatalf("ID field empty")
+					}
+				} else {
+					t.Fatalf("Incorrect %s: Expected %v, Received: %v", f, expected[f], r[f])
+				}
+			}
+		}
+	}
+}
+
+// run test workflow for a single endpoint
+func runTestWorkflow(t *testing.T, tsR *httptest.Server, tsW *httptest.Server, endpoint string, hdlr func(http.ResponseWriter, *http.Request), dbrec dbs.DBRecord, params url.Values, fields []string) {
+	emap := remapRecord(t, dbrec)
+
+	t.Run("Test empty GET", func(t *testing.T) {
+		d, _ := getData(t, tsR.URL, endpoint, nil)
+		if len(d) != 0 {
+			t.Fatal("Data exists")
+		}
+	})
+
+	t.Run("Test POST", func(t *testing.T) {
+		records := injectDBRecord(t, dbrec, "POST", tsW.URL, endpoint, hdlr)
+		verifyResponse(t, records, emap, fields)
+	})
+
+	t.Run("Test GET after POST", func(t *testing.T) {
+		d, _ := getData(t, tsR.URL, endpoint, nil)
+		verifyResponse(t, d, emap, fields)
+	})
+
+	t.Run("Test GET with parameters", func(t *testing.T) {
+		getData(t, tsR.URL, endpoint, params)
+	})
+}
+
+// remap a DBRecord to a general map
+func remapRecord(t *testing.T, record dbs.DBRecord) map[string]interface{} {
+	data, err := json.Marshal(record)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	var emap map[string]interface{}
+	err = json.Unmarshal(data, &emap)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	return emap
+}
+
 // TestDBSIntegration Tests both DBSReader and DBSWriter Endpoints
 func TestDBSIntegration(t *testing.T) {
 	db := initDB(false)
@@ -131,95 +197,43 @@ func TestDBSIntegration(t *testing.T) {
 		t.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
 	}
 
-	configTestServer(t, "DBSWriter", lexiconFileWriter)
 	// start DBSWriter server
-	tsW := httptest.NewServer(web.Handlers())
+	tsW := runTestServer(t, "DBSWriter", lexiconFileWriter)
 	defer tsW.Close()
 
-	configTestServer(t, "DBSReader", lexiconFileReader)
 	// start DBSReader server
-	tsR := httptest.NewServer(web.Handlers())
+	tsR := runTestServer(t, "DBSReader", lexiconFileReader)
 	defer tsR.Close()
 
 	t.Run("Test datatiers", func(t *testing.T) {
-		// verify datatier received vs data
-		verifyResponse := func(expected dbs.DataTiers, received []dbs.Record) {
-			if received[0]["data_tier_name"] != expected.DATA_TIER_NAME {
-				t.Fatalf("Incorrect data_tier_name: Expected %v, Received %v", expected.DATA_TIER_NAME, received[0]["data_tier_name"])
-			}
-			if received[0]["create_by"] != expected.CREATE_BY {
-				t.Fatalf("Incorrect create_by: Expected %v, Received %v", expected.CREATE_BY, received[0]["create_by"])
-			}
-			if received[0]["data_tier_id"] == nil {
-				t.Fatalf("No ID assigned")
-			}
-		}
-
 		dt := dbs.DataTiers{
 			DATA_TIER_NAME: "GEN-SIM-RAW",
 			CREATE_BY:      "tester",
 		}
+		// fields that are created thru api handler
+		var fields = []string{
+			"data_tier_id",
+			"creation_date",
+			"data_tier_name",
+			"create_by",
+		}
 
-		t.Run("Test empty GET", func(t *testing.T) {
-			d, _ := getData(t, tsR.URL, "/dbs/datatiers", nil)
-			if len(d) != 0 {
-				t.Fatal("Data exists")
-			}
-		})
+		params := url.Values{}
+		params.Add("data_tier_name", "GEN-SIM-RAW")
 
-		t.Run("Test POST", func(t *testing.T) {
-			records := injectDBRecord(t, &dt, "POST", tsW.URL, "/dbs/datatiers", web.DatatiersHandler)
-			verifyResponse(dt, records)
-		})
-
-		t.Run("Test GET after POST", func(t *testing.T) {
-			d, _ := getData(t, tsR.URL, "/dbs/datatiers", nil)
-			verifyResponse(dt, d)
-		})
-
-		t.Run("Test GET with parameters", func(t *testing.T) {
-			params := url.Values{}
-			params.Add("data_tier_name", "GEN-SIM-RAW")
-			getData(t, tsR.URL, "/dbs/datatiers", params)
-		})
+		runTestWorkflow(t, tsR, tsW, "/dbs/datatiers", web.DatatiersHandler, &dt, params, fields)
 	})
 
 	t.Run("Test physicsgroups", func(t *testing.T) {
-		// verify physicsgroups received vs expected data
-		verifyResponse := func(expected dbs.PhysicsGroups, received []dbs.Record) {
-			if received[0]["physics_group_name"] != expected.PHYSICS_GROUP_NAME {
-				t.Fatalf("Incorrect physics_group_name: Expected %v, Received %v", expected.PHYSICS_GROUP_NAME, received[0]["physics_group_name"])
-			}
-			if received[0]["physics_group_id"] != nil {
-				t.Fatalf("No ID assigned")
-			}
-		}
-
 		pg := dbs.PhysicsGroups{
 			PHYSICS_GROUP_NAME: "Tracker",
 		}
+		// fields that are created thru api handler
+		fields := []string{"physics_group_name"}
 
-		t.Run("Test empty GET", func(t *testing.T) {
-			d, _ := getData(t, tsR.URL, "/dbs/physicsgroups", nil)
-			if len(d) != 0 {
-				t.Fatal("Data exists")
-			}
-		})
+		params := url.Values{}
+		params.Add("physics_group_name", "Tracker")
 
-		t.Run("Test POST", func(t *testing.T) {
-			records := injectDBRecord(t, &pg, "POST", tsW.URL, "/dbs/physicsgroups", web.PhysicsGroupsHandler)
-			verifyResponse(pg, records)
-		})
-
-		t.Run("Test GET after POST", func(t *testing.T) {
-			d, _ := getData(t, tsR.URL, "/dbs/physicsgroups", nil)
-			verifyResponse(pg, d)
-		})
-
-		t.Run("Test GET with parameters", func(t *testing.T) {
-			params := url.Values{}
-			params.Add("physics_group_name", "Tracker")
-			getData(t, tsR.URL, "/dbs/physicsgroups", params)
-		})
+		runTestWorkflow(t, tsR, tsW, "/dbs/physicsgroups", web.PhysicsGroupsHandler, &pg, params, fields)
 	})
 }
