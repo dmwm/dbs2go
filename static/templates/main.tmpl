@@ -4,28 +4,29 @@
     <title>DBS server</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-    <link rel="stylesheet" href="css/kube.min.css" />
-    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="{{.Base}}/css/main.css" />
 </head>
-<body class="kubepage">
-
-    <header class="group header">
-        <nav class="navbar navbar-left">
-            <ul>
-            <li><img src="images/cms_logo.jpg" alt="" style="width:30px" ></li>
-            <li><a href="" class="main-menu-item">DBS</a></li>
-            </ul>
-        </nav>
-        <nav class="navbar navbar-right">
-            <strong>User: {{.User}}</strong>
-        </nav>
-    </header>
+<body>
+    <h2>DBS Server</h2>
+    {{.ServerInfo}}
     <br/>
-
-<div class="main-font">
-    {{.Content}}
-</div>
-
+    <h2>DBS documentation</h2>
+    <div class="list">
+    <ul>
+        <li><a href="https://github.com/dmwm/dbs2go/blob/master/docs/DBSServer.md">DBS Server architecture</a></li>
+        <li><a href="https://monit-grafana.cern.ch/d/kJOvR2h7k/dbs2go?orgId=11">DBS server dashboard</a></li>
+        <li><a href="https://github.com/dmwm/dbs2go/blob/master/docs/Client.md">DBS client</a></li>
+        <li><a href="https://github.com/dmwm/dbs2go/blob/master/docs/apis.md">DBS apis</a></li>
+        <li><a href="https://github.com/dmwm/dbs2go/blob/master/docs/DBSServer.md#dbs-errors">DBS errors</a></li>
+    </ul>
+    </div>
+    <hr/>
+    <div class="center">
+        <a href="https://github.com/dmwm/dbs2go" title="GitHub"><img src="https://www.freeiconspng.com/uploads/github-logo-icon-0.png" width="30" alt="Github" /></a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/dmwm/dbs2go/issues" title="Issue"><img src="https://www.freeiconspng.com/uploads/error-exclamation-problem-warning-icon-32.png" width="30" alt="Issue" /></a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://cms-talk.web.cern.ch/c/offcompannounce/dmwmdev/153" title="ContactUs"><img src="https://www.freeiconspng.com/uploads/discussion-forum-icon-6.png" width="30" alt="Contact" /></a>
+    </div>
 </body>
 </html>
