@@ -11,6 +11,9 @@ import (
 	"path/filepath"
 )
 
+// TmplRecord represent template record
+type TmplRecord map[string]interface{}
+
 // consume list of templates and release their full path counterparts
 func fileNames(tdir string, filenames ...string) []string {
 	flist := []string{}
@@ -54,16 +57,16 @@ func parseTmpl(tdir, tmpl string, data interface{}) string {
 	return buf.String()
 }
 
-// ServerTemplates structure
-type ServerTemplates struct {
-	top, bottom, pagination, files, searchForm, cards, serverError, keys, zero, record, status string
+// Templates structure
+type Templates struct {
+	html string
 }
 
 // Tmpl method for ServerTemplates structure
-func (q ServerTemplates) Tmpl(tdir, tfile string, tmplData map[string]interface{}) string {
-	if q.top != "" {
-		return q.top
+func (q Templates) Tmpl(tdir, tfile string, tmplData map[string]interface{}) string {
+	if q.html != "" {
+		return q.html
 	}
-	q.top = parseTmpl(Config.Templates, tfile, tmplData)
-	return q.top
+	q.html = parseTmpl(Config.Templates, tfile, tmplData)
+	return q.html
 }

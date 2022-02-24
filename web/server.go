@@ -196,6 +196,9 @@ func handlers() *mux.Router {
 	router.HandleFunc(basePath("/help"), ApisHandler).Methods("GET")
 	router.HandleFunc(basePath("/dummy"), DummyHandler).Methods("GET", "POST")
 
+	// main page
+	router.HandleFunc(basePath("/"), MainHandler).Methods("GET")
+
 	// for all requests
 	router.Use(headerMiddleware)
 	// for all requests
@@ -361,7 +364,7 @@ func Server(configFile string) {
 
 	// static handlers
 	for _, dir := range []string{"js", "css", "images"} {
-		m := fmt.Sprintf("/%s/%s/", Config.Base, dir)
+		m := fmt.Sprintf("%s/%s/", Config.Base, dir)
 		d := fmt.Sprintf("%s/%s", utils.STATICDIR, dir)
 		http.Handle(m, http.StripPrefix(m, http.FileServer(http.Dir(d))))
 	}

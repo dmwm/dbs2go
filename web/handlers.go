@@ -48,6 +48,16 @@ type ServerError struct {
 	Message   string    `json:"message"`   // for compatibility with Python server
 }
 
+// helper function to parse given template and return HTML page
+func tmplPage(tmpl string, tmplData TmplRecord) string {
+	if tmplData == nil {
+		tmplData = make(TmplRecord)
+	}
+	var templates Templates
+	page := templates.Tmpl(Config.Templates, tmpl, tmplData)
+	return page
+}
+
 // responseMsg helper function to provide response to end-user
 func responseMsg(w http.ResponseWriter, r *http.Request, err error, code int) int64 {
 	path := r.RequestURI
@@ -132,6 +142,15 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(promMetrics(Config.MetricsPrefix)))
 	return
+}
+
+// MainHandler provides access to main page of DBS server
+func MainHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := make(TmplRecord)
+	tmpl["Base"] = Config.Base
+	tmpl["ServerInfo"] = ServerInfo
+	page := tmplPage("main.tmpl", tmpl)
+	w.Write([]byte(page))
 }
 
 // QueryHandler provides access to graph ql query
