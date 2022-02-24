@@ -29,11 +29,17 @@ curl -H "Accept: application/json" \
     primary_ds_type`, `processed_ds_name`, `data_tier_name`, `dataset_access_type,
     prep_id`, `create_by`, `last_modified_by`, `min_cdate`, `max_cdate`, `min_ldate,
     max_ldate`, `cdate`, `ldate`, `detail`, `dataset_id`
+
+  - lists: this apis allows list of `dataset`, `run_num` and `dataset_id`
+
 - `/blocks`
   - returns list of DBS blocks, including their details
   - arguments: `dataset`, `block_name`, `data_tier_name`, `origin_site_name,
     logical_file_name`, `run_num`, `min_cdate`, `max_cdate`, `min_ldate`, `max_ldate,
     cdate`, `ldate`, `open_for_writing`, `detail`
+
+  - lists: this apis allows list of `run_num`
+
 - `/blockTrio`
   - returns the triplets of files ids, run numbers and associative lumis
   - arguments: `block_name`
@@ -42,6 +48,9 @@ curl -H "Accept: application/json" \
   - arguments: `dataset`, `block_name`, `logical_file_name`, `release_version,
     pset_hash`, `app_name`, `output_module_label`, `run_num`, `origin_site_name,
     lumi_list`, `detail`, `validFileOnly`, `sumOverLumi`
+
+  - lists: this apis allows list of `logical_file_name` and `lumi_list`
+
 - `/primarydatasets`
   - returns list of primary datasets
   - arguments: `primary_ds_name`, `primary_ds_type`
@@ -92,21 +101,36 @@ curl -H "Accept: application/json" \
 - `/blockparents`
   - returns list of block parents
   - arguments: `block_name`
+
+  - lists: this apis allows list of `block_name`
+
 - `/blocksummaries`
   - returns list of block summaries
   - arguments: `block_name`, `dataset`, `detail`
+
+  - lists: this apis allows list of `block_name`
+
 - `/filechildren`
   - returns list of file children
   - arguments: `logical_file_name`, `block_name`, `block_id`
+
+  - lists: this apis allows list of `logical_file_name`
+
 - `/fileparents`
   - returns list of file parents
   - arguments: `logical_file_name`, `block_name`, `block_id`
+
+  - lists: this apis allows list of `logical_file_name`
+
 - /filesummaries
   - returns list of file summaries
   - arguments: `block_name`, `dataset`, `run_num`, `validFileOnly`, `sumOverLumi`
 - `/filelumis`
   - returns list of file lumis
   - arguments: `logical_file_name`, `block_name`, `run_num`, `validFileOnly`
+
+  - lists: this apis allows list of `logical_file_name`
+
 - `/datasetchildren`
   - return list of dataset children
   - arguments: `dataset`
