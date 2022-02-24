@@ -7,6 +7,7 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 )
@@ -130,6 +131,9 @@ func ParseConfig(configFile string) error {
 	if Config.FileLumiInsertMethod == "" {
 		// possible values are: temptable, chunks, linear
 		Config.FileLumiInsertMethod = "chunks"
+	}
+	if Config.Templates == "" {
+		Config.Templates = fmt.Sprintf("%s/templates", Config.StaticDir)
 	}
 	return nil
 }
