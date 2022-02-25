@@ -30,7 +30,10 @@ curl -H "Accept: application/json" \
     prep_id`, `create_by`, `last_modified_by`, `min_cdate`, `max_cdate`, `min_ldate,
     max_ldate`, `cdate`, `ldate`, `detail`, `dataset_id`
 
-  - lists: this apis allows list of `dataset`, `run_num` and `dataset_id`
+    - this api allows list of `dataset`, `run_num` and `dataset_id` parameters
+    - the `run_num` parameter can be represented in ths following forms:
+      - as a list, e.g. `run_num=[123,234]`
+      - as a run range, e.g. `run_num=1-10`
 
 - `/blocks`
   - returns list of DBS blocks, including their details
@@ -38,7 +41,10 @@ curl -H "Accept: application/json" \
     logical_file_name`, `run_num`, `min_cdate`, `max_cdate`, `min_ldate`, `max_ldate,
     cdate`, `ldate`, `open_for_writing`, `detail`
 
-  - lists: this apis allows list of `run_num`
+    - this api allows list of `run_num` parameter
+    - the `run_num` parameter can be represented in ths following forms:
+      - as a list, e.g. `run_num=[123,234]`
+      - as a run range, e.g. `run_num=1-10`
 
 - `/blockTrio`
   - returns the triplets of files ids, run numbers and associative lumis
@@ -49,7 +55,7 @@ curl -H "Accept: application/json" \
     pset_hash`, `app_name`, `output_module_label`, `run_num`, `origin_site_name,
     lumi_list`, `detail`, `validFileOnly`, `sumOverLumi`
 
-  - lists: this apis allows list of `logical_file_name` and `lumi_list`
+    - this api allows list of `logical_file_name` and `lumi_list` parameters
 
 - `/primarydatasets`
   - returns list of primary datasets
@@ -102,25 +108,25 @@ curl -H "Accept: application/json" \
   - returns list of block parents
   - arguments: `block_name`
 
-  - lists: this apis allows list of `block_name`
+    - this api allows list of `block_name` parameter
 
 - `/blocksummaries`
   - returns list of block summaries
   - arguments: `block_name`, `dataset`, `detail`
 
-  - lists: this apis allows list of `block_name`
+    - this api allows list of `block_name` parameter
 
 - `/filechildren`
   - returns list of file children
   - arguments: `logical_file_name`, `block_name`, `block_id`
 
-  - lists: this apis allows list of `logical_file_name`
+    - this api allows list of `logical_file_name` parameter
 
 - `/fileparents`
   - returns list of file parents
   - arguments: `logical_file_name`, `block_name`, `block_id`
 
-  - lists: this apis allows list of `logical_file_name`
+    - this api allows list of `logical_file_name` parameter
 
 - /filesummaries
   - returns list of file summaries
@@ -129,7 +135,7 @@ curl -H "Accept: application/json" \
   - returns list of file lumis
   - arguments: `logical_file_name`, `block_name`, `run_num`, `validFileOnly`
 
-  - lists: this apis allows list of `logical_file_name`
+    - this api allows list of `logical_file_name` parameter
 
 - `/datasetchildren`
   - return list of dataset children
