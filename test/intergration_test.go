@@ -54,13 +54,13 @@ func runTestServer(t *testing.T, serverType string, lexiconFile string) *httptes
 }
 
 // injects dbs records
-func injectDBRecord(t *testing.T, rec dbs.DBRecord, method string, url string, endpoint string, handler func(http.ResponseWriter, *http.Request)) []dbs.Record {
+func injectDBRecord(t *testing.T, rec dbs.DBRecord, method string, hostname string, endpoint string, params url.Values, handler func(http.ResponseWriter, *http.Request), needParams bool) []dbs.Record {
 	data, err := json.Marshal(rec)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 	reader := bytes.NewReader(data)
-	req := newreq(t, method, url, endpoint, reader, nil)
+	req := newreq(t, method, hostname, endpoint, reader, nil)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	r, err := http.DefaultClient.Do(req)
@@ -73,7 +73,9 @@ func injectDBRecord(t *testing.T, rec dbs.DBRecord, method string, url string, e
 		t.Fatal(err)
 	}
 
-	rr, err := respRecorder("GET", endpoint, nil, handler)
+	rURL := parseURL(t, hostname, endpoint, params)
+
+	rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
 	if err != nil {
 		t.Error(err)
 	}
@@ -89,13 +91,19 @@ func injectDBRecord(t *testing.T, rec dbs.DBRecord, method string, url string, e
 }
 
 // fetches data from url and endpoint
-func getData(t *testing.T, url string, endpoint string, params url.Values) ([]dbs.Record, int) {
+func getData(t *testing.T, url string, endpoint string, params url.Values, needParams bool) ([]dbs.Record, int) {
 	r, err := http.DefaultClient.Do(newreq(t, "GET", url, endpoint, nil, params))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer r.Body.Close()
 
+	if params == nil && needParams {
+		if r.StatusCode != http.StatusBadRequest {
+			t.Fatalf("Expected Bad Request")
+		}
+		return nil, r.StatusCode
+	}
 	if r.StatusCode != http.StatusOK {
 		t.Fatalf("Bad status code: %v", r.StatusCode)
 	}
@@ -109,8 +117,8 @@ func getData(t *testing.T, url string, endpoint string, params url.Values) ([]db
 	return d, r.StatusCode
 }
 
-// creates an http request for testing
-func newreq(t *testing.T, method string, hostname string, endpoint string, body io.Reader, params url.Values) *http.Request {
+// creates a URL given a hostname, endpoint, and parameters
+func parseURL(t *testing.T, hostname string, endpoint string, params url.Values) *url.URL {
 	url2, err := url.Parse(hostname)
 	if err != nil {
 		t.Fatal(err)
@@ -118,7 +126,14 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 	url2.Path = endpoint
 	url2.RawQuery = params.Encode()
 
-	r, err := http.NewRequest(method, url2.String(), body)
+	return url2
+}
+
+// creates an http request for testing
+func newreq(t *testing.T, method string, hostname string, endpoint string, body io.Reader, params url.Values) *http.Request {
+	reqURL := parseURL(t, hostname, endpoint, params)
+
+	r, err := http.NewRequest(method, reqURL.String(), body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,6 +142,12 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 
 // compares received response to expected
 func verifyResponse(t *testing.T, received []dbs.Record, expected map[string]interface{}, fields []string) {
+	keys := make([]string, len(expected))
+	i := 0
+	for k := range expected {
+		keys[i] = k
+		i++
+	}
 	for _, r := range received {
 		for _, f := range fields {
 			if r[f] != expected[f] {
@@ -143,28 +164,32 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected map[string]int
 }
 
 // run test workflow for a single endpoint
-func runTestWorkflow(t *testing.T, tsR *httptest.Server, tsW *httptest.Server, endpoint string, hdlr func(http.ResponseWriter, *http.Request), dbrec dbs.DBRecord, params url.Values, fields []string) {
+func runTestWorkflow(t *testing.T, tsR *httptest.Server, tsW *httptest.Server, endpoint string, hdlr func(http.ResponseWriter, *http.Request), dbrec dbs.DBRecord, fields []string, params url.Values, needParams bool) {
 	emap := remapRecord(t, dbrec)
 
-	t.Run("Test empty GET", func(t *testing.T) {
-		d, _ := getData(t, tsR.URL, endpoint, nil)
+	t.Run("Test GET with empty DB", func(t *testing.T) {
+		d, _ := getData(t, tsR.URL, endpoint, params, needParams)
 		if len(d) != 0 {
 			t.Fatal("Data exists")
 		}
 	})
 
 	t.Run("Test POST", func(t *testing.T) {
-		records := injectDBRecord(t, dbrec, "POST", tsW.URL, endpoint, hdlr)
+		records := injectDBRecord(t, dbrec, "POST", tsW.URL, endpoint, params, hdlr, needParams)
 		verifyResponse(t, records, emap, fields)
 	})
 
 	t.Run("Test GET after POST", func(t *testing.T) {
-		d, _ := getData(t, tsR.URL, endpoint, nil)
+		d, _ := getData(t, tsR.URL, endpoint, params, needParams)
 		verifyResponse(t, d, emap, fields)
 	})
 
 	t.Run("Test GET with parameters", func(t *testing.T) {
-		getData(t, tsR.URL, endpoint, params)
+		getData(t, tsR.URL, endpoint, params, needParams)
+	})
+
+	t.Run("Test GET without parameters", func(t *testing.T) {
+		getData(t, tsR.URL, endpoint, nil, needParams)
 	})
 }
 
@@ -206,7 +231,7 @@ func TestIntegration(t *testing.T) {
 	defer tsR.Close()
 
 	t.Run("Test datatiers", func(t *testing.T) {
-		dt := dbs.DataTiers{
+		rec := dbs.DataTiers{
 			DATA_TIER_NAME: "GEN-SIM-RAW",
 			CREATE_BY:      "tester",
 		}
@@ -221,11 +246,11 @@ func TestIntegration(t *testing.T) {
 		params := url.Values{}
 		params.Add("data_tier_name", "GEN-SIM-RAW")
 
-		runTestWorkflow(t, tsR, tsW, "/dbs/datatiers", web.DatatiersHandler, &dt, params, fields)
+		runTestWorkflow(t, tsR, tsW, "/dbs/datatiers", web.DatatiersHandler, &rec, fields, params, false)
 	})
 
 	t.Run("Test physicsgroups", func(t *testing.T) {
-		pg := dbs.PhysicsGroups{
+		rec := dbs.PhysicsGroups{
 			PHYSICS_GROUP_NAME: "Tracker",
 		}
 		// fields that are created thru api handler
@@ -234,6 +259,18 @@ func TestIntegration(t *testing.T) {
 		params := url.Values{}
 		params.Add("physics_group_name", "Tracker")
 
-		runTestWorkflow(t, tsR, tsW, "/dbs/physicsgroups", web.PhysicsGroupsHandler, &pg, params, fields)
+		runTestWorkflow(t, tsR, tsW, "/dbs/physicsgroups", web.PhysicsGroupsHandler, &rec, fields, params, false)
+	})
+
+	t.Run("Test datasetaccesstypes", func(t *testing.T) {
+		rec := dbs.DatasetAccessTypes{
+			DATASET_ACCESS_TYPE: "PRODUCTION",
+		}
+		fields := []string{"dataset_access_type"}
+
+		params := url.Values{}
+		params.Add("dataset_access_type", "PRODUCTION")
+
+		runTestWorkflow(t, tsR, tsW, "/dbs/datasetaccesstypes", web.DatasetAccessTypesHandler, &rec, fields, params, false)
 	})
 }
