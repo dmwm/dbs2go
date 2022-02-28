@@ -93,8 +93,8 @@ func basePath(api string) string {
 	return utils.BasePath(Config.Base, api)
 }
 
-// helper cuntion to setup all HTTP routes
-func handlers() *mux.Router {
+// Handlers provides helper function to setup all HTTP routes
+func Handlers() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true) // to allow /route and /route/ end-points
 
@@ -437,9 +437,9 @@ func Server(configFile string) {
 			)),
 		)
 
-		http.Handle("/", CSRF(handlers()))
+		http.Handle("/", CSRF(Handlers()))
 	} else {
-		http.Handle("/", handlers())
+		http.Handle("/", Handlers())
 	}
 	// define our HTTP server
 	addr := fmt.Sprintf(":%d", Config.Port)

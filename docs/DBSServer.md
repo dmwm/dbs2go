@@ -24,7 +24,7 @@ Here is architecture of the DBS server:
   folder contains all business and DAO objects
 - [static](https://github.com/vkuznet/dbs2go/tree/master/static) area contains 
   - [SQL templates](https://github.com/vkuznet/dbs2go/tree/master/static/sql)
-  - [HTPP templates](https://github.com/vkuznet/dbs2go/tree/master/static/templates)
+  - [HTTP templates](https://github.com/vkuznet/dbs2go/tree/master/static/templates)
   - [CSS](https://github.com/vkuznet/dbs2go/tree/master/static/css)
   - [DB schemas](https://github.com/vkuznet/dbs2go/tree/master/static/schema)
   - [images](https://github.com/vkuznet/dbs2go/tree/master/static/images)

@@ -36,7 +36,7 @@ clean:
 
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-lexicon bench
 
-test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon bench
+test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration bench
 
 test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reader-pos test-lexicon-reader-neg
 
@@ -68,5 +68,7 @@ test-lexicon-reader-pos:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_positive.json go test -v -run LexiconPositive
 test-lexicon-reader-neg:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_negative.json go test -v -run LexiconNegative
+test-integration:
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && echo "\"sqlite3 /tmp/dbs-test.db sqlite\"" > ./dbfile && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_READER_LEXICON_FILE=../static/lexicon_reader.json DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json DBS_DB_FILE=./dbfile go test -v -run Integration
 bench:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -run Benchmark -bench=.
