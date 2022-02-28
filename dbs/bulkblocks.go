@@ -86,7 +86,7 @@ type ProcessingEra struct {
 
 // PrimaryDataset represents primary dataset structure used in BulkBlocks structure
 type PrimaryDataset struct {
-	PrimaryDSId   string `json:"primary_ds_id"`
+	PrimaryDSId   int64  `json:"primary_ds_id"`
 	CreateBy      string `json:"create_by"`
 	PrimaryDSType string `json:"primary_ds_type"`
 	PrimaryDSName string `json:"primary_ds_name"`
