@@ -127,10 +127,9 @@ curl -H "Accept: application/json" \
 - `/fileparents`
   - returns list of file parents
   - arguments: `logical_file_name`, `block_name`, `block_id`
+  - this api allows list of `logical_file_name` parameter
 
-    - this api allows list of `logical_file_name` parameter
-
-- /filesummaries
+- `/filesummaries`
   - returns list of file summaries
   - arguments: `block_name`, `dataset`, `run_num`, `validFileOnly`, `sumOverLumi`
 - `/filelumis`
