@@ -34,6 +34,7 @@ curl -H "Accept: application/json" \
     - the `run_num` parameter can be represented in ths following forms:
       - as a list, e.g. `run_num=[123,234]`
       - as a run range, e.g. `run_num=1-10`
+      - as individual values, e.g. `run_num=123`
 
 - `/blocks`
   - returns list of DBS blocks, including their details
@@ -45,6 +46,7 @@ curl -H "Accept: application/json" \
     - the `run_num` parameter can be represented in ths following forms:
       - as a list, e.g. `run_num=[123,234]`
       - as a run range, e.g. `run_num=1-10`
+      - as individual values, e.g. `run_num=123`
 
 - `/blockTrio`
   - returns the triplets of files ids, run numbers and associative lumis
