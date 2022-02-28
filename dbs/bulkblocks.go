@@ -43,6 +43,7 @@ type DatasetConfig struct {
 type FileConfig struct {
 	ReleaseVersion    string `json:"release_version"`
 	PsetHash          string `json:"pset_hash"`
+	PsetName          string `json:"pset_name"`
 	LFN               string `json:"lfn"`
 	AppName           string `json:"app_name"`
 	OutputModuleLabel string `json:"output_module_label"`
@@ -85,6 +86,7 @@ type ProcessingEra struct {
 
 // PrimaryDataset represents primary dataset structure used in BulkBlocks structure
 type PrimaryDataset struct {
+	PrimaryDSId   string `json:"primary_ds_id"`
 	CreateBy      string `json:"create_by"`
 	PrimaryDSType string `json:"primary_ds_type"`
 	PrimaryDSName string `json:"primary_ds_name"`

@@ -92,6 +92,7 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 	}
 
 	err := DB.QueryRow(stm, args...).Scan(
+		&primaryDataset.PrimaryDSId,
 		&primaryDataset.CreateBy,
 		&primaryDataset.PrimaryDSType,
 		&primaryDataset.PrimaryDSName,
@@ -342,6 +343,7 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 		err = rows.Scan(
 			&fileConfig.ReleaseVersion,
 			&fileConfig.PsetHash,
+			&fileConfig.PsetName,
 			&fileConfig.LFN,
 			&fileConfig.AppName,
 			&fileConfig.OutputModuleLabel,
