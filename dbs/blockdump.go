@@ -234,7 +234,8 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			return
 		}
 		defer frows.Close()
-		var fileLumiList []FileLumi
+		// ensure that fileLumiList will be serialized as empty list [] and not as null
+		fileLumiList := make([]FileLumi, 0)
 		for frows.Next() {
 			fileLumi := FileLumi{}
 			var evt sql.NullInt64
