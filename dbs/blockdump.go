@@ -91,13 +91,17 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 		utils.PrintSQL(stm, args, "execute")
 	}
 
+	var cby sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
 		&primaryDataset.PrimaryDSId,
-		&primaryDataset.CreateBy,
+		&cby,
 		&primaryDataset.PrimaryDSType,
 		&primaryDataset.PrimaryDSName,
 		&primaryDataset.CreationDate,
 	)
+	if cby.Valid {
+		primaryDataset.CreateBy = cby.String
+	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
@@ -142,13 +146,17 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	}
 
 	var cby, desc sql.NullString
+	var cdate sql.NullInt64
 	err := DB.QueryRow(stm, args...).Scan(
 		&acquisitionEra.AcquisitionEraName,
 		&acquisitionEra.StartDate,
-		&acquisitionEra.CreationDate,
+		&cdate,
 		&cby,
 		&desc,
 	)
+	if cdate.Valid {
+		acquisitionEra.CreationDate = cdate.Int64
+	}
 	if cby.Valid {
 		acquisitionEra.CreateBy = cby.String
 	}
@@ -184,6 +192,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	for rows.Next() {
 		file := File{}
 		var bhash, md5 sql.NullString
+		var xt sql.NullFloat64
 		err = rows.Scan(
 			&file.CheckSum,
 			&file.Adler32,
@@ -195,7 +204,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			&file.LastModificationDate,
 			&file.LogicalFileName,
 			&md5,
-			&file.AutoCrossSection,
+			&xt,
 			&file.IsFileValid,
 		)
 		if bhash.Valid {
@@ -203,6 +212,9 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 		}
 		if md5.Valid {
 			file.MD5 = md5.String
+		}
+		if xt.Valid {
+			file.AutoCrossSection = xt.Float64
 		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -340,10 +352,11 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 	defer rows.Close()
 	for rows.Next() {
 		fileConfig := FileConfig{}
+		var pname sql.NullString
 		err = rows.Scan(
 			&fileConfig.ReleaseVersion,
 			&fileConfig.PsetHash,
-			&fileConfig.PsetName,
+			&pname,
 			&fileConfig.LFN,
 			&fileConfig.AppName,
 			&fileConfig.OutputModuleLabel,
@@ -351,6 +364,9 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 			&fileConfig.CreateBy,
 			&fileConfig.CreationDate,
 		)
+		if pname.Valid {
+			fileConfig.PsetName = pname.String
+		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
 			return
