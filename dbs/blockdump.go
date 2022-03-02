@@ -502,9 +502,6 @@ func (a *API) BlockDump() error {
 	// in order to get proper JSON serialization for empty list,
 	// i.e. [] instead of null, we should make empty lists
 	// https://apoorvam.github.io/blog/2017/golang-json-marshal-slice-as-empty-array-not-null/
-	//     var fileParentList FileParentList
-	//     var blockParentList BlockParentList
-	//     var datasetParentList DatasetParentList
 	fileParentList := make(FileParentList, 0)
 	blockParentList := make(BlockParentList, 0)
 	datasetParentList := make(DatasetParentList, 0)
@@ -529,7 +526,7 @@ func (a *API) BlockDump() error {
 		log.Println("waited for all goroutines to finish")
 	}
 	// prepare dsParentList in form of []DatasetParent
-	var dsParentList []DatasetParent
+	dsParentList := make([]DatasetParent, 0)
 	for _, d := range datasetParentList {
 		dsParentList = append(dsParentList, DatasetParent{ParentDataset: d})
 	}
