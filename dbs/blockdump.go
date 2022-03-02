@@ -126,7 +126,7 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 		&desc,
 	)
 	if cby.Valid {
-		proccesingEra.CreateBy = cby.String
+		processingEra.CreateBy = cby.String
 	}
 	if desc.Valid {
 		processingEra.Description = desc.String
