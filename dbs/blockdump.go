@@ -119,12 +119,15 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 		utils.PrintSQL(stm, args, "execute")
 	}
 
-	var desc sql.NullString
+	var cby, desc sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
-		&processingEra.CreateBy,
+		&cby,
 		&processingEra.ProcessingVersion,
 		&desc,
 	)
+	if cby.Valid {
+		proccesingEra.CreateBy = cby.String
+	}
 	if desc.Valid {
 		processingEra.Description = desc.String
 	}
@@ -238,11 +241,15 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 		var fileLumiList []FileLumi
 		for frows.Next() {
 			fileLumi := FileLumi{}
+			var evt sql.NullInt64
 			err = frows.Scan(
 				&fileLumi.LumiSectionNumber,
 				&fileLumi.RunNumber,
-				&fileLumi.EventCount,
+				&evt,
 			)
+			if evt.Valid {
+				fileLumi.EventCount = evt.Int64
+			}
 			if err != nil {
 				log.Println("unable to scan rows", err)
 				return
