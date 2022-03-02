@@ -368,6 +368,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 // used by bulkblock API
 type FileParentRecord struct {
 	LogicalFileName       string `json:"this_logical_file_name"`
+	ParentFileId          int64  `json:"parent_file_id"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
 

@@ -403,10 +403,19 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	defer rows.Close()
 	for rows.Next() {
 		fileParent := FileParentRecord{}
+		var pid sql.NullInt64
+		var pfn sql.NullString
 		err = rows.Scan(
 			&fileParent.LogicalFileName,
-			&fileParent.ParentLogicalFileName,
+			&pid,
+			&pfn,
 		)
+		if pid.Valid {
+			fileParent.ParentFileId = pid.Int64
+		}
+		if pfn.Valid {
+			fileParent.ParentLogicalFileName = pfn.String
+		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
 			return
