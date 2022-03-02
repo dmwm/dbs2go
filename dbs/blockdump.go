@@ -499,9 +499,15 @@ func (a *API) BlockDump() error {
 	var dataset Dataset
 	var acquisitionEra AcquisitionEra
 	var block Block
-	var fileParentList FileParentList
-	var blockParentList BlockParentList
-	var datasetParentList DatasetParentList
+	// in order to get proper JSON serialization for empty list,
+	// i.e. [] instead of null, we should make empty lists
+	// https://apoorvam.github.io/blog/2017/golang-json-marshal-slice-as-empty-array-not-null/
+	//     var fileParentList FileParentList
+	//     var blockParentList BlockParentList
+	//     var datasetParentList DatasetParentList
+	fileParentList := make(FileParentList, 0)
+	blockParentList := make(BlockParentList, 0)
+	datasetParentList := make(DatasetParentList, 0)
 
 	// get concurrently all necessary information required for block dump
 	var wg sync.WaitGroup
