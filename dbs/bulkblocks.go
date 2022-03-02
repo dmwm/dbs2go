@@ -67,7 +67,6 @@ type File struct {
 	FileSize             int64      `json:"file_size"`
 	EventCount           int64      `json:"event_count"`
 	FileType             string     `json:"file_type"`
-	BranchHash           string     `json:"branch_hash"`
 	LastModifiedBy       string     `json:"last_modified_by"`
 	LastModificationDate int64      `json:"last_modification_date"`
 	LogicalFileName      string     `json:"logical_file_name"`
@@ -566,9 +565,9 @@ func (a *API) InsertBulkBlocks() error {
 			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		// get branch hash ID and insert record if it does not exists
-		if rrr.BranchHash == "" {
-			rrr.BranchHash = "branch-hash"
-		}
+		//         if rrr.BranchHash == "" {
+		//             rrr.BranchHash = "branch-hash"
+		//         }
 
 		cBy := rrr.LastModifiedBy
 		if cBy == "" {
