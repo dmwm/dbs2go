@@ -194,7 +194,7 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	defer rows.Close()
 	for rows.Next() {
 		file := File{}
-		var bhash, md5 sql.NullString
+		var md5 sql.NullString
 		var xt sql.NullFloat64
 		err = rows.Scan(
 			&file.CheckSum,
@@ -202,7 +202,6 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			&file.FileSize,
 			&file.EventCount,
 			&file.FileType,
-			&bhash,
 			&file.LastModifiedBy,
 			&file.LastModificationDate,
 			&file.LogicalFileName,
@@ -210,9 +209,6 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			&xt,
 			&file.IsFileValid,
 		)
-		if bhash.Valid {
-			file.BranchHash = bhash.String
-		}
 		if md5.Valid {
 			file.MD5 = md5.String
 		}
