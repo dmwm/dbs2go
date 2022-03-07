@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +12,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/vkuznet/dbs2go/utils"
 	"github.com/vkuznet/dbs2go/web"
 
 	limiter "github.com/ulule/limiter/v3"
@@ -32,11 +32,26 @@ func initTestLimiter(t *testing.T, period string) {
 }
 
 // configures the test server with basic parameters
-func runTestServer(t *testing.T, serverType string, lexiconFile string) *httptest.Server {
+func runTestServer(t *testing.T, serverType string) *httptest.Server {
 	dbfile := os.Getenv("DBS_DB_FILE")
 	if dbfile == "" {
 		t.Fatal("no DBS_DB_FILE env variable, please define")
 	}
+
+	var lexiconFile string
+
+	if serverType == "DBSWriter" {
+		lexiconFile = os.Getenv("DBS_WRITER_LEXICON_FILE")
+		if lexiconFile == "" {
+			t.Fatal("no DBS_WRITER_LEXICON_FILE env variable, please define")
+		}
+	} else if serverType == "DBSReader" {
+		lexiconFile = os.Getenv("DBS_READER_LEXICON_FILE")
+		if lexiconFile == "" {
+			t.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
+		}
+	}
+
 	web.Config.Base = "/dbs"
 	web.Config.DBFile = dbfile
 	web.Config.LexiconFile = lexiconFile
@@ -45,6 +60,13 @@ func runTestServer(t *testing.T, serverType string, lexiconFile string) *httptes
 	web.Config.ServerType = serverType
 	web.Config.LogFile = "/tmp/dbs2go-test.log"
 	web.Config.Verbose = 0
+	utils.VERBOSE = 0
+	utils.BASE = "/dbs"
+	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbs.LexiconPatterns = lexPatterns
 
 	initTestLimiter(t, "100-S")
 
@@ -76,22 +98,42 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 	return r
 }
 
+// extract keys from a map
+func extractKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 // compares received response to expected
-func verifyResponse(t *testing.T, received []dbs.Record, expected []Response, fields []string) {
+func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { //, fields []string) {
+	// fmt.Printf("Received: %s\nExpected: %s\n", received, expected)
 	if len(received) != len(expected) {
 		t.Fatalf("Expected length: %v, Received length: %v", len(expected), len(received))
 	}
-	fmt.Printf("Received: %s\nExpected: %s\n", received, expected)
+	fields := []string{}
+	if len(expected) > 0 {
+		fields = extractKeys(expected[0])
+	}
 	for _, f := range fields {
 		for i, r := range received {
-			if r[f] != expected[i][f] {
-				if f == "creation_date" {
-					if r[f] == nil {
-						t.Fatalf("Field empty: %s", f)
+			if f == "error" {
+				rCode := r[f].(map[string]interface{})["code"]
+				eCode := expected[i]["error"]
+				if rCode != eCode {
+					t.Fatalf("Expected error code: %v, Received: %v", rCode, eCode)
+				}
+			} else {
+				if r[f] != expected[i][f] {
+					if f == "creation_date" {
+						if r[f] == nil {
+							t.Fatalf("Field empty: %s", f)
+						}
+					} else {
+						t.Fatalf("Incorrect %s: Expected: %v, Received: %v", f, expected[i][f], r[f])
 					}
-				} else {
-					fmt.Printf("Received: %T, Expected: %T", r[f], expected[i][f])
-					t.Fatalf("Incorrect %s: Expected: %v, Received: %v", f, expected[i][f], r[f])
 				}
 			}
 		}
@@ -157,68 +199,25 @@ func getData(t *testing.T, url string, endpoint string, params url.Values, httpC
 }
 
 // run test workflow for a single endpoint
-/*
-func runTestWorkflow(t *testing.T, tsR *httptest.Server, tsW *httptest.Server, endpoint string, hdlr func(http.ResponseWriter, *http.Request), reqBody map[string]string, fields []string, params url.Values, needParams bool) {
-	// emap := remapRecord(t, dbrec)
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		t.Fatal(err)
-	}
+func runTestWorkflow(t *testing.T, c EndpointTestCase) { //, tsR *httptest.Server, tsW *httptest.Server) {
 
-	t.Run("Test GET with empty DB", func(t *testing.T) {
-		d, _ := getData(t, tsR.URL, endpoint, params, needParams, http.StatusOK)
-		if len(d) != 0 {
-			t.Fatal("Data exists")
-		}
-	})
+	var server *httptest.Server
 
-	t.Run("Test POST", func(t *testing.T) {
-		records := injectDBRecord(t, body, "POST", tsW.URL, endpoint, params, hdlr, needParams, http.StatusOK)
-		verifyResponse(t, records, reqBody, fields)
-	})
-
-	t.Run("Test GET after POST", func(t *testing.T) {
-		d, _ := getData(t, tsR.URL, endpoint, params, needParams, http.StatusOK)
-		verifyResponse(t, d, reqBody, fields)
-	})
-
-	t.Run("Test GET with parameters", func(t *testing.T) {
-		getData(t, tsR.URL, endpoint, params, needParams, http.StatusOK)
-	})
-
-	t.Run("Test GET without parameters", func(t *testing.T) {
-		getData(t, tsR.URL, endpoint, nil, needParams, http.StatusOK)
-	})
-}
-*/
-
-func runTestWorkflow(t *testing.T, c EndpointTestCase, tsR *httptest.Server, tsW *httptest.Server) {
 	t.Run(c.description, func(t *testing.T) {
 		for _, v := range c.testCases {
 			t.Run(v.description, func(t *testing.T) {
+				// run a test server for a single test case
+				server = runTestServer(t, v.serverType)
+				defer server.Close()
 				if v.method == "GET" {
-					d, _ := getData(t, tsR.URL, v.endpoint, v.params, v.respCode)
-					verifyResponse(t, d, v.resp, v.fields)
+					d, _ := getData(t, server.URL, v.endpoint, v.params, v.respCode)
+					verifyResponse(t, d, v.resp) //, v.fields)
 				} else if v.method == "POST" {
-					injectDBRecord(t, v.record, tsW.URL, v.endpoint, v.params, v.handler, v.respCode)
+					injectDBRecord(t, v.record, server.URL, v.endpoint, v.params, v.handler, v.respCode)
 				}
 			})
 		}
 	})
-}
-
-// remap a dbs.DBRecord to a general dbs.Record
-func remapRecord(t *testing.T, record dbs.DBRecord) dbs.Record {
-	data, err := json.Marshal(record)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	var emap dbs.Record
-	err = json.Unmarshal(data, &emap)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	return emap
 }
 
 // TestDBSIntegration Tests both DBSReader and DBSWriter Endpoints
@@ -236,13 +235,15 @@ func TestIntegation(t *testing.T) {
 		t.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
 	}
 
-	// start DBSWriter server
-	tsW := runTestServer(t, "DBSWriter", lexiconFileWriter)
-	defer tsW.Close()
+	/*
+		// start DBSReader server
+		tsR := runTestServer(t, "DBSReader", lexiconFileReader)
+		defer tsR.Close()
 
-	// start DBSReader server
-	tsR := runTestServer(t, "DBSReader", lexiconFileReader)
-	defer tsR.Close()
+		// start DBSWriter server
+		tsW := runTestServer(t, "DBSWriter", lexiconFileWriter)
+		defer tsW.Close()
+	*/
 
 	/*
 		t.Run("Test primarydataset", func(t *testing.T) {
@@ -328,26 +329,7 @@ func TestIntegration2(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	lexiconFileWriter := os.Getenv("DBS_WRITER_LEXICON_FILE")
-	if lexiconFileWriter == "" {
-		t.Fatal("no DBS_WRITER_LEXICON_FILE env variable, please define")
-	}
-
-	lexiconFileReader := os.Getenv("DBS_READER_LEXICON_FILE")
-	if lexiconFileReader == "" {
-		t.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
-	}
-
-	// start DBSWriter server
-	tsW := runTestServer(t, "DBSWriter", lexiconFileWriter)
-	defer tsW.Close()
-
-	// start DBSReader server
-	tsR := runTestServer(t, "DBSReader", lexiconFileReader)
-	defer tsR.Close()
-
 	for _, v := range IntegrationTestCases {
-		runTestWorkflow(t, v, tsR, tsW)
+		runTestWorkflow(t, v) //, tsR, tsW)
 	}
-
 }

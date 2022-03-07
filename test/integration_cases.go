@@ -11,19 +11,20 @@ type Response map[string]interface{}
 
 type RequestBody map[string]string
 
-type testFields []string
+// type testFields []string
 
 // basic elements to define a test case
 type testCase struct {
-	description string      // test case description
-	method      string      // http method
-	endpoint    string      // url endpoint
-	params      url.Values  // url parameters
+	description string     // test case description
+	serverType  string     //DBSWriter, DBSReader, DBSMigrate
+	method      string     // http method
+	endpoint    string     // url endpoint
+	params      url.Values // url parameters
+	handler     func(http.ResponseWriter, *http.Request)
 	record      RequestBody // POST record
 	resp        []Response  // expected response
-	fields      testFields  // expected fields
-	respCode    int         // expected HTTP response code
-	handler     func(http.ResponseWriter, *http.Request)
+	// fields      testFields  // expected fields
+	respCode int // expected HTTP response code
 }
 
 // defines a testcase for an endpoint
@@ -33,47 +34,50 @@ type EndpointTestCase struct {
 }
 
 // PrimaryDatasetTestCase contains test cases for primarydataset and primarydstype endpoints
-// TODO: test dataset parameter
 var PrimaryDatasetAndTypesTestCase = EndpointTestCase{
 	description: "Test primarydataset",
 	testCases: []testCase{
 		{
 			description: "Test GET with no data",
+			serverType:  "DBSReader",
 			method:      "GET",
 			endpoint:    "/dbs/primarydatasets",
 			params:      nil,
-			resp:        []Response{},
-			fields:      nil,
 			handler:     web.PrimaryDatasetsHandler,
+			record:      nil,
+			resp:        []Response{},
 			respCode:    http.StatusOK,
 		},
 		{
 			description: "Test primarydstypes GET with no Data",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/primarydstypes",
 			params:      nil,
-			resp:        []Response{},
-			fields:      nil,
 			handler:     web.PrimaryDSTypesHandler,
+			record:      nil,
+			resp:        []Response{},
 			respCode:    http.StatusOK,
 		},
 		{
 			description: "Test POST",
 			method:      "POST",
+			serverType:  "DBSWriter",
 			endpoint:    "/dbs/primarydatasets",
+			params:      nil,
+			handler:     web.PrimaryDatasetsHandler,
 			record: RequestBody{
 				"primary_ds_name": "unittest",
 				"primary_ds_type": "test",
 				"create_by":       "tester",
 			},
-			params:   nil,
-			fields:   nil,
+			resp:     nil,
 			respCode: http.StatusOK,
-			handler:  web.PrimaryDatasetsHandler,
 		},
 		{
 			description: "Test primarydatasets GET after POST",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/primarydatasets",
 			resp: []Response{
 				{
@@ -84,19 +88,13 @@ var PrimaryDatasetAndTypesTestCase = EndpointTestCase{
 					"primary_ds_type": "test",
 				},
 			},
-			fields: testFields{
-				"primary_ds_id",
-				"primary_ds_name",
-				"creation_date",
-				"create_by",
-				"primary_ds_type",
-			},
 			respCode: http.StatusOK,
 			handler:  web.PrimaryDatasetsHandler,
 		},
 		{
 			description: "Test primarydstypes GET",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/primarydstypes",
 			record:      nil,
 			resp: []Response{
@@ -105,16 +103,13 @@ var PrimaryDatasetAndTypesTestCase = EndpointTestCase{
 					"data_type":          "test",
 				},
 			},
-			params: nil,
-			fields: testFields{
-				"primary_ds_type_id",
-				"data_type",
-			},
+			params:   nil,
 			respCode: http.StatusOK,
 		},
 		{
 			description: "Test primarydstypes GET w primary_ds_type param",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/primarydstypes",
 			record:      nil,
 			resp: []Response{
@@ -126,15 +121,12 @@ var PrimaryDatasetAndTypesTestCase = EndpointTestCase{
 			params: url.Values{
 				"primary_ds_type": []string{"test"},
 			},
-			fields: testFields{
-				"primary_ds_type_id",
-				"data_type",
-			},
 			respCode: http.StatusOK,
 		},
 		{
-			description: "Test primarydstypes GET w primary_ds_type param regex",
+			description: "Test primarydstypes GET w primary_ds_type wildcard param",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/primarydstypes",
 			record:      nil,
 			resp: []Response{
@@ -146,30 +138,12 @@ var PrimaryDatasetAndTypesTestCase = EndpointTestCase{
 			params: url.Values{
 				"primary_ds_type": []string{"t*"},
 			},
-			fields: testFields{
-				"primary_ds_type_id",
-				"data_type",
-			},
-			respCode: http.StatusOK,
-		},
-		{
-			description: "Test primarydstypes GET w different params",
-			method:      "GET",
-			endpoint:    "/dbs/primarydstypes",
-			record:      nil,
-			resp:        []Response{},
-			params: url.Values{
-				"primary_ds_type": []string{"A*"},
-			},
-			fields: testFields{
-				"primary_ds_type_id",
-				"data_type",
-			},
 			respCode: http.StatusOK,
 		},
 		{
 			description: "Test primarydstypes GET w dataset param",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/primarydstypes",
 			record:      nil,
 			resp: []Response{
@@ -179,13 +153,108 @@ var PrimaryDatasetAndTypesTestCase = EndpointTestCase{
 				},
 			},
 			params: url.Values{
-				"dataset": []string{"banana"},
+				"dataset": []string{"unittest"},
 			},
-			fields: testFields{
-				"primary_ds_type_id",
-				"data_type",
+			respCode: http.StatusOK,
+		},
+		{
+			description: "Test primarydstypes GET w bad dataset param",
+			method:      "GET",
+			serverType:  "DBSReader",
+			endpoint:    "/dbs/primarydstypes",
+			record:      nil,
+			resp: []Response{
+				{
+					"error": 113.0,
+				},
+			},
+			params: url.Values{
+				"dataset": []string{"fnal"},
 			},
 			respCode: http.StatusBadRequest,
+		},
+		{
+			description: "Test primarydstypes GET w different params",
+			method:      "GET",
+			serverType:  "DBSReader",
+			endpoint:    "/dbs/primarydstypes",
+			record:      nil,
+			resp:        []Response{},
+			params: url.Values{
+				"primary_ds_type": []string{"A*"},
+			},
+			respCode: http.StatusOK,
+		},
+		{
+			description: "Test primarydataset POST duplicate",
+			method:      "POST",
+			serverType:  "DBSWriter",
+			endpoint:    "/dbs/primarydatasets",
+			params:      nil,
+			handler:     web.PrimaryDatasetsHandler,
+			record: RequestBody{
+				"primary_ds_name": "unittest",
+				"primary_ds_type": "test",
+				"create_by":       "tester",
+			},
+			resp:     nil,
+			respCode: http.StatusOK,
+		},
+		{
+			description: "Test primarydatasets GET after duplicate POST",
+			method:      "GET",
+			serverType:  "DBSReader",
+			endpoint:    "/dbs/primarydatasets",
+			resp: []Response{
+				{
+					"primary_ds_id":   1.0,
+					"primary_ds_name": "unittest",
+					"creation_date":   0,
+					"create_by":       "tester",
+					"primary_ds_type": "test",
+				},
+			},
+			respCode: http.StatusOK,
+			handler:  web.PrimaryDatasetsHandler,
+		},
+		{
+			description: "Test primarydataset second POST",
+			method:      "POST",
+			serverType:  "DBSWriter",
+			endpoint:    "/dbs/primarydatasets",
+			params:      nil,
+			handler:     web.PrimaryDatasetsHandler,
+			record: RequestBody{
+				"primary_ds_name": "unittest2",
+				"primary_ds_type": "test",
+				"create_by":       "tester",
+			},
+			resp:     nil,
+			respCode: http.StatusOK,
+		},
+		{
+			description: "Test primarydatasets GET after second POST",
+			method:      "GET",
+			serverType:  "DBSReader",
+			endpoint:    "/dbs/primarydatasets",
+			resp: []Response{
+				{
+					"primary_ds_id":   1.0,
+					"primary_ds_name": "unittest",
+					"creation_date":   0,
+					"create_by":       "tester",
+					"primary_ds_type": "test",
+				},
+				{
+					"primary_ds_id":   2.0,
+					"primary_ds_name": "unittest2",
+					"creation_date":   0,
+					"create_by":       "tester",
+					"primary_ds_type": "test",
+				},
+			},
+			respCode: http.StatusOK,
+			handler:  web.PrimaryDatasetsHandler,
 		},
 	},
 }
@@ -197,39 +266,30 @@ var DatatiersTestCase = EndpointTestCase{
 		{
 			description: "Test GET with no data",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/datatiers",
 			record:      nil,
 			params:      nil,
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
-			resp:     []Response{},
-			respCode: http.StatusOK,
-			handler:  web.DatatiersHandler,
+			resp:        []Response{},
+			respCode:    http.StatusOK,
+			handler:     web.DatatiersHandler,
 		},
 		{
 			description: "Test bad POST",
 			method:      "POST",
+			serverType:  "DBSWriter",
 			endpoint:    "/dbs/datatiers",
 			record: RequestBody{
 				"non-existing-field": "GEN-SIM-RAW",
 			},
-			params: nil,
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
+			params:   nil,
 			respCode: http.StatusBadRequest,
 			handler:  web.DatatiersHandler,
 		},
 		{
 			description: "Test POST",
 			method:      "POST",
+			serverType:  "DBSWriter",
 			endpoint:    "/dbs/datatiers",
 			record: RequestBody{
 				"data_tier_name": "GEN-SIM-RAW",
@@ -242,19 +302,14 @@ var DatatiersTestCase = EndpointTestCase{
 					"create_by":      "tester",
 				},
 			},
-			params: nil,
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
+			params:   nil,
 			respCode: http.StatusOK,
 			handler:  web.DatatiersHandler,
 		},
 		{
 			description: "Test GET after POST",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/datatiers",
 			record: RequestBody{
 				"data_tier_name": "GEN-SIM-RAW",
@@ -268,19 +323,14 @@ var DatatiersTestCase = EndpointTestCase{
 					"data_tier_id":   1.0,
 				},
 			},
-			params: nil,
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
+			params:   nil,
 			respCode: http.StatusOK,
 			handler:  web.DatatiersHandler,
 		},
 		{
 			description: "Test GET with parameters",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/datatiers",
 			record: RequestBody{
 				"data_tier_name": "GEN-SIM-RAW",
@@ -297,18 +347,13 @@ var DatatiersTestCase = EndpointTestCase{
 			params: url.Values{
 				"data_tier_name": []string{"GEN-SIM-RAW"},
 			},
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
 			respCode: http.StatusOK,
 			handler:  web.DatatiersHandler,
 		},
 		{
 			description: "Test GET with regex parameter",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/datatiers",
 			record: RequestBody{
 				"data_tier_name": "GEN-SIM-RAW",
@@ -325,18 +370,13 @@ var DatatiersTestCase = EndpointTestCase{
 			params: url.Values{
 				"data_tier_name": []string{"G*"},
 			},
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
 			respCode: http.StatusOK,
 			handler:  web.DatatiersHandler,
 		},
 		{
 			description: "Test GET with non-existing parameter value",
 			method:      "GET",
+			serverType:  "DBSReader",
 			endpoint:    "/dbs/datatiers",
 			record: RequestBody{
 				"data_tier_name": "GEN-SIM-RAW",
@@ -346,12 +386,6 @@ var DatatiersTestCase = EndpointTestCase{
 			params: url.Values{
 				"data_tier_name": []string{"A*"},
 			},
-			fields: testFields{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			},
 			respCode: http.StatusOK,
 			handler:  web.DatatiersHandler,
 		},
@@ -360,5 +394,5 @@ var DatatiersTestCase = EndpointTestCase{
 
 var IntegrationTestCases = []EndpointTestCase{
 	PrimaryDatasetAndTypesTestCase,
-	// DatatiersTestCase,
+	DatatiersTestCase,
 }
