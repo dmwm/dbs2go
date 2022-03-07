@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -109,7 +111,7 @@ func extractKeys(m map[string]interface{}) []string {
 
 // compares received response to expected
 func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { //, fields []string) {
-	// fmt.Printf("Received: %s\nExpected: %s\n", received, expected)
+	fmt.Printf("Received: %s\nExpected: %s\n", received, expected)
 	if len(received) != len(expected) {
 		t.Fatalf("Expected length: %v, Received length: %v", len(expected), len(received))
 	}
@@ -127,7 +129,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { 
 				}
 			} else {
 				if r[f] != expected[i][f] {
-					if f == "creation_date" {
+					if strings.Contains(f, "date") {
 						if r[f] == nil {
 							t.Fatalf("Field empty: %s", f)
 						}
@@ -206,14 +208,27 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) { //, tsR *httptest.Serve
 	t.Run(c.description, func(t *testing.T) {
 		for _, v := range c.testCases {
 			t.Run(v.description, func(t *testing.T) {
+				var handler func(http.ResponseWriter, *http.Request)
+
+				// set handler
+				handler = c.defaultHandler
+				if v.handler != nil {
+					handler = v.handler
+				}
+
+				// set the endpoint
+				endpoint := c.defaultEndpoint
+				if v.endpoint != "" {
+					endpoint = v.endpoint
+				}
 				// run a test server for a single test case
 				server = runTestServer(t, v.serverType)
 				defer server.Close()
 				if v.method == "GET" {
-					d, _ := getData(t, server.URL, v.endpoint, v.params, v.respCode)
+					d, _ := getData(t, server.URL, endpoint, v.params, v.respCode)
 					verifyResponse(t, d, v.resp) //, v.fields)
 				} else if v.method == "POST" {
-					injectDBRecord(t, v.record, server.URL, v.endpoint, v.params, v.handler, v.respCode)
+					injectDBRecord(t, v.record, server.URL, endpoint, v.params, handler, v.respCode)
 				}
 			})
 		}
@@ -224,66 +239,6 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) { //, tsR *httptest.Serve
 func TestIntegation(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
-
-	lexiconFileWriter := os.Getenv("DBS_WRITER_LEXICON_FILE")
-	if lexiconFileWriter == "" {
-		t.Fatal("no DBS_WRITER_LEXICON_FILE env variable, please define")
-	}
-
-	lexiconFileReader := os.Getenv("DBS_READER_LEXICON_FILE")
-	if lexiconFileReader == "" {
-		t.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
-	}
-
-	/*
-		// start DBSReader server
-		tsR := runTestServer(t, "DBSReader", lexiconFileReader)
-		defer tsR.Close()
-
-		// start DBSWriter server
-		tsW := runTestServer(t, "DBSWriter", lexiconFileWriter)
-		defer tsW.Close()
-	*/
-
-	/*
-		t.Run("Test primarydataset", func(t *testing.T) {
-			rec := map[string]string{
-				"primary_ds_name": "unittest",
-				"primary_ds_type": "test",
-				"create_by":       "tester",
-			}
-
-			var fields = []string{}
-
-			params := url.Values{}
-			params.Add("primary_ds_name", "unittest")
-			params.Add("primary_ds_type", "test")
-
-			runTestWorkflow(t, tsR, tsW, "/dbs/primarydatasets", web.PrimaryDatasetsHandler, rec, fields, params, false)
-		})
-	*/
-
-	/*
-		t.Run("Test datatiers", func(t *testing.T) {
-			rec := map[string]string{
-				"data_tier_name": "GEN-SIM-RAW",
-				"create_by":      "tester",
-			}
-
-			// fields that are created thru api handler
-			var fields = []string{
-				"data_tier_id",
-				"creation_date",
-				"data_tier_name",
-				"create_by",
-			}
-
-			params := url.Values{}
-			params.Add("data_tier_name", "GEN-SIM-RAW")
-
-			runTestWorkflow(t, tsR, tsW, "/dbs/datatiers", web.DatatiersHandler, rec, fields, params, false)
-		})
-	*/
 
 	/*
 		t.Run("Test physicsgroups", func(t *testing.T) {

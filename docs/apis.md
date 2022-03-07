@@ -387,7 +387,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
     "acquisition_era_name": "era",
     "start_date": 1631118749,
     "end_date": 1631118749,
-    "create_date": 1631118749,
+    "creation_date": 1631118749,
     "create_by": "tester",
     "description": "note"
 }
