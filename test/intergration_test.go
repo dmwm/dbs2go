@@ -62,7 +62,7 @@ func runTestServer(t *testing.T, serverType string) *httptest.Server {
 	web.Config.ServerType = serverType
 	web.Config.LogFile = "/tmp/dbs2go-test.log"
 	web.Config.Verbose = 0
-	utils.VERBOSE = 0
+	utils.VERBOSE = 1
 	utils.BASE = "/dbs"
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
 	if err != nil {

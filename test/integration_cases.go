@@ -403,7 +403,7 @@ var ProcessingEraTestCase = EndpointTestCase{
 			method:      "POST",
 			serverType:  "DBSWriter",
 			record: RequestBody{
-				"processing_version": 12345,
+				"processing_version": 7269,
 				"description":        "this_is_a_test",
 				"create_by":          "tester",
 			},
@@ -415,7 +415,7 @@ var ProcessingEraTestCase = EndpointTestCase{
 			serverType:  "DBSReader",
 			resp: []Response{
 				{
-					"processing_version": 12345.0,
+					"processing_version": 7269,
 					"description":        "this_is_a_test",
 					"create_by":          "tester",
 					"creation_date":      0,
@@ -547,10 +547,98 @@ var DatatiersTestCase = EndpointTestCase{
 	},
 }
 
+// DatasetAccessTypesTestCase tests the datasetaccesstypes endpoint
+var DatasetAccessTypesTestCase = EndpointTestCase{
+	description:     "Test datasetaccesstypes",
+	defaultHandler:  web.DatasetAccessTypesHandler,
+	defaultEndpoint: "/dbs/datasetaccesstypes",
+	testCases: []testCase{
+		{
+			description: "Test GET with no data",
+			method:      "GET",
+			serverType:  "DBSReader",
+			resp:        []Response{},
+			respCode:    http.StatusOK,
+		},
+		{
+			description: "Test POST",
+			method:      "POST",
+			serverType:  "DBSWriter",
+			record: RequestBody{
+				"dataset_access_type": "PRODUCTION",
+			},
+			resp:     []Response{},
+			respCode: http.StatusOK,
+		},
+		{
+			description: "Test GET after POST",
+			method:      "GET",
+			serverType:  "DBSReader",
+			resp: []Response{
+				{
+					"dataset_access_type": "PRODUCTION",
+				},
+			},
+			respCode: http.StatusOK,
+		},
+	},
+}
+
+// DatasetsTestCase contains tests for the datasets endpoint
+//* Note: depends on PrimaryDS and Datatiers tests
+var DatasetsTestCase = EndpointTestCase{
+	description:     "Test datasets",
+	defaultHandler:  web.DatasetsHandler,
+	defaultEndpoint: "/dbs/datasets",
+	testCases: []testCase{
+		{
+			description: "Test empty GET",
+			method:      "GET",
+			serverType:  "DBSReader",
+			resp:        []Response{},
+			respCode:    http.StatusOK,
+		},
+		{
+			description: "Test POST",
+			method:      "POST",
+			serverType:  "DBSWriter",
+			record: RequestBody{
+				"physics_group_name":  "Tracker",
+				"dataset":             "unittest",
+				"dataset_access_type": "PRODUCTION",
+				"processed_ds_name":   "acq_era",
+				"primary_ds_name":     "unittest",
+				"output_configs": []RequestBody{
+					{
+						"release_version":     "CMSSW_1_2_3",
+						"pset_hash":           "76e303993a1c2f842159dbfeeed9a0dd",
+						"app_name":            "cmsRun",
+						"output_module_label": "Merged",
+						"global_tag":          "my-cms-gtag",
+					},
+				},
+				"xtcrosssection":         123,
+				"primary_ds_type":        "test",
+				"data_tier_name":         "GEN-SIM-RAW",
+				"creation_date":          1635177605,
+				"create_by":              "tester2",
+				"last_modification_date": 1635177605,
+				"last_modified_by":       "tester3",
+				"processing_version":     7269,
+				"acquisition_era_name":   "acq_era",
+			},
+			resp:     []Response{},
+			respCode: http.StatusOK,
+		},
+	},
+}
+
 var IntegrationTestCases = []EndpointTestCase{
 	PrimaryDatasetAndTypesTestCase,
 	OutputConfigTestCase,
 	AcquisitionEraTestCase,
 	ProcessingEraTestCase,
-	// DatatiersTestCase,
+	DatatiersTestCase,
+	DatasetAccessTypesTestCase,
+	DatasetsTestCase,
 }
