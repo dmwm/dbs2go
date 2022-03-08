@@ -235,52 +235,8 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) { //, tsR *httptest.Serve
 	})
 }
 
-// TestDBSIntegration Tests both DBSReader and DBSWriter Endpoints
-func TestIntegation(t *testing.T) {
-	db := initDB(false)
-	defer db.Close()
-
-	/*
-		t.Run("Test physicsgroups", func(t *testing.T) {
-			rec := dbs.PhysicsGroups{
-				PHYSICS_GROUP_NAME: "Tracker",
-			}
-
-			data, err := json.Marshal(rec)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// fields that are created thru api handler
-			fields := []string{"physics_group_name"}
-
-			params := url.Values{}
-			params.Add("physics_group_name", "Tracker")
-
-			runTestWorkflow(t, tsR, tsW, "/dbs/physicsgroups", web.PhysicsGroupsHandler, data, fields, params, false)
-		})
-
-		t.Run("Test datasetaccesstypes", func(t *testing.T) {
-			rec := dbs.DatasetAccessTypes{
-				DATASET_ACCESS_TYPE: "PRODUCTION",
-			}
-
-			data, err := json.Marshal(rec)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			fields := []string{"dataset_access_type"}
-
-			params := url.Values{}
-			params.Add("dataset_access_type", "PRODUCTION")
-
-			runTestWorkflow(t, tsR, tsW, "/dbs/datasetaccesstypes", web.DatasetAccessTypesHandler, data, fields, params, false)
-		})
-	*/
-}
-
-func TestIntegration2(t *testing.T) {
+// TestIntegration Tests both DBSReader and DBSWriter Endpoints
+func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 

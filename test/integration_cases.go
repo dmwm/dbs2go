@@ -584,8 +584,44 @@ var DatasetAccessTypesTestCase = EndpointTestCase{
 	},
 }
 
+// PhysicsGroupsTestCase tests for the physicsgroups endpoint
+var PhysicsGroupsTestCase = EndpointTestCase{
+	description:     "Test physicsgroups",
+	defaultHandler:  web.PhysicsGroupsHandler,
+	defaultEndpoint: "/dbs/physicsgroups",
+	testCases: []testCase{
+		{
+			description: "Test GET with no data",
+			serverType:  "DBSReader",
+			method:      "GET",
+			resp:        []Response{},
+			respCode:    http.StatusOK,
+		},
+		{
+			description: "Test POST",
+			serverType:  "DBSWriter",
+			method:      "POST",
+			record: RequestBody{
+				"physics_group_name": "Tracker",
+			},
+			respCode: http.StatusOK,
+		},
+		{
+			description: "Test GET after POST",
+			serverType:  "DBSReader",
+			method:      "GET",
+			resp: []Response{
+				{
+					"physics_group_name": "Tracker",
+				},
+			},
+		},
+	},
+}
+
 // DatasetsTestCase contains tests for the datasets endpoint
-//* Note: depends on PrimaryDS and Datatiers tests
+//* Note: depends on above tests for their *_id
+// TODO: include prep_id in POST tests
 var DatasetsTestCase = EndpointTestCase{
 	description:     "Test datasets",
 	defaultHandler:  web.DatasetsHandler,
@@ -640,5 +676,6 @@ var IntegrationTestCases = []EndpointTestCase{
 	ProcessingEraTestCase,
 	DatatiersTestCase,
 	DatasetAccessTypesTestCase,
+	PhysicsGroupsTestCase,
 	DatasetsTestCase,
 }
