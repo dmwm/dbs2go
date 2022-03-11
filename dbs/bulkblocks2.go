@@ -715,9 +715,9 @@ func insertFilesChunk(
 			return
 		}
 		// get branch hash ID and insert record if it does not exists
-		if rrr.BranchHash == "" {
-			rrr.BranchHash = "branch-hash"
-		}
+		//         if rrr.BranchHash == "" {
+		//             rrr.BranchHash = "branch-hash"
+		//         }
 
 		cBy := rrr.LastModifiedBy
 		if cBy == "" {

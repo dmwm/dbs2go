@@ -91,13 +91,17 @@ func getPrimaryDataset(blk string, wg *sync.WaitGroup, primaryDataset *PrimaryDa
 		utils.PrintSQL(stm, args, "execute")
 	}
 
+	var cby sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
 		&primaryDataset.PrimaryDSId,
-		&primaryDataset.CreateBy,
+		&cby,
 		&primaryDataset.PrimaryDSType,
 		&primaryDataset.PrimaryDSName,
 		&primaryDataset.CreationDate,
 	)
+	if cby.Valid {
+		primaryDataset.CreateBy = cby.String
+	}
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
@@ -115,12 +119,15 @@ func getProcessingEra(blk string, wg *sync.WaitGroup, processingEra *ProcessingE
 		utils.PrintSQL(stm, args, "execute")
 	}
 
-	var desc sql.NullString
+	var cby, desc sql.NullString
 	err := DB.QueryRow(stm, args...).Scan(
-		&processingEra.CreateBy,
+		&cby,
 		&processingEra.ProcessingVersion,
 		&desc,
 	)
+	if cby.Valid {
+		processingEra.CreateBy = cby.String
+	}
 	if desc.Valid {
 		processingEra.Description = desc.String
 	}
@@ -142,13 +149,17 @@ func getAcquisitionEra(blk string, wg *sync.WaitGroup, acquisitionEra *Acquisiti
 	}
 
 	var cby, desc sql.NullString
+	var cdate sql.NullInt64
 	err := DB.QueryRow(stm, args...).Scan(
 		&acquisitionEra.AcquisitionEraName,
 		&acquisitionEra.StartDate,
-		&acquisitionEra.CreationDate,
+		&cdate,
 		&cby,
 		&desc,
 	)
+	if cdate.Valid {
+		acquisitionEra.CreationDate = cdate.Int64
+	}
 	if cby.Valid {
 		acquisitionEra.CreateBy = cby.String
 	}
@@ -183,26 +194,26 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 	defer rows.Close()
 	for rows.Next() {
 		file := File{}
-		var bhash, md5 sql.NullString
+		var md5 sql.NullString
+		var xt sql.NullFloat64
 		err = rows.Scan(
 			&file.CheckSum,
 			&file.Adler32,
 			&file.FileSize,
 			&file.EventCount,
 			&file.FileType,
-			&bhash,
 			&file.LastModifiedBy,
 			&file.LastModificationDate,
 			&file.LogicalFileName,
 			&md5,
-			&file.AutoCrossSection,
+			&xt,
 			&file.IsFileValid,
 		)
-		if bhash.Valid {
-			file.BranchHash = bhash.String
-		}
 		if md5.Valid {
 			file.MD5 = md5.String
+		}
+		if xt.Valid {
+			file.AutoCrossSection = xt.Float64
 		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
@@ -223,14 +234,19 @@ func getFileList(blk string, wg *sync.WaitGroup, files *FileList) {
 			return
 		}
 		defer frows.Close()
-		var fileLumiList []FileLumi
+		// ensure that fileLumiList will be serialized as empty list [] and not as null
+		fileLumiList := make([]FileLumi, 0)
 		for frows.Next() {
 			fileLumi := FileLumi{}
+			var evt sql.NullInt64
 			err = frows.Scan(
 				&fileLumi.LumiSectionNumber,
 				&fileLumi.RunNumber,
-				&fileLumi.EventCount,
+				&evt,
 			)
+			if evt.Valid {
+				fileLumi.EventCount = evt.Int64
+			}
 			if err != nil {
 				log.Println("unable to scan rows", err)
 				return
@@ -340,10 +356,11 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 	defer rows.Close()
 	for rows.Next() {
 		fileConfig := FileConfig{}
+		var pname sql.NullString
 		err = rows.Scan(
 			&fileConfig.ReleaseVersion,
 			&fileConfig.PsetHash,
-			&fileConfig.PsetName,
+			&pname,
 			&fileConfig.LFN,
 			&fileConfig.AppName,
 			&fileConfig.OutputModuleLabel,
@@ -351,6 +368,9 @@ func getFileConfigList(blk string, wg *sync.WaitGroup, fileConfigList *FileConfi
 			&fileConfig.CreateBy,
 			&fileConfig.CreationDate,
 		)
+		if pname.Valid {
+			fileConfig.PsetName = pname.String
+		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
 			return
@@ -383,10 +403,19 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	defer rows.Close()
 	for rows.Next() {
 		fileParent := FileParentRecord{}
+		var pid sql.NullInt64
+		var pfn sql.NullString
 		err = rows.Scan(
 			&fileParent.LogicalFileName,
-			&fileParent.ParentLogicalFileName,
+			&pid,
+			&pfn,
 		)
+		if pid.Valid {
+			fileParent.ParentFileId = pid.Int64
+		}
+		if pfn.Valid {
+			fileParent.ParentLogicalFileName = pfn.String
+		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
 			return
@@ -476,9 +505,12 @@ func (a *API) BlockDump() error {
 	var dataset Dataset
 	var acquisitionEra AcquisitionEra
 	var block Block
-	var fileParentList FileParentList
-	var blockParentList BlockParentList
-	var datasetParentList DatasetParentList
+	// in order to get proper JSON serialization for empty list,
+	// i.e. [] instead of null, we should make empty lists
+	// https://apoorvam.github.io/blog/2017/golang-json-marshal-slice-as-empty-array-not-null/
+	fileParentList := make(FileParentList, 0)
+	blockParentList := make(BlockParentList, 0)
+	datasetParentList := make(DatasetParentList, 0)
 
 	// get concurrently all necessary information required for block dump
 	var wg sync.WaitGroup
@@ -500,7 +532,7 @@ func (a *API) BlockDump() error {
 		log.Println("waited for all goroutines to finish")
 	}
 	// prepare dsParentList in form of []DatasetParent
-	var dsParentList []DatasetParent
+	dsParentList := make([]DatasetParent, 0)
 	for _, d := range datasetParentList {
 		dsParentList = append(dsParentList, DatasetParent{ParentDataset: d})
 	}
