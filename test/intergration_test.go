@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -21,6 +22,24 @@ import (
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
 )
+
+// reads a json file
+func readJsonFile(t *testing.T, filename string) map[string]interface{} {
+	var data []byte
+	var err error
+	var testData map[string]interface{}
+	data, err = os.ReadFile(filename)
+	if err != nil {
+		log.Printf("ERROR: unable to read %s error %v", filename, err.Error())
+		t.Fatal(err.Error())
+	}
+	err = json.Unmarshal(data, &testData)
+	if err != nil {
+		log.Println("unable to unmarshal received data")
+		t.Fatal(err.Error())
+	}
+	return testData
+}
 
 // initializes the limiter middleware
 func initTestLimiter(t *testing.T, period string) {
@@ -62,7 +81,7 @@ func runTestServer(t *testing.T, serverType string) *httptest.Server {
 	web.Config.ServerType = serverType
 	web.Config.LogFile = "/tmp/dbs2go-test.log"
 	web.Config.Verbose = 0
-	utils.VERBOSE = 1
+	utils.VERBOSE = 0
 	utils.BASE = "/dbs"
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
 	if err != nil {
@@ -97,6 +116,7 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return r
 }
 
@@ -111,30 +131,34 @@ func extractKeys(m map[string]interface{}) []string {
 
 // compares received response to expected
 func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { //, fields []string) {
-	fmt.Printf("Received: %s\nExpected: %s\n", received, expected)
-	if len(received) != len(expected) {
-		t.Fatalf("Expected length: %v, Received length: %v", len(expected), len(received))
+	expect := expected
+	if expected == nil {
+		expect = []Response{}
+	}
+	fmt.Printf("Received: %s\nExpected: %s\n", received, expect)
+	if len(received) != len(expect) {
+		t.Fatalf("Expected length: %v, Received length: %v", len(expect), len(received))
 	}
 	fields := []string{}
-	if len(expected) > 0 {
-		fields = extractKeys(expected[0])
+	if len(expect) > 0 {
+		fields = extractKeys(expect[0])
 	}
 	for _, f := range fields {
 		for i, r := range received {
 			if f == "error" {
 				rCode := r[f].(map[string]interface{})["code"]
-				eCode := expected[i]["error"]
+				eCode := expect[i]["error"]
 				if rCode != eCode {
 					t.Fatalf("Expected error code: %v, Received: %v", rCode, eCode)
 				}
 			} else {
-				if r[f] != expected[i][f] {
+				if r[f] != expect[i][f] {
 					if strings.Contains(f, "date") {
 						if r[f] == nil {
 							t.Fatalf("Field empty: %s", f)
 						}
 					} else {
-						t.Fatalf("Incorrect %s: Expected: %v, Received: %v", f, expected[i][f], r[f])
+						t.Fatalf("Incorrect %s: Expected: %v, Received: %v", f, expect[i][f], r[f])
 					}
 				}
 			}
@@ -226,9 +250,9 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) { //, tsR *httptest.Serve
 				defer server.Close()
 				if v.method == "GET" {
 					d, _ := getData(t, server.URL, endpoint, v.params, v.respCode)
-					verifyResponse(t, d, v.resp) //, v.fields)
+					verifyResponse(t, d, v.output)
 				} else if v.method == "POST" {
-					injectDBRecord(t, v.record, server.URL, endpoint, v.params, handler, v.respCode)
+					injectDBRecord(t, v.input, server.URL, endpoint, v.params, handler, v.respCode)
 				}
 			})
 		}
@@ -240,7 +264,11 @@ func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	for _, v := range IntegrationTestCases {
-		runTestWorkflow(t, v) //, tsR, tsW)
+	testData := readJsonFile(t, "./data/integrationdata.json")
+
+	testCases := LoadTestCases(t, testData)
+
+	for _, v := range testCases {
+		runTestWorkflow(t, v)
 	}
 }
