@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/hex"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/vkuznet/dbs2go/web"
 )
 
@@ -27,6 +31,41 @@ type testCase struct {
 	respCode    int         // expected HTTP response code
 }
 
+// testData struct for test data generation
+type testData struct {
+	primary_ds_name          string
+	procdataset              string
+	tier                     string
+	dataset                  string
+	parent_dataset           string
+	primary_ds_name2         string
+	dataset2                 string
+	app_name                 string
+	output_module_label      string
+	global_tag               string
+	pset_hash                string
+	pset_name                string
+	release_version          string
+	site                     string
+	block                    string
+	parent_block             string
+	files                    []string
+	parent_files             []string
+	runs                     []int
+	acquisition_era          string
+	processing_version       int64
+	step_primary_ds_name     string
+	stepchain_dataset        string
+	stepchain_block          string
+	parent_stepchain_dataset string
+	parent_stepchain_block   string
+	stepchain_files          []string
+	parent_stepchain_files   []string
+}
+
+// TestData contains the generated data
+var TestData testData
+
 // defines a testcase for an endpoint
 type EndpointTestCase struct {
 	description     string
@@ -35,8 +74,93 @@ type EndpointTestCase struct {
 	testCases       []testCase
 }
 
+// get a UUID time_mid as an int
+func getUUID(t *testing.T) int64 {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		t.Fatal(err)
+	}
+	time_mid := uuid[4:6]
+	uid := hex.EncodeToString(time_mid)
+	uidInt, err := strconv.ParseInt(uid, 16, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return uidInt
+}
+
+// generate test data
+func generateBaseData(t *testing.T) {
+	uid := getUUID(t)
+	fmt.Printf("****uid=%v*****\n", uid)
+
+	primary_ds_name := fmt.Sprintf("unittest_web_primary_ds_name_%v", uid)
+	processing_version := uid % 9999
+	if uid < 9999 {
+		processing_version = uid
+	}
+	acquisition_era_name := fmt.Sprintf("acq_era_%v", uid)
+	procdataset := fmt.Sprintf("%s-pstr-v%v", acquisition_era_name, processing_version)
+	parent_procdataset := fmt.Sprintf("%s-ptsr-v%v", acquisition_era_name, processing_version)
+	tier := "GEN-SIM-RAW"
+	dataset := fmt.Sprintf("/%s/%s/%s", primary_ds_name, procdataset, tier)
+	primary_ds_name2 := fmt.Sprintf("%s_2", primary_ds_name)
+	dataset2 := fmt.Sprintf("/%s/%s/%s", primary_ds_name2, procdataset, tier)
+	app_name := "cmsRun"
+	output_module_label := "merged"
+	global_tag := fmt.Sprintf("my-cms-gtag_%v", uid)
+	pset_hash := "76e303993a1c2f842159dbfeeed9a0dd"
+	pset_name := "UnittestPsetName"
+	release_version := "CMSSW_1_2_3"
+	site := "cmssrm.fnal.gov"
+	block := fmt.Sprintf("%s#%v", dataset, uid)
+	parent_dataset := fmt.Sprintf("/%s/%s/%s", primary_ds_name, parent_procdataset, tier)
+	parent_block := fmt.Sprintf("%s#%v", parent_dataset, uid)
+
+	step_primary_ds_name := fmt.Sprintf("%s_stepchain", primary_ds_name)
+	stepchain_dataset := fmt.Sprintf("/%s/%s/%s", step_primary_ds_name, procdataset, tier)
+	stepchain_block := fmt.Sprintf("%s#%v", stepchain_dataset, uid)
+	parent_stepchain_dataset := fmt.Sprintf("/%s/%s/%s", step_primary_ds_name, parent_procdataset, tier)
+	parent_stepchain_block := fmt.Sprintf("%s#%v", parent_stepchain_dataset, uid)
+	stepchain_files := []string{}
+	parent_stepchain_files := []string{}
+
+	TestData.primary_ds_name = primary_ds_name
+	TestData.procdataset = procdataset
+	TestData.tier = tier
+	TestData.dataset = dataset
+	TestData.parent_dataset = parent_dataset
+	TestData.primary_ds_name2 = primary_ds_name2
+	TestData.dataset2 = dataset2
+	TestData.app_name = app_name
+	TestData.output_module_label = output_module_label
+	TestData.global_tag = global_tag
+	TestData.pset_hash = pset_hash
+	TestData.pset_name = pset_name
+	TestData.release_version = release_version
+	TestData.site = site
+	TestData.block = block
+	TestData.parent_block = parent_block
+	TestData.files = []string{}
+	TestData.parent_files = []string{}
+	TestData.runs = []int{97, 98, 99}
+	TestData.acquisition_era = acquisition_era_name
+	TestData.processing_version = processing_version
+	TestData.step_primary_ds_name = step_primary_ds_name
+	TestData.stepchain_dataset = stepchain_dataset
+	TestData.stepchain_block = stepchain_block
+	TestData.parent_stepchain_dataset = parent_stepchain_dataset
+	TestData.parent_stepchain_block = parent_stepchain_block
+	TestData.stepchain_files = stepchain_files
+	TestData.parent_stepchain_files = parent_stepchain_files
+
+	fmt.Println(TestData)
+}
+
 // LoadTestCases loads the testData from a json file
-func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTestCase {
+func LoadTestCases(t *testing.T) []EndpointTestCase {
+	generateBaseData(t)
 	var primaryDatasetAndTypesTestCase EndpointTestCase
 	var outputConfigTestCase EndpointTestCase
 	var acquisitionErasTestCase EndpointTestCase
@@ -73,12 +197,23 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				respCode:    http.StatusOK,
 			},
 			{
-				description: "Test POST",
+				description: "Test primarydatasets bad POST",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				input: RequestBody{
+					"bad-field": "Bad",
+				},
+				params:   nil,
+				output:   nil,
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test primarydatasets POST",
 				method:      "POST",
 				serverType:  "DBSWriter",
 				params:      nil,
 				input: RequestBody{
-					"primary_ds_name": testData["primary_ds_name"],
+					"primary_ds_name": TestData.primary_ds_name,
 					"primary_ds_type": "test",
 					"create_by":       "tester",
 				},
@@ -92,7 +227,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				output: []Response{
 					{
 						"primary_ds_id":   1.0,
-						"primary_ds_name": testData["primary_ds_name"],
+						"primary_ds_name": TestData.primary_ds_name,
 						"creation_date":   0,
 						"create_by":       "tester",
 						"primary_ds_type": "test",
@@ -150,8 +285,8 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				params: url.Values{
 					"primary_ds_type": []string{"t*"},
 				},
-				respCode: http.StatusOK,
 				handler:  web.PrimaryDSTypesHandler,
+				respCode: http.StatusOK,
 			},
 			{
 				description: "Test primarydstypes GET w dataset param",
@@ -168,8 +303,8 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				params: url.Values{
 					"dataset": []string{"unittest"},
 				},
-				respCode: http.StatusOK,
 				handler:  web.PrimaryDSTypesHandler,
+				respCode: http.StatusOK,
 			},
 			{
 				description: "Test primarydstypes GET w bad dataset param",
@@ -207,7 +342,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSWriter",
 				params:      nil,
 				input: RequestBody{
-					"primary_ds_name": testData["primary_ds_name"],
+					"primary_ds_name": TestData.primary_ds_name,
 					"primary_ds_type": "test",
 					"create_by":       "tester",
 				},
@@ -221,7 +356,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				output: []Response{
 					{
 						"primary_ds_id":   1.0,
-						"primary_ds_name": testData["primary_ds_name"],
+						"primary_ds_name": TestData.primary_ds_name,
 						"creation_date":   0,
 						"create_by":       "tester",
 						"primary_ds_type": "test",
@@ -249,7 +384,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				output: []Response{
 					{
 						"primary_ds_id":   1.0,
-						"primary_ds_name": testData["primary_ds_name"],
+						"primary_ds_name": TestData.primary_ds_name,
 						"creation_date":   0,
 						"create_by":       "tester",
 						"primary_ds_type": "test",
@@ -299,11 +434,11 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: RequestBody{
-					"app_name":            testData["app_name"],
-					"release_version":     testData["release_version"],
-					"pset_hash":           testData["pset_hash"],
-					"global_tag":          testData["global_tag"],
-					"output_module_label": testData["output_module_label"],
+					"app_name":            TestData.app_name,
+					"release_version":     TestData.release_version,
+					"pset_hash":           TestData.pset_hash,
+					"global_tag":          TestData.global_tag,
+					"output_module_label": TestData.output_module_label,
 					"create_by":           "tester",
 					"scenario":            "note",
 				},
@@ -316,11 +451,11 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: RequestBody{
-					"app_name":            testData["app_name"],
-					"release_version":     testData["release_version"],
-					"pset_hash":           testData["pset_hash"],
-					"global_tag":          testData["global_tag"],
-					"output_module_label": testData["output_module_label"],
+					"app_name":            TestData.app_name,
+					"release_version":     TestData.release_version,
+					"pset_hash":           TestData.pset_hash,
+					"global_tag":          TestData.global_tag,
+					"output_module_label": TestData.output_module_label,
 					"create_by":           "tester",
 					"scenario":            "note",
 				},
@@ -334,11 +469,11 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSReader",
 				output: []Response{
 					{
-						"app_name":            testData["app_name"],
-						"release_version":     testData["release_version"],
-						"pset_hash":           testData["pset_hash"],
-						"global_tag":          testData["global_tag"],
-						"output_module_label": testData["output_module_label"],
+						"app_name":            TestData.app_name,
+						"release_version":     TestData.release_version,
+						"pset_hash":           TestData.pset_hash,
+						"global_tag":          TestData.global_tag,
+						"output_module_label": TestData.output_module_label,
 						"create_by":           "tester",
 						"creation_date":       0,
 					},
@@ -368,7 +503,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: RequestBody{
-					"acquisition_era_name": testData["acquisition_era"],
+					"acquisition_era_name": TestData.acquisition_era,
 					"create_by":            "tester",
 					"description":          "note",
 				},
@@ -380,7 +515,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSReader",
 				output: []Response{
 					{
-						"acquisition_era_name": testData["acquisition_era"],
+						"acquisition_era_name": TestData.acquisition_era,
 						"start_date":           0,
 						"end_date":             0,
 						"creation_date":        0,
@@ -414,7 +549,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: RequestBody{
-					"processing_version": testData["processing_version"],
+					"processing_version": TestData.processing_version,
 					"description":        "this_is_a_test",
 					"create_by":          "tester",
 				},
@@ -426,7 +561,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSReader",
 				output: []Response{
 					{
-						"processing_version": testData["processing_version"],
+						"processing_version": float64(TestData.processing_version),
 						"description":        "this_is_a_test",
 						"create_by":          "tester",
 						"creation_date":      0,
@@ -457,7 +592,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: RequestBody{
-					"non-existing-field": testData["data_tier_name"],
+					"non-existing-field": TestData.tier,
 				},
 				params:   nil,
 				respCode: http.StatusBadRequest,
@@ -467,13 +602,13 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: RequestBody{
-					"data_tier_name": testData["data_tier_name"],
+					"data_tier_name": TestData.tier,
 					"create_by":      "tester",
 				},
 				output: []Response{
 					{
 						"data_tier_id":   "1",
-						"data_tier_name": testData["data_tier_name"],
+						"data_tier_name": TestData.tier,
 						"create_by":      "tester",
 					},
 				},
@@ -485,12 +620,12 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "GET",
 				serverType:  "DBSReader",
 				input: RequestBody{
-					"data_tier_name": testData["data_tier_name"],
+					"data_tier_name": TestData.tier,
 					"create_by":      "tester",
 				},
 				output: []Response{
 					{
-						"data_tier_name": testData["data_tier_name"],
+						"data_tier_name": TestData.tier,
 						"create_by":      "tester",
 						"creation_date":  "0",
 						"data_tier_id":   1.0,
@@ -504,12 +639,12 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "GET",
 				serverType:  "DBSReader",
 				input: RequestBody{
-					"data_tier_name": testData["data_tier_name"],
+					"data_tier_name": TestData.tier,
 					"create_by":      "tester",
 				},
 				output: []Response{
 					{
-						"data_tier_name": testData["data_tier_name"],
+						"data_tier_name": TestData.tier,
 						"create_by":      "tester",
 						"creation_date":  "0",
 						"data_tier_id":   1.0,
@@ -517,7 +652,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				},
 				params: url.Values{
 					"data_tier_name": []string{
-						testData["data_tier_name"].(string),
+						TestData.tier,
 					},
 				},
 				respCode: http.StatusOK,
@@ -527,12 +662,12 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "GET",
 				serverType:  "DBSReader",
 				input: RequestBody{
-					"data_tier_name": testData["data_tier_name"],
+					"data_tier_name": TestData.tier,
 					"create_by":      "tester",
 				},
 				output: []Response{
 					{
-						"data_tier_name": testData["data_tier_name"],
+						"data_tier_name": TestData.tier,
 						"create_by":      "tester",
 						"creation_date":  "0",
 						"data_tier_id":   1.0,
@@ -548,7 +683,7 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				method:      "GET",
 				serverType:  "DBSReader",
 				input: RequestBody{
-					"data_tier_name": testData["data_tier_name"],
+					"data_tier_name": TestData.tier,
 					"create_by":      "tester",
 				},
 				output: []Response{},
@@ -654,28 +789,28 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSWriter",
 				input: RequestBody{
 					"physics_group_name":  "Tracker",
-					"dataset":             testData["dataset"],
+					"dataset":             TestData.dataset,
 					"dataset_access_type": "PRODUCTION",
-					"processed_ds_name":   testData["processed_ds_name"],
-					"primary_ds_name":     testData["primary_ds_name"],
+					"processed_ds_name":   TestData.procdataset,
+					"primary_ds_name":     TestData.primary_ds_name,
 					"output_configs": []RequestBody{
 						{
-							"release_version":     testData["release_version"],
-							"pset_hash":           testData["pset_hash"],
-							"app_name":            testData["app_name"],
-							"output_module_label": testData["output_module_label"],
-							"global_tag":          testData["global_tag"],
+							"release_version":     TestData.release_version,
+							"pset_hash":           TestData.pset_hash,
+							"app_name":            TestData.app_name,
+							"output_module_label": TestData.output_module_label,
+							"global_tag":          TestData.global_tag,
 						},
 					},
 					"xtcrosssection":         123,
 					"primary_ds_type":        "test",
-					"data_tier_name":         testData["data_tier_name"],
+					"data_tier_name":         TestData.tier,
 					"creation_date":          1635177605,
 					"create_by":              "tester",
 					"last_modification_date": 1635177605,
-					"last_modified_by":       "tester2",
-					"processing_version":     testData["processing_version"],
-					"acquisition_era_name":   testData["acquisition_era"],
+					"last_modified_by":       "testuser",
+					"processing_version":     TestData.processing_version,
+					"acquisition_era_name":   TestData.acquisition_era,
 				},
 				output: []Response{
 					{
@@ -690,28 +825,28 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSWriter",
 				input: RequestBody{
 					"physics_group_name":  "Tracker",
-					"dataset":             testData["dataset"],
+					"dataset":             TestData.dataset,
 					"dataset_access_type": "PRODUCTION",
-					"processed_ds_name":   testData["processed_ds_name"],
-					"primary_ds_name":     testData["primary_ds_name"],
+					"processed_ds_name":   TestData.procdataset,
+					"primary_ds_name":     TestData.primary_ds_name,
 					"output_configs": []RequestBody{
 						{
-							"release_version":     testData["release_version"],
-							"pset_hash":           testData["pset_hash"],
-							"app_name":            testData["app_name"],
-							"output_module_label": testData["output_module_label"],
-							"global_tag":          testData["global_tag"],
+							"release_version":     TestData.release_version,
+							"pset_hash":           TestData.pset_hash,
+							"app_name":            TestData.app_name,
+							"output_module_label": TestData.output_module_label,
+							"global_tag":          TestData.global_tag,
 						},
 					},
 					"xtcrosssection":         123,
 					"primary_ds_type":        "test",
-					"data_tier_name":         testData["data_tier_name"],
+					"data_tier_name":         TestData.tier,
 					"creation_date":          1635177605,
 					"create_by":              "tester",
 					"last_modification_date": 1635177605,
-					"last_modified_by":       "tester2",
-					"processing_version":     testData["processing_version"],
-					"acquisition_era_name":   testData["acquisition_era"],
+					"last_modified_by":       "testuser",
+					"processing_version":     TestData.processing_version,
+					"acquisition_era_name":   TestData.acquisition_era,
 				},
 				output: []Response{
 					{
@@ -725,12 +860,12 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset":             []string{testData["dataset"].(string)},
+					"dataset":             []string{TestData.dataset},
 					"dataset_access_type": []string{"PRODUCTION"},
 				},
 				output: []Response{
 					{
-						"dataset": testData["dataset"],
+						"dataset": TestData.dataset,
 					},
 				},
 				respCode: http.StatusOK,
@@ -740,27 +875,27 @@ func LoadTestCases(t *testing.T, testData map[string]interface{}) []EndpointTest
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset":             []string{testData["dataset"].(string)},
+					"dataset":             []string{TestData.dataset},
 					"dataset_access_type": []string{"PRODUCTION"},
 					"detail":              []string{"true"},
 				},
 				output: []Response{
 					{
-						"acquisition_era_name":   testData["acquisition_era"],
+						"acquisition_era_name":   TestData.acquisition_era,
 						"create_by":              "tester",
 						"creation_date":          1635177605,
-						"data_tier_name":         testData["data_tier_name"],
-						"dataset":                testData["dataset"],
+						"data_tier_name":         TestData.tier,
+						"dataset":                TestData.dataset,
 						"dataset_access_type":    "PRODUCTION",
 						"dataset_id":             1.0,
 						"last_modification_date": 1635177605,
-						"last_modified_by":       "tester2",
+						"last_modified_by":       "testuser",
 						"physics_group_name":     "Tracker",
 						"prep_id":                "",
-						"primary_ds_name":        testData["primary_ds_name"],
+						"primary_ds_name":        TestData.primary_ds_name,
 						"primary_ds_type":        "test",
-						"processed_ds_name":      testData["processed_ds_name"],
-						"processing_version":     testData["processing_version"],
+						"processed_ds_name":      TestData.procdataset,
+						"processing_version":     float64(TestData.processing_version),
 						"xtcrosssection":         123.0,
 					},
 				},

@@ -264,9 +264,11 @@ func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	testData := readJsonFile(t, "./data/integrationdata.json")
+	/*
+		testData := readJsonFile(t, "./data/integrationdata.json")
+	*/
 
-	testCases := LoadTestCases(t, testData)
+	testCases := LoadTestCases(t)
 
 	for _, v := range testCases {
 		runTestWorkflow(t, v)
