@@ -120,15 +120,6 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 	return r
 }
 
-// extract keys from a map
-func extractKeys(m map[string]interface{}) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 // compares received response to expected
 func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { //, fields []string) {
 	expect := expected
@@ -141,7 +132,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { 
 	}
 	fields := []string{}
 	if len(expect) > 0 {
-		fields = extractKeys(expect[0])
+		fields = utils.MapKeys(expect[0])
 	}
 	for _, f := range fields {
 		for i, r := range received {
@@ -264,9 +255,8 @@ func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	/*
-		testData := readJsonFile(t, "./data/integrationdata.json")
-	*/
+	testData := readJsonFile(t, "./data/integrationdata.json")
+	fmt.Println(testData)
 
 	testCases := LoadTestCases(t)
 

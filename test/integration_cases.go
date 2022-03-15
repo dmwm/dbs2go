@@ -53,7 +53,7 @@ type testData struct {
 	parent_files             []string
 	runs                     []int
 	acquisition_era          string
-	processing_version       int64
+	processing_version       float64
 	step_primary_ds_name     string
 	stepchain_dataset        string
 	stepchain_block          string
@@ -146,7 +146,7 @@ func generateBaseData(t *testing.T) {
 	TestData.parent_files = []string{}
 	TestData.runs = []int{97, 98, 99}
 	TestData.acquisition_era = acquisition_era_name
-	TestData.processing_version = processing_version
+	TestData.processing_version = float64(processing_version)
 	TestData.step_primary_ds_name = step_primary_ds_name
 	TestData.stepchain_dataset = stepchain_dataset
 	TestData.stepchain_block = stepchain_block
@@ -158,20 +158,37 @@ func generateBaseData(t *testing.T) {
 	fmt.Println(TestData)
 }
 
-// LoadTestCases loads the testData from a json file
-func LoadTestCases(t *testing.T) []EndpointTestCase {
-	generateBaseData(t)
-	var primaryDatasetAndTypesTestCase EndpointTestCase
-	var outputConfigTestCase EndpointTestCase
-	var acquisitionErasTestCase EndpointTestCase
-	var processingErasTestCase EndpointTestCase
-	var datatiersTestCase EndpointTestCase
-	var datasetAccessTypesTestCase EndpointTestCase
-	var physicsGroupsTestCase EndpointTestCase
-	var datasetsTestCase EndpointTestCase
-
-	// primarydataset and primarydstype endpoints tests
-	primaryDatasetAndTypesTestCase = EndpointTestCase{
+// primarydataset and primarydstype endpoints tests
+func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
+	primaryDSRequest := RequestBody{
+		"primary_ds_name": TestData.primary_ds_name,
+		"primary_ds_type": "test",
+		"create_by":       "tester",
+	}
+	primaryDSResponse := Response{
+		"primary_ds_id":   1.0,
+		"primary_ds_name": TestData.primary_ds_name,
+		"creation_date":   0,
+		"create_by":       "tester",
+		"primary_ds_type": "test",
+	}
+	primaryDSTypeResponse := Response{
+		"primary_ds_type_id": 1.0,
+		"data_type":          "test",
+	}
+	primaryDSRequest2 := RequestBody{
+		"primary_ds_name": TestData.primary_ds_name2,
+		"primary_ds_type": "test",
+		"create_by":       "tester",
+	}
+	primaryDSResponse2 := Response{
+		"primary_ds_id":   2.0,
+		"primary_ds_name": TestData.primary_ds_name2,
+		"creation_date":   0,
+		"create_by":       "tester",
+		"primary_ds_type": "test",
+	}
+	return EndpointTestCase{
 		description:     "Test primarydataset",
 		defaultHandler:  web.PrimaryDatasetsHandler,
 		defaultEndpoint: "/dbs/primarydatasets",
@@ -212,26 +229,16 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				method:      "POST",
 				serverType:  "DBSWriter",
 				params:      nil,
-				input: RequestBody{
-					"primary_ds_name": TestData.primary_ds_name,
-					"primary_ds_type": "test",
-					"create_by":       "tester",
-				},
-				output:   nil,
-				respCode: http.StatusOK,
+				input:       primaryDSRequest,
+				output:      nil,
+				respCode:    http.StatusOK,
 			},
 			{
 				description: "Test primarydatasets GET after POST",
 				method:      "GET",
 				serverType:  "DBSReader",
 				output: []Response{
-					{
-						"primary_ds_id":   1.0,
-						"primary_ds_name": TestData.primary_ds_name,
-						"creation_date":   0,
-						"create_by":       "tester",
-						"primary_ds_type": "test",
-					},
+					primaryDSResponse,
 				},
 				params:   nil,
 				respCode: http.StatusOK,
@@ -243,10 +250,7 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				endpoint:    "/dbs/primarydstypes",
 				input:       nil,
 				output: []Response{
-					{
-						"primary_ds_type_id": 1.0,
-						"data_type":          "test",
-					},
+					primaryDSTypeResponse,
 				},
 				params:   nil,
 				respCode: http.StatusOK,
@@ -259,10 +263,7 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				endpoint:    "/dbs/primarydstypes",
 				input:       nil,
 				output: []Response{
-					{
-						"primary_ds_type_id": 1.0,
-						"data_type":          "test",
-					},
+					primaryDSTypeResponse,
 				},
 				params: url.Values{
 					"primary_ds_type": []string{"test"},
@@ -277,10 +278,7 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				endpoint:    "/dbs/primarydstypes",
 				input:       nil,
 				output: []Response{
-					{
-						"primary_ds_type_id": 1.0,
-						"data_type":          "test",
-					},
+					primaryDSTypeResponse,
 				},
 				params: url.Values{
 					"primary_ds_type": []string{"t*"},
@@ -295,10 +293,7 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				endpoint:    "/dbs/primarydstypes",
 				input:       nil,
 				output: []Response{
-					{
-						"primary_ds_type_id": 1.0,
-						"data_type":          "test",
-					},
+					primaryDSTypeResponse,
 				},
 				params: url.Values{
 					"dataset": []string{"unittest"},
@@ -341,26 +336,16 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				method:      "POST",
 				serverType:  "DBSWriter",
 				params:      nil,
-				input: RequestBody{
-					"primary_ds_name": TestData.primary_ds_name,
-					"primary_ds_type": "test",
-					"create_by":       "tester",
-				},
-				output:   nil,
-				respCode: http.StatusOK,
+				input:       primaryDSRequest,
+				output:      nil,
+				respCode:    http.StatusOK,
 			},
 			{
 				description: "Test primarydatasets GET after duplicate POST",
 				method:      "GET",
 				serverType:  "DBSReader",
 				output: []Response{
-					{
-						"primary_ds_id":   1.0,
-						"primary_ds_name": TestData.primary_ds_name,
-						"creation_date":   0,
-						"create_by":       "tester",
-						"primary_ds_type": "test",
-					},
+					primaryDSResponse,
 				},
 				respCode: http.StatusOK,
 			},
@@ -369,42 +354,46 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				method:      "POST",
 				serverType:  "DBSWriter",
 				params:      nil,
-				input: RequestBody{
-					"primary_ds_name": "unittest2",
-					"primary_ds_type": "test",
-					"create_by":       "tester",
-				},
-				output:   nil,
-				respCode: http.StatusOK,
+				input:       primaryDSRequest2,
+				output:      nil,
+				respCode:    http.StatusOK,
 			},
 			{
 				description: "Test primarydatasets GET after second POST",
 				method:      "GET",
 				serverType:  "DBSReader",
 				output: []Response{
-					{
-						"primary_ds_id":   1.0,
-						"primary_ds_name": TestData.primary_ds_name,
-						"creation_date":   0,
-						"create_by":       "tester",
-						"primary_ds_type": "test",
-					},
-					{
-						"primary_ds_id":   2.0,
-						"primary_ds_name": "unittest2",
-						"creation_date":   0,
-						"create_by":       "tester",
-						"primary_ds_type": "test",
-					},
+					primaryDSResponse,
+					primaryDSResponse2,
 				},
 				respCode: http.StatusOK,
 			},
 		},
 	}
+}
 
-	// outputconfigs endpoint tests
-	// TODO: Rest of test cases
-	outputConfigTestCase = EndpointTestCase{
+// outputconfigs endpoint tests
+// TODO: Rest of test cases
+func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
+	outputConfigRequest := RequestBody{
+		"app_name":            TestData.app_name,
+		"release_version":     TestData.release_version,
+		"pset_hash":           TestData.pset_hash,
+		"global_tag":          TestData.global_tag,
+		"output_module_label": TestData.output_module_label,
+		"create_by":           "tester",
+		"scenario":            "note",
+	}
+	outputConfigResponse := Response{
+		"app_name":            TestData.app_name,
+		"release_version":     TestData.release_version,
+		"pset_hash":           TestData.pset_hash,
+		"global_tag":          TestData.global_tag,
+		"output_module_label": TestData.output_module_label,
+		"create_by":           "tester",
+		"creation_date":       0,
+	}
+	return EndpointTestCase{
 		description:     "Test outputconfigs",
 		defaultHandler:  web.OutputConfigsHandler,
 		defaultEndpoint: "/dbs/outputconfigs",
@@ -433,56 +422,48 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				description: "Test POST",
 				method:      "POST",
 				serverType:  "DBSWriter",
-				input: RequestBody{
-					"app_name":            TestData.app_name,
-					"release_version":     TestData.release_version,
-					"pset_hash":           TestData.pset_hash,
-					"global_tag":          TestData.global_tag,
-					"output_module_label": TestData.output_module_label,
-					"create_by":           "tester",
-					"scenario":            "note",
-				},
-				output:   nil,
-				params:   nil,
-				respCode: http.StatusOK,
+				input:       outputConfigRequest,
+				output:      nil,
+				params:      nil,
+				respCode:    http.StatusOK,
 			},
 			{
 				description: "Test duplicate POST",
 				method:      "POST",
 				serverType:  "DBSWriter",
-				input: RequestBody{
-					"app_name":            TestData.app_name,
-					"release_version":     TestData.release_version,
-					"pset_hash":           TestData.pset_hash,
-					"global_tag":          TestData.global_tag,
-					"output_module_label": TestData.output_module_label,
-					"create_by":           "tester",
-					"scenario":            "note",
-				},
-				output:   nil,
-				params:   nil,
-				respCode: http.StatusOK,
+				input:       outputConfigRequest,
+				output:      nil,
+				params:      nil,
+				respCode:    http.StatusOK,
 			},
 			{
 				description: "Test GET after POST",
 				method:      "GET",
 				serverType:  "DBSReader",
 				output: []Response{
-					{
-						"app_name":            TestData.app_name,
-						"release_version":     TestData.release_version,
-						"pset_hash":           TestData.pset_hash,
-						"global_tag":          TestData.global_tag,
-						"output_module_label": TestData.output_module_label,
-						"create_by":           "tester",
-						"creation_date":       0,
-					},
+					outputConfigResponse,
 				},
 				params:   nil,
 				respCode: http.StatusOK,
 			},
 		},
 	}
+}
+
+// LoadTestCases loads the testData from a json file
+func LoadTestCases(t *testing.T) []EndpointTestCase {
+	generateBaseData(t)
+	var primaryDatasetAndTypesTestCase EndpointTestCase
+	var outputConfigTestCase EndpointTestCase
+	var acquisitionErasTestCase EndpointTestCase
+	var processingErasTestCase EndpointTestCase
+	var datatiersTestCase EndpointTestCase
+	var datasetAccessTypesTestCase EndpointTestCase
+	var physicsGroupsTestCase EndpointTestCase
+	var datasetsTestCase EndpointTestCase
+
+	primaryDatasetAndTypesTestCase = getPrimaryDatasetTestTable(t)
+	outputConfigTestCase = getOutputConfigTestTable(t)
 
 	// acquisitioneras endpoint tests
 	// TODO: Rest of test cases
@@ -561,7 +542,7 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 				serverType:  "DBSReader",
 				output: []Response{
 					{
-						"processing_version": float64(TestData.processing_version),
+						"processing_version": TestData.processing_version,
 						"description":        "this_is_a_test",
 						"create_by":          "tester",
 						"creation_date":      0,
@@ -895,7 +876,7 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 						"primary_ds_name":        TestData.primary_ds_name,
 						"primary_ds_type":        "test",
 						"processed_ds_name":      TestData.procdataset,
-						"processing_version":     float64(TestData.processing_version),
+						"processing_version":     TestData.processing_version,
 						"xtcrosssection":         123.0,
 					},
 				},
