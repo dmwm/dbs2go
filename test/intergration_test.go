@@ -10,10 +10,10 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"strings"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/r3labs/diff/v2"
 	"github.com/vkuznet/dbs2go/dbs"
 	"github.com/vkuznet/dbs2go/utils"
 	"github.com/vkuznet/dbs2go/web"
@@ -24,21 +24,20 @@ import (
 )
 
 // reads a json file
-func readJsonFile(t *testing.T, filename string) map[string]interface{} {
+func readJsonFile(t *testing.T, filename string) {
 	var data []byte
 	var err error
-	var testData map[string]interface{}
+	// var testData map[string]interface{}
 	data, err = os.ReadFile(filename)
 	if err != nil {
 		log.Printf("ERROR: unable to read %s error %v", filename, err.Error())
 		t.Fatal(err.Error())
 	}
-	err = json.Unmarshal(data, &testData)
+	err = json.Unmarshal(data, &TestData)
 	if err != nil {
 		log.Println("unable to unmarshal received data")
 		t.Fatal(err.Error())
 	}
-	return testData
 }
 
 // initializes the limiter middleware
@@ -120,8 +119,24 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 	return r
 }
 
+// convert []Response to []dbs.Record
+func responseToRecord(t *testing.T, rec []Response) []dbs.Record {
+	d, err := json.Marshal(rec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var e []dbs.Record
+	err = json.Unmarshal(d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return e
+}
+
 // compares received response to expected
-func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { //, fields []string) {
+func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	expect := expected
 	if expected == nil {
 		expect = []Response{}
@@ -130,28 +145,34 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) { 
 	if len(received) != len(expect) {
 		t.Fatalf("Expected length: %v, Received length: %v", len(expect), len(received))
 	}
-	fields := []string{}
-	if len(expect) > 0 {
-		fields = utils.MapKeys(expect[0])
+
+	e := responseToRecord(t, expect)
+
+	// fields not in initial POST request
+	generatedFields := []string{
+		"creation_date", // created upon POST
+		"start_date",
+		"end_date",
+		"http", // client http information on errors
 	}
-	for _, f := range fields {
-		for i, r := range received {
-			if f == "error" {
-				rCode := r[f].(map[string]interface{})["code"]
-				eCode := expect[i]["error"]
-				if rCode != eCode {
-					t.Fatalf("Expected error code: %v, Received: %v", rCode, eCode)
+
+	for i, r := range received {
+		log.Printf("\n\nReceived: %v\nExpected: %v\n\n", r, e[i])
+		// see difference between expected and received structs
+		c, err := diff.Diff(e[i], r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Check if the changes are from generated values
+		for _, a := range c {
+			field := a.Path[0]
+			if utils.InList(field, generatedFields) {
+				// check if a value was given to the field
+				if a.To == nil {
+					t.Fatalf("Field empty: %s", field)
 				}
 			} else {
-				if r[f] != expect[i][f] {
-					if strings.Contains(f, "date") {
-						if r[f] == nil {
-							t.Fatalf("Field empty: %s", f)
-						}
-					} else {
-						t.Fatalf("Incorrect %s: Expected: %v, Received: %v", f, expect[i][f], r[f])
-					}
-				}
+				t.Fatalf("Incorrect %s, received %s, expected %s", field, a.To, a.From)
 			}
 		}
 	}
@@ -255,8 +276,7 @@ func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	testData := readJsonFile(t, "./data/integrationdata.json")
-	fmt.Println(testData)
+	readJsonFile(t, "./data/integration/integration_data.json")
 
 	testCases := LoadTestCases(t)
 
