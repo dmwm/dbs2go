@@ -28,24 +28,6 @@ type BadRequest struct {
 	BAD_FIELD string
 }
 
-// PrimaryDSTypesResponse is the expected primarydstypes GET response
-type PrimaryDSTypesResponse struct {
-	DATA_TYPE          string `json:"data_type"`
-	PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id"`
-}
-
-// OutputConfigResponse is the expected outputconfigs GET response
-type OutputConfigResponse struct {
-	APP_NAME            string `json:"app_name"`
-	RELEASE_VERSION     string `json:"release_version"`
-	PSET_HASH           string `json:"pset_hash"`
-	PSET_NAME           string `json:"pset_name"`
-	GLOBAL_TAG          string `json:"global_tag"`
-	OUTPUT_MODULE_LABEL string `json:"output_module_label"`
-	CREATION_DATE       int64  `json:"creation_date"`
-	CREATE_BY           string `json:"create_by"`
-}
-
 // basic elements to define a test case
 type testCase struct {
 	description string     // test case description
@@ -190,6 +172,12 @@ func generateBaseData(t *testing.T) {
 
 // primarydataset and primarydstype endpoints tests
 func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
+	// primaryDSTypesResponse is the expected primarydstypes GET response
+	type primaryDSTypesResponse struct {
+		DATA_TYPE          string `json:"data_type"`
+		PRIMARY_DS_TYPE_ID int64  `json:"primary_ds_type_id"`
+	}
+
 	// create data structs for expected requests and responses
 	primaryDSRequest := dbs.PrimaryDatasetRecord{
 		PRIMARY_DS_NAME: TestData.PrimaryDSName,
@@ -203,7 +191,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 		CreationDate:  0,
 		CreateBy:      "tester",
 	}
-	primaryDSTypeResponse := PrimaryDSTypesResponse{
+	primaryDSTypeResponse := primaryDSTypesResponse{
 		PRIMARY_DS_TYPE_ID: 1.0,
 		DATA_TYPE:          "test",
 	}
@@ -430,6 +418,18 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 // outputconfigs endpoint tests
 // TODO: Rest of test cases
 func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
+	// outputConfigResponse is the expected outputconfigs GET response
+	type outputConfigResponse struct {
+		APP_NAME            string `json:"app_name"`
+		RELEASE_VERSION     string `json:"release_version"`
+		PSET_HASH           string `json:"pset_hash"`
+		PSET_NAME           string `json:"pset_name"`
+		GLOBAL_TAG          string `json:"global_tag"`
+		OUTPUT_MODULE_LABEL string `json:"output_module_label"`
+		CREATION_DATE       int64  `json:"creation_date"`
+		CREATE_BY           string `json:"create_by"`
+	}
+
 	outputConfigRequest := dbs.OutputConfigRecord{
 		APP_NAME:            TestData.AppName,
 		RELEASE_VERSION:     TestData.ReleaseVersion,
@@ -439,7 +439,7 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 		CREATE_BY:           "tester",
 		SCENARIO:            "note",
 	}
-	outputConfigResponse := OutputConfigResponse{
+	outputConfigResp := outputConfigResponse{
 		APP_NAME:            TestData.AppName,
 		RELEASE_VERSION:     TestData.ReleaseVersion,
 		PSET_HASH:           TestData.PsetHash,
@@ -496,7 +496,7 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				output: []Response{
-					outputConfigResponse,
+					outputConfigResp,
 				},
 				params:   nil,
 				respCode: http.StatusOK,
@@ -700,62 +700,70 @@ func getDatatiersTestTable(t *testing.T) EndpointTestCase {
 
 }
 
+// datasetaccesstypes endpoint tests
+func getDatasetAccessTypesTable(t *testing.T) EndpointTestCase {
+	type datasetAccessTypeResponse struct {
+		DATASET_ACCESS_TYPE string `json:"dataset_access_type"`
+	}
+
+	dataATreq := dbs.DatasetAccessTypes{
+		DATASET_ACCESS_TYPE: "PRODUCTION",
+	}
+	dataATresp := datasetAccessTypeResponse{
+		DATASET_ACCESS_TYPE: "PRODUCTION",
+	}
+	return EndpointTestCase{
+		description:     "Test datasetaccesstypes",
+		defaultHandler:  web.DatasetAccessTypesHandler,
+		defaultEndpoint: "/dbs/datasetaccesstypes",
+		testCases: []testCase{
+			{
+				description: "Test GET with no data",
+				method:      "GET",
+				serverType:  "DBSReader",
+				output:      []Response{},
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Test POST",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				input:       dataATreq,
+				output:      []Response{},
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Test GET after POST",
+				method:      "GET",
+				serverType:  "DBSReader",
+				output: []Response{
+					dataATresp,
+				},
+				respCode: http.StatusOK,
+			},
+		},
+	}
+}
+
 // LoadTestCases loads the InitialData from a json file
 func LoadTestCases(t *testing.T) []EndpointTestCase {
 	if _, err := os.Stat("./data/integration/integration_data.json"); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Generating data")
 		generateBaseData(t)
 	}
-	/*
-		var datasetAccessTypesTestCase EndpointTestCase
-		var physicsGroupsTestCase EndpointTestCase
-		var datasetsTestCase EndpointTestCase
-	*/
-
 	primaryDatasetAndTypesTestCase := getPrimaryDatasetTestTable(t)
 	outputConfigTestCase := getOutputConfigTestTable(t)
 	acquisitionErasTestCase := getAcquisitionErasTestTable(t)
 	processingErasTestCase := getProcessingErasTestTable(t)
 	datatiersTestCase := getDatatiersTestTable(t)
+	datasetAccessTypesTestCase := getDatasetAccessTypesTable(t)
+
 	/*
+		var physicsGroupsTestCase EndpointTestCase
+		var datasetsTestCase EndpointTestCase
+	*/
 
-		// datasetaccesstypes endpoint tests
-		datasetAccessTypesTestCase = EndpointTestCase{
-			description:     "Test datasetaccesstypes",
-			defaultHandler:  web.DatasetAccessTypesHandler,
-			defaultEndpoint: "/dbs/datasetaccesstypes",
-			testCases: []testCase{
-				{
-					description: "Test GET with no data",
-					method:      "GET",
-					serverType:  "DBSReader",
-					output:      []Response{},
-					respCode:    http.StatusOK,
-				},
-				{
-					description: "Test POST",
-					method:      "POST",
-					serverType:  "DBSWriter",
-					input: RequestBody{
-						"dataset_access_type": "PRODUCTION",
-					},
-					output:   []Response{},
-					respCode: http.StatusOK,
-				},
-				{
-					description: "Test GET after POST",
-					method:      "GET",
-					serverType:  "DBSReader",
-					output: []Response{
-						{
-							"dataset_access_type": "PRODUCTION",
-						},
-					},
-					respCode: http.StatusOK,
-				},
-			},
-		}
-
+	/*
 		// contains tests for the physicsgroups endpoint
 		physicsGroupsTestCase = EndpointTestCase{
 			description:     "Test physicsgroups",
@@ -935,8 +943,8 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 		acquisitionErasTestCase,
 		processingErasTestCase,
 		datatiersTestCase,
+		datasetAccessTypesTestCase,
 		/*
-			datasetAccessTypesTestCase,
 			physicsGroupsTestCase,
 			datasetsTestCase,
 		*/
