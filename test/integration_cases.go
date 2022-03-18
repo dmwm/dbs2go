@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -182,9 +183,8 @@ func generateBaseData(t *testing.T) {
 	TestData.StepchainFiles = stepchain_files
 	TestData.ParentStepchainFiles = parent_stepchain_files
 
-	fmt.Println(TestData)
+	// fmt.Println(TestData)
 	file, _ := json.MarshalIndent(TestData, "", "  ")
-	fmt.Println(file)
 	_ = ioutil.WriteFile("./data/integration/integration_data.json", file, os.ModePerm)
 }
 
@@ -601,13 +601,112 @@ func getProcessingErasTestTable(t *testing.T) EndpointTestCase {
 	}
 }
 
+// datatiers endpoint tests
+func getDatatiersTestTable(t *testing.T) EndpointTestCase {
+	tiersReq := dbs.DataTiers{
+		DATA_TIER_NAME: TestData.Tier,
+		CREATE_BY:      "tester",
+	}
+	tiersResp := dbs.DataTiers{
+		DATA_TIER_ID:   1,
+		DATA_TIER_NAME: TestData.Tier,
+		CREATE_BY:      "tester",
+		CREATION_DATE:  0,
+	}
+	badReq := BadRequest{
+		BAD_FIELD: "BAD",
+	}
+	return EndpointTestCase{
+		description:     "Test datatiers",
+		defaultHandler:  web.DatatiersHandler,
+		defaultEndpoint: "/dbs/datatiers",
+		testCases: []testCase{
+			{
+				description: "Test GET with no data",
+				method:      "GET",
+				serverType:  "DBSReader",
+				input:       nil,
+				params:      nil,
+				output:      []Response{},
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Test bad POST",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				input:       badReq,
+				params:      nil,
+				respCode:    http.StatusBadRequest,
+			},
+			{
+				description: "Test POST",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				input:       tiersReq,
+				output: []Response{
+					tiersResp,
+				},
+				params:   nil,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET after POST",
+				method:      "GET",
+				serverType:  "DBSReader",
+				output: []Response{
+					tiersResp,
+				},
+				params:   nil,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with parameters",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"data_tier_name": []string{
+						TestData.Tier,
+					},
+				},
+				output: []Response{
+					tiersResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with regex parameter",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"data_tier_name": []string{"G*"},
+				},
+				output: []Response{
+					tiersResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with non-existing parameter value",
+				method:      "GET",
+				serverType:  "DBSReader",
+				output:      []Response{},
+				params: url.Values{
+					"data_tier_name": []string{"A*"},
+				},
+				respCode: http.StatusOK,
+			},
+		},
+	}
+
+}
+
 // LoadTestCases loads the InitialData from a json file
 func LoadTestCases(t *testing.T) []EndpointTestCase {
-	if _, err := os.Stat("./data/integration/integration_data.json"); err == nil {
+	if _, err := os.Stat("./data/integration/integration_data.json"); errors.Is(err, os.ErrNotExist) {
+		fmt.Println("Generating data")
 		generateBaseData(t)
 	}
 	/*
-		var datatiersTestCase EndpointTestCase
 		var datasetAccessTypesTestCase EndpointTestCase
 		var physicsGroupsTestCase EndpointTestCase
 		var datasetsTestCase EndpointTestCase
@@ -617,130 +716,8 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 	outputConfigTestCase := getOutputConfigTestTable(t)
 	acquisitionErasTestCase := getAcquisitionErasTestTable(t)
 	processingErasTestCase := getProcessingErasTestTable(t)
-
+	datatiersTestCase := getDatatiersTestTable(t)
 	/*
-		// datatiers endpoint tests
-		datatiersTestCase = EndpointTestCase{
-			description:     "Test datatiers",
-			defaultHandler:  web.DatatiersHandler,
-			defaultEndpoint: "/dbs/datatiers",
-			testCases: []testCase{
-				{
-					description: "Test GET with no data",
-					method:      "GET",
-					serverType:  "DBSReader",
-					input:       nil,
-					params:      nil,
-					output:      []Response{},
-					respCode:    http.StatusOK,
-				},
-				{
-					description: "Test bad POST",
-					method:      "POST",
-					serverType:  "DBSWriter",
-					input: RequestBody{
-						"non-existing-field": TestData.Tier,
-					},
-					params:   nil,
-					respCode: http.StatusBadRequest,
-				},
-				{
-					description: "Test POST",
-					method:      "POST",
-					serverType:  "DBSWriter",
-					input: RequestBody{
-						"data_tier_name": TestData.Tier,
-						"create_by":      "tester",
-					},
-					output: []Response{
-						{
-							"data_tier_id":   "1",
-							"data_tier_name": TestData.Tier,
-							"create_by":      "tester",
-						},
-					},
-					params:   nil,
-					respCode: http.StatusOK,
-				},
-				{
-					description: "Test GET after POST",
-					method:      "GET",
-					serverType:  "DBSReader",
-					input: RequestBody{
-						"data_tier_name": TestData.Tier,
-						"create_by":      "tester",
-					},
-					output: []Response{
-						{
-							"data_tier_name": TestData.Tier,
-							"create_by":      "tester",
-							"creation_date":  "0",
-							"data_tier_id":   1.0,
-						},
-					},
-					params:   nil,
-					respCode: http.StatusOK,
-				},
-				{
-					description: "Test GET with parameters",
-					method:      "GET",
-					serverType:  "DBSReader",
-					input: RequestBody{
-						"data_tier_name": TestData.Tier,
-						"create_by":      "tester",
-					},
-					output: []Response{
-						{
-							"data_tier_name": TestData.Tier,
-							"create_by":      "tester",
-							"creation_date":  "0",
-							"data_tier_id":   1.0,
-						},
-					},
-					params: url.Values{
-						"data_tier_name": []string{
-							TestData.Tier,
-						},
-					},
-					respCode: http.StatusOK,
-				},
-				{
-					description: "Test GET with regex parameter",
-					method:      "GET",
-					serverType:  "DBSReader",
-					input: RequestBody{
-						"data_tier_name": TestData.Tier,
-						"create_by":      "tester",
-					},
-					output: []Response{
-						{
-							"data_tier_name": TestData.Tier,
-							"create_by":      "tester",
-							"creation_date":  "0",
-							"data_tier_id":   1.0,
-						},
-					},
-					params: url.Values{
-						"data_tier_name": []string{"G*"},
-					},
-					respCode: http.StatusOK,
-				},
-				{
-					description: "Test GET with non-existing parameter value",
-					method:      "GET",
-					serverType:  "DBSReader",
-					input: RequestBody{
-						"data_tier_name": TestData.Tier,
-						"create_by":      "tester",
-					},
-					output: []Response{},
-					params: url.Values{
-						"data_tier_name": []string{"A*"},
-					},
-					respCode: http.StatusOK,
-				},
-			},
-		}
 
 		// datasetaccesstypes endpoint tests
 		datasetAccessTypesTestCase = EndpointTestCase{
@@ -957,8 +934,8 @@ func LoadTestCases(t *testing.T) []EndpointTestCase {
 		outputConfigTestCase,
 		acquisitionErasTestCase,
 		processingErasTestCase,
+		datatiersTestCase,
 		/*
-			datatiersTestCase,
 			datasetAccessTypesTestCase,
 			physicsGroupsTestCase,
 			datasetsTestCase,
