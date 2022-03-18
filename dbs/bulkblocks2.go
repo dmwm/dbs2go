@@ -673,8 +673,8 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	}
 	if utils.VERBOSE > 0 {
 		log.Printf(
-			"insertFilesViaChunks processed %d goroutines, elapsed time %v",
-			ngoroutines, time.Since(t0))
+			"insertFilesViaChunks processed %d goroutines with ids %v, elapsed time %v",
+			ngoroutines, ids, time.Since(t0))
 	}
 	wg.Wait()
 	if trec.NErrors != 0 {

@@ -408,20 +408,23 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 			log.Printf("Insert FileParents record %+v", rec)
 		}
 		lfn := rec.LogicalFileName
+		pfn := rec.ParentLogicalFileName
 		// get file id for given lfn
 		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find logical_file_name file_id for %v", lfn)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find logical_file_name file_id for", rec)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.fileparents.InsertFileParentsTxt")
+			return Error(err, GetIDErrorCode, msg, "dbs.fileparents.InsertFileParentsTxt")
 		}
-		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
+		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", pfn)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find parent_logical_file_name file_id for %s", pfn)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find parent_logical_file_name file_id for", rec.ParentLogicalFileName)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.fileparents.InsertFileParentsTxt")
+			return Error(err, GetIDErrorCode, msg, "dbs.fileparents.InsertFileParentsTxt")
 		}
 		var rrr FileParents
 		rrr.THIS_FILE_ID = fid
