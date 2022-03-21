@@ -367,7 +367,8 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 // FileParentRecord represents file parent DBS record
 // used by bulkblock API
 type FileParentRecord struct {
-	LogicalFileName       string `json:"this_logical_file_name"`
+	ThisLogicalFileName   string `json:"this_logical_file_name"`
+	LogicalFileName       string `json:"logical_file_name"`
 	ParentFileId          int64  `json:"parent_file_id"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
@@ -408,20 +409,26 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 			log.Printf("Insert FileParents record %+v", rec)
 		}
 		lfn := rec.LogicalFileName
+		if lfn == "" {
+			lfn = rec.ThisLogicalFileName // for backward compatibility
+		}
+		pfn := rec.ParentLogicalFileName
 		// get file id for given lfn
 		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find logical_file_name file_id for lfn='%v'", lfn)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find logical_file_name file_id for", rec)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.fileparents.InsertFileParentsTxt")
+			return Error(err, GetIDErrorCode, msg, "dbs.fileparents.InsertFileParentsTxt")
 		}
-		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.ParentLogicalFileName)
+		pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", pfn)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find parent_logical_file_name file_id for pfn='%s'", pfn)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find parent_logical_file_name file_id for", rec.ParentLogicalFileName)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.fileparents.InsertFileParentsTxt")
+			return Error(err, GetIDErrorCode, msg, "dbs.fileparents.InsertFileParentsTxt")
 		}
 		var rrr FileParents
 		rrr.THIS_FILE_ID = fid

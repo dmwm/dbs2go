@@ -727,7 +727,8 @@ func (a *API) InsertBulkBlocks() error {
 		if utils.VERBOSE > 1 {
 			log.Println("unable to insert file parents", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		msg := fmt.Sprintf("failed record %+v", rec)
+		return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	// insert dataset parent list
