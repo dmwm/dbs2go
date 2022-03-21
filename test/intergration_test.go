@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -22,23 +21,6 @@ import (
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
 )
-
-// reads a json file
-func readJsonFile(t *testing.T, filename string) {
-	var data []byte
-	var err error
-	// var testData map[string]interface{}
-	data, err = os.ReadFile(filename)
-	if err != nil {
-		log.Printf("ERROR: unable to read %s error %v", filename, err.Error())
-		t.Fatal(err.Error())
-	}
-	err = json.Unmarshal(data, &TestData)
-	if err != nil {
-		log.Println("unable to unmarshal received data")
-		t.Fatal(err.Error())
-	}
-}
 
 // initializes the limiter middleware
 func initTestLimiter(t *testing.T, period string) {
@@ -141,7 +123,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	if expected == nil {
 		expect = []Response{}
 	}
-	fmt.Printf("Received: %s\nExpected: %s\n", received, expect)
+	log.Printf("Received: %s\nExpected: %s\n", received, expect)
 	if len(received) != len(expect) {
 		t.Fatalf("Expected length: %v, Received length: %v", len(expect), len(received))
 	}
@@ -157,7 +139,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	}
 
 	for i, r := range received {
-		log.Printf("\n\nReceived: %v\nExpected: %v\n\n", r, e[i])
+		log.Printf("\nReceived: %v\nExpected: %v\n", r, e[i])
 		// see difference between expected and received structs
 		c, err := diff.Diff(e[i], r)
 		if err != nil {
@@ -276,9 +258,12 @@ func TestIntegration(t *testing.T) {
 	db := initDB(false)
 	defer db.Close()
 
-	readJsonFile(t, "./data/integration/integration_data.json")
+	testCaseFile := os.Getenv("INTEGRATION_DATA_FILE")
+	if testCaseFile == "" {
+		t.Fatal("INTEGRATION_DATA_FILE not defined")
+	}
 
-	testCases := LoadTestCases(t)
+	testCases := LoadTestCases(t, testCaseFile)
 
 	for _, v := range testCases {
 		runTestWorkflow(t, v)
