@@ -32,6 +32,423 @@ type TempFileRecord struct {
 	NErrors int
 }
 
+// helper function to insert dataset configurations
+func insertDatasetConfigurations(api *API, datasetConfigList DatasetConfigList, hash string) error {
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "insert output configs")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+	}
+	defer tx.Rollback()
+	for _, rrr := range datasetConfigList {
+		data, err := json.Marshal(rrr)
+		if err != nil {
+			log.Println(hash, "unable to marshal dataset config list", err)
+			return Error(err, MarshalErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+		}
+		api.Reader = bytes.NewReader(data)
+		err = api.InsertOutputConfigsTx(tx)
+		if err != nil {
+			return Error(err, InsertErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return Error(err, CommitErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+	}
+	return nil
+}
+
+// helper function to get primary dataset type ID
+func getPrimaryDatasetTypeID(primaryDSType, hash string) (int64, error) {
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get primary dataset type ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getPrimaryDatasetTypeID")
+	}
+	defer tx.Rollback()
+	pdstDS := PrimaryDSTypes{
+		PRIMARY_DS_TYPE: primaryDSType,
+	}
+	primaryDatasetTypeID, err := GetRecID(
+		tx,
+		&pdstDS,
+		"PRIMARY_DS_TYPES",
+		"primary_ds_type_id",
+		"primary_ds_type",
+		primaryDSType,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find primary_ds_type_id for primary ds type='%s'", primaryDSType)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetTypeID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, "", "dbs.bulkblocks.getPrimaryDatasetTypeID")
+	}
+	return primaryDatasetTypeID, nil
+}
+
+func getPrimaryDatasetID(
+	primaryDSName string,
+	primaryDatasetTypeID, cDate int64,
+	cBy, hash string) (int64, error) {
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get primary dataset ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getPrimaryDatasetTypeID")
+	}
+	defer tx.Rollback()
+	primDS := PrimaryDatasets{
+		PRIMARY_DS_NAME:    primaryDSName,
+		PRIMARY_DS_TYPE_ID: primaryDatasetTypeID,
+		CREATION_DATE:      cDate,
+		CREATE_BY:          cBy,
+	}
+	primaryDatasetID, err := GetRecID(
+		tx,
+		&primDS,
+		"PRIMARY_DATASETS",
+		"primary_ds_id",
+		"primary_ds_name",
+		primaryDSName,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find primary_ds_id for primary ds name='%s'", primaryDSName)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getPrimaryDatasetID")
+	}
+	return primaryDatasetID, nil
+}
+
+// helper function to get processing Era ID
+func getProcessingEraID(
+	processingVersion, cDate int64,
+	cBy, description, hash string) (int64, error) {
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get processing era ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getProcessingEraID")
+	}
+	defer tx.Rollback()
+	pera := ProcessingEras{
+		PROCESSING_VERSION: processingVersion,
+		CREATION_DATE:      cDate,
+		CREATE_BY:          cBy,
+		DESCRIPTION:        description,
+	}
+	processingEraID, err := GetRecID(
+		tx,
+		&pera,
+		"PROCESSING_ERAS",
+		"processing_era_id",
+		"processing_version",
+		processingVersion,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find processing_era_id for processing version='%v'", processingVersion)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getProcessingEraID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getProcessingEraID")
+	}
+	return processingEraID, nil
+}
+
+// helper function to get acquisition era ID
+func getAcquisitionEraID(
+	acquisitionEraName string,
+	startDate, endDate, creationDate int64,
+	cBy, description, hash string) (int64, error) {
+
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get acquisition era ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getAcquisitionEraID")
+	}
+	defer tx.Rollback()
+	aera := AcquisitionEras{
+		ACQUISITION_ERA_NAME: acquisitionEraName,
+		START_DATE:           startDate,
+		END_DATE:             endDate,
+		CREATION_DATE:        creationDate,
+		CREATE_BY:            cBy,
+		DESCRIPTION:          description,
+	}
+	acquisitionEraID, err := GetRecID(
+		tx,
+		&aera,
+		"ACQUISITION_ERAS",
+		"acquisition_era_id",
+		"acquisition_era_name",
+		acquisitionEraName,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find acquisition_era_id for acq era name='%s'", acquisitionEraName)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getAcquisitionEraID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getAcquisitionEraID")
+	}
+	return acquisitionEraID, nil
+}
+
+// helper function to get data tier ID
+func getDataTierID(
+	tierName string,
+	cDate int64,
+	cBy, hash string) (int64, error) {
+
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get data tier ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getDataTierID")
+	}
+	defer tx.Rollback()
+	tier := DataTiers{
+		DATA_TIER_NAME: tierName,
+		CREATION_DATE:  cDate,
+		CREATE_BY:      cBy,
+	}
+	dataTierID, err := GetRecID(
+		tx,
+		&tier,
+		"DATA_TIERS",
+		"data_tier_id",
+		"data_tier_name",
+		tierName,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find data_tier_id for tier name='%s'", tierName)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getDataTierID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getDataTierID")
+	}
+	return dataTierID, nil
+}
+
+// helper function to get physics group ID
+func getPhysicsGroupID(physName, hash string) (int64, error) {
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get physics group ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getPhysicsGroupID")
+	}
+	defer tx.Rollback()
+	pgrp := PhysicsGroups{
+		PHYSICS_GROUP_NAME: physName,
+	}
+	physicsGroupID, err := GetRecID(
+		tx,
+		&pgrp,
+		"PHYSICS_GROUPS",
+		"physics_group_id",
+		"physics_group_name",
+		physName,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find physics_group_id for physics group name='%s'", physName)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getPhysicsGroupID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getPhysicsGroupID")
+	}
+	return physicsGroupID, nil
+}
+
+// helper function to get dataset access type ID
+func getDatasetAccessTypeID(
+	datasetAccessType, hash string) (int64, error) {
+
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get dataset access type ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getDatasetAccessTypeID")
+	}
+	defer tx.Rollback()
+	dat := DatasetAccessTypes{
+		DATASET_ACCESS_TYPE: datasetAccessType,
+	}
+	datasetAccessTypeID, err := GetRecID(
+		tx,
+		&dat,
+		"DATASET_ACCESS_TYPES",
+		"dataset_access_type_id",
+		"dataset_access_type",
+		datasetAccessType,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find dataset_access_type_id for data access type='%s'", datasetAccessType)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getDatasetAccesssTypeID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getDatasetAccessTypeID")
+	}
+	return datasetAccessTypeID, nil
+}
+
+// helper function to get processed dataset ID
+func getProcessedDatasetID(
+	processedDSName, hash string) (int64, error) {
+
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "get processed dataset ID")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getProcessedDatasetID")
+	}
+	defer tx.Rollback()
+	procDS := ProcessedDatasets{
+		PROCESSED_DS_NAME: processedDSName,
+	}
+	processedDatasetID, err := GetRecID(
+		tx,
+		&procDS,
+		"PROCESSED_DATASETS",
+		"processed_ds_id",
+		"processed_ds_name",
+		processedDSName,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to find processed_ds_id for procDS='%s'", processedDSName)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getProcessedDSName")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getProcessedDatasetID")
+	}
+	return processedDatasetID, nil
+}
+
+// helper function to get dataset ID
+func getDatasetID(
+	datasetName string,
+	isDatasetValid int,
+	primaryDatasetID int64,
+	processedDatasetID int64,
+	dataTierID int64,
+	datasetAccessTypeID int64,
+	acquisitionEraID int64,
+	processingEraID int64,
+	physicsGroupID int64,
+	xtcrosssection float64,
+	creationDate int64,
+	createBy string,
+	lastModificationDate int64,
+	lBy string,
+	hash string,
+) (int64, error) {
+
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "insert dataset")
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		return 0, Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.getDatasetID")
+	}
+	defer tx.Rollback()
+	dataset := Datasets{
+		DATASET:                datasetName,
+		IS_DATASET_VALID:       isDatasetValid,
+		PRIMARY_DS_ID:          primaryDatasetID,
+		PROCESSED_DS_ID:        processedDatasetID,
+		DATA_TIER_ID:           dataTierID,
+		DATASET_ACCESS_TYPE_ID: datasetAccessTypeID,
+		ACQUISITION_ERA_ID:     acquisitionEraID,
+		PROCESSING_ERA_ID:      processingEraID,
+		PHYSICS_GROUP_ID:       physicsGroupID,
+		XTCROSSSECTION:         xtcrosssection,
+		CREATION_DATE:          creationDate,
+		CREATE_BY:              createBy,
+		LAST_MODIFICATION_DATE: lastModificationDate,
+		LAST_MODIFIED_BY:       lBy,
+	}
+	// get datasetID
+	if utils.VERBOSE > 1 {
+		log.Printf("get dataset ID for %+v", dataset)
+	}
+	datasetID, err := GetRecID(
+		tx,
+		&dataset,
+		"DATASETS",
+		"dataset_id",
+		"dataset",
+		dataset,
+	)
+	if err != nil {
+		msg := fmt.Sprintf("unable to insert dataset='%s'", dataset)
+		if utils.VERBOSE > 1 {
+			log.Println(hash, msg)
+		}
+		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getDatasetID")
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Println(hash, "fail to commit transaction", err)
+		return 0, Error(err, CommitErrorCode, hash, "dbs.bulkblocks.getDatasetID")
+	}
+	return datasetID, nil
+}
+
 // InsertBulkBlocksConcurrently DBS API provides concurrent bulk blocks
 // insertion. It inherits the same logic as BulkBlocks API but perform
 // Files and FileLumis injection concurrently via chunk of record.
@@ -55,6 +472,12 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		log.Println("unable to read bulkblock input", err)
 		return Error(err, ReaderErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
+	// get our request hash ID to be able to trace concurrent requests
+	hash := utils.GetHash(data)
+
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "start bulkblocks.InsertBulkBlocksConcurrently")
+	}
 
 	// unmarshal the data into BulkBlocks record
 	var rec BulkBlocks
@@ -63,13 +486,6 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		log.Printf("unable to unmarshal bulkblock record %s, error %v", string(data), err)
 		return Error(err, UnmarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
-
-	// start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-	}
-	defer tx.Rollback()
 
 	var reader *bytes.Reader
 	api := &API{
@@ -84,266 +500,106 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	creationDate := time.Now().Unix()
 
 	// insert dataset configuration
-	if utils.VERBOSE > 1 {
-		log.Println("insert output configs")
-	}
-	for _, rrr := range rec.DatasetConfigList {
-		data, err = json.Marshal(rrr)
-		if err != nil {
-			log.Println("unable to marshal dataset config list", err)
-			return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-		}
-		api.Reader = bytes.NewReader(data)
-		err = api.InsertOutputConfigsTx(tx)
-		if err != nil {
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-		}
+	if err = insertDatasetConfigurations(api, rec.DatasetConfigList, hash); err != nil {
+		return err
 	}
 
 	// get primaryDatasetTypeID and insert record if it does not exists
-	if utils.VERBOSE > 1 {
-		log.Println("get primary dataset type ID")
-	}
-	pdstDS := PrimaryDSTypes{
-		PRIMARY_DS_TYPE: rec.PrimaryDataset.PrimaryDSType,
-	}
-	primaryDatasetTypeID, err = GetRecID(
-		tx,
-		&pdstDS,
-		"PRIMARY_DS_TYPES",
-		"primary_ds_type_id",
-		"primary_ds_type",
-		rec.PrimaryDataset.PrimaryDSType,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find primary_ds_type_id for primary ds type='%s'", rec.PrimaryDataset.PrimaryDSType)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	if primaryDatasetTypeID, err = getPrimaryDatasetTypeID(rec.PrimaryDataset.PrimaryDSType, hash); err != nil {
+		return err
 	}
 
 	// get primarayDatasetID and insert record if it does not exists
-	if utils.VERBOSE > 1 {
-		log.Println("get primary dataset ID")
-	}
 	if rec.PrimaryDataset.CreateBy == "" {
 		rec.PrimaryDataset.CreateBy = a.CreateBy
 	}
-	primDS := PrimaryDatasets{
-		PRIMARY_DS_NAME:    rec.PrimaryDataset.PrimaryDSName,
-		PRIMARY_DS_TYPE_ID: primaryDatasetTypeID,
-		CREATION_DATE:      rec.PrimaryDataset.CreationDate,
-		CREATE_BY:          rec.PrimaryDataset.CreateBy,
-	}
-	primaryDatasetID, err = GetRecID(
-		tx,
-		&primDS,
-		"PRIMARY_DATASETS",
-		"primary_ds_id",
-		"primary_ds_name",
+	if primaryDatasetID, err = getPrimaryDatasetID(
 		rec.PrimaryDataset.PrimaryDSName,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find primary_ds_id for primary ds name='%s'", rec.PrimaryDataset.PrimaryDSName)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		primaryDatasetTypeID,
+		rec.PrimaryDataset.CreationDate,
+		rec.PrimaryDataset.CreateBy, hash); err != nil {
+		return err
 	}
 
 	// get processing era ID and insert record if it does not exists
-	if utils.VERBOSE > 1 {
-		log.Println("get processing era ID")
-	}
 	if rec.ProcessingEra.CreateBy == "" {
 		rec.ProcessingEra.CreateBy = a.CreateBy
 	}
-	pera := ProcessingEras{
-		PROCESSING_VERSION: rec.ProcessingEra.ProcessingVersion,
-		CREATION_DATE:      creationDate,
-		CREATE_BY:          rec.ProcessingEra.CreateBy,
-		DESCRIPTION:        rec.ProcessingEra.Description,
-	}
-	processingEraID, err = GetRecID(
-		tx,
-		&pera,
-		"PROCESSING_ERAS",
-		"processing_era_id",
-		"processing_version",
+	if processingEraID, err = getProcessingEraID(
 		rec.ProcessingEra.ProcessingVersion,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find processing_era_id for processing version='%v'", rec.ProcessingEra.ProcessingVersion)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		creationDate,
+		rec.ProcessingEra.CreateBy,
+		rec.ProcessingEra.Description, hash); err != nil {
+		return err
 	}
 
 	// insert acquisition era if it does not exists
-	if utils.VERBOSE > 1 {
-		log.Println("get acquisition era ID")
-	}
 	if rec.AcquisitionEra.CreateBy == "" {
 		rec.AcquisitionEra.CreateBy = a.CreateBy
 	}
-	aera := AcquisitionEras{
-		ACQUISITION_ERA_NAME: rec.AcquisitionEra.AcquisitionEraName,
-		START_DATE:           rec.AcquisitionEra.StartDate,
-		END_DATE:             0,
-		CREATION_DATE:        creationDate,
-		CREATE_BY:            rec.AcquisitionEra.CreateBy,
-		DESCRIPTION:          rec.AcquisitionEra.Description,
-	}
-	acquisitionEraID, err = GetRecID(
-		tx,
-		&aera,
-		"ACQUISITION_ERAS",
-		"acquisition_era_id",
-		"acquisition_era_name",
+	if acquisitionEraID, err = getAcquisitionEraID(
 		rec.AcquisitionEra.AcquisitionEraName,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find acquisition_era_id for acq era name='%s'", rec.AcquisitionEra.AcquisitionEraName)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		rec.AcquisitionEra.StartDate,
+		0,
+		creationDate,
+		rec.AcquisitionEra.CreateBy,
+		rec.AcquisitionEra.Description, hash); err != nil {
+		return err
 	}
 
 	// get dataTierID
-	if utils.VERBOSE > 1 {
-		log.Println("get data tier ID")
-	}
-	tier := DataTiers{
-		DATA_TIER_NAME: rec.Dataset.DataTierName,
-		CREATION_DATE:  creationDate,
-		CREATE_BY:      a.CreateBy,
-	}
-	dataTierID, err = GetRecID(
-		tx,
-		&tier,
-		"DATA_TIERS",
-		"data_tier_id",
-		"data_tier_name",
-		rec.Dataset.DataTierName,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find data_tier_id for tier name='%s'", rec.Dataset.DataTierName)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-	}
-	// get physicsGroupID
-	if utils.VERBOSE > 1 {
-		log.Println("get physics group ID")
-	}
-	pgrp := PhysicsGroups{
-		PHYSICS_GROUP_NAME: rec.Dataset.PhysicsGroupName,
-	}
-	physicsGroupID, err = GetRecID(
-		tx,
-		&pgrp,
-		"PHYSICS_GROUPS",
-		"physics_group_id",
-		"physics_group_name",
-		rec.Dataset.PhysicsGroupName,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find physics_group_id for physics group name='%s'", rec.Dataset.PhysicsGroupName)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-	}
-	// get datasetAccessTypeID
-	if utils.VERBOSE > 1 {
-		log.Println("get dataset access type ID")
-	}
-	dat := DatasetAccessTypes{
-		DATASET_ACCESS_TYPE: rec.Dataset.DatasetAccessType,
-	}
-	datasetAccessTypeID, err = GetRecID(
-		tx,
-		&dat,
-		"DATASET_ACCESS_TYPES",
-		"dataset_access_type_id",
-		"dataset_access_type",
-		rec.Dataset.DatasetAccessType,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find dataset_access_type_id for data access type='%s'", rec.Dataset.DatasetAccessType)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-	}
-	if utils.VERBOSE > 1 {
-		log.Println("get processed dataset ID")
-	}
-	procDS := ProcessedDatasets{
-		PROCESSED_DS_NAME: rec.Dataset.ProcessedDSName,
-	}
-	processedDatasetID, err = GetRecID(
-		tx,
-		&procDS,
-		"PROCESSED_DATASETS",
-		"processed_ds_id",
-		"processed_ds_name",
-		rec.Dataset.ProcessedDSName,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to find processed_ds_id for procDS='%s'", rec.Dataset.ProcessedDSName)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	if dataTierID, err = getDataTierID(
+		rec.Dataset.DataTierName, creationDate, a.CreateBy, hash); err != nil {
+		return err
 	}
 
-	// insert dataset
-	if utils.VERBOSE > 1 {
-		log.Println("insert dataset")
+	// get physicsGroupID
+	if physicsGroupID, err = getPhysicsGroupID(
+		rec.Dataset.PhysicsGroupName, hash); err != nil {
+		return err
 	}
+
+	// get datasetAccessTypeID
+	if datasetAccessTypeID, err = getDatasetAccessTypeID(
+		rec.Dataset.DatasetAccessType, hash); err != nil {
+		return err
+	}
+
+	// get processedDatasetID
+	if processedDatasetID, err = getProcessedDatasetID(
+		rec.Dataset.ProcessedDSName, hash); err != nil {
+		return err
+	}
+
+	// get datasetID and insert dataset if necessary
 	if rec.Dataset.CreateBy == "" {
 		rec.Dataset.CreateBy = a.CreateBy
 	}
-	dataset := Datasets{
-		DATASET:                rec.Dataset.Dataset,
-		IS_DATASET_VALID:       1,
-		PRIMARY_DS_ID:          primaryDatasetID,
-		PROCESSED_DS_ID:        processedDatasetID,
-		DATA_TIER_ID:           dataTierID,
-		DATASET_ACCESS_TYPE_ID: datasetAccessTypeID,
-		ACQUISITION_ERA_ID:     acquisitionEraID,
-		PROCESSING_ERA_ID:      processingEraID,
-		PHYSICS_GROUP_ID:       physicsGroupID,
-		XTCROSSSECTION:         rec.Dataset.Xtcrosssection,
-		CREATION_DATE:          rec.Dataset.CreationDate,
-		CREATE_BY:              rec.Dataset.CreateBy,
-		LAST_MODIFICATION_DATE: creationDate,
-		LAST_MODIFIED_BY:       rec.Dataset.CreateBy,
-	}
-	// get datasetID
-	if utils.VERBOSE > 1 {
-		log.Printf("get dataset ID for %+v", dataset)
-	}
-	datasetID, err = GetRecID(
-		tx,
-		&dataset,
-		"DATASETS",
-		"dataset_id",
-		"dataset",
+	if datasetID, err = getDatasetID(
 		rec.Dataset.Dataset,
-	)
-	if err != nil {
-		msg := fmt.Sprintf("unable to insert dataset='%s'", rec.Dataset.Dataset)
-		if utils.VERBOSE > 1 {
-			log.Println(msg)
-		}
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		1,
+		primaryDatasetID,
+		processedDatasetID,
+		dataTierID,
+		datasetAccessTypeID,
+		acquisitionEraID,
+		processingEraID,
+		physicsGroupID,
+		rec.Dataset.Xtcrosssection,
+		rec.Dataset.CreationDate,
+		rec.Dataset.CreateBy,
+		creationDate,
+		rec.Dataset.CreateBy,
+		hash); err != nil {
+		return err
 	}
+
+	// start transaction for the rest of the injection process
+	tx, err := DB.Begin()
+	if err != nil {
+		return Error(err, TransactionErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	}
+	defer tx.Rollback()
 
 	// get outputModConfigID using datasetID
 	// since we already inserted records from DatasetConfigList
@@ -370,7 +626,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		err = dsoRec.Insert(tx)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert dataset output mod configs record", err)
+				log.Println(hash, "unable to insert dataset output mod configs record", err)
 			}
 			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -378,7 +634,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 
 	// insert block
 	if utils.VERBOSE > 1 {
-		log.Println("insert block")
+		log.Println(hash, "insert block")
 	}
 	if rec.Block.CreateBy == "" {
 		rec.Block.CreateBy = a.CreateBy
@@ -399,12 +655,12 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find block_id for", rec.Block.BlockName, "will insert")
+			log.Println(hash, "unable to find block_id for", rec.Block.BlockName, "will insert")
 		}
 		err = blk.Insert(tx)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert block record", err)
+				log.Println(hash, "unable to insert block record", err)
 			}
 			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -431,14 +687,14 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find file_type_id for", ftype)
+				log.Println(hash, "unable to find file_type_id for", ftype)
 			}
 			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 	// insert files
 	if utils.VERBOSE > 1 {
-		log.Println("insert files")
+		log.Println(hash, "insert files")
 	}
 	trec := TempFileRecord{
 		IsFileValid:  isFileValid,
@@ -452,7 +708,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	err = insertFilesViaChunks(tx, rec.Files, &trec)
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("unable to insert files", err)
+			log.Println(hash, "unable to insert files", err)
 		}
 		return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
@@ -512,7 +768,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 
 		} else {
 			if utils.VERBOSE > 0 {
-				log.Println("insert FileLumi list sequentially", len(rrr.FileLumiList), "records")
+				log.Println(hash, "insert FileLumi list sequentially", len(rrr.FileLumiList), "records")
 			}
 
 			// insert FileLumi list via sequential insert of file lumi records
@@ -535,7 +791,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 				data, err = json.Marshal(fl)
 				if err != nil {
 					if utils.VERBOSE > 1 {
-						log.Println("unable to marshal dataset file lumi list", err)
+						log.Println(hash, "unable to marshal dataset file lumi list", err)
 					}
 					return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 				}
@@ -543,7 +799,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 				err = api.InsertFileLumisTx(tx)
 				if err != nil {
 					if utils.VERBOSE > 1 {
-						log.Println("unable to insert FileLumis record", err)
+						log.Println(hash, "unable to insert FileLumis record", err)
 					}
 					return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 				}
@@ -556,7 +812,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		data, err = json.Marshal(rrr)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to marshal file config list", err)
+				log.Println(hash, "unable to marshal file config list", err)
 			}
 			return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -564,7 +820,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		err = api.InsertFileOutputModConfigs(tx)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert file output mod config", err)
+				log.Println(hash, "unable to insert file output mod config", err)
 			}
 			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -574,7 +830,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	data, err = json.Marshal(rec.FileParentList)
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("unable to marshal file parent list", err)
+			log.Println(hash, "unable to marshal file parent list", err)
 		}
 		return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
@@ -583,7 +839,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	err = api.InsertFileParentsTxt(tx)
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("unable to insert file parents", err)
+			log.Println(hash, "unable to insert file parents", err)
 		}
 		msg := fmt.Sprintf("failed record %+v", rec)
 		return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
@@ -602,7 +858,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		pid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", ds)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find dataset_id for", ds)
+				log.Println(hash, "unable to find dataset_id for", ds)
 			}
 			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -610,7 +866,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		err = r.Insert(tx)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert parent dataset record", err)
+				log.Println(hash, "unable to insert parent dataset record", err)
 			}
 			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -620,9 +876,12 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	err = tx.Commit()
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("fail to commit transaction", err)
+			log.Println(hash, "fail to commit transaction", err)
 		}
 		return Error(err, CommitErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	}
+	if utils.VERBOSE > 1 {
+		log.Println(hash, "successfully finished bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	if a.Writer != nil {
