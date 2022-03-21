@@ -39,7 +39,7 @@ func (r *ProcessedDatasets) Insert(tx *sql.Tx) error {
 			tid, err = LastInsertID(tx, "PROCESSED_DATASETS", "processed_ds_id")
 			r.PROCESSED_DS_ID = tid + 1
 		} else {
-			tid, err = IncrementSequence(tx, "SEQ_PDT")
+			tid, err = IncrementSequence(tx, "SEQ_PSDS")
 			r.PROCESSED_DS_ID = tid
 		}
 		if err != nil {
