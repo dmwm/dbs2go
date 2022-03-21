@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -299,5 +300,5 @@ func UpdateOrderedDict(omap, nmap map[int][]string) map[int][]string {
 // GetHash generates SHA256 hash for given data blob
 func GetHash(data []byte) string {
 	hash := sha256.Sum256(data)
-	return string(hash[:])
+	return hex.EncodeToString(hash[:])
 }

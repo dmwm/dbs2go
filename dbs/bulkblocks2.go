@@ -432,10 +432,10 @@ func getDatasetID(
 		"DATASETS",
 		"dataset_id",
 		"dataset",
-		dataset,
+		datasetName,
 	)
 	if err != nil {
-		msg := fmt.Sprintf("unable to insert dataset='%s'", dataset)
+		msg := fmt.Sprintf("unable to insert dataset='%v'", dataset)
 		if utils.VERBOSE > 1 {
 			log.Println(hash, msg)
 		}
