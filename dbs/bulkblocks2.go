@@ -116,10 +116,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.PrimaryDataset.PrimaryDSType,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find primary_ds_type_id for primary ds type='%s'", rec.PrimaryDataset.PrimaryDSType)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// get primarayDatasetID and insert record if it does not exists
@@ -144,10 +145,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.PrimaryDataset.PrimaryDSName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find primary_ds_id for primary ds name='%s'", rec.PrimaryDataset.PrimaryDSName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// get processing era ID and insert record if it does not exists
@@ -172,10 +174,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.ProcessingEra.ProcessingVersion,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find processing_era_id for processing version='%v'", rec.ProcessingEra.ProcessingVersion)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// insert acquisition era if it does not exists
@@ -202,10 +205,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.AcquisitionEra.AcquisitionEraName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find acquisition_era_id for acq era name='%s'", rec.AcquisitionEra.AcquisitionEraName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// get dataTierID
@@ -226,10 +230,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.Dataset.DataTierName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find data_tier_id for tier name='%s'", rec.Dataset.DataTierName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	// get physicsGroupID
 	if utils.VERBOSE > 1 {
@@ -247,10 +252,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.Dataset.PhysicsGroupName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find physics_group_id for physics group name='%s'", rec.Dataset.PhysicsGroupName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	// get datasetAccessTypeID
 	if utils.VERBOSE > 1 {
@@ -268,10 +274,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.Dataset.DatasetAccessType,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find dataset_access_type_id for data access type='%s'", rec.Dataset.DatasetAccessType)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	if utils.VERBOSE > 1 {
 		log.Println("get processed dataset ID")
@@ -288,29 +295,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.Dataset.ProcessedDSName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find processed_ds_id for procDS='%s'", rec.Dataset.ProcessedDSName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find processed_ds_id for", rec.Dataset.ProcessedDSName)
+			log.Println(msg)
 		}
-		err := procDS.Insert(tx)
-		if err != nil {
-			if utils.VERBOSE > 1 {
-				log.Println("unable to insert processed dataset name record", err)
-			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-		}
-		processedDatasetID, err = GetID(
-			tx,
-			"PROCESSED_DATASETS",
-			"processed_ds_id",
-			"processed_ds_name",
-			rec.Dataset.ProcessedDSName,
-		)
-		if err != nil {
-			if utils.VERBOSE > 1 {
-				log.Printf("unable to find processed_ds_id %s error %v", rec.Dataset.ProcessedDSName, err)
-			}
-			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-		}
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// insert dataset
@@ -349,10 +338,11 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		rec.Dataset.Dataset,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to insert dataset='%s'", rec.Dataset.Dataset)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to insert dataset record", err)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// get outputModConfigID using datasetID
