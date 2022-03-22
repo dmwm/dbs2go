@@ -37,7 +37,7 @@ type testCase struct {
 	endpoint    string     // url endpoint
 	params      url.Values // url parameters
 	handler     func(http.ResponseWriter, *http.Request)
-	input       RequestBody //kjdPOST record
+	input       RequestBody // POST record
 	output      []Response  // expected response
 	respCode    int         // expected HTTP response code
 }
@@ -103,7 +103,7 @@ func getUUID(t *testing.T) int64 {
 }
 
 // generate test data
-func generateBaseData(t *testing.T) {
+func generateBaseData(t *testing.T, filepath string) {
 	uid := getUUID(t)
 	fmt.Printf("****uid=%v*****\n", uid)
 
@@ -113,7 +113,7 @@ func generateBaseData(t *testing.T) {
 		processing_version = uid
 	}
 	acquisition_era_name := fmt.Sprintf("acq_era_%v", uid)
-	ProcDataset := fmt.Sprintf("%s-pstr-v%v", acquisition_era_name, processing_version)
+	ProcDataset := fmt.Sprintf("%s-v%v", acquisition_era_name, processing_version)
 	parent_procdataset := fmt.Sprintf("%s-ptsr-v%v", acquisition_era_name, processing_version)
 	Tier := "GEN-SIM-RAW"
 	dataset := fmt.Sprintf("/%s/%s/%s", PrimaryDSName, ProcDataset, Tier)
@@ -170,7 +170,7 @@ func generateBaseData(t *testing.T) {
 
 	// fmt.Println(TestData)
 	file, _ := json.MarshalIndent(TestData, "", "  ")
-	_ = ioutil.WriteFile("./data/integration/integration_data.json", file, os.ModePerm)
+	_ = ioutil.WriteFile(filepath, file, os.ModePerm)
 }
 
 // primarydataset and primarydstype endpoints tests
@@ -980,7 +980,7 @@ func readJsonFile(t *testing.T, filename string) {
 func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 	if _, err := os.Stat(filepath); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Generating data")
-		generateBaseData(t)
+		generateBaseData(t, filepath)
 	}
 	readJsonFile(t, filepath)
 

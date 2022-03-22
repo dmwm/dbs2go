@@ -26,7 +26,7 @@ import (
 func initTestLimiter(t *testing.T, period string) {
 	rate, err := limiter.NewRateFromFormatted(period)
 	if err != nil {
-		t.Fatalf("Limiter Error")
+		log.Fatalf("Limiter Error")
 	}
 	store := memory.NewStore()
 	instance := limiter.New(store, rate)
@@ -37,7 +37,7 @@ func initTestLimiter(t *testing.T, period string) {
 func runTestServer(t *testing.T, serverType string) *httptest.Server {
 	dbfile := os.Getenv("DBS_DB_FILE")
 	if dbfile == "" {
-		t.Fatal("no DBS_DB_FILE env variable, please define")
+		log.Fatal("no DBS_DB_FILE env variable, please define")
 	}
 
 	var lexiconFile string
@@ -45,12 +45,12 @@ func runTestServer(t *testing.T, serverType string) *httptest.Server {
 	if serverType == "DBSWriter" {
 		lexiconFile = os.Getenv("DBS_WRITER_LEXICON_FILE")
 		if lexiconFile == "" {
-			t.Fatal("no DBS_WRITER_LEXICON_FILE env variable, please define")
+			log.Fatal("no DBS_WRITER_LEXICON_FILE env variable, please define")
 		}
 	} else if serverType == "DBSReader" {
 		lexiconFile = os.Getenv("DBS_READER_LEXICON_FILE")
 		if lexiconFile == "" {
-			t.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
+			log.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
 		}
 	}
 
@@ -90,13 +90,15 @@ func parseURL(t *testing.T, hostname string, endpoint string, params url.Values)
 }
 
 // creates an http request for testing
-func newreq(t *testing.T, method string, hostname string, endpoint string, body io.Reader, params url.Values) *http.Request {
+func newreq(t *testing.T, method string, hostname string, endpoint string, body io.Reader, params url.Values, headers http.Header) *http.Request {
 	reqURL := parseURL(t, hostname, endpoint, params)
 
 	r, err := http.NewRequest(method, reqURL.String(), body)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	r.Header = headers
 
 	return r
 }
@@ -167,10 +169,11 @@ func injectDBRecord(t *testing.T, rec RequestBody, hostname string, endpoint str
 		t.Fatal(err.Error())
 	}
 	reader := bytes.NewReader(data)
-	req := newreq(t, "POST", hostname, endpoint, reader, nil)
-	req.Header.Add("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-	r, err := http.DefaultClient.Do(req)
+	headers := http.Header{
+		"Accept":       []string{"application/json"},
+		"Content-Type": []string{"application/json"},
+	}
+	r, err := http.DefaultClient.Do(newreq(t, "POST", hostname, endpoint, reader, nil, headers))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +202,7 @@ func injectDBRecord(t *testing.T, rec RequestBody, hostname string, endpoint str
 
 // fetches data from url and endpoint
 func getData(t *testing.T, url string, endpoint string, params url.Values, httpCode int) ([]dbs.Record, int) {
-	r, err := http.DefaultClient.Do(newreq(t, "GET", url, endpoint, nil, params))
+	r, err := http.DefaultClient.Do(newreq(t, "GET", url, endpoint, nil, params, nil))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +222,7 @@ func getData(t *testing.T, url string, endpoint string, params url.Values, httpC
 }
 
 // run test workflow for a single endpoint
-func runTestWorkflow(t *testing.T, c EndpointTestCase) { //, tsR *httptest.Server, tsW *httptest.Server) {
+func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 
 	var server *httptest.Server
 
@@ -260,7 +263,7 @@ func TestIntegration(t *testing.T) {
 
 	testCaseFile := os.Getenv("INTEGRATION_DATA_FILE")
 	if testCaseFile == "" {
-		t.Fatal("INTEGRATION_DATA_FILE not defined")
+		log.Fatal("INTEGRATION_DATA_FILE not defined")
 	}
 
 	testCases := LoadTestCases(t, testCaseFile)
