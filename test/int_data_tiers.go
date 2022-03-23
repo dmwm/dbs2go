@@ -1,5 +1,11 @@
 package main
 
+// this file contains logic for datatiers API
+// the HTTP request body is defined by dbs.DataTiers struct defined in dbs/tiers.go
+// the HTTP request body for a bad request is defined by BadRequest struct defined in test/integration_cases.go
+// the HTTP response body is defined by dbs.DataTiers struct defined in dbs/tiers.go
+// the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
+
 import (
 	"net/http"
 	"net/url"

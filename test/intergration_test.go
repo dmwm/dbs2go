@@ -1,5 +1,18 @@
 package main
 
+// Integration Tests
+// This file contains the main function, TestIntegration, for running DBS integration tests.
+// The DBS integration tests are table-driven
+// The tests workflow is as follows:
+//   1. Load data into test tables
+//   2. Iterate through tables, providing the data to runTestWorkflow
+//   3. Depending on configuration in table, start a fully running DBSReader or DBSWriter server
+//   4. Execute the HTTP request and validate results
+// Middlewares can also be tested, such as the validation middleware
+// The tables for each of the endpoints is defined in test/int_*.go files
+// Default data for the tables are loaded in test/data/integration/integration_data.json.
+// Data is loaded into the tables in test/data/integration_cases.go
+
 import (
 	"bytes"
 	"encoding/json"

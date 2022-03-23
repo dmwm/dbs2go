@@ -1,5 +1,10 @@
 package main
 
+// this file contains logic for datasetaccesstypes API
+// the HTTP request body is defined by dbs.DatasetAccessTypes struct defined in dbs/datasetaccesstypes.go
+// the HTTP response body is defined by datasetAccessTypeReponse struct defined in this file
+// the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
+
 import (
 	"net/http"
 	"testing"

@@ -1,5 +1,8 @@
 package main
 
+// This file contains common types for test cases. It also contains a function to generate initial data, if the json file does not exist
+// the initial data is also loaded into the TestData struct for the test-driven tables defined in  int_*.go
+
 import (
 	"encoding/hex"
 	"encoding/json"
@@ -30,7 +33,7 @@ type BadRequest struct {
 // basic elements to define a test case
 type testCase struct {
 	description string     // test case description
-	serverType  string     //DBSWriter, DBSReader, DBSMigrate
+	serverType  string     // DBSWriter, DBSReader, DBSMigrate
 	method      string     // http method
 	endpoint    string     // url endpoint
 	params      url.Values // url parameters
@@ -40,8 +43,8 @@ type testCase struct {
 	respCode    int         // expected HTTP response code
 }
 
-// InitialData struct for test data generation
-type InitialData struct {
+// initialData struct for test data generation
+type initialData struct {
 	PrimaryDSName          string   `json:"primary_ds_name"`
 	ProcDataset            string   `json:"procdataset"`
 	Tier                   string   `json:"tier"`
@@ -74,7 +77,7 @@ type InitialData struct {
 }
 
 // TestData contains the generated data
-var TestData InitialData
+var TestData initialData
 
 // defines a testcase for an endpoint
 type EndpointTestCase struct {
@@ -100,7 +103,7 @@ func getUUID(t *testing.T) int64 {
 	return uidInt
 }
 
-// generate test data
+// generate test data based on dmwm/DBSClient tests/dbsclient_t/unittests/DBSClientWriter_t.py
 func generateBaseData(t *testing.T, filepath string) {
 	uid := getUUID(t)
 	fmt.Printf("****uid=%v*****\n", uid)

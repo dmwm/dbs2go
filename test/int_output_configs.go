@@ -1,5 +1,10 @@
 package main
 
+// this file contains logic for outputconfigs API
+// the HTTP request body is defined by dbs.OutputConfigRecord struct defined in dbs/outputconfigs.go
+// the HTTP response body is defined by outputConfigResponse struct defined in this file
+// the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
+
 import (
 	"net/http"
 	"testing"

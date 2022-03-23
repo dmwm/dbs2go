@@ -1,5 +1,16 @@
 package main
 
+// this file contains logic for primarydatasets and primarydstypes API
+//
+// primarydatasets:
+// the HTTP request body is defined by dbs.PrimaryDatasetRecord struct defined in dbs/primarydatasets.go
+// the HTTP response body is defined by dbs.PrimaryDataset struct defined in this dbs/primarydatasets.go
+//
+// primarydstypes:
+// the HTTP response body is defined by primaryDSTypesReponse struct defined in this dbs/primarydstypes.go
+//
+// the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
+
 import (
 	"net/http"
 	"net/url"
