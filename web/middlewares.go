@@ -29,6 +29,9 @@ func initLimiter(period string) {
 	}
 	store := memory.NewStore()
 	instance := limiter.New(store, rate)
+	if Config.LimiterHeader != "" {
+		instance = limiter.New(store, rate, limiter.WithClientIPHeader(Config.LimiterHeader))
+	}
 	LimiterMiddleware = stdlib.NewMiddleware(instance)
 }
 

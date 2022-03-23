@@ -163,18 +163,18 @@ func (a *API) Datasets() error {
 		}
 		if minval != "" && maxval != "" {
 			cond := fmt.Sprintf(
-				" D.CREATION_DATE BETWEEN %s and %s",
+				" D.LAST_MODIFICATION_DATE BETWEEN %s and %s",
 				placeholder("min_ldate"),
 				placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 			args = append(args, maxval)
 		} else if minval != "" {
-			cond := fmt.Sprintf(" D.CREATION_DATE > %s", placeholder("min_ldate"))
+			cond := fmt.Sprintf(" D.LAST_MODIFICATION_DATE > %s", placeholder("min_ldate"))
 			conds = append(conds, cond)
 			args = append(args, minval)
 		} else if maxval != "" {
-			cond := fmt.Sprintf(" D.CREATION_DATE < %s", placeholder("max_ldate"))
+			cond := fmt.Sprintf(" D.LAST_MODIFICATION_DATE < %s", placeholder("max_ldate"))
 			conds = append(conds, cond)
 			args = append(args, maxval)
 		}
