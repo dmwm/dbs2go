@@ -127,10 +127,9 @@ curl -H "Accept: application/json" \
 - `/fileparents`
   - returns list of file parents
   - arguments: `logical_file_name`, `block_name`, `block_id`
+  - this api allows list of `logical_file_name` parameter
 
-    - this api allows list of `logical_file_name` parameter
-
-- /filesummaries
+- `/filesummaries`
   - returns list of file summaries
   - arguments: `block_name`, `dataset`, `run_num`, `validFileOnly`, `sumOverLumi`
 - `/filelumis`
@@ -388,7 +387,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
     "acquisition_era_name": "era",
     "start_date": 1631118749,
     "end_date": 1631118749,
-    "create_date": 1631118749,
+    "creation_date": 1631118749,
     "create_by": "tester",
     "description": "note"
 }
