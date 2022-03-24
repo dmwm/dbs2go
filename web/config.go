@@ -23,7 +23,8 @@ type Configuration struct {
 	MonitType     string `json:"monit_type"`     // monit record type
 	MonitProducer string `json:"monit_producer"` // monit record producer
 	Hmac          string `json:"hmac"`           // cmsweb hmac file location
-	LimiterPeriod string `json:"rate"`           // limiter rate value
+	LimiterPeriod string `json:"limiter_rate"`   // limiter rate value
+	LimiterHeader string `json:"limiter_header"` // limiter header to use
 	MetricsPrefix string `json:"metrics_prefix"` // metrics prefix used for prometheus
 	ServerType    string `json:"server_type"`    // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
 	Etag          string `json:"etag"`           // etag value to use for ETag generation
