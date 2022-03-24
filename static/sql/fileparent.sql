@@ -1,5 +1,5 @@
 SELECT
-    F.LOGICAL_FILE_NAME this_logical_file_name,
+    F.LOGICAL_FILE_NAME,
     PF.LOGICAL_FILE_NAME parent_logical_file_name,
     PF.FILE_ID parent_file_id
 FROM {{.Owner}}.FILES PF

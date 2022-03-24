@@ -367,8 +367,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 // FileParentRecord represents file parent DBS record
 // used by bulkblock API
 type FileParentRecord struct {
-	ThisLogicalFileName   string `json:"this_logical_file_name"`
-	LogicalFileName       string `json:"logical_file_name"`
+	LogicalFileName       string `json:"this_logical_file_name"`
 	ParentFileId          int64  `json:"parent_file_id"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
@@ -409,9 +408,6 @@ func (a *API) InsertFileParentsTxt(tx *sql.Tx) error {
 			log.Printf("Insert FileParents record %+v", rec)
 		}
 		lfn := rec.LogicalFileName
-		if lfn == "" {
-			lfn = rec.ThisLogicalFileName // for backward compatibility
-		}
 		pfn := rec.ParentLogicalFileName
 		// get file id for given lfn
 		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", lfn)
