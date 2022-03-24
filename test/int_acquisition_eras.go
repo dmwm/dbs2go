@@ -1,8 +1,8 @@
 package main
 
 // this file contains logic for acquisitioneras API
-// the HTTP requests body is defined by dbs.AcquisitionEras struct defined in dbs/acquisition_eras.go
-// the HTTP response body is defined by dbs.AcquisitionEra struct defined in dbs/acquisition_eras.go
+// the HTTP requests body is defined by dbs.AcquisitionEras struct defined in dbs/acquisitioneras.go
+// the HTTP response body is defined by dbs.AcquisitionEra struct defined in dbs/bulkblocks.go
 // the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
 
 import (

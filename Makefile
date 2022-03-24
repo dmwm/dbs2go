@@ -69,6 +69,9 @@ test-lexicon-reader-pos:
 test-lexicon-reader-neg:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_reader.json DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_negative.json go test -v -run LexiconNegative
 test-integration:
-	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && echo "\"sqlite3 /tmp/dbs-test.db sqlite\"" > ./dbfile && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_READER_LEXICON_FILE=../static/lexicon_reader.json DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json DBS_DB_FILE=./dbfile INTEGRATION_DATA_FILE=./data/integration/integration_data.json go test -v -run Integration
+	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
+	echo "\"sqlite3 /tmp/dbs-test.db sqlite\"" > ./dbfile && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
+	DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json DBS_DB_FILE=./dbfile INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
+	go test -v -run Integration
 bench:
 	cd test && rm -f /tmp/dbs-test.db && sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} DBS_LEXICON_FILE=../static/lexicon_writer.json go test -run Benchmark -bench=.

@@ -2,7 +2,7 @@ package main
 
 // this file contains logic for processingeras API
 // the HTTP request body is defined by dbs.ProcessingEras struct defined in dbs/processingeras.go
-// the HTTP response body is defined by dbs.ProcessingEra struct defined in dbs/processingeras.go
+// the HTTP response body is defined by dbs.ProcessingEra struct defined in dbs/bulkblocks.go
 // the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
 
 import (

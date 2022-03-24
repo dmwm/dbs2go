@@ -4,10 +4,10 @@ package main
 //
 // primarydatasets:
 // the HTTP request body is defined by dbs.PrimaryDatasetRecord struct defined in dbs/primarydatasets.go
-// the HTTP response body is defined by dbs.PrimaryDataset struct defined in this dbs/primarydatasets.go
+// the HTTP response body is defined by dbs.PrimaryDataset struct defined in dbs/bulkblocks.go
 //
 // primarydstypes:
-// the HTTP response body is defined by primaryDSTypesReponse struct defined in this dbs/primarydstypes.go
+// the HTTP response body is defined by primaryDSTypesReponse struct defined in this file
 //
 // the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
 
