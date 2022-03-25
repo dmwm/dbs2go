@@ -138,7 +138,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	if expected == nil {
 		expect = []Response{}
 	}
-	log.Printf("Received: %s\nExpected: %s\n", received, expect)
+	log.Printf("\nReceived: %v\nExpected: %+v\n", received, expect)
 	if len(received) != len(expect) {
 		t.Fatalf("Expected length: %v, Received length: %v", len(expect), len(received))
 	}
@@ -154,7 +154,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	}
 
 	for i, r := range received {
-		log.Printf("\nReceived: %v\nExpected: %v\n", r, e[i])
+		log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		// see difference between expected and received structs
 		c, err := diff.Diff(e[i], r)
 		if err != nil {
