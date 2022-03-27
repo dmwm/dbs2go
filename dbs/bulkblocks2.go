@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // FileChunkSize controls size of chunk for []File insertion

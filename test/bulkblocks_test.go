@@ -10,8 +10,8 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // TestBulkBlocks API

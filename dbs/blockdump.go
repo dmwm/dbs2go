@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // helper function to get block information

@@ -7,7 +7,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // FileParents API

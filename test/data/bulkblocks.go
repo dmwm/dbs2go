@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/dbs"
 )
 
 func main() {

@@ -19,36 +19,36 @@ Here is architecture of the DBS server:
 ![DBS Server Architecture](images/DBSServer.png)
 
 ### Repository structure and code logic
-[dbs2go](https://github.com/vkuznet/dbs2go) has the following structure:
-- [dbs](https://github.com/vkuznet/dbs2go/tree/master/dbs)
+[dbs2go](https://github.com/dmwm/dbs2go) has the following structure:
+- [dbs](https://github.com/dmwm/dbs2go/tree/master/dbs)
   folder contains all business and DAO objects
-- [static](https://github.com/vkuznet/dbs2go/tree/master/static) area contains 
-  - [SQL templates](https://github.com/vkuznet/dbs2go/tree/master/static/sql)
-  - [HTTP templates](https://github.com/vkuznet/dbs2go/tree/master/static/templates)
-  - [CSS](https://github.com/vkuznet/dbs2go/tree/master/static/css)
-  - [DB schemas](https://github.com/vkuznet/dbs2go/tree/master/static/schema)
-  - [images](https://github.com/vkuznet/dbs2go/tree/master/static/images)
-  - [lexicon.json](https://github.com/vkuznet/dbs2go/blob/master/static/lexicon.json)
+- [static](https://github.com/dmwm/dbs2go/tree/master/static) area contains 
+  - [SQL templates](https://github.com/dmwm/dbs2go/tree/master/static/sql)
+  - [HTTP templates](https://github.com/dmwm/dbs2go/tree/master/static/templates)
+  - [CSS](https://github.com/dmwm/dbs2go/tree/master/static/css)
+  - [DB schemas](https://github.com/dmwm/dbs2go/tree/master/static/schema)
+  - [images](https://github.com/dmwm/dbs2go/tree/master/static/images)
+  - [lexicon.json](https://github.com/dmwm/dbs2go/blob/master/static/lexicon.json)
   to store regular expression for validating input parameters
-- [web](https://github.com/vkuznet/dbs2go/tree/master/web) contains all
+- [web](https://github.com/dmwm/dbs2go/tree/master/web) contains all
   codebase related to HTTP web server, including handlers, middleware
   implementaions, etc.
-- [utils](https://github.com/vkuznet/dbs2go/tree/master/utils) contains general
+- [utils](https://github.com/dmwm/dbs2go/tree/master/utils) contains general
   utilities used across the codebase
-- [graphql](https://github.com/vkuznet/dbs2go/tree/master/graphql) contains
+- [graphql](https://github.com/dmwm/dbs2go/tree/master/graphql) contains
   initial implementation of [GraphQL](https://graphql.org/) for DBS server.
 
 The HTTP server consists of the following components:
-- [server.go](https://github.com/vkuznet/dbs2go/blob/master/web/server.go)
+- [server.go](https://github.com/dmwm/dbs2go/blob/master/web/server.go)
   implements server logic
-- [handlers.go](https://github.com/vkuznet/dbs2go/blob/master/web/handlers.go)
+- [handlers.go](https://github.com/dmwm/dbs2go/blob/master/web/handlers.go)
   contains all HTTP handlers
-- [middleware.go](https://github.com/vkuznet/dbs2go/blob/master/web/middleware.go)
+- [middleware.go](https://github.com/dmwm/dbs2go/blob/master/web/middleware.go)
   contains all midlewares layers
-- [metrics.go](https://github.com/vkuznet/dbs2go/blob/master/web/templates.go)
+- [metrics.go](https://github.com/dmwm/dbs2go/blob/master/web/templates.go)
   contains implementation of DBS metrics which can be used by
   [Prometheus](https://prometheus.io/)
-- [templates.go](https://github.com/vkuznet/dbs2go/blob/master/web/templates.go)
+- [templates.go](https://github.com/dmwm/dbs2go/blob/master/web/templates.go)
   holds implementation of DBS templates
 
 The HTTP server relies on the following logic:
@@ -62,13 +62,13 @@ The HTTP server relies on the following logic:
 
 ### DBS business and DAO logic
 The DBS business and DAO logic resides within
-[dbs](https://github.com/vkuznet/dbs2go/blob/master/dbs) folder.
+[dbs](https://github.com/dmwm/dbs2go/blob/master/dbs) folder.
 The individual file, e.g.
-[tiers.go](https://github.com/vkuznet/dbs2go/blob/master/dbs/tiers.go)
+[tiers.go](https://github.com/dmwm/dbs2go/blob/master/dbs/tiers.go)
 holds full implemenation for that specific api `/tiers` used by DBS server.
 It includes corresponding data strcut, e.g. `DataTiers`, which represent associative
 DBS table. Each DBS API implements `DBRecord` interface (found in
-[dbs/dbs.go](https://github.com/vkuznet/dbs2go/blob/master/dbs/dbs.go)):
+[dbs/dbs.go](https://github.com/dmwm/dbs2go/blob/master/dbs/dbs.go)):
 ```
 type DBRecord interface {
 	Insert(tx *sql.Tx) error

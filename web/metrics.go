@@ -15,7 +15,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // TotalGetRequests counts total number of GET requests received by the server

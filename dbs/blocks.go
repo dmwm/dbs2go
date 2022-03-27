@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // Blocks DBS API

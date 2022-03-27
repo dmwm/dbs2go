@@ -50,9 +50,9 @@ import (
 	graphql "github.com/graph-gophers/graphql-go"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/vkuznet/auth-proxy-server/logging"
-	"github.com/vkuznet/dbs2go/dbs"
-	dbsGraphQL "github.com/vkuznet/dbs2go/graphql"
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/dbs"
+	dbsGraphQL "github.com/dmwm/dbs2go/graphql"
+	"github.com/dmwm/dbs2go/utils"
 
 	// imports for supported DB drivers
 	// go-oci8 oracle driver

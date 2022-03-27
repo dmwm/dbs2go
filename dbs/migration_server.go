@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // MigrationProcessTimeout defines migration process timeout

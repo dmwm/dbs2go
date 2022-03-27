@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // BulkBlocks represents bulk block structure used by `/bulkblocks` DBS API

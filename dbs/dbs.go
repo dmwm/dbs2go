@@ -21,7 +21,7 @@ import (
 	"time"
 
 	validator "github.com/go-playground/validator/v10"
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // API structure represents DBS API. Each API has reader (to read

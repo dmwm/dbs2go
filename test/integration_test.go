@@ -26,9 +26,9 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/r3labs/diff/v2"
-	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/utils"
-	"github.com/vkuznet/dbs2go/web"
+	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/utils"
+	"github.com/dmwm/dbs2go/web"
 
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"

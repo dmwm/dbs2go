@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/vkuznet/dbs2go/web"
+	"github.com/dmwm/dbs2go/web"
 )
 
 // version of the code

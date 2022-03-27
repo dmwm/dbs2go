@@ -8,8 +8,8 @@ import (
 
 	validator "github.com/go-playground/validator/v10"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // helper function to initialize DB for tests

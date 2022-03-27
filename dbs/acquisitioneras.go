@@ -8,7 +8,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // AcquisitionEras DBS API

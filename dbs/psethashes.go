@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // ParameterSetHashes represents Parameter Set Hashes DBS DB table

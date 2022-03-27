@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/utils"
+	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/utils"
 )
 
 // TestDBSCleanStatement

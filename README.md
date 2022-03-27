@@ -1,8 +1,8 @@
 ### dbs2go package
 
-![Build Status](https://github.com/vkuznet/dbs2go/actions/workflows/go.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vkuznet/dbs2go)](https://goreportcard.com/report/github.com/vkuznet/dbs2go)
-[![GoDoc](https://godoc.org/github.com/vkuznet/dbs2go?status.svg)](https://godoc.org/github.com/vkuznet/dbs2go)
+![Build Status](https://github.com/dmwm/dbs2go/actions/workflows/go.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dmwm/dbs2go)](https://goreportcard.com/report/github.com/dmwm/dbs2go)
+[![GoDoc](https://godoc.org/github.com/dmwm/dbs2go?status.svg)](https://godoc.org/github.com/dmwm/dbs2go)
 
 The `dbs2go` package represents Data Bookkeeping Server (DBS) used
 by CMS collaboration. Please refer to the appropriate section of `dbs2go`

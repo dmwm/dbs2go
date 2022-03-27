@@ -13,7 +13,7 @@ import (
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
-	"github.com/vkuznet/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/dbs"
 )
 
 // LimiterMiddleware provides limiter middleware pointer

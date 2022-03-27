@@ -16,8 +16,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/vkuznet/dbs2go/dbs"
-	"github.com/vkuznet/dbs2go/web"
+	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/web"
 )
 
 // expected response from primarydstypes GET API
