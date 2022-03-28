@@ -207,6 +207,7 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 	datasetAccessTypesTestCase := getDatasetAccessTypesTestTable(t)
 	physicsGroupsTestCase := getPhysicsGroupsTestTable(t)
 	datasetsTestCase := getDatasetsTestTable(t)
+	blocksTestCase := getBlocksTestTable(t)
 
 	return []EndpointTestCase{
 		primaryDatasetAndTypesTestCase,
@@ -217,5 +218,6 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 		datasetAccessTypesTestCase,
 		physicsGroupsTestCase,
 		datasetsTestCase,
+		blocksTestCase,
 	}
 }

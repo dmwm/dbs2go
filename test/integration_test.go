@@ -147,7 +147,8 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 
 	// fields not in initial POST request
 	generatedFields := []string{
-		"creation_date", // created upon POST
+		"creation_date",          // created upon POST
+		"last_modification_date", // created upon POST
 		"start_date",
 		"end_date",
 		"http", // client http information on errors
@@ -166,10 +167,10 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 			if utils.InList(field, generatedFields) {
 				// check if a value was given to the field
 				if a.To == nil {
-					t.Fatalf("Field empty: %s", field)
+					t.Fatalf("Field empty: %v", field)
 				}
 			} else {
-				t.Fatalf("Incorrect %s, received %s, expected %s", field, a.To, a.From)
+				t.Fatalf("Incorrect %v, received %v, expected %v", field, a.To, a.From)
 			}
 		}
 	}

@@ -23,12 +23,12 @@ curl -H "Accept: application/json" \
   - arguments: `data_tier_name`
 - `/datasets`
   - returns list of DBS datasets, including their details
-  - arguments: `dataset`, `parent_dataset`, `release_version`, `pset_hash`, `app_name,
-    output_module_label`, `global_tag`, `processing_version`, `acquisition_era_name,
-    run_num`, `physics_group_name`, `logical_file_name`, `primary_ds_name,
-    primary_ds_type`, `processed_ds_name`, `data_tier_name`, `dataset_access_type,
-    prep_id`, `create_by`, `last_modified_by`, `min_cdate`, `max_cdate`, `min_ldate,
-    max_ldate`, `cdate`, `ldate`, `detail`, `dataset_id`
+  - arguments: `dataset`, `parent_dataset`, `release_version`, `pset_hash`, `app_name`,
+    `output_module_label`, `global_tag`, `processing_version`, `acquisition_era_name`,
+    `run_num`, `physics_group_name`, `logical_file_name`, `primary_ds_name`,
+    `primary_ds_type`, `processed_ds_name`, `data_tier_name`, `dataset_access_type`,
+    `prep_id`, `create_by`, `last_modified_by`, `min_cdate`, `max_cdate`, `min_ldate`,
+    `max_ldate`, `cdate`, `ldate`, `detail`, `dataset_id`
 
     - this api allows list of `dataset`, `run_num` and `dataset_id` parameters
     - the `run_num` parameter can be represented in ths following forms:
@@ -38,9 +38,9 @@ curl -H "Accept: application/json" \
 
 - `/blocks`
   - returns list of DBS blocks, including their details
-  - arguments: `dataset`, `block_name`, `data_tier_name`, `origin_site_name,
-    logical_file_name`, `run_num`, `min_cdate`, `max_cdate`, `min_ldate`, `max_ldate,
-    cdate`, `ldate`, `open_for_writing`, `detail`
+  - arguments: `dataset`, `block_name`, `data_tier_name`, `origin_site_name`,
+    `logical_file_name`, `run_num`, `min_cdate`, `max_cdate`, `min_ldate`, `max_ldate`,
+    `cdate`, `ldate`, `open_for_writing`, `detail`
 
     - this api allows list of `run_num` parameter
     - the `run_num` parameter can be represented in ths following forms:
@@ -53,9 +53,9 @@ curl -H "Accept: application/json" \
   - arguments: `block_name`
 - `/files`
   - returns list of files including their details
-  - arguments: `dataset`, `block_name`, `logical_file_name`, `release_version,
-    pset_hash`, `app_name`, `output_module_label`, `run_num`, `origin_site_name,
-    lumi_list`, `detail`, `validFileOnly`, `sumOverLumi`
+  - arguments: `dataset`, `block_name`, `logical_file_name`, `release_version`,
+    `pset_hash`, `app_name`, `output_module_label`, `run_num`, `origin_site_name`,
+    `lumi_list`, `detail`, `validFileOnly`, `sumOverLumi`
 
     - this api allows list of `logical_file_name` and `lumi_list` parameters
 
@@ -85,8 +85,8 @@ curl -H "Accept: application/json" \
   - arguments: `processing_version`
 - `/outputconfigs`
   - returns list of output configs
-  - arguments: `dataset`, `logical_file_name`, `release_version`, `pset_hash,
-    app_name`, `output_module_label`, `block_id`, `global_tag`
+  - arguments: `dataset`, `logical_file_name`, `release_version`, `pset_hash`,
+    `app_name`, `output_module_label`, `block_id`, `global_tag`
 - `/datasetaccesstypes`
   - returns list of dataset access types
   - arguments: `dataset_access_type`

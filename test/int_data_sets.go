@@ -62,6 +62,7 @@ type datasetsDetailResponse struct {
 // datasets endpoint tests
 //* Note: depends on above tests for their *_id
 // TODO: include prep_id in POST tests
+// TODO: add other parameter tests
 func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 	outputConfs := []dbs.OutputConfigRecord{
 		{
