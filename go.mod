@@ -46,4 +46,4 @@ require (
 	google.golang.org/protobuf v1.26.0 // indirect
 )
 
-replace github.com/ulule/limiter/v3 => github.com/vkuznet/limiter/v3 v3.10.1
+replace github.com/ulule/limiter/v3 => github.com/vkuznet/limiter/v3 v3.10.2

@@ -14,24 +14,24 @@ import (
 
 // Configuration stores dbs configuration parameters
 type Configuration struct {
-	Port             int      `json:"port"`              // dbs port number
-	StaticDir        string   `json:"staticdir"`         // location of static directory
-	Base             string   `json:"base"`              // dbs base path
-	Verbose          int      `json:"verbose"`           // verbosity level
-	LogFile          string   `json:"log_file"`          // server log file (should ends with .log) or log area
-	UTC              bool     `json:"utc"`               // report logger time in UTC
-	MonitType        string   `json:"monit_type"`        // monit record type
-	MonitProducer    string   `json:"monit_producer"`    // monit record producer
-	Hmac             string   `json:"hmac"`              // cmsweb hmac file location
-	LimiterPeriod    string   `json:"limiter_rate"`      // limiter rate value
-	LimiterHeader    string   `json:"limiter_header"`    // limiter header to use
-	LimiterWhiteList []string `json:"limiter_whitelist"` // limiter white list
-	MetricsPrefix    string   `json:"metrics_prefix"`    // metrics prefix used for prometheus
-	ServerType       string   `json:"server_type"`       // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
-	Etag             string   `json:"etag"`              // etag value to use for ETag generation
-	CacheControl     string   `json:"cache_control"`     // Cache-Control value, e.g. max-age=300
-	CMSRole          string   `json:"cms_role"`          // cms role for write access
-	CMSGroup         string   `json:"cms_group"`         // cms group for write access
+	Port            int      `json:"port"`              // dbs port number
+	StaticDir       string   `json:"staticdir"`         // location of static directory
+	Base            string   `json:"base"`              // dbs base path
+	Verbose         int      `json:"verbose"`           // verbosity level
+	LogFile         string   `json:"log_file"`          // server log file (should ends with .log) or log area
+	UTC             bool     `json:"utc"`               // report logger time in UTC
+	MonitType       string   `json:"monit_type"`        // monit record type
+	MonitProducer   string   `json:"monit_producer"`    // monit record producer
+	Hmac            string   `json:"hmac"`              // cmsweb hmac file location
+	LimiterPeriod   string   `json:"limiter_rate"`      // limiter rate value
+	LimiterHeader   string   `json:"limiter_header"`    // limiter header to use
+	LimiterSkipList []string `json:"limiter_skip_list"` // limiter skip list
+	MetricsPrefix   string   `json:"metrics_prefix"`    // metrics prefix used for prometheus
+	ServerType      string   `json:"server_type"`       // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
+	Etag            string   `json:"etag"`              // etag value to use for ETag generation
+	CacheControl    string   `json:"cache_control"`     // Cache-Control value, e.g. max-age=300
+	CMSRole         string   `json:"cms_role"`          // cms role for write access
+	CMSGroup        string   `json:"cms_group"`         // cms group for write access
 
 	// Migration server settings
 	MigrationDBFile          string `json:"migration_dbfile"`           // dbfile with secrets

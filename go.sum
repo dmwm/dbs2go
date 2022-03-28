@@ -88,6 +88,8 @@ github.com/vkuznet/limiter v2.2.2+incompatible h1:sXYnV39WcyOjtt0osSgeCTr8wvyp4F
 github.com/vkuznet/limiter v2.2.2+incompatible/go.mod h1:jxlQYtcc9DWGwzJTkmtCE7ozOVJUKhw7Xf0m26mO7VI=
 github.com/vkuznet/limiter/v3 v3.10.1 h1:jRqBEQkb0GsW9g5VfL29r9Yd3NyYSkpyNpUAultDAOQ=
 github.com/vkuznet/limiter/v3 v3.10.1/go.mod h1:NqPA/r8QfP7O11iC+95X6gcWJPtRWjKrtOUw07BTvoo=
+github.com/vkuznet/limiter/v3 v3.10.2 h1:opnRhJq80fPZLfIttveTjF19nz97w4jyrnnnk3M1wCU=
+github.com/vkuznet/limiter/v3 v3.10.2/go.mod h1:NqPA/r8QfP7O11iC+95X6gcWJPtRWjKrtOUw07BTvoo=
 github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6 h1:Y5LCuH9nfTZ6srI5NaoKKbcDb01zqTHw8678++4fw0c=
 github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6/go.mod h1:gfEPE3azFe+K/nMLezta3+kTiumttEYDawGAE72IYfM=
 github.com/vmihailenco/msgpack v4.0.4+incompatible h1:dSLoQfGFAo3F6OoNhwUmLwVgaUXK79GlxNBwueZn0xI=

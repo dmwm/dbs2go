@@ -28,13 +28,13 @@ func initLimiter(period string) {
 		panic(err)
 	}
 	store := memory.NewStore()
-	instance := limiter.New(store, rate, limiter.WithWhiteList(Config.LimiterWhiteList))
+	instance := limiter.New(store, rate, limiter.WithSkipList(Config.LimiterSkipList))
 	if Config.LimiterHeader != "" {
 		instance = limiter.New(
 			store,
 			rate,
 			limiter.WithClientIPHeader(Config.LimiterHeader),
-			limiter.WithWhiteList(Config.LimiterWhiteList))
+			limiter.WithSkipList(Config.LimiterSkipList))
 	}
 	LimiterMiddleware = stdlib.NewMiddleware(instance)
 }
