@@ -17,6 +17,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/ulule/limiter/v3 v3.10.0
 	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20220316171336-a7168957a1a4
+	github.com/vkuznet/limiter v2.2.2+incompatible
 	github.com/vkuznet/x509proxy v0.0.0-20210801171832-e47b94db99b6
 	gopkg.in/rana/ora.v4 v4.1.15
 	gopkg.in/yaml.v2 v2.4.0
@@ -44,3 +45,5 @@ require (
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 )
+
+replace github.com/ulule/limiter/v3 => github.com/vkuznet/limiter/v3 v3.10.1
