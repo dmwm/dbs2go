@@ -157,7 +157,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 			Error(
 				err,
 				TransactionErrorCode,
-				"",
+				"unable to obtain MigrationDB transaction",
 				"dbs.migration_requests.MigrationRequests")
 	}
 	defer tx.Rollback()
@@ -167,7 +167,8 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	}
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
-		return records, Error(err, QueryErrorCode, "", "dbs.migration_requests.MigrationRequests")
+		msg := fmt.Sprintf("fail to execute %s", stm)
+		return records, Error(err, QueryErrorCode, msg, "dbs.migration_requests.MigrationRequests")
 	}
 	defer rows.Close()
 	for rows.Next() {
