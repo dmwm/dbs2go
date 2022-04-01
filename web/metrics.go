@@ -5,17 +5,19 @@ package web
 // Copyright (c) 2020 - Valentin Kuznetsov <vkuznet AT gmail dot com>
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/utils"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
-	"github.com/dmwm/dbs2go/utils"
 )
 
 // TotalGetRequests counts total number of GET requests received by the server
@@ -92,24 +94,27 @@ type Mem struct {
 
 // Metrics provide various metrics about our server
 type Metrics struct {
-	CPU          []float64               `json:"cpu"`          // cpu metrics from gopsutils
-	CpuPercent   float64                 `json:"cpu_pct"`      // cpu percent
-	Connections  []net.ConnectionStat    `json:"connections"`  // connections metrics from gopsutils
-	Load         load.AvgStat            `json:"load"`         // load metrics from gopsutils
-	Memory       Mem                     `json:"memory"`       // memory metrics from gopsutils
-	OpenFiles    []process.OpenFilesStat `json:"openFiles"`    // open files metrics from gopsutils
-	GoRoutines   uint64                  `json:"goroutines"`   // total number of go routines at run-time
-	Uptime       float64                 `json:"uptime"`       // uptime of the server
-	GetRequests  uint64                  `json:"getRequests"`  // total number of get requests across all services
-	PostRequests uint64                  `json:"postRequests"` // total number of post requests across all services
-	PutRequests  uint64                  `json:"putRequests"`  // total number of post requests across all services
-	AvgGetTime   float64                 `json:"avgGetTime"`   // avg GET request time
-	AvgPostTime  float64                 `json:"avgPostTime"`  // avg POST request time
-	AvgPutTime   float64                 `json:"avgPutTime"`   // avg PUT request time
-	RPS          float64                 `json:"rps"`          // throughput req/sec
-	RPSPhysical  float64                 `json:"rpsPhysical"`  // throughput req/sec using physical cpu
-	RPSLogical   float64                 `json:"rpsLogical"`   // throughput req/sec using logical cpu
-	ProcFS       utils.ProcFS            `json:"procfs"`       // metrics from prometheus procfs
+	CPU                []float64               `json:"cpu"`                // cpu metrics from gopsutils
+	CpuPercent         float64                 `json:"cpu_pct"`            // cpu percent
+	Connections        []net.ConnectionStat    `json:"connections"`        // connections metrics from gopsutils
+	Load               load.AvgStat            `json:"load"`               // load metrics from gopsutils
+	Memory             Mem                     `json:"memory"`             // memory metrics from gopsutils
+	OpenFiles          []process.OpenFilesStat `json:"openFiles"`          // open files metrics from gopsutils
+	GoRoutines         uint64                  `json:"goroutines"`         // total number of go routines at run-time
+	Uptime             float64                 `json:"uptime"`             // uptime of the server
+	GetRequests        uint64                  `json:"getRequests"`        // total number of get requests across all services
+	PostRequests       uint64                  `json:"postRequests"`       // total number of post requests across all services
+	PutRequests        uint64                  `json:"putRequests"`        // total number of post requests across all services
+	AvgGetTime         float64                 `json:"avgGetTime"`         // avg GET request time
+	AvgPostTime        float64                 `json:"avgPostTime"`        // avg POST request time
+	AvgPutTime         float64                 `json:"avgPutTime"`         // avg PUT request time
+	RPS                float64                 `json:"rps"`                // throughput req/sec
+	RPSPhysical        float64                 `json:"rpsPhysical"`        // throughput req/sec using physical cpu
+	RPSLogical         float64                 `json:"rpsLogical"`         // throughput req/sec using logical cpu
+	ProcFS             utils.ProcFS            `json:"procfs"`             // metrics from prometheus procfs
+	DBStats            sql.DBStats             `json:"dbstats"`            // metrics about database
+	MaxDBConnections   uint64                  `json:"maxDBConnections"`   // max number of DB connections
+	MaxIdleConnections uint64                  `json:"maxIdleConnections"` // max number of idle DB connections
 }
 
 func metrics() Metrics {
@@ -150,6 +155,9 @@ func metrics() Metrics {
 		metrics.CpuPercent = cpuPct
 	}
 
+	metrics.MaxIdleConnections = uint64(Config.MaxIdleConnections)
+	metrics.MaxDBConnections = uint64(Config.MaxDBConnections)
+	metrics.DBStats = dbs.DB.Stats()
 	metrics.ProcFS = utils.ProcFSMetrics()
 	metrics.Uptime = time.Since(StartTime).Seconds()
 
@@ -337,6 +345,52 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# HELP %s_rps_logical_cpu reports request per second average weighted by logical CPU cures\n", prefix)
 	out += fmt.Sprintf("# TYPE %s_rps_logical_cpu gauge\n", prefix)
 	out += fmt.Sprintf("%s_rps_logical_cpu %v\n", prefix, data.RPSLogical)
+
+	// database metrics
+	out += fmt.Sprintf("# HELP %s_max_db_connections reports max number of DB conenctions\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_max_db_connections gauge\n", prefix)
+	out += fmt.Sprintf("%s_max_db_connections %v\n", prefix, data.MaxDBConnections)
+
+	out += fmt.Sprintf("# HELP %s_max_idle_connections reports max number of idls DB connections\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_max_idle_connections gauge\n", prefix)
+	out += fmt.Sprintf("%s_max_idle_connections %v\n", prefix, data.MaxIdleConnections)
+
+	// see https://pkg.go.dev/database/sql#DBStats
+	out += fmt.Sprintf("# HELP %s_max_open_connections reports max number of open DB connections\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_max_open_connections gauge\n", prefix)
+	out += fmt.Sprintf("%s_max_open_connections %v\n", prefix, data.DBStats.MaxOpenConnections)
+
+	out += fmt.Sprintf("# HELP %s_open_connections reports number of established to database (both in use and idle)\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_open_connections gauge\n", prefix)
+	out += fmt.Sprintf("%s_open_connections %v\n", prefix, data.DBStats.OpenConnections)
+
+	out += fmt.Sprintf("# HELP %s_in_use_connections reports number of in use database connections\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_in_use_connections gauge\n", prefix)
+	out += fmt.Sprintf("%s_in_use_connections %v\n", prefix, data.DBStats.InUse)
+
+	out += fmt.Sprintf("# HELP %s_idle_connections reports number of idle database connections\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_idle_connections gauge\n", prefix)
+	out += fmt.Sprintf("%s_idle_connections %v\n", prefix, data.DBStats.Idle)
+
+	out += fmt.Sprintf("# HELP %s_wait_count reports total number of connections waited for\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_wait_count counter\n", prefix)
+	out += fmt.Sprintf("%s_wait_count %v\n", prefix, data.DBStats.WaitCount)
+
+	out += fmt.Sprintf("# HELP %s_wait_duration reports total time (in sec) blocked waiting for a new connection\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_wait_duration counter\n", prefix)
+	out += fmt.Sprintf("%s_wait_duration %v\n", prefix, data.DBStats.WaitDuration.Seconds())
+
+	out += fmt.Sprintf("# HELP %s_max_idle_closed reports total number of connections closed due to SetMaxIdleConns\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_max_idle_closed counter\n", prefix)
+	out += fmt.Sprintf("%s_max_idle_closed %v\n", prefix, data.DBStats.MaxIdleClosed)
+
+	out += fmt.Sprintf("# HELP %s_max_idle_time_closed reports total number of connections closed due to SetConnMaxIdleTime\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_max_idle_time_closed counter\n", prefix)
+	out += fmt.Sprintf("%s_max_idle_time_closed %v\n", prefix, data.DBStats.MaxIdleTimeClosed)
+
+	out += fmt.Sprintf("# HELP %s_max_lifetime_closed reports total number of connections closed due to SetConnMaxLifetime\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_max_lifetime_closed counter\n", prefix)
+	out += fmt.Sprintf("%s_max_lifetime_closed %v\n", prefix, data.DBStats.MaxLifetimeClosed)
 
 	return out
 }

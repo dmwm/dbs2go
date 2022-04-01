@@ -63,6 +63,7 @@ const (
 	MigrationErrorCode                   // 125 Migration error
 	RemoveErrorCode                      // 126 remove error
 	InvalidRequestErrorCode              // 127 invalid request error
+	LastAvailableErrorCode               // last available DBS error code
 )
 
 // DBSError represents common structure for DBS errors
@@ -88,6 +89,8 @@ func (e *DBSError) Explain() string {
 	switch e.Code {
 	case GenericErrorCode:
 		return "Generic DBS error"
+	case DatabaseErrorCode:
+		return "DBS DB error"
 	case TransactionErrorCode:
 		return "DBS DB transaction error"
 	case QueryErrorCode:

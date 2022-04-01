@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dmwm/dbs2go/dbs"
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
-	"github.com/dmwm/dbs2go/dbs"
 )
 
 // LimiterMiddleware provides limiter middleware pointer
@@ -28,9 +28,13 @@ func initLimiter(period string) {
 		panic(err)
 	}
 	store := memory.NewStore()
-	instance := limiter.New(store, rate)
+	instance := limiter.New(store, rate, limiter.WithSkipList(Config.LimiterSkipList))
 	if Config.LimiterHeader != "" {
-		instance = limiter.New(store, rate, limiter.WithClientIPHeader(Config.LimiterHeader))
+		instance = limiter.New(
+			store,
+			rate,
+			limiter.WithClientIPHeader(Config.LimiterHeader),
+			limiter.WithSkipList(Config.LimiterSkipList))
 	}
 	LimiterMiddleware = stdlib.NewMiddleware(instance)
 }

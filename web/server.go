@@ -44,15 +44,15 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/dmwm/cmsauth"
+	"github.com/dmwm/dbs2go/dbs"
+	dbsGraphQL "github.com/dmwm/dbs2go/graphql"
+	"github.com/dmwm/dbs2go/utils"
 	validator "github.com/go-playground/validator/v10"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	graphql "github.com/graph-gophers/graphql-go"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/vkuznet/auth-proxy-server/logging"
-	"github.com/dmwm/dbs2go/dbs"
-	dbsGraphQL "github.com/dmwm/dbs2go/graphql"
-	"github.com/dmwm/dbs2go/utils"
 
 	// imports for supported DB drivers
 	// go-oci8 oracle driver
@@ -188,6 +188,7 @@ func Handlers() *mux.Router {
 	}
 
 	// aux APIs used by all DBS servers
+	router.HandleFunc(basePath("/errors"), ErrorsHandler).Methods("GET")
 	router.HandleFunc(basePath("/healthz"), StatusHandler).Methods("GET")
 	router.HandleFunc(basePath("/serverinfo"), ServerInfoHandler).Methods("GET")
 	router.HandleFunc(basePath("/metrics"), MetricsHandler).Methods("GET")
@@ -387,11 +388,12 @@ func Server(configFile string) {
 	// setup MigrationDB access
 	if Config.ServerType == "DBSMigration" || Config.ServerType == "DBSMigrate" {
 		log.Println("parse Config.MigrationDBFile:", Config.MigrationDBFile)
-		dbtype, dburi, dbowner = dbs.ParseDBFile(Config.MigrationDBFile)
-		db, dberr = dbInit(dbtype, dburi)
+		dbtype, dburi, dbowner := dbs.ParseDBFile(Config.MigrationDBFile)
+		db, dberr := dbInit(dbtype, dburi)
 		if dberr != nil {
 			log.Fatal(dberr)
 		}
+		log.Printf("obtain MigrationDB dburi for %s and %s", dbtype, dbowner)
 		dbs.MigrationDB = db
 		defer dbs.MigrationDB.Close()
 	}
