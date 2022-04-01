@@ -219,6 +219,29 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// ErrorsHandler provides all DBS errors
+func ErrorsHandler(w http.ResponseWriter, r *http.Request) {
+
+	// loop over all known error codes and construct DBS error array
+	var errors []dbs.DBSError
+	msg := "DBS error definition defined at run-time"
+	fname := "DBS error origin defined at run-time"
+	for code := dbs.GenericErrorCode; code < dbs.LastAvailableErrorCode; code++ {
+		e := dbs.DBSError{Message: msg, Function: fname, Code: code}
+		e.Reason = e.Explain()
+		errors = append(errors, e)
+	}
+
+	// marhsal the data to return back to caller
+	data, err := json.Marshal(errors)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
+}
+
 // StatusHandler provides basic functionality of status response
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	// we will use DBS DatasetAccessTypes API to check status of DBS
