@@ -328,7 +328,7 @@ curl -X POST -H "Content-Type: applicatin/json" -H "Accept: application/json" \
     "logical_file_name": "/path/lfn.root",
     "is_file_valid": 1,
     "dataset": "/a/b/RAW",
-    "block": "a/b/RAW#123",
+    "block_name": "a/b/RAW#123",
     "file_type": "EDM",
     "check_sum": "1123ljsdkfjsd",
     "file_size": 123,
