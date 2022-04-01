@@ -46,8 +46,12 @@ type testCase struct {
 // initialData struct for test data generation
 type initialData struct {
 	UID                    int64    `json:"uid"`
+	CreateBy               string   `json:"create_by"`
 	PrimaryDSName          string   `json:"primary_ds_name"`
+	PrimaryDSType          string   `json:"primary_ds_type"`
 	ProcDataset            string   `json:"procdataset"`
+	PhysicsGroupName       string   `json:"physics_group_name"`
+	DatasetAccessType      string   `json:"dataset_access_type"`
 	Tier                   string   `json:"tier"`
 	Dataset                string   `json:"dataset"`
 	ParentDataset          string   `json:"parent_dataset"`
@@ -139,6 +143,11 @@ func generateBaseData(t *testing.T, filepath string) {
 	parent_stepchain_block := fmt.Sprintf("%s#%v", parent_stepchain_dataset, uid)
 	stepchain_files := []string{}
 	parent_stepchain_files := []string{}
+
+	TestData.CreateBy = "tester"
+	TestData.PrimaryDSType = "test"
+	TestData.PhysicsGroupName = "Tracker"
+	TestData.DatasetAccessType = "PRODUCTION"
 
 	TestData.UID = uid
 	TestData.PrimaryDSName = PrimaryDSName

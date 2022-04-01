@@ -41,14 +41,14 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 	blockReq := dbs.Blocks{
 		BLOCK_NAME:       TestData.Block,
 		ORIGIN_SITE_NAME: TestData.Site,
-		CREATE_BY:        "tester",
-		LAST_MODIFIED_BY: "tester",
+		CREATE_BY:        TestData.CreateBy,
+		LAST_MODIFIED_BY: TestData.CreateBy,
 	}
 	parentBlockReq := dbs.Blocks{
 		BLOCK_NAME:       TestData.ParentBlock,
 		ORIGIN_SITE_NAME: TestData.Site,
-		CREATE_BY:        "tester",
-		LAST_MODIFIED_BY: "tester",
+		CREATE_BY:        TestData.CreateBy,
+		LAST_MODIFIED_BY: TestData.CreateBy,
 	}
 	blockResp := blockResponse{
 		BLOCK_NAME: TestData.Block,
@@ -60,13 +60,13 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 		BlockID:              1,
 		BlockName:            TestData.Block,
 		BlockSize:            0,
-		CreateBy:             "tester",
+		CreateBy:             TestData.CreateBy,
 		CreationDate:         0,
 		Dataset:              TestData.Dataset,
 		DatasetID:            1,
 		FileCount:            0,
 		LastModificationDate: 0,
-		LastModifiedBy:       "tester",
+		LastModifiedBy:       TestData.CreateBy,
 		OpenForWriting:       0,
 		OriginSiteName:       TestData.Site,
 	}
@@ -74,13 +74,13 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 		BlockID:              2,
 		BlockName:            TestData.ParentBlock,
 		BlockSize:            0,
-		CreateBy:             "tester",
+		CreateBy:             TestData.CreateBy,
 		CreationDate:         0,
 		Dataset:              TestData.ParentDataset,
 		DatasetID:            2,
 		FileCount:            0,
 		LastModificationDate: 0,
-		LastModifiedBy:       "tester",
+		LastModifiedBy:       TestData.CreateBy,
 		OpenForWriting:       0,
 		OriginSiteName:       TestData.Site,
 	}

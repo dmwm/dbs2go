@@ -19,14 +19,14 @@ func getAcquisitionErasTestTable(t *testing.T) EndpointTestCase {
 	acqEraReq := dbs.AcquisitionEras{
 		ACQUISITION_ERA_NAME: TestData.AcquisitionEra,
 		DESCRIPTION:          "note",
-		CREATE_BY:            "tester",
+		CREATE_BY:            TestData.CreateBy,
 	}
 	acqEraResp := dbs.AcquisitionEra{
 		AcquisitionEraName: TestData.AcquisitionEra,
 		StartDate:          0,
 		EndDate:            0,
 		CreationDate:       0,
-		CreateBy:           "tester",
+		CreateBy:           TestData.CreateBy,
 		Description:        "note",
 	}
 	return EndpointTestCase{

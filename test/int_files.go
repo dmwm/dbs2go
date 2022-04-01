@@ -53,7 +53,7 @@ func createFileRecord(i int, dataset string, blockName string, fileLumiList []db
 		EVENT_COUNT:        1619,
 		ADLER32:            "NOTSET",
 		AUTO_CROSS_SECTION: 0.0,
-		CREATE_BY:          "tester",
+		CREATE_BY:          TestData.CreateBy,
 		FILE_SIZE:          2012211901,
 		FILE_LUMI_LIST:     fileLumiList,
 		FILE_PARENT_LIST:   fileParentList,
@@ -66,7 +66,7 @@ func createFileRecord(i int, dataset string, blockName string, fileLumiList []db
 				GLOBAL_TAG:          TestData.GlobalTag,
 			},
 		},
-		LAST_MODIFIED_BY: "tester",
+		LAST_MODIFIED_BY: TestData.CreateBy,
 	}
 }
 
@@ -77,7 +77,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 		BLOCK_ID:               blockID,
 		BLOCK_NAME:             fileRecord.BLOCK_NAME,
 		CHECK_SUM:              "1504266448",
-		CREATE_BY:              "DBS-workflow",
+		CREATE_BY:              "DBS-workflow", // TODO: Replace with CreateBy
 		CREATION_DATE:          0,
 		DATASET:                fileRecord.DATASET,
 		DATASET_ID:             datasetID,
@@ -88,7 +88,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 		FILE_TYPE_ID:           1,
 		IS_FILE_VALID:          0,
 		LAST_MODIFICATION_DATE: 0,
-		LAST_MODIFIED_BY:       "DBS-workflow",
+		LAST_MODIFIED_BY:       "DBS-workflow", // TODO: Replace with CreateBy
 		LOGICAL_FILE_NAME:      fileRecord.LOGICAL_FILE_NAME,
 		MD5:                    "",
 	}

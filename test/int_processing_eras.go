@@ -19,11 +19,11 @@ func getProcessingErasTestTable(t *testing.T) EndpointTestCase {
 	procErasReq := dbs.ProcessingEras{
 		PROCESSING_VERSION: int64(TestData.ProcessingVersion),
 		DESCRIPTION:        "this_is_a_test",
-		CREATE_BY:          "tester",
+		CREATE_BY:          TestData.CreateBy,
 	}
 	procErasResp := dbs.ProcessingEra{
 		ProcessingVersion: int64(TestData.ProcessingVersion),
-		CreateBy:          "tester",
+		CreateBy:          TestData.CreateBy,
 		Description:       "this_is_a_test",
 		CreationDate:      0,
 	}
