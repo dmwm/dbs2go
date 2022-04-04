@@ -449,8 +449,12 @@ func (a *API) InsertFiles() error {
 		isFileValid = 1
 	}
 	for _, rec := range records {
-		rec.CREATE_BY = a.CreateBy
-		rec.LAST_MODIFIED_BY = a.CreateBy
+		if rec.CREATE_BY == "" {
+			rec.CREATE_BY = a.CreateBy
+		}
+		if rec.LAST_MODIFIED_BY == "" {
+			rec.LAST_MODIFIED_BY = a.CreateBy
+		}
 		if utils.VERBOSE > 1 {
 			log.Printf("insert %+v", rec)
 		}
