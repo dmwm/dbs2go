@@ -367,12 +367,6 @@ func (r *Files) Decode(reader io.Reader) error {
 	return nil
 }
 
-// RunLumi represents run lumi record
-type RunLumi struct {
-	RunNumber    int64 `json:"run_num"`
-	LumitSection int64 `json:"lumi_section_num"`
-}
-
 // type FileParent struct {
 //     FileParentLfn string `json:"file_parent_lfn"`
 // }
@@ -400,7 +394,7 @@ type FileRecord struct {
 	LAST_MODIFICATION_DATE int64   `json:"last_modification_date"`
 	LAST_MODIFIED_BY       string  `json:"last_modified_by"`
 
-	FILE_LUMI_LIST          []RunLumi             `json:"file_lumi_list"`
+	FILE_LUMI_LIST          []FileLumi            `json:"file_lumi_list"`
 	FILE_PARENT_LIST        []FileParentLFNRecord `json:"file_parent_list"`
 	FILE_OUTPUT_CONFIG_LIST []OutputConfigRecord  `json:"file_output_config"`
 }
@@ -529,6 +523,24 @@ func (a *API) InsertFiles() error {
 		err = frec.Insert(tx)
 		if err != nil {
 			return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+		}
+
+		// get current file ID
+		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME)
+		if err != nil {
+			return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+		}
+
+		// * from dbs/bulkblocks.go line 546
+		tempTable := fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
+		if DBOWNER == "sqlite" {
+			tempTable = "FILE_LUMIS"
+		}
+
+		// insert fileLumiList, depending on method
+		err = a.SelectFileLumiListInsert(tx, rec.FILE_LUMI_LIST, tempTable, fid, "dbs.files.InsertFiles")
+		if err != nil {
+			return err
 		}
 
 		// insert file parent list

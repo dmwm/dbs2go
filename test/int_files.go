@@ -17,6 +17,12 @@ type fileResponse struct {
 	LOGICAL_FILE_NAME string `json:"logical_file_name"`
 }
 
+// files API response with run_num
+type fileRunResponse struct {
+	LOGICAL_FILE_NAME string `json:"logical_file_name"`
+	RUN_NUM           int64  `json:"run_num"`
+}
+
 // detailed files API response
 type fileDetailResponse struct {
 	ADLER32            string  `json:"adler32" validate:"required"`
@@ -29,7 +35,7 @@ type fileDetailResponse struct {
 	CREATION_DATE          int64  `json:"creation_date" validate:"required,number,gt=0"`
 	DATASET                string `json:"dataset"`
 	DATASET_ID             int64  `json:"dataset_id" validate:"number,gt=0"`
-	EVENT_COUNT            int64  `json:"event_count" validate:"number"`
+	EventCount             int64  `json:"event_count" validate:"number"`
 	FILE_ID                int64  `json:"file_id"`
 	FILE_SIZE              int64  `json:"file_size" validate:"required,number,gt=0"`
 	FILE_TYPE              string `json:"file_type"`
@@ -42,7 +48,7 @@ type fileDetailResponse struct {
 }
 
 // creates a FileRecord depending on an integer
-func createFileRecord(i int, dataset string, blockName string, fileLumiList []dbs.RunLumi, logicalFileName string, fileParentList []dbs.FileParentLFNRecord) dbs.FileRecord {
+func createFileRecord(i int, dataset string, blockName string, fileLumiList []dbs.FileLumi, logicalFileName string, fileParentList []dbs.FileParentLFNRecord) dbs.FileRecord {
 	return dbs.FileRecord{
 		LOGICAL_FILE_NAME:  logicalFileName,
 		IS_FILE_VALID:      1,
@@ -81,7 +87,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 		CREATION_DATE:          0,
 		DATASET:                fileRecord.DATASET,
 		DATASET_ID:             datasetID,
-		EVENT_COUNT:            fileRecord.EVENT_COUNT,
+		EventCount:             fileRecord.EVENT_COUNT,
 		FILE_ID:                int64(i),
 		FILE_SIZE:              fileRecord.FILE_SIZE,
 		FILE_TYPE:              fileRecord.FILE_TYPE,
@@ -97,31 +103,31 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 // files endpoint tests
 // TODO: handle BRANCH_HASH_ID
 func getFilesTestTable(t *testing.T) EndpointTestCase {
-	parentFileLumiList := []dbs.RunLumi{
-		{LumitSection: 27414, RunNumber: 97},
-		{LumitSection: 26422, RunNumber: 97},
-		{LumitSection: 29838, RunNumber: 97},
-		{LumitSection: 248, RunNumber: 97},
-		{LumitSection: 250, RunNumber: 97},
-		{LumitSection: 300, RunNumber: 97},
-		{LumitSection: 534, RunNumber: 97},
-		{LumitSection: 546, RunNumber: 97},
-		{LumitSection: 638, RunNumber: 97},
-		{LumitSection: 650, RunNumber: 97},
-		{LumitSection: 794, RunNumber: 97},
-		{LumitSection: 1313, RunNumber: 97},
-		{LumitSection: 1327, RunNumber: 97},
-		{LumitSection: 1339, RunNumber: 97},
-		{LumitSection: 1353, RunNumber: 97},
-		{LumitSection: 1428, RunNumber: 97},
-		{LumitSection: 1496, RunNumber: 97},
-		{LumitSection: 1537, RunNumber: 97},
-		{LumitSection: 1652, RunNumber: 97},
-		{LumitSection: 1664, RunNumber: 97},
-		{LumitSection: 1743, RunNumber: 97},
-		{LumitSection: 1755, RunNumber: 97},
-		{LumitSection: 1860, RunNumber: 97},
-		{LumitSection: 1872, RunNumber: 97},
+	parentFileLumiList := []dbs.FileLumi{
+		{LumiSectionNumber: 27414, RunNumber: 97, EventCount: 66},
+		{LumiSectionNumber: 26422, RunNumber: 97, EventCount: 67},
+		{LumiSectionNumber: 29838, RunNumber: 97, EventCount: 68},
+		{LumiSectionNumber: 248, RunNumber: 97, EventCount: 69},
+		{LumiSectionNumber: 250, RunNumber: 97, EventCount: 70},
+		{LumiSectionNumber: 300, RunNumber: 97, EventCount: 71},
+		{LumiSectionNumber: 534, RunNumber: 97, EventCount: 72},
+		{LumiSectionNumber: 546, RunNumber: 97, EventCount: 73},
+		{LumiSectionNumber: 638, RunNumber: 97, EventCount: 74},
+		{LumiSectionNumber: 650, RunNumber: 97, EventCount: 75},
+		{LumiSectionNumber: 794, RunNumber: 97, EventCount: 76},
+		{LumiSectionNumber: 1313, RunNumber: 97, EventCount: 77},
+		{LumiSectionNumber: 1327, RunNumber: 97, EventCount: 78},
+		{LumiSectionNumber: 1339, RunNumber: 97, EventCount: 79},
+		{LumiSectionNumber: 1353, RunNumber: 97, EventCount: 80},
+		{LumiSectionNumber: 1428, RunNumber: 97, EventCount: 81},
+		{LumiSectionNumber: 1496, RunNumber: 97, EventCount: 82},
+		{LumiSectionNumber: 1537, RunNumber: 97, EventCount: 83},
+		{LumiSectionNumber: 1652, RunNumber: 97, EventCount: 84},
+		{LumiSectionNumber: 1664, RunNumber: 97, EventCount: 85},
+		{LumiSectionNumber: 1743, RunNumber: 97, EventCount: 86},
+		{LumiSectionNumber: 1755, RunNumber: 97, EventCount: 87},
+		{LumiSectionNumber: 1860, RunNumber: 97, EventCount: 88},
+		{LumiSectionNumber: 1872, RunNumber: 97, EventCount: 89},
 	}
 	var parentFiles []dbs.FileRecord
 	var parentLFNs []Response
@@ -134,11 +140,12 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		parentDetailResp = append(parentDetailResp, createDetailedResponse(i, 2, 2, fileRecord))
 	}
 
-	fileLumiList := []dbs.RunLumi{
-		{LumitSection: 27414, RunNumber: 97},
-		{LumitSection: 26422, RunNumber: 98},
-		{LumitSection: 29838, RunNumber: 99},
+	fileLumiList := []dbs.FileLumi{
+		{LumiSectionNumber: 27414, RunNumber: 97},
+		{LumiSectionNumber: 26422, RunNumber: 98},
+		{LumiSectionNumber: 29838, RunNumber: 99},
 	}
+
 	var files []dbs.FileRecord
 	var lfns []Response
 	var detailResp []Response
@@ -156,9 +163,15 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		detailResp = append(detailResp, createDetailedResponse(i+10, 1, 1, fileRecord))
 	}
 
-	for k, v := range lfns {
-		fmt.Println(k + 1)
-		fmt.Println(v)
+	fmt.Println(lfns)
+	// add run_num
+	var fileRunResp []Response
+	for _, lfn := range lfns {
+		frr := fileRunResponse{
+			LOGICAL_FILE_NAME: lfn.(fileResponse).LOGICAL_FILE_NAME,
+			RUN_NUM:           99,
+		}
+		fileRunResp = append(fileRunResp, frr)
 	}
 
 	return EndpointTestCase{
@@ -242,9 +255,11 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"run_num": []string{"97"},
+					// "dataset":   []string{TestData.Dataset},
+					"run_num":   []string{"99"},
+					"lumi_list": []string{"[29838]"},
 				},
-				output:   lfns,
+				output:   fileRunResp,
 				respCode: http.StatusOK,
 			},
 		},

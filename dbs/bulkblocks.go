@@ -616,80 +616,9 @@ func (a *API) InsertBulkBlocks() error {
 			}
 		}
 
-		// there are three methods to insert FileLumi list
-		// - via temp table
-		// - via INSERT ALL and using chunks
-		// - sequential method, i.e. record by record
-		// we apply the following rules:
-		// - if number of records is less FileLumiChunkSize we use sequential inserts
-		// - otherwise we choose between temptable and chunks methods, and only use
-		// temp table name, e.g. ORA$PTT_TEMP_FILE_LUMIS, for ORACLE inserts
-
-		// insert FileLumi list via temptable or chunks
-		if len(rrr.FileLumiList) > FileLumiChunkSize {
-
-			if utils.VERBOSE > 0 {
-				log.Printf(
-					"insert FileLumi list via %s method %d records",
-					FileLumiInsertMethod, len(rrr.FileLumiList))
-			}
-
-			var fileLumiList []FileLumis
-			for _, r := range rrr.FileLumiList {
-				fl := FileLumis{
-					FILE_ID:          fileID,
-					RUN_NUM:          r.RunNumber,
-					LUMI_SECTION_NUM: r.LumiSectionNumber,
-					EVENT_COUNT:      r.EventCount,
-				}
-				fileLumiList = append(fileLumiList, fl)
-			}
-			err = InsertFileLumisTxViaChunks(tx, tempTable, fileLumiList)
-			if err != nil {
-				if utils.VERBOSE > 1 {
-					log.Println("unable to insert FileLumis records", err)
-				}
-				return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
-			}
-
-		} else {
-			if utils.VERBOSE > 0 {
-				log.Println("insert FileLumi list sequentially", len(rrr.FileLumiList), "records")
-			}
-
-			// insert FileLumi list via sequential insert of file lumi records
-			for _, r := range rrr.FileLumiList {
-				var vals []interface{}
-				vals = append(vals, fileID)
-				vals = append(vals, r.RunNumber)
-				vals = append(vals, r.LumiSectionNumber)
-				args := []string{"file_id", "run_num", "lumi_section_num"}
-				if IfExistMulti(tx, "FILE_LUMIS", "file_id", args, vals...) {
-					// skip if we found valid filelumi record for given run and lumi
-					continue
-				}
-				fl := FileLumis{
-					FILE_ID:          fileID,
-					RUN_NUM:          r.RunNumber,
-					LUMI_SECTION_NUM: r.LumiSectionNumber,
-					EVENT_COUNT:      r.EventCount,
-				}
-				data, err = json.Marshal(fl)
-				if err != nil {
-					if utils.VERBOSE > 1 {
-						log.Println("unable to marshal dataset file lumi list", err)
-					}
-					return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
-				}
-				api.Reader = bytes.NewReader(data)
-				err = api.InsertFileLumisTx(tx)
-				if err != nil {
-					if utils.VERBOSE > 1 {
-						log.Println("unable to insert FileLumis record", err)
-					}
-					return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
-				}
-			}
+		err = api.SelectFileLumiListInsert(tx, rrr.FileLumiList, tempTable, fileID, "dbs.bulkblocks.InsertBulkBlocks")
+		if err != nil {
+			return err
 		}
 	}
 
