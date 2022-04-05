@@ -242,9 +242,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"dataset":   []string{TestData.Dataset},
-					"run":       []string{"98"},
-					"lumi_list": []string{"27414"},
+					"run_num": []string{"97"},
 				},
 				output:   lfns,
 				respCode: http.StatusOK,
