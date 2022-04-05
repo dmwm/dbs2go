@@ -203,22 +203,20 @@ func injectDBRecord(t *testing.T, rec RequestBody, hostname string, endpoint str
 		t.Fatalf("Different HTTP Status: Expected %v, Received %v", httpCode, r.StatusCode)
 	}
 
-	/*
-		rURL := parseURL(t, hostname, endpoint, params)
-
-		rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
-		if err != nil {
-			t.Error(err)
-		}
-
-		data = rr.Body.Bytes()
-		err = json.Unmarshal(data, &records)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-	*/
 	var records []dbs.Record
+	rURL := parseURL(t, hostname, endpoint, params)
+
+	rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
+	if err != nil {
+		t.Error(err)
+	}
+
+	data = rr.Body.Bytes()
+	err = json.Unmarshal(data, &records)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	return records
 }
 
@@ -264,15 +262,27 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				if v.endpoint != "" {
 					endpoint = v.endpoint
 				}
+
 				// run a test server for a single test case
 				server = runTestServer(t, v.serverType)
 				defer server.Close()
+
+				//var req *http.Request
 				if v.method == "GET" {
 					d, _ := getData(t, server.URL, endpoint, v.params, v.respCode)
+
+					//	req = newreq(t, v.method, server.URL, endpoint, nil, v.params, nil)
 					verifyResponse(t, d, v.output)
 				} else if v.method == "POST" {
 					injectDBRecord(t, v.input, server.URL, endpoint, v.params, handler, v.respCode)
 				}
+				/*
+					r, err := http.DefaultClient.Do(req)
+					if err != nil {
+						t.Fatal(err)
+					}
+					defer r.Body.Close()
+				*/
 			})
 		}
 	})

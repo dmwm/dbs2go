@@ -43,7 +43,7 @@ curl -H "Accept: application/json" \
     `cdate`, `ldate`, `open_for_writing`, `detail`
 
     - this api allows list of `run_num` parameter
-    - the `run_num` parameter can be represented in ths following forms:
+    - the `run_num` parameter can be represented in the following forms:
       - as a list, e.g. `run_num=[123,234]`
       - as a run range, e.g. `run_num=1-10`
       - as individual values, e.g. `run_num=123`

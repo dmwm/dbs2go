@@ -77,7 +77,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 		BLOCK_ID:               blockID,
 		BLOCK_NAME:             fileRecord.BLOCK_NAME,
 		CHECK_SUM:              "1504266448",
-		CREATE_BY:              "DBS-workflow", // TODO: Replace with CreateBy
+		CREATE_BY:              TestData.CreateBy,
 		CREATION_DATE:          0,
 		DATASET:                fileRecord.DATASET,
 		DATASET_ID:             datasetID,
@@ -88,7 +88,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 		FILE_TYPE_ID:           1,
 		IS_FILE_VALID:          0,
 		LAST_MODIFICATION_DATE: 0,
-		LAST_MODIFIED_BY:       "DBS-workflow", // TODO: Replace with CreateBy
+		LAST_MODIFIED_BY:       TestData.CreateBy,
 		LOGICAL_FILE_NAME:      fileRecord.LOGICAL_FILE_NAME,
 		MD5:                    "",
 	}
@@ -173,7 +173,9 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				input: dbs.PyFileRecord{
 					Records: parentFiles,
 				},
-				params:   nil,
+				params: url.Values{
+					"dataset": []string{TestData.ParentDataset},
+				},
 				output:   []Response{},
 				respCode: http.StatusOK,
 			},
@@ -184,7 +186,9 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				input: dbs.PyFileRecord{
 					Records: files,
 				},
-				params:   nil,
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+				},
 				output:   []Response{},
 				respCode: http.StatusOK,
 			},
@@ -195,7 +199,9 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				input: dbs.PyFileRecord{
 					Records: files,
 				},
-				params:   nil,
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+				},
 				output:   []Response{},
 				respCode: http.StatusOK,
 			},
@@ -229,6 +235,18 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 					"detail":  []string{"true"},
 				},
 				output:   parentDetailResp,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset, run, and lumi_list params",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset":   []string{TestData.Dataset},
+					"run":       []string{"98"},
+					"lumi_list": []string{"27414"},
+				},
+				output:   lfns,
 				respCode: http.StatusOK,
 			},
 		},
