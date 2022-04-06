@@ -251,11 +251,11 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET with dataset, run, and lumi_list params",
+				description: "Test GET with dataset run_num and lumi_list params",
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					// "dataset":   []string{TestData.Dataset},
+					"dataset":   []string{TestData.Dataset},
 					"run_num":   []string{"99"},
 					"lumi_list": []string{"[29838]"},
 				},

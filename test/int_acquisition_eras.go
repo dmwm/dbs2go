@@ -42,7 +42,7 @@ func getAcquisitionErasTestTable(t *testing.T) EndpointTestCase {
 				respCode:    http.StatusOK,
 			},
 			{
-				description: "Test POST",
+				description: "Test POST", // DBSClientWriter_t.test06
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input:       acqEraReq,

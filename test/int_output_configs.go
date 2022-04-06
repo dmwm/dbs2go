@@ -72,7 +72,7 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusBadRequest,
 			},
 			{
-				description: "Test POST",
+				description: "Test POST", // DBSClientWriter_t.test04
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input:       outputConfigReq,
@@ -81,7 +81,7 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 				respCode:    http.StatusOK,
 			},
 			{
-				description: "Test duplicate POST",
+				description: "Test duplicate POST", // DBSClientWriter_t.test05
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input:       outputConfigReq,

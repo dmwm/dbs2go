@@ -121,7 +121,7 @@ func (a *API) FileLumis() error {
 
 // FileLumis represents File Lumis DBS DB table
 type FileLumis struct {
-	FILE_ID          int64 `json:"file_id validate:"required,number""`
+	FILE_ID          int64 `json:"file_id" validate:"required,number"`
 	LUMI_SECTION_NUM int64 `json:"lumi_section_num" validate:"required,number"`
 	RUN_NUM          int64 `json:"run_num" validate:"required,number"`
 	EVENT_COUNT      int64 `json:"event_count"`
