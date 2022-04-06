@@ -405,8 +405,11 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 		fileParent := FileParentRecord{}
 		var pid sql.NullInt64
 		var pfn sql.NullString
+		// blockdump DBS API should yield this_logical_file_name
+		// therefore, here we use it
 		err = rows.Scan(
-			&fileParent.LogicalFileName,
+			//             &fileParent.LogicalFileName,
+			&fileParent.ThisLogicalFileName,
 			&pid,
 			&pfn,
 		)
