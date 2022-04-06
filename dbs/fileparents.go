@@ -372,8 +372,8 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 // Therefore, we should keep both this_logical_file_name and logical_file_name
 // together for backward compatibility
 type FileParentRecord struct {
-	ThisLogicalFileName   string `json:"this_logical_file_name, omitempty"`
-	LogicalFileName       string `json:"logical_file_name, omitempty"`
+	ThisLogicalFileName   string `json:"this_logical_file_name,omitempty"`
+	LogicalFileName       string `json:"logical_file_name,omitempty"`
 	ParentFileId          int64  `json:"parent_file_id"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
 }
