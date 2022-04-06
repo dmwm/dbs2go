@@ -21,10 +21,10 @@ type datasetAccessTypeResponse struct {
 // datasetaccesstypes endpoint tests
 func getDatasetAccessTypesTestTable(t *testing.T) EndpointTestCase {
 	dataATreq := dbs.DatasetAccessTypes{
-		DATASET_ACCESS_TYPE: "PRODUCTION",
+		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
 	}
 	dataATresp := datasetAccessTypeResponse{
-		DATASET_ACCESS_TYPE: "PRODUCTION",
+		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
 	}
 	return EndpointTestCase{
 		description:     "Test datasetaccesstypes",

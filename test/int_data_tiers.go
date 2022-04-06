@@ -19,12 +19,12 @@ import (
 func getDatatiersTestTable(t *testing.T) EndpointTestCase {
 	tiersReq := dbs.DataTiers{
 		DATA_TIER_NAME: TestData.Tier,
-		CREATE_BY:      "tester",
+		CREATE_BY:      TestData.CreateBy,
 	}
 	tiersResp := dbs.DataTiers{
 		DATA_TIER_ID:   1,
 		DATA_TIER_NAME: TestData.Tier,
-		CREATE_BY:      "tester",
+		CREATE_BY:      TestData.CreateBy,
 		CREATION_DATE:  0,
 	}
 	badReq := BadRequest{

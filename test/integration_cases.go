@@ -45,8 +45,13 @@ type testCase struct {
 
 // initialData struct for test data generation
 type initialData struct {
+	UID                    int64    `json:"uid"`
+	CreateBy               string   `json:"create_by"`
 	PrimaryDSName          string   `json:"primary_ds_name"`
+	PrimaryDSType          string   `json:"primary_ds_type"`
 	ProcDataset            string   `json:"procdataset"`
+	PhysicsGroupName       string   `json:"physics_group_name"`
+	DatasetAccessType      string   `json:"dataset_access_type"`
 	Tier                   string   `json:"tier"`
 	Dataset                string   `json:"dataset"`
 	ParentDataset          string   `json:"parent_dataset"`
@@ -139,6 +144,12 @@ func generateBaseData(t *testing.T, filepath string) {
 	stepchain_files := []string{}
 	parent_stepchain_files := []string{}
 
+	TestData.CreateBy = "tester"
+	TestData.PrimaryDSType = "test"
+	TestData.PhysicsGroupName = "Tracker"
+	TestData.DatasetAccessType = "PRODUCTION"
+
+	TestData.UID = uid
 	TestData.PrimaryDSName = PrimaryDSName
 	TestData.ProcDataset = ProcDataset
 	TestData.Tier = Tier
@@ -207,6 +218,8 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 	datasetAccessTypesTestCase := getDatasetAccessTypesTestTable(t)
 	physicsGroupsTestCase := getPhysicsGroupsTestTable(t)
 	datasetsTestCase := getDatasetsTestTable(t)
+	blocksTestCase := getBlocksTestTable(t)
+	filesTestCase := getFilesTestTable(t)
 
 	return []EndpointTestCase{
 		primaryDatasetAndTypesTestCase,
@@ -217,5 +230,7 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 		datasetAccessTypesTestCase,
 		physicsGroupsTestCase,
 		datasetsTestCase,
+		blocksTestCase,
+		filesTestCase,
 	}
 }

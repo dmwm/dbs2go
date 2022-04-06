@@ -34,7 +34,7 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 		PSET_HASH:           TestData.PsetHash,
 		GLOBAL_TAG:          TestData.GlobalTag,
 		OUTPUT_MODULE_LABEL: TestData.OutputModuleLabel,
-		CREATE_BY:           "tester",
+		CREATE_BY:           TestData.CreateBy,
 		SCENARIO:            "note",
 	}
 	outputConfigResp := outputConfigResponse{
@@ -43,7 +43,7 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 		PSET_HASH:           TestData.PsetHash,
 		GLOBAL_TAG:          TestData.GlobalTag,
 		OUTPUT_MODULE_LABEL: TestData.OutputModuleLabel,
-		CREATE_BY:           "tester",
+		CREATE_BY:           TestData.CreateBy,
 		CREATION_DATE:       0,
 	}
 	return EndpointTestCase{

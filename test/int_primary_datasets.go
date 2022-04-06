@@ -31,30 +31,30 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 	// create data structs for expected requests and responses
 	primaryDSReq := dbs.PrimaryDatasetRecord{
 		PRIMARY_DS_NAME: TestData.PrimaryDSName,
-		PRIMARY_DS_TYPE: "test",
-		CREATE_BY:       "tester",
+		PRIMARY_DS_TYPE: TestData.PrimaryDSType,
+		CREATE_BY:       TestData.CreateBy,
 	}
 	primaryDSResp := dbs.PrimaryDataset{
 		PrimaryDSId:   1.0,
-		PrimaryDSType: "test",
+		PrimaryDSType: TestData.PrimaryDSType,
 		PrimaryDSName: TestData.PrimaryDSName,
 		CreationDate:  0,
-		CreateBy:      "tester",
+		CreateBy:      TestData.CreateBy,
 	}
 	primaryDSTypeResp := primaryDSTypesResponse{
 		PRIMARY_DS_TYPE_ID: 1.0,
-		DATA_TYPE:          "test",
+		DATA_TYPE:          TestData.PrimaryDSType,
 	}
 	primaryDSReq2 := dbs.PrimaryDatasetRecord{
 		PRIMARY_DS_NAME: TestData.PrimaryDSName2,
-		PRIMARY_DS_TYPE: "test",
-		CREATE_BY:       "tester",
+		PRIMARY_DS_TYPE: TestData.PrimaryDSType,
+		CREATE_BY:       TestData.CreateBy,
 	}
 	primaryDSResp2 := dbs.PrimaryDataset{
 		PrimaryDSId:   2.0,
-		PrimaryDSType: "test",
+		PrimaryDSType: TestData.PrimaryDSType,
 		PrimaryDSName: TestData.PrimaryDSName2,
-		CreateBy:      "tester",
+		CreateBy:      TestData.CreateBy,
 		CreationDate:  0,
 	}
 	dbsError1 := dbs.DBSError{
@@ -161,7 +161,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 					primaryDSTypeResp,
 				},
 				params: url.Values{
-					"primary_ds_type": []string{"test"},
+					"primary_ds_type": []string{TestData.PrimaryDSType},
 				},
 				respCode: http.StatusOK,
 				handler:  web.PrimaryDSTypesHandler,

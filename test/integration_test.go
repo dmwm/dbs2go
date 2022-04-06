@@ -147,10 +147,15 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 
 	// fields not in initial POST request
 	generatedFields := []string{
-		"creation_date", // created upon POST
+		"creation_date",          // created upon POST
+		"last_modification_date", // created upon POST
 		"start_date",
 		"end_date",
 		"http", // client http information on errors
+	}
+
+	ignoredFields := []string{
+		"branch_hash_id", // TODO: Need to fix
 	}
 
 	for i, r := range received {
@@ -166,10 +171,12 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 			if utils.InList(field, generatedFields) {
 				// check if a value was given to the field
 				if a.To == nil {
-					t.Fatalf("Field empty: %s", field)
+					t.Fatalf("Field empty: %v", field)
 				}
+			} else if utils.InList(field, ignoredFields) {
+				continue
 			} else {
-				t.Fatalf("Incorrect %s, received %s, expected %s", field, a.To, a.From)
+				t.Fatalf("Incorrect %v, received %v (%T), expected %v (%T)", field, a.To, a.To, a.From, a.From)
 			}
 		}
 	}
@@ -196,6 +203,7 @@ func injectDBRecord(t *testing.T, rec RequestBody, hostname string, endpoint str
 		t.Fatalf("Different HTTP Status: Expected %v, Received %v", httpCode, r.StatusCode)
 	}
 
+	var records []dbs.Record
 	rURL := parseURL(t, hostname, endpoint, params)
 
 	rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
@@ -203,7 +211,6 @@ func injectDBRecord(t *testing.T, rec RequestBody, hostname string, endpoint str
 		t.Error(err)
 	}
 
-	var records []dbs.Record
 	data = rr.Body.Bytes()
 	err = json.Unmarshal(data, &records)
 	if err != nil {
@@ -255,15 +262,27 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				if v.endpoint != "" {
 					endpoint = v.endpoint
 				}
+
 				// run a test server for a single test case
 				server = runTestServer(t, v.serverType)
 				defer server.Close()
+
+				//var req *http.Request
 				if v.method == "GET" {
 					d, _ := getData(t, server.URL, endpoint, v.params, v.respCode)
+
+					//	req = newreq(t, v.method, server.URL, endpoint, nil, v.params, nil)
 					verifyResponse(t, d, v.output)
 				} else if v.method == "POST" {
 					injectDBRecord(t, v.input, server.URL, endpoint, v.params, handler, v.respCode)
 				}
+				/*
+					r, err := http.DefaultClient.Do(req)
+					if err != nil {
+						t.Fatal(err)
+					}
+					defer r.Body.Close()
+				*/
 			})
 		}
 	})
