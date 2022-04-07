@@ -132,6 +132,22 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 		PROCESSING_VERSION:     TestData.ProcessingVersion,
 		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
 	}
+	noOMCReq := dbs.DatasetRecord{
+		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
+		DATASET:                TestData.Dataset2,
+		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
+		PROCESSED_DS_NAME:      TestData.ProcDataset,
+		PRIMARY_DS_NAME:        TestData.PrimaryDSName2,
+		XTCROSSSECTION:         123,
+		DATA_TIER_NAME:         TestData.Tier,
+		OUTPUT_CONFIGS:         []dbs.OutputConfigRecord{},
+		CREATION_DATE:          1635177605,
+		CREATE_BY:              TestData.CreateBy,
+		LAST_MODIFICATION_DATE: 1635177605,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		PROCESSING_VERSION:     TestData.ProcessingVersion,
+		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
+	}
 	datasetResp := datasetsResponse{
 		DATASET: TestData.Dataset,
 	}
@@ -309,12 +325,22 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset_access_type": []string{"PRODUCTION"},
+					"dataset_access_type": []string{TestData.DatasetAccessType},
 					"output_module_label": []string{TestData.OutputModuleLabel},
 				},
 				output: []Response{
 					datasetResp,
 					datasetParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test POST with no output_config", // DBSClientWriter_t.test011
+				serverType:  "DBSWriter",
+				method:      "POST",
+				input:       noOMCReq,
+				output: []Response{
+					datasetResp,
 				},
 				respCode: http.StatusOK,
 			},
