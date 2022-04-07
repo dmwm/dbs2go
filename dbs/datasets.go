@@ -245,6 +245,26 @@ func (a *API) Datasets() error {
 		new(sql.NullString),
 		new(sql.NullInt64),
 		new(sql.NullString)}
+	if tmpl["ParentDataset"].(bool) {
+		cols = append(cols, "parent_dataset")
+		vals = append(vals, new(sql.NullString))
+	}
+	if tmpl["Version"].(bool) {
+		cols = append(
+			cols,
+			"output_module_label",
+			"global_tag",
+			"release_version",
+			"pset_hash",
+			"app_name")
+		vals = append(
+			vals,
+			new(sql.NullString),
+			new(sql.NullString),
+			new(sql.NullString),
+			new(sql.NullString),
+			new(sql.NullString))
+	}
 	if strings.ToLower(detail) != "true" {
 		//         stm = getSQL("datasets_short")
 		cols = []string{"dataset"}
@@ -432,17 +452,18 @@ type DatasetRecord struct {
 	DATASET         string `json:"dataset" validate:"required"`
 	PRIMARY_DS_NAME string `json:"primary_ds_name" validate:"required"`
 	//     PRIMARY_DS_TYPE        string  `json:"primary_ds_type" validate:"required"`
-	PROCESSED_DS_NAME      string  `json:"processed_ds_name" validate:"required"`
-	DATA_TIER_NAME         string  `json:"data_tier_name" validate:"required"`
-	ACQUISITION_ERA_NAME   string  `json:"acquisition_era_name" validate:"required"`
-	DATASET_ACCESS_TYPE    string  `json:"dataset_access_type" validate:"required"`
-	PROCESSING_VERSION     int64   `json:"processing_version" validate:"required,number,gt=0"`
-	PHYSICS_GROUP_NAME     string  `json:"physics_group_name" validate:"required"`
-	XTCROSSSECTION         float64 `json:"xtcrosssection" validate:"required,number"`
-	CREATION_DATE          int64   `json:"creation_date" validate:"required,number,gt=0"`
-	CREATE_BY              string  `json:"create_by" validate:"required"`
-	LAST_MODIFICATION_DATE int64   `json:"last_modification_date" validate:"required,number,gt=0"`
-	LAST_MODIFIED_BY       string  `json:"last_modified_by" validate:"required"`
+	PROCESSED_DS_NAME      string               `json:"processed_ds_name" validate:"required"`
+	DATA_TIER_NAME         string               `json:"data_tier_name" validate:"required"`
+	ACQUISITION_ERA_NAME   string               `json:"acquisition_era_name" validate:"required"`
+	DATASET_ACCESS_TYPE    string               `json:"dataset_access_type" validate:"required"`
+	PROCESSING_VERSION     int64                `json:"processing_version" validate:"required,number,gt=0"`
+	PHYSICS_GROUP_NAME     string               `json:"physics_group_name" validate:"required"`
+	XTCROSSSECTION         float64              `json:"xtcrosssection" validate:"required,number"`
+	CREATION_DATE          int64                `json:"creation_date" validate:"required,number,gt=0"`
+	CREATE_BY              string               `json:"create_by" validate:"required"`
+	LAST_MODIFICATION_DATE int64                `json:"last_modification_date" validate:"required,number,gt=0"`
+	LAST_MODIFIED_BY       string               `json:"last_modified_by" validate:"required"`
+	OUTPUT_CONFIGS         []OutputConfigRecord `json:"output_configs"`
 }
 
 // InsertDatasets DBS API implements the following logic:
@@ -609,6 +630,23 @@ func (a *API) InsertDatasets() error {
 	err = dsrec.Insert(tx)
 	if err != nil {
 		return Error(err, InsertErrorCode, "", "dbs.datasets.InsertDatasets")
+	}
+
+	// get current dataset id
+	dsid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", dsrec.DATASET)
+	if err != nil {
+		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
+	}
+	for _, oc := range rec.OUTPUT_CONFIGS {
+		ocid, err := GetID(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", oc.OUTPUT_MODULE_LABEL)
+		if err != nil {
+			return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
+		}
+		r := DatasetOutputModConfigs{OUTPUT_MOD_CONFIG_ID: ocid, DATASET_ID: dsid}
+		err = r.Insert(tx)
+		if err != nil {
+			return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+		}
 	}
 
 	// commit transaction

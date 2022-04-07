@@ -23,8 +23,8 @@ SELECT
 {{if .Version}}
         ,OMC.OUTPUT_MODULE_LABEL
         ,OMC.GLOBAL_TAG
-        ,RV.RELEASE_VERSION,
-        ,PSH.PSET_HASH,
+        ,RV.RELEASE_VERSION
+        ,PSH.PSET_HASH
         ,AEX.APP_NAME
 {{end}}
 {{else}}
