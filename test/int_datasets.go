@@ -39,6 +39,12 @@ type datasetsResponse struct {
 	DATASET string `json:"dataset"`
 }
 
+// struct for datasets GET response with parent_dataset parameter
+type datasetsWithParentsResponse struct {
+	DATASET        string `json:"dataset"`
+	PARENT_DATASET string `json:"parent_dataset"`
+}
+
 // struct for datasets GET response with detail=true query parameter
 type datasetsDetailResponse struct {
 	DATASET_ID             int64  `json:"dataset_id"`
@@ -405,5 +411,31 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 			},
 		},
 	}
+}
 
+// second datasets endpoint tests for after files integration tests
+func getDatasetsTestTable2(t *testing.T) EndpointTestCase {
+	dsChildrenResp := datasetsWithParentsResponse{
+		DATASET:        TestData.Dataset,
+		PARENT_DATASET: TestData.ParentDataset,
+	}
+	return EndpointTestCase{
+		description:     "Test datasets 2",
+		defaultHandler:  web.DatasetsHandler,
+		defaultEndpoint: "/dbs/datasets",
+		testCases: []testCase{
+			{
+				description: "Test GET dataset children", // DBSClientReader_t.test072
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"parent_dataset": []string{TestData.ParentDataset},
+				},
+				output: []Response{
+					dsChildrenResp,
+				},
+				respCode: http.StatusOK,
+			},
+		},
+	}
 }

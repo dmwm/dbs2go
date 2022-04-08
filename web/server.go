@@ -253,7 +253,7 @@ func dbInit(dbtype, dburi string) (*sql.DB, error) {
 	//     }
 	db, dberr := sql.Open(dbtype, dburi)
 	if dberr != nil {
-		log.Printf("unable to open %s %s, error %v", dbtype, dburi)
+		log.Printf("unable to open %s, error %v", dbtype, dburi)
 		return nil, dberr
 	}
 	dberr = db.Ping()

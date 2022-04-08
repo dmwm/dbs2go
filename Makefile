@@ -34,7 +34,7 @@ install:
 clean:
 	go clean; rm -rf pkg
 
-test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-lexicon bench
+test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
 
 test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration bench
 

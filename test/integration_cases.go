@@ -222,6 +222,7 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 	datasetsTestCase := getDatasetsTestTable(t)
 	blocksTestCase := getBlocksTestTable(t)
 	filesTestCase := getFilesTestTable(t)
+	datasetsTestCase2 := getDatasetsTestTable2(t)
 
 	return []EndpointTestCase{
 		primaryDatasetAndTypesTestCase,
@@ -234,5 +235,6 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 		datasetsTestCase,
 		blocksTestCase,
 		filesTestCase,
+		datasetsTestCase2,
 	}
 }

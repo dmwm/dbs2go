@@ -152,7 +152,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	for i := 1; i <= 10; i++ {
 		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
 		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
-		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
+		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		fileParentList := []dbs.FileParentLFNRecord{
 			{
 				FILE_PARENT_LFN: fileParentLFN,
@@ -179,7 +179,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		defaultEndpoint: "/dbs/files",
 		testCases: []testCase{
 			{
-				description: "Test parent file POST",
+				description: "Test parent file POST", // DBSClientWriter_t.test16
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: dbs.PyFileRecord{
@@ -192,7 +192,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test file POST",
+				description: "Test file POST", // DBSClientWriter_t.test17
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: dbs.PyFileRecord{

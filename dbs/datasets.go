@@ -96,7 +96,7 @@ func (a *API) Datasets() error {
 	// optional arguments
 	if _, e := getSingleValue(a.Params, "parent_dataset"); e == nil {
 		tmpl["ParentDataset"] = true
-		conds, args = AddParam("parent_dataset", "PDS.DATASET PARENT_DATASET", a.Params, conds, args)
+		conds, args = AddParam("parent_dataset", "PDS.DATASET", a.Params, conds, args)
 	}
 	if _, e := getSingleValue(a.Params, "release_version"); e == nil {
 		tmpl["Version"] = true
@@ -245,10 +245,6 @@ func (a *API) Datasets() error {
 		new(sql.NullString),
 		new(sql.NullInt64),
 		new(sql.NullString)}
-	if tmpl["ParentDataset"].(bool) {
-		cols = append(cols, "parent_dataset")
-		vals = append(vals, new(sql.NullString))
-	}
 	if tmpl["Version"].(bool) {
 		cols = append(
 			cols,
@@ -269,6 +265,10 @@ func (a *API) Datasets() error {
 		//         stm = getSQL("datasets_short")
 		cols = []string{"dataset"}
 		vals = []interface{}{new(sql.NullString)}
+	}
+	if tmpl["ParentDataset"].(bool) {
+		cols = append(cols, "parent_dataset")
+		vals = append(vals, new(sql.NullString))
 	}
 	stm = WhereClause(stm, conds)
 
