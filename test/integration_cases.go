@@ -52,6 +52,7 @@ type initialData struct {
 	ProcDataset            string   `json:"procdataset"`
 	PhysicsGroupName       string   `json:"physics_group_name"`
 	DatasetAccessType      string   `json:"dataset_access_type"`
+	DatasetAccessType2     string   `json:"dataset_access_type2"`
 	Tier                   string   `json:"tier"`
 	Dataset                string   `json:"dataset"`
 	ParentDataset          string   `json:"parent_dataset"`
@@ -147,7 +148,8 @@ func generateBaseData(t *testing.T, filepath string) {
 	TestData.CreateBy = "tester"
 	TestData.PrimaryDSType = "test"
 	TestData.PhysicsGroupName = "Tracker"
-	TestData.DatasetAccessType = "PRODUCTION"
+	TestData.DatasetAccessType = "VALID"
+	TestData.DatasetAccessType2 = "PRODUCTION"
 
 	TestData.UID = uid
 	TestData.PrimaryDSName = PrimaryDSName

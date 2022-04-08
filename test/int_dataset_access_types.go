@@ -23,6 +23,10 @@ func getDatasetAccessTypesTestTable(t *testing.T) EndpointTestCase {
 	dataATreq := dbs.DatasetAccessTypes{
 		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
 	}
+	datasetATreq2 := dbs.DatasetAccessTypes{
+		DATASET_ACCESS_TYPE: TestData.DatasetAccessType2,
+	}
+	// for datasets test
 	dataATresp := datasetAccessTypeResponse{
 		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
 	}
@@ -54,6 +58,14 @@ func getDatasetAccessTypesTestTable(t *testing.T) EndpointTestCase {
 					dataATresp,
 				},
 				respCode: http.StatusOK,
+			},
+			{
+				description: "Test POST second type", // for datasets test
+				method:      "POST",
+				serverType:  "DBSWriter",
+				input:       datasetATreq2,
+				output:      []Response{},
+				respCode:    http.StatusOK,
 			},
 		},
 	}

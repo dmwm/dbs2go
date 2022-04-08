@@ -84,6 +84,34 @@ type datasetsDetailVersionResponse struct {
 	APP_NAME               string `json:"app_name"`
 }
 
+// creates a dataset request
+func createDSRequest(dataset string, procdataset string, dsType string, outputConfs []dbs.OutputConfigRecord) dbs.DatasetRecord {
+	return dbs.DatasetRecord{
+		PHYSICS_GROUP_NAME:  TestData.PhysicsGroupName,
+		DATASET:             dataset,
+		DATASET_ACCESS_TYPE: dsType,
+		PROCESSED_DS_NAME:   procdataset,
+		PRIMARY_DS_NAME:     TestData.PrimaryDSName,
+		XTCROSSSECTION:      123,
+		DATA_TIER_NAME:      TestData.Tier,
+		// PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
+		OUTPUT_CONFIGS:         outputConfs,
+		CREATION_DATE:          1635177605,
+		CREATE_BY:              TestData.CreateBy,
+		LAST_MODIFICATION_DATE: 1635177605,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		PROCESSING_VERSION:     TestData.ProcessingVersion,
+		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
+	}
+}
+
+// creates a basic datasets response
+func createDSResponse(dataset string) datasetsResponse {
+	return datasetsResponse{
+		DATASET: dataset,
+	}
+}
+
 // datasets endpoint tests
 //* Note: depends on above tests for their *_id
 // TODO: include prep_id in POST tests
@@ -98,63 +126,15 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 			GLOBAL_TAG:          TestData.GlobalTag,
 		},
 	}
-	datasetReq := dbs.DatasetRecord{
-		PHYSICS_GROUP_NAME:  TestData.PhysicsGroupName,
-		DATASET:             TestData.Dataset,
-		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
-		PROCESSED_DS_NAME:   TestData.ProcDataset,
-		PRIMARY_DS_NAME:     TestData.PrimaryDSName,
-		XTCROSSSECTION:      123,
-		DATA_TIER_NAME:      TestData.Tier,
-		// PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
-		OUTPUT_CONFIGS:         outputConfs,
-		CREATION_DATE:          1635177605,
-		CREATE_BY:              TestData.CreateBy,
-		LAST_MODIFICATION_DATE: 1635177605,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		PROCESSING_VERSION:     TestData.ProcessingVersion,
-		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-	}
-	parentDatasetReq := dbs.DatasetRecord{
-		PHYSICS_GROUP_NAME:  TestData.PhysicsGroupName,
-		DATASET:             TestData.ParentDataset,
-		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
-		PROCESSED_DS_NAME:   TestData.ParentProcDataset,
-		PRIMARY_DS_NAME:     TestData.PrimaryDSName,
-		XTCROSSSECTION:      123,
-		DATA_TIER_NAME:      TestData.Tier,
-		// PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
-		OUTPUT_CONFIGS:         outputConfs,
-		CREATION_DATE:          1635177605,
-		CREATE_BY:              TestData.CreateBy,
-		LAST_MODIFICATION_DATE: 1635177605,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		PROCESSING_VERSION:     TestData.ProcessingVersion,
-		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-	}
-	noOMCReq := dbs.DatasetRecord{
-		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
-		DATASET:                TestData.Dataset2,
-		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
-		PROCESSED_DS_NAME:      TestData.ProcDataset,
-		PRIMARY_DS_NAME:        TestData.PrimaryDSName2,
-		XTCROSSSECTION:         123,
-		DATA_TIER_NAME:         TestData.Tier,
-		OUTPUT_CONFIGS:         []dbs.OutputConfigRecord{},
-		CREATION_DATE:          1635177605,
-		CREATE_BY:              TestData.CreateBy,
-		LAST_MODIFICATION_DATE: 1635177605,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		PROCESSING_VERSION:     TestData.ProcessingVersion,
-		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-	}
-	datasetResp := datasetsResponse{
-		DATASET: TestData.Dataset,
-	}
-	datasetParentResp := datasetsResponse{
-		DATASET: TestData.ParentDataset,
-	}
-	datasetDetailResp := datasetsDetailResponse{
+	dsReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, outputConfs)
+	dsParentReq := createDSRequest(TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType, outputConfs)
+	// record without output_configs
+	noOMCReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, []dbs.OutputConfigRecord{})
+	dsAccessTypeReq := createDSRequest(TestData.Dataset2, TestData.ProcDataset, "PRODUCTION", outputConfs)
+	dsResp := createDSResponse(TestData.Dataset)
+	dsParentResp := createDSResponse(TestData.ParentDataset)
+	dsAccessTypeResp := createDSResponse(TestData.Dataset2)
+	dsDetailResp := datasetsDetailResponse{
 		DATASET_ID:             1.0,
 		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
 		DATASET:                TestData.Dataset,
@@ -172,31 +152,52 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 		PROCESSING_VERSION:     TestData.ProcessingVersion,
 		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
 	}
-	/*
-		datasetDetailVersResp := datasetsDetailVersionResponse{
-			DATASET_ID:             1.0,
-			PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
-			DATASET:                TestData.Dataset,
-			DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
-			PROCESSED_DS_NAME:      TestData.ProcDataset,
-			PREP_ID:                "",
-			PRIMARY_DS_NAME:        TestData.PrimaryDSName,
-			XTCROSSSECTION:         123,
-			DATA_TIER_NAME:         TestData.Tier,
-			PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
-			CREATION_DATE:          1635177605,
-			CREATE_BY:              TestData.CreateBy,
-			LAST_MODIFICATION_DATE: 1635177605,
-			LAST_MODIFIED_BY:       TestData.CreateBy,
-			PROCESSING_VERSION:     TestData.ProcessingVersion,
-			ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-			OUTPUT_MODULE_LABEL:    TestData.OutputModuleLabel,
-			GLOBAL_TAG:             TestData.GlobalTag,
-			RELEASE_VERSION:        TestData.ReleaseVersion,
-			PSET_HASH:              TestData.PsetHash,
-			APP_NAME:               TestData.AppName,
-		}
-	*/
+	dsDetailVersResp := datasetsDetailVersionResponse{
+		DATASET_ID:             1.0,
+		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
+		DATASET:                TestData.Dataset,
+		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
+		PROCESSED_DS_NAME:      TestData.ProcDataset,
+		PREP_ID:                "",
+		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
+		XTCROSSSECTION:         123,
+		DATA_TIER_NAME:         TestData.Tier,
+		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
+		CREATION_DATE:          1635177605,
+		CREATE_BY:              TestData.CreateBy,
+		LAST_MODIFICATION_DATE: 1635177605,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		PROCESSING_VERSION:     TestData.ProcessingVersion,
+		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
+		OUTPUT_MODULE_LABEL:    TestData.OutputModuleLabel,
+		GLOBAL_TAG:             TestData.GlobalTag,
+		RELEASE_VERSION:        TestData.ReleaseVersion,
+		PSET_HASH:              TestData.PsetHash,
+		APP_NAME:               TestData.AppName,
+	}
+	dsParentDetailVersResp := datasetsDetailVersionResponse{
+		DATASET_ID:             2.0,
+		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
+		DATASET:                TestData.ParentDataset,
+		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
+		PROCESSED_DS_NAME:      TestData.ParentProcDataset,
+		PREP_ID:                "",
+		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
+		XTCROSSSECTION:         123,
+		DATA_TIER_NAME:         TestData.Tier,
+		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
+		CREATION_DATE:          1635177605,
+		CREATE_BY:              TestData.CreateBy,
+		LAST_MODIFICATION_DATE: 1635177605,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		PROCESSING_VERSION:     TestData.ProcessingVersion,
+		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
+		OUTPUT_MODULE_LABEL:    TestData.OutputModuleLabel,
+		GLOBAL_TAG:             TestData.GlobalTag,
+		RELEASE_VERSION:        TestData.ReleaseVersion,
+		PSET_HASH:              TestData.PsetHash,
+		APP_NAME:               TestData.AppName,
+	}
 	return EndpointTestCase{
 		description:     "Test datasets",
 		defaultHandler:  web.DatasetsHandler,
@@ -213,9 +214,9 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				description: "Test POST", // DBSClientWriter_t.test08
 				method:      "POST",
 				serverType:  "DBSWriter",
-				input:       datasetReq,
+				input:       dsReq,
 				output: []Response{
-					datasetResp,
+					dsResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -223,34 +224,54 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				description: "Test POST parent dataset", // DBSClientWriter_t.test08
 				method:      "POST",
 				serverType:  "DBSWriter",
-				input:       parentDatasetReq,
+				input:       dsParentReq,
 				output:      []Response{},
 				respCode:    http.StatusOK,
 			},
 			{
-				description: "Test GET after POST",
+				description: "Test GET with no params",
 				serverType:  "DBSReader",
 				method:      "GET",
-				params: url.Values{
-					"dataset":             []string{TestData.Dataset},
-					"dataset_access_type": []string{"PRODUCTION"},
-				},
 				output: []Response{
-					datasetResp,
+					dsResp,
+					dsParentResp,
 				},
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET to confirm parent dataset",
+				description: "Test GET initial dataset",
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset":             []string{TestData.Dataset, TestData.ParentDataset},
-					"dataset_access_type": []string{"PRODUCTION"},
+					"dataset": []string{TestData.Dataset},
 				},
 				output: []Response{
-					datasetResp,
-					datasetParentResp,
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET parent dataset",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.ParentDataset},
+				},
+				output: []Response{
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset list",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset, TestData.ParentDataset},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -259,12 +280,11 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset":             []string{TestData.Dataset},
-					"dataset_access_type": []string{"PRODUCTION"},
-					"detail":              []string{"true"},
+					"dataset": []string{TestData.Dataset},
+					"detail":  []string{"true"},
 				},
 				output: []Response{
-					datasetDetailResp,
+					dsDetailResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -272,9 +292,9 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				description: "Test duplicate POST", // DBSClientWriter_t.test09
 				method:      "POST",
 				serverType:  "DBSWriter",
-				input:       datasetReq,
+				input:       dsReq,
 				output: []Response{
-					datasetResp,
+					dsResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -283,12 +303,11 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset_access_type": []string{TestData.DatasetAccessType},
-					"release_version":     []string{TestData.ReleaseVersion},
+					"release_version": []string{TestData.ReleaseVersion},
 				},
 				output: []Response{
-					datasetResp,
-					datasetParentResp,
+					dsResp,
+					dsParentResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -297,12 +316,11 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset_access_type": []string{TestData.DatasetAccessType},
-					"pset_hash":           []string{TestData.PsetHash},
+					"pset_hash": []string{TestData.PsetHash},
 				},
 				output: []Response{
-					datasetResp,
-					datasetParentResp,
+					dsResp,
+					dsParentResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -311,12 +329,11 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset_access_type": []string{TestData.DatasetAccessType},
-					"app_name":            []string{TestData.AppName},
+					"app_name": []string{TestData.AppName},
 				},
 				output: []Response{
-					datasetResp,
-					datasetParentResp,
+					dsResp,
+					dsParentResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -325,12 +342,25 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
-					"dataset_access_type": []string{TestData.DatasetAccessType},
 					"output_module_label": []string{TestData.OutputModuleLabel},
 				},
 				output: []Response{
-					datasetResp,
-					datasetParentResp,
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with version and detail parameter",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"detail":              []string{"true"},
+					"output_module_label": []string{TestData.OutputModuleLabel},
+				},
+				output: []Response{
+					dsDetailVersResp,
+					dsParentDetailVersResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -340,7 +370,39 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				method:      "POST",
 				input:       noOMCReq,
 				output: []Response{
-					datasetResp,
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test POST with different dataset_access_type",
+				serverType:  "DBSWriter",
+				method:      "POST",
+				input:       dsAccessTypeReq,
+				output: []Response{
+					dsResp, // change with actual response
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET for new dataset_access_type",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset_access_type": []string{TestData.DatasetAccessType2},
+				},
+				output: []Response{
+					dsAccessTypeResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET ensure only VALID dstype",
+				serverType:  "DBSReader",
+				method:      "GET",
+				output: []Response{
+					dsResp,
+					dsParentResp,
 				},
 				respCode: http.StatusOK,
 			},
