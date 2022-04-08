@@ -112,6 +112,55 @@ func createDSResponse(dataset string) datasetsResponse {
 	}
 }
 
+// creates a detailed datasets response
+func createDetailDSResponse(datasetID int64, dataset string, procdataset string, dsType string) datasetsDetailResponse {
+	return datasetsDetailResponse{
+		DATASET_ID:             datasetID,
+		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
+		DATASET:                dataset,
+		DATASET_ACCESS_TYPE:    dsType,
+		PROCESSED_DS_NAME:      procdataset,
+		PREP_ID:                "",
+		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
+		XTCROSSSECTION:         123,
+		DATA_TIER_NAME:         TestData.Tier,
+		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
+		CREATION_DATE:          1635177605,
+		CREATE_BY:              TestData.CreateBy,
+		LAST_MODIFICATION_DATE: 1635177605,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		PROCESSING_VERSION:     TestData.ProcessingVersion,
+		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
+	}
+}
+
+// creates a detailed datasets response for params using output_mod_config values
+func createDetailVersionDSResponse(datasetID int64, dataset string, procdataset string, dsType string) datasetsDetailVersionResponse {
+	return datasetsDetailVersionResponse{
+		DATASET_ID:             datasetID,
+		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
+		DATASET:                dataset,
+		DATASET_ACCESS_TYPE:    dsType,
+		PROCESSED_DS_NAME:      procdataset,
+		PREP_ID:                "",
+		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
+		XTCROSSSECTION:         123,
+		DATA_TIER_NAME:         TestData.Tier,
+		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
+		CREATION_DATE:          1635177605,
+		CREATE_BY:              TestData.CreateBy,
+		LAST_MODIFICATION_DATE: 1635177605,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		PROCESSING_VERSION:     TestData.ProcessingVersion,
+		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
+		OUTPUT_MODULE_LABEL:    TestData.OutputModuleLabel,
+		GLOBAL_TAG:             TestData.GlobalTag,
+		RELEASE_VERSION:        TestData.ReleaseVersion,
+		PSET_HASH:              TestData.PsetHash,
+		APP_NAME:               TestData.AppName,
+	}
+}
+
 // datasets endpoint tests
 //* Note: depends on above tests for their *_id
 // TODO: include prep_id in POST tests
@@ -128,76 +177,24 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 	}
 	dsReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, outputConfs)
 	dsParentReq := createDSRequest(TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType, outputConfs)
+
 	// record without output_configs
 	noOMCReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, []dbs.OutputConfigRecord{})
+
+	// alternative access type request
 	dsAccessTypeReq := createDSRequest(TestData.Dataset2, TestData.ProcDataset, "PRODUCTION", outputConfs)
+
+	// basic responses
 	dsResp := createDSResponse(TestData.Dataset)
 	dsParentResp := createDSResponse(TestData.ParentDataset)
 	dsAccessTypeResp := createDSResponse(TestData.Dataset2)
-	dsDetailResp := datasetsDetailResponse{
-		DATASET_ID:             1.0,
-		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
-		DATASET:                TestData.Dataset,
-		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
-		PROCESSED_DS_NAME:      TestData.ProcDataset,
-		PREP_ID:                "",
-		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
-		XTCROSSSECTION:         123,
-		DATA_TIER_NAME:         TestData.Tier,
-		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
-		CREATION_DATE:          1635177605,
-		CREATE_BY:              TestData.CreateBy,
-		LAST_MODIFICATION_DATE: 1635177605,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		PROCESSING_VERSION:     TestData.ProcessingVersion,
-		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-	}
-	dsDetailVersResp := datasetsDetailVersionResponse{
-		DATASET_ID:             1.0,
-		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
-		DATASET:                TestData.Dataset,
-		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
-		PROCESSED_DS_NAME:      TestData.ProcDataset,
-		PREP_ID:                "",
-		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
-		XTCROSSSECTION:         123,
-		DATA_TIER_NAME:         TestData.Tier,
-		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
-		CREATION_DATE:          1635177605,
-		CREATE_BY:              TestData.CreateBy,
-		LAST_MODIFICATION_DATE: 1635177605,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		PROCESSING_VERSION:     TestData.ProcessingVersion,
-		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-		OUTPUT_MODULE_LABEL:    TestData.OutputModuleLabel,
-		GLOBAL_TAG:             TestData.GlobalTag,
-		RELEASE_VERSION:        TestData.ReleaseVersion,
-		PSET_HASH:              TestData.PsetHash,
-		APP_NAME:               TestData.AppName,
-	}
-	dsParentDetailVersResp := datasetsDetailVersionResponse{
-		DATASET_ID:             2.0,
-		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
-		DATASET:                TestData.ParentDataset,
-		DATASET_ACCESS_TYPE:    TestData.DatasetAccessType,
-		PROCESSED_DS_NAME:      TestData.ParentProcDataset,
-		PREP_ID:                "",
-		PRIMARY_DS_NAME:        TestData.PrimaryDSName,
-		XTCROSSSECTION:         123,
-		DATA_TIER_NAME:         TestData.Tier,
-		PRIMARY_DS_TYPE:        TestData.PrimaryDSType,
-		CREATION_DATE:          1635177605,
-		CREATE_BY:              TestData.CreateBy,
-		LAST_MODIFICATION_DATE: 1635177605,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		PROCESSING_VERSION:     TestData.ProcessingVersion,
-		ACQUISITION_ERA_NAME:   TestData.AcquisitionEra,
-		OUTPUT_MODULE_LABEL:    TestData.OutputModuleLabel,
-		GLOBAL_TAG:             TestData.GlobalTag,
-		RELEASE_VERSION:        TestData.ReleaseVersion,
-		PSET_HASH:              TestData.PsetHash,
-		APP_NAME:               TestData.AppName,
-	}
+
+	// detail responses
+	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
+
+	// detail responses for output_config parameters
+	dsDetailVersResp := createDetailVersionDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
+	dsParentDetailVersResp := createDetailVersionDSResponse(2, TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType)
 	return EndpointTestCase{
 		description:     "Test datasets",
 		defaultHandler:  web.DatasetsHandler,
@@ -365,7 +362,7 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test POST with no output_config", // DBSClientWriter_t.test011
+				description: "Test POST with no output_config", // DBSClientWriter_t.test11
 				serverType:  "DBSWriter",
 				method:      "POST",
 				input:       noOMCReq,

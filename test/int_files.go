@@ -163,7 +163,6 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		detailResp = append(detailResp, createDetailedResponse(i+10, 1, 1, fileRecord))
 	}
 
-	fmt.Println(lfns)
 	// add run_num
 	var fileRunResp []Response
 	for _, lfn := range lfns {
