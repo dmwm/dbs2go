@@ -152,7 +152,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	for i := 1; i <= 10; i++ {
 		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
 		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
-		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
+		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		fileParentList := []dbs.FileParentLFNRecord{
 			{
 				FILE_PARENT_LFN: fileParentLFN,
@@ -163,7 +163,6 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		detailResp = append(detailResp, createDetailedResponse(i+10, 1, 1, fileRecord))
 	}
 
-	fmt.Println(lfns)
 	// add run_num
 	var fileRunResp []Response
 	for _, lfn := range lfns {
@@ -180,7 +179,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		defaultEndpoint: "/dbs/files",
 		testCases: []testCase{
 			{
-				description: "Test parent file POST",
+				description: "Test parent file POST", // DBSClientWriter_t.test16
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: dbs.PyFileRecord{
@@ -193,7 +192,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test file POST",
+				description: "Test file POST", // DBSClientWriter_t.test17
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input: dbs.PyFileRecord{
@@ -251,11 +250,11 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET with dataset, run, and lumi_list params",
+				description: "Test GET with dataset run_num and lumi_list params",
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					// "dataset":   []string{TestData.Dataset},
+					"dataset":   []string{TestData.Dataset},
 					"run_num":   []string{"99"},
 					"lumi_list": []string{"[29838]"},
 				},

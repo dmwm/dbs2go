@@ -92,7 +92,7 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 		r.CREATE_BY,
 		r.DESCRIPTION)
 	if utils.VERBOSE > 0 {
-		log.Printf("unable to insert AcquisitionEras +v", stm, err)
+		log.Printf("unable to insert AcquisitionEras %s error %+v", stm, err)
 	}
 	if err != nil {
 		return Error(err, InsertErrorCode, "", "dbs.acquisitioneras.Insert")

@@ -120,7 +120,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusBadRequest,
 			},
 			{
-				description: "Test primarydatasets POST",
+				description: "Test primarydatasets POST", // DBSClientWriter_t.test01
 				method:      "POST",
 				serverType:  "DBSWriter",
 				params:      nil,
@@ -225,7 +225,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				handler:  web.PrimaryDSTypesHandler,
 			},
 			{
-				description: "Test primarydataset POST duplicate",
+				description: "Test primarydataset POST duplicate", // DBSClientWriter_t.test02
 				method:      "POST",
 				serverType:  "DBSWriter",
 				params:      nil,

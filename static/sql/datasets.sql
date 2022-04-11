@@ -17,18 +17,18 @@ SELECT
         AE.ACQUISITION_ERA_NAME,
         PE.PROCESSING_VERSION,
         PH.PHYSICS_GROUP_NAME 
-{{if .ParentDataset}}
-        ,PDS.DATASET PARENT_DATASET
-{{end}}
 {{if .Version}}
         ,OMC.OUTPUT_MODULE_LABEL
         ,OMC.GLOBAL_TAG
-        ,RV.RELEASE_VERSION,
-        ,PSH.PSET_HASH,
+        ,RV.RELEASE_VERSION
+        ,PSH.PSET_HASH
         ,AEX.APP_NAME
 {{end}}
 {{else}}
         D.DATASET
+{{end}}
+{{if .ParentDataset}}
+        ,PDS.DATASET PARENT_DATASET
 {{end}}
        
 FROM {{.Owner}}.DATASETS D

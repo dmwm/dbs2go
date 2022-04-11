@@ -42,7 +42,7 @@ func getProcessingErasTestTable(t *testing.T) EndpointTestCase {
 				respCode:    http.StatusOK,
 			},
 			{
-				description: "Test POST",
+				description: "Test POST", // DBSClientWriter_t.test07
 				method:      "POST",
 				serverType:  "DBSWriter",
 				input:       procErasReq,

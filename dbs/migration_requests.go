@@ -20,7 +20,7 @@ type MigrationRequest struct {
 	CREATE_BY              string `json:"create_by" validate:"required"`
 	CREATION_DATE          int64  `json:"creation_date" validate:"required,number,gt=0"`
 	LAST_MODIFIED_BY       string `json:"last_modified_by" validate:"required"`
-	LAST_MODIFICATION_DATE int64  `json:"last_modification_date" validate:"required,number,gt=0`
+	LAST_MODIFICATION_DATE int64  `json:"last_modification_date" validate:"required,number,gt=0"`
 	RETRY_COUNT            int64  `json:"retry_count"`
 }
 
