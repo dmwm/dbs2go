@@ -32,15 +32,15 @@ type BadRequest struct {
 
 // basic elements to define a test case
 type testCase struct {
-	description string     // test case description
-	serverType  string     // DBSWriter, DBSReader, DBSMigrate
-	method      string     // http method
-	endpoint    string     // url endpoint
-	params      url.Values // url parameters
-	handler     func(http.ResponseWriter, *http.Request)
-	input       RequestBody // POST record
-	output      []Response  // expected response
-	respCode    int         // expected HTTP response code
+	description string                                   // test case description
+	serverType  string                                   // DBSWriter, DBSReader, DBSMigrate
+	method      string                                   // http method
+	endpoint    string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
+	params      url.Values                               // url parameters, optional
+	handler     func(http.ResponseWriter, *http.Request) // optional if EndpointTestCase.defaultHandler is defined
+	input       RequestBody                              // POST and PUT body, optional for GET request
+	output      []Response                               // expected response
+	respCode    int                                      // expected HTTP response code
 }
 
 // initialData struct for test data generation
@@ -223,6 +223,8 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 	blocksTestCase := getBlocksTestTable(t)
 	filesTestCase := getFilesTestTable(t)
 	datasetsTestCase2 := getDatasetsTestTable2(t)
+	filesTestCase2 := getFilesTestTable2(t)
+	datasetsTestCase3 := getDatasetsTestTable3(t)
 
 	return []EndpointTestCase{
 		primaryDatasetAndTypesTestCase,
@@ -236,5 +238,7 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 		blocksTestCase,
 		filesTestCase,
 		datasetsTestCase2,
+		filesTestCase2,
+		datasetsTestCase3,
 	}
 }

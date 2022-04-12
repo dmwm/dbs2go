@@ -437,11 +437,6 @@ func (a *API) InsertFiles() error {
 		records = pyrec.Records
 	}
 
-	// check if is_file_valid was present in request, if not set it to 1
-	isFileValid := 0
-	if !strings.Contains(string(data), "is_file_valid") {
-		isFileValid = 1
-	}
 	for _, rec := range records {
 		if rec.CREATE_BY == "" {
 			rec.CREATE_BY = a.CreateBy
@@ -452,7 +447,10 @@ func (a *API) InsertFiles() error {
 		if utils.VERBOSE > 1 {
 			log.Printf("insert %+v", rec)
 		}
-		rec.IS_FILE_VALID = int64(isFileValid)
+		// check if is_file_valid was present in request, if not set it to 1
+		if !strings.Contains(string(data), "is_file_valid") {
+			rec.IS_FILE_VALID = 1
+		}
 
 		// set dependent's records
 		frec := Files{

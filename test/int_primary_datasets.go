@@ -125,8 +125,10 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSWriter",
 				params:      nil,
 				input:       primaryDSReq,
-				output:      nil,
-				respCode:    http.StatusOK,
+				output: []Response{
+					primaryDSResp,
+				},
+				respCode: http.StatusOK,
 			},
 			{
 				description: "Test primarydatasets GET after POST",
@@ -230,8 +232,10 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSWriter",
 				params:      nil,
 				input:       primaryDSReq,
-				output:      nil,
-				respCode:    http.StatusOK,
+				output: []Response{
+					primaryDSResp,
+				},
+				respCode: http.StatusOK,
 			},
 			{
 				description: "Test primarydatasets GET after duplicate POST",
@@ -248,8 +252,11 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSWriter",
 				params:      nil,
 				input:       primaryDSReq2,
-				output:      nil,
-				respCode:    http.StatusOK,
+				output: []Response{
+					primaryDSResp,
+					primaryDSResp2,
+				},
+				respCode: http.StatusOK,
 			},
 			{
 				description: "Test primarydatasets GET after second POST",

@@ -11,6 +11,11 @@ import (
 )
 
 // this file contains logic for files API
+// the HTTP request body is defined by dbs.FileRecord struct defined in dbs/files.go
+// the basic HTTP response body is defined by fileResponse struct in this file
+// the detailed HTTP response body is defined by fileDetailResponse struct in this file
+// the HTTP response body for run_num param is defined by fileRunResponse struct in this file
+// the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
 
 // basic files API response
 type fileResponse struct {
@@ -92,7 +97,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 		FILE_SIZE:              fileRecord.FILE_SIZE,
 		FILE_TYPE:              fileRecord.FILE_TYPE,
 		FILE_TYPE_ID:           1,
-		IS_FILE_VALID:          0,
+		IS_FILE_VALID:          1,
 		LAST_MODIFICATION_DATE: 0,
 		LAST_MODIFIED_BY:       TestData.CreateBy,
 		LOGICAL_FILE_NAME:      fileRecord.LOGICAL_FILE_NAME,
@@ -102,6 +107,7 @@ func createDetailedResponse(i int, blockID int64, datasetID int64, fileRecord db
 
 // files endpoint tests
 // TODO: handle BRANCH_HASH_ID
+// TODO: Test with a request that does not contain is_file_valid
 func getFilesTestTable(t *testing.T) EndpointTestCase {
 	parentFileLumiList := []dbs.FileLumi{
 		{LumiSectionNumber: 27414, RunNumber: 97, EventCount: 66},
@@ -260,6 +266,35 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				},
 				output:   fileRunResp,
 				respCode: http.StatusOK,
+			},
+		},
+	}
+}
+
+// files PUT request body struct
+type filesPUTRequest struct {
+	LOGICAL_FILE_NAME string `json:"logical_file_name"`
+	IS_FILE_VALID     int64  `json:"is_file_valid" validate:"number"`
+}
+
+// files endpoint tests part 2
+func getFilesTestTable2(t *testing.T) EndpointTestCase {
+	lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, 1)
+	fileReq := filesPUTRequest{
+		LOGICAL_FILE_NAME: lfn,
+		IS_FILE_VALID:     0,
+	}
+	return EndpointTestCase{
+		description:     "Test files 2",
+		defaultHandler:  web.FilesHandler,
+		defaultEndpoint: "/dbs/files",
+		testCases: []testCase{
+			{
+				description: "Test update file status",
+				method:      "PUT",
+				serverType:  "DBSWriter",
+				input:       fileReq,
+				respCode:    http.StatusOK,
 			},
 		},
 	}
