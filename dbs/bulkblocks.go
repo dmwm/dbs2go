@@ -438,6 +438,7 @@ func (a *API) InsertBulkBlocks() error {
 		PROCESSING_ERA_ID:      processingEraID,
 		PHYSICS_GROUP_ID:       physicsGroupID,
 		XTCROSSSECTION:         rec.Dataset.Xtcrosssection,
+		PREP_ID:                rec.Dataset.PrepID,
 		CREATION_DATE:          rec.Dataset.CreationDate,
 		CREATE_BY:              rec.Dataset.CreateBy,
 		LAST_MODIFICATION_DATE: creationDate,
