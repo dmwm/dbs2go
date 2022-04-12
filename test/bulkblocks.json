@@ -86,6 +86,7 @@
 "last_modified_by": "Yuyi", "creation_date": 1279912078,
 "processed_ds_name": "Summer2011-pstr-v10",
 "xtcrosssection": 123.0, "last_modification_date": 1279912078,
+"prep_id": "test-prepID",
 "dataset":
 "/unittest_web_primary_ds_name_14144/Summer2011-pstr-v10/GEN-SIM-RAW"},
 

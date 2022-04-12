@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/utils"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // TestBulkBlocks API
@@ -96,6 +96,7 @@ func TestBulkBlocks(t *testing.T) {
 		ACQUISITION_ERA_ID:     1,
 		PROCESSING_ERA_ID:      1,
 		PHYSICS_GROUP_ID:       1,
+		PREP_ID:                "test-prep_id",
 		CREATION_DATE:          ts,
 		CREATE_BY:              createBy,
 		LAST_MODIFICATION_DATE: ts,
