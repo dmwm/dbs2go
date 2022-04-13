@@ -85,8 +85,6 @@ test-migration:
 	DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json \
 	DBS_DB_FILE_1=./dbfile_1 \
 	DBS_DB_FILE_2=./dbfile_2 \
-	DBS_DB_FILE_3=./dbfile_2 \
-	DBS_DB_FILE_4=./dbfile_2 \
 	INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
 	go test -v -run Migration
 bench:
