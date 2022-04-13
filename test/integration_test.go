@@ -249,14 +249,6 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 	t.Run(c.description, func(t *testing.T) {
 		for _, v := range c.testCases {
 			t.Run(v.description, func(t *testing.T) {
-				var handler func(http.ResponseWriter, *http.Request)
-
-				// set handler
-				handler = c.defaultHandler
-				if v.handler != nil {
-					handler = v.handler
-				}
-
 				// set the endpoint
 				endpoint := c.defaultEndpoint
 				if v.endpoint != "" {
@@ -267,22 +259,41 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				server = runTestServer(t, v.serverType)
 				defer server.Close()
 
-				//var req *http.Request
-				if v.method == "GET" {
-					d, _ := getData(t, server.URL, endpoint, v.params, v.respCode)
-
-					//	req = newreq(t, v.method, server.URL, endpoint, nil, v.params, nil)
-					verifyResponse(t, d, v.output)
-				} else if v.method == "POST" {
-					injectDBRecord(t, v.input, server.URL, endpoint, v.params, handler, v.respCode)
+				// create request body
+				data, err := json.Marshal(v.input)
+				if err != nil {
+					t.Fatal(err.Error())
 				}
-				/*
-					r, err := http.DefaultClient.Do(req)
+				reader := bytes.NewReader(data)
+
+				// Set headers
+				headers := http.Header{}
+				headers.Set("Accept", "application/json")
+				if v.method == "POST" || v.method == "PUT" {
+					headers.Set("Content-Type", "application/json")
+				}
+				req := newreq(t, v.method, server.URL, endpoint, reader, v.params, headers)
+
+				r, err := http.DefaultClient.Do(req)
+				if err != nil {
+					t.Fatal(err.Error())
+				}
+				defer r.Body.Close()
+
+				// ensure returned status code is same as expected status code
+				if r.StatusCode != v.respCode {
+					t.Fatalf("Different HTTP Status: Expected %v, Received %v", v.respCode, r.StatusCode)
+				}
+
+				// decode and verify a GET request
+				if v.method == "GET" {
+					var d []dbs.Record
+					err = json.NewDecoder(r.Body).Decode(&d)
 					if err != nil {
-						t.Fatal(err)
+						t.Fatalf("Failed to decode body, %v", err)
 					}
-					defer r.Body.Close()
-				*/
+					verifyResponse(t, d, v.output)
+				}
 			})
 		}
 	})

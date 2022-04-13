@@ -439,3 +439,74 @@ func getDatasetsTestTable2(t *testing.T) EndpointTestCase {
 		},
 	}
 }
+
+// struct for a datasets update request body
+type datasetsUpdateRequest struct {
+	DATASET             string `json:"dataset"`
+	DATASET_ACCESS_TYPE string `json:"dataset_access_type"`
+}
+
+// third datasets endpoint tests for update datasets
+func getDatasetsTestTable3(t *testing.T) EndpointTestCase {
+	// basic responses
+	dsResp := createDSResponse(TestData.Dataset)
+
+	// detail responses
+	// dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
+
+	// setting dsResp to PRODUCTION
+	dsUpdateReq := datasetsUpdateRequest{
+		DATASET:             TestData.Dataset,
+		DATASET_ACCESS_TYPE: TestData.DatasetAccessType2,
+	}
+	return EndpointTestCase{
+		description:     "Test datasets update",
+		defaultHandler:  web.DatasetsHandler,
+		defaultEndpoint: "/dbs/datasets",
+		testCases: []testCase{
+			{
+				description: "Check dataset to be updated",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test PUT update dataset type", // DBSClientWriter_t.test20
+				serverType:  "DBSWriter",
+				method:      "PUT",
+				input:       dsUpdateReq,
+				output:      []Response{},
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Ensure update removes dataset valid",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+				},
+				output:   []Response{},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Check dataset access type is PRODUCTION",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"is_dataset_valid":    []string{"0"},
+					"dataset_access_type": []string{"PRODUCTION"},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+		},
+	}
+}

@@ -29,7 +29,7 @@ func (a *API) Datasets() error {
 	tmpl["ParentDataset"] = false
 	tmpl["Detail"] = false
 
-	// run_num shouhld come first since it may produce TokenGenerator
+	// run_num should come first since it may produce TokenGenerator
 	// whose bind parameters should appear first
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {

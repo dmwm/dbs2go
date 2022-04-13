@@ -1,7 +1,7 @@
 package main
 
 // this file contains logic for the blocks API
-// the HTTP requests body is defined by dbs.Blocks struct defined in this dbs/blocks.go
+// the HTTP requests body is defined by dbs.Blocks struct defined in dbs/blocks.go
 // the HTTP response body is defined by blockResponse struct defined in this file
 // the HTTP response body for the `detail` query is defined by blockDetailResponse struct defined in this file
 // the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
