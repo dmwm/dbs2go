@@ -256,10 +256,11 @@ func PrintSQL(stm string, args []interface{}, msg string) {
 		log.Println("")
 	}
 	log.Printf("### SQL statement ###\n%s\n\n", stm)
-	log.Printf("### SQL values ###\n")
+	var values string
 	for _, v := range args {
-		log.Printf("\t'%v'\n", v)
+		values = fmt.Sprintf("%s\t'%v'\n", values, v)
 	}
+	log.Printf("### SQL values ###\n%s\n", values)
 }
 
 // BasePath function provides end-point path for given api string
