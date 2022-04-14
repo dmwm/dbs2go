@@ -16,61 +16,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"net/http/httptest"
-	"os"
 	"testing"
 
-	"github.com/dmwm/dbs2go/dbs"
-	"github.com/dmwm/dbs2go/utils"
-	"github.com/dmwm/dbs2go/web"
 	_ "github.com/mattn/go-sqlite3"
 )
-
-// helper funtion to return DBS server with basic parameters
-func dbsServer(t *testing.T, base, dbFile, serverType string) *httptest.Server {
-	dbfile := os.Getenv(dbFile)
-	if dbfile == "" {
-		log.Fatal(fmt.Sprintf("no %s env variable, please define", dbFile))
-	}
-
-	var lexiconFile string
-
-	if serverType == "DBSReader" {
-		lexiconFile = os.Getenv("DBS_READER_LEXICON_FILE")
-		if lexiconFile == "" {
-			log.Fatal("no DBS_READER_LEXICON_FILE env variable, please define")
-		}
-	} else {
-		lexiconFile = os.Getenv("DBS_WRITER_LEXICON_FILE")
-		if lexiconFile == "" {
-			log.Fatal("no DBS_WRITER_LEXICON_FILE env variable, please define")
-		}
-	}
-
-	web.Config.Base = base
-	web.Config.DBFile = dbfile
-	web.Config.LexiconFile = lexiconFile
-	web.Config.ServerCrt = ""
-	web.Config.ServerKey = ""
-	web.Config.ServerType = serverType
-	web.Config.LogFile = fmt.Sprintf("/tmp/dbs2go-%s.log", base)
-	web.Config.Verbose = 0
-	utils.VERBOSE = 0
-	utils.BASE = base
-	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	dbs.LexiconPatterns = lexPatterns
-
-	initTestLimiter(t, "100-S")
-
-	ts := httptest.NewServer(web.Handlers())
-
-	return ts
-}
 
 // TestMigration tests DBS Migration process
 func TestMigration(t *testing.T) {
