@@ -285,7 +285,7 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 		IS_FILE_VALID:     0,
 	}
 	return EndpointTestCase{
-		description:     "Test files 2",
+		description:     "Test files update",
 		defaultHandler:  web.FilesHandler,
 		defaultEndpoint: "/dbs/files",
 		testCases: []testCase{

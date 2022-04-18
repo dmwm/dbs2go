@@ -34,6 +34,13 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 	t.Run(c.description, func(t *testing.T) {
 		for _, v := range c.testCases {
 			t.Run(v.description, func(t *testing.T) {
+
+				// set the default handler
+				handler := c.defaultHandler
+				if v.handler != nil {
+					handler = v.handler
+				}
+
 				// set the endpoint
 				endpoint := c.defaultEndpoint
 				if v.endpoint != "" {
@@ -58,6 +65,7 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				}
 				req := newreq(t, v.method, server.URL, endpoint, reader, v.params, headers)
 
+				// execute request
 				r, err := http.DefaultClient.Do(req)
 				if err != nil {
 					t.Fatal(err.Error())
@@ -69,14 +77,26 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 					t.Fatalf("Different HTTP Status: Expected %v, Received %v", v.respCode, r.StatusCode)
 				}
 
-				// decode and verify a GET request
+				var d []dbs.Record
+				// decode and verify the GET request
 				if v.method == "GET" {
-					var d []dbs.Record
 					err = json.NewDecoder(r.Body).Decode(&d)
 					if err != nil {
 						t.Fatalf("Failed to decode body, %v", err)
 					}
 					verifyResponse(t, d, v.output)
+				}
+				if v.method == "POST" {
+					rURL := parseURL(t, server.URL, endpoint, v.params)
+					rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
+					if err != nil {
+						t.Error(err)
+					}
+					data = rr.Body.Bytes()
+					err = json.Unmarshal(data, &d)
+					if err != nil {
+						t.Fatal(err)
+					}
 				}
 			})
 		}
