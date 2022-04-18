@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -487,11 +488,15 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		CreateBy: a.CreateBy,
 		Params:   make(Record),
 	}
-	//     var isFileValid, datasetID, blockID, fileID, fileTypeID int64
 	var isFileValid, datasetID, blockID int64
 	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
 	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
 	creationDate := time.Now().Unix()
+
+	// check if is_file_valid was present in request, if not set it to 1
+	if !strings.Contains(string(data), "is_file_valid") {
+		isFileValid = 1
+	}
 
 	// insert dataset configuration
 	if err = insertDatasetConfigurations(api, rec.DatasetConfigList, hash); err != nil {

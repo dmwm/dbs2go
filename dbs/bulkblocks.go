@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/dmwm/dbs2go/utils"
@@ -186,6 +187,10 @@ func (a *API) InsertBulkBlocks() error {
 	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
 	creationDate := time.Now().Unix()
 
+	// check if is_file_valid was present in request, if not set it to 1
+	if !strings.Contains(string(data), "is_file_valid") {
+		isFileValid = 1
+	}
 	// insert dataset configuration
 	if utils.VERBOSE > 1 {
 		log.Println("insert output configs")
