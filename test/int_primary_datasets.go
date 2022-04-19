@@ -131,7 +131,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test primarydatasets GET after POST",
+				description: "Test primarydatasets GET after POST", //DBSClientReader_t.test001
 				method:      "GET",
 				serverType:  "DBSReader",
 				output: []Response{
@@ -259,9 +259,47 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test primarydatasets GET after second POST",
+				description: "Test primarydatasets GET after second POST", // DBSClientReader_t.test001
 				method:      "GET",
 				serverType:  "DBSReader",
+				output: []Response{
+					primaryDSResp,
+					primaryDSResp2,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test primarydatasets GET param primary_ds_name=*", // DBSClientReader_t.test002
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"primary_ds_name": []string{"*"},
+				},
+				output: []Response{
+					primaryDSResp,
+					primaryDSResp2,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "primarydatasets GET param primary_ds_name defined", // DBSClientReader_t.test003
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"primary_ds_name": []string{TestData.PrimaryDSName},
+				},
+				output: []Response{
+					primaryDSResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "primarydatasets GET param primary_ds_name name with wildcard", // DBSClientReader_t.test004
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"primary_ds_name": []string{TestData.PrimaryDSName + "*"},
+				},
 				output: []Response{
 					primaryDSResp,
 					primaryDSResp2,
