@@ -62,7 +62,7 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 		return Error(err, ValidateErrorCode, "", "dbs.blockparents.Insert")
 	}
 	// get SQL statement from static area
-	stm := getSQL("insert_fileparents")
+	stm := getSQL("insert_block_parents")
 	if utils.VERBOSE > 0 {
 		log.Printf("Insert BlockParents\n%s\n%+v", stm, r)
 	}
