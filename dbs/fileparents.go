@@ -165,11 +165,21 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	}
 
 	// insert relationship between block and parent block
-	blockParents := BlockParents{THIS_BLOCK_ID: thisBlockID, PARENT_BLOCK_ID: parentBlockID}
-	err = blockParents.Insert(tx)
+	var tbid, pbid int64
+	stm = getSQL("blockparents_ids")
+	err = tx.QueryRow(stm, thisBlockID, parentBlockID).Scan(&tbid, &pbid)
 	if err != nil {
 		if utils.VERBOSE > 1 {
-			log.Println("unable to insert block parentage", blockParents, "error", err)
+			log.Println("unable to execute", stm, "error", err)
+		}
+	}
+	if tbid == 0 && pbid == 0 { // there is no such ids in BlockParents table
+		blockParents := BlockParents{THIS_BLOCK_ID: thisBlockID, PARENT_BLOCK_ID: parentBlockID}
+		err = blockParents.Insert(tx)
+		if err != nil {
+			if utils.VERBOSE > 1 {
+				log.Println("unable to insert block parentage", blockParents, "error", err)
+			}
 		}
 	}
 
