@@ -20,8 +20,8 @@ import (
 	"strings"
 	"time"
 
-	validator "github.com/go-playground/validator/v10"
 	"github.com/dmwm/dbs2go/utils"
+	validator "github.com/go-playground/validator/v10"
 )
 
 // API structure represents DBS API. Each API has reader (to read
@@ -607,7 +607,17 @@ func GetRecID(tx *sql.Tx, rec DBRecord, table, id, attr string, val ...interface
 		}
 		err = rec.Insert(tx)
 		if err != nil {
-			return 0, Error(err, InsertErrorCode, "", "dbs.GetRecID")
+			// if we have concurrent threads to insert data we may end-up with
+			// ORA-00001 error which violates unique constrain
+			if strings.Contains(err.Error(), "ORA-00001") {
+				time.Sleep(1 * time.Second)
+				err = rec.Insert(tx)
+				if err != nil {
+					return 0, Error(err, InsertErrorCode, "", "dbs.GetRecID")
+				}
+			} else {
+				return 0, Error(err, InsertErrorCode, "", "dbs.GetRecID")
+			}
 		}
 		rid, err = GetID(tx, table, id, attr, val...)
 		if err != nil {
