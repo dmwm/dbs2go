@@ -1,0 +1,8 @@
+SELECT
+    BP.THIS_BLOCK_ID,
+    BP.PARENT_BLOCK_ID
+FROM {{.Owner}}.BLOCK_PARENTS
+WHERE 
+THIS_BLOCK_ID = :this_block_id
+AND
+PARENT_BLOCK_ID = :parent_block_id
