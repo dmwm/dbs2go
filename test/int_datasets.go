@@ -7,8 +7,10 @@ package main
 // the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -201,6 +203,8 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 	// detail responses for output_config parameters
 	dsDetailVersResp := createDetailVersionDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
 	dsParentDetailVersResp := createDetailVersionDSResponse(2, TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType)
+	a := strings.Split(TestData.Dataset, "/")
+	dsQuery := fmt.Sprintf("/*%s/%s/%s", a[1], a[2], a[3])
 	return EndpointTestCase{
 		description:     "Test datasets",
 		defaultHandler:  web.DatasetsHandler,
@@ -232,7 +236,7 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				respCode:    http.StatusOK,
 			},
 			{
-				description: "Test GET with no params",
+				description: "Test GET with no params", // DBSClientReader_t.test005
 				serverType:  "DBSReader",
 				method:      "GET",
 				output: []Response{
@@ -242,11 +246,51 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET initial dataset",
+				description: "Test GET initial dataset", // DBSClientReader_t.test006a
 				serverType:  "DBSReader",
 				method:      "GET",
 				params: url.Values{
 					"dataset": []string{TestData.Dataset},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET after POST with detail", // DBSClientReader_t.test006b
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+					"detail":  []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET after POST with detail and ds access type wildcard", // DBSClientReader_t.test006b.2
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset_id":          []string{"1"},
+					"detail":              []string{"true"},
+					"dataset_access_type": []string{"*"},
+				},
+				output: []Response{
+					dsDetailResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET after POST ds access type wildcard ", // DBSClientReader_t.test006c
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset_id":          []string{"1"},
+					"dataset_access_type": []string{"*"},
 				},
 				output: []Response{
 					dsResp,
@@ -266,6 +310,43 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
+				description: "Test GET with dataset wildcard", // DBSClientReader_t.test007
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset + "*"},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset all wildcard", // DBSClientReader_t.test007a
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{"/*/*/*"},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset first wildcard", // DBSClientReader_t.test007b
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{dsQuery},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
 				description: "Test GET with dataset list",
 				serverType:  "DBSReader",
 				method:      "GET",
@@ -275,19 +356,6 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				output: []Response{
 					dsResp,
 					dsParentResp,
-				},
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET after POST with detail",
-				serverType:  "DBSReader",
-				method:      "GET",
-				params: url.Values{
-					"dataset": []string{TestData.Dataset},
-					"detail":  []string{"true"},
-				},
-				output: []Response{
-					dsDetailResp,
 				},
 				respCode: http.StatusOK,
 			},
@@ -346,6 +414,77 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				params: url.Values{
 					"output_module_label": []string{TestData.OutputModuleLabel},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with multiple params", // DBSClientReader_t.test012
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"release_version":     []string{TestData.ReleaseVersion},
+					"pset_hash":           []string{TestData.PsetHash},
+					"app_name":            []string{TestData.AppName},
+					"output_module_label": []string{TestData.OutputModuleLabel},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with multiple params including dataset", // DBSClientReader_t.test013
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset":             []string{TestData.Dataset},
+					"release_version":     []string{TestData.ReleaseVersion},
+					"pset_hash":           []string{TestData.PsetHash},
+					"app_name":            []string{TestData.AppName},
+					"output_module_label": []string{TestData.OutputModuleLabel},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset and release_version", // DBSClientReader_t.test014
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset":         []string{TestData.Dataset},
+					"release_version": []string{TestData.ReleaseVersion},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with create_by", // DBSClientReader_t.test014a
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"create_by": []string{TestData.CreateBy},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with last_modified_by", // DBSClientReader_t.test014b
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"last_modified_by": []string{TestData.CreateBy},
 				},
 				output: []Response{
 					dsResp,
@@ -419,11 +558,188 @@ func getDatasetsTestTable2(t *testing.T) EndpointTestCase {
 		DATASET:        TestData.Dataset,
 		PARENT_DATASET: TestData.ParentDataset,
 	}
+	dsResp := createDSResponse(TestData.Dataset)
+	dsParentResp := createDSResponse(TestData.ParentDataset)
+	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
+	dsDetailParentResp := createDetailDSResponse(2, TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType)
+	runs := strings.ReplaceAll(fmt.Sprint(TestData.Runs), " ", ",")
 	return EndpointTestCase{
 		description:     "Test datasets 2",
 		defaultHandler:  web.DatasetsHandler,
 		defaultEndpoint: "/dbs/datasets",
 		testCases: []testCase{
+			{
+				description: "Test GET with dataset runs and detail", // DBSClientReader_t.test014c
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+					"run_num": []string{runs},
+					"detail":  []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with primary_ds_name with * and detail", // DBSClientReader_t.test014d
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"primary_ds_name": []string{TestData.PrimaryDSName + "*"},
+					"detail":          []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+					dsDetailParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with primary_ds_name and detail", // DBSClientReader_t.test014e
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"primary_ds_name": []string{TestData.PrimaryDSName},
+					"detail":          []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+					dsDetailParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with primary_ds_name with *", // DBSClientReader_t.test014f
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"primary_ds_name": []string{TestData.PrimaryDSName + "*"},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with primary_ds_name", // DBSClientReader_t.test014g
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"primary_ds_name": []string{TestData.PrimaryDSName},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with processed_ds_name with *", // DBSClientReader_t.test014h
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"processed_ds_name": []string{TestData.ProcDataset + "*"},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with processed_ds_name", // DBSClientReader_t.test014i
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"processed_ds_name": []string{TestData.ProcDataset},
+				},
+				output: []Response{
+					dsResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with processed_ds_name with *, detail true", // DBSClientReader_t.test014j
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"processed_ds_name": []string{TestData.ProcDataset + "*"},
+					"detail":            []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with processed_ds_name, detail true", // DBSClientReader_t.test014k
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"processed_ds_name": []string{TestData.ProcDataset},
+					"detail":            []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with data_tier_name with *", // DBSClientReader_t.test014n
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"data_tier_name": []string{TestData.Tier + "*"},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with data_tier_name", // DBSClientReader_t.test014o
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"data_tier_name": []string{TestData.Tier},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with data_tier_name with *, detail true", // DBSClientReader_t.test014l
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"data_tier_name": []string{TestData.Tier + "*"},
+					"detail":         []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+					dsDetailParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with data_tier_name, detail true", // DBSClientReader_t.test014m
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"data_tier_name": []string{TestData.Tier},
+					"detail":         []string{"true"},
+				},
+				output: []Response{
+					dsDetailResp,
+					dsDetailParentResp,
+				},
+				respCode: http.StatusOK,
+			},
 			{
 				description: "Test GET dataset children", // DBSClientReader_t.test072
 				serverType:  "DBSReader",
