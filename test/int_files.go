@@ -137,14 +137,18 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	}
 	var parentFiles []dbs.FileRecord
 	var parentLFNs []Response
+	var testDataParentFiles []string
 	var parentDetailResp []Response
 	for i := 1; i <= 10; i++ {
 		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		parentLFNs = append(parentLFNs, fileResponse{LOGICAL_FILE_NAME: parentLFN})
+		testDataParentFiles = append(testDataParentFiles, parentLFN)
 		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
 		parentFiles = append(parentFiles, fileRecord)
 		parentDetailResp = append(parentDetailResp, createDetailedResponse(i, 2, 2, fileRecord))
 	}
+
+	TestData.ParentFiles = testDataParentFiles
 
 	fileLumiList := []dbs.FileLumi{
 		{LumiSectionNumber: 27414, RunNumber: 97},
@@ -155,9 +159,11 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	var files []dbs.FileRecord
 	var lfns []Response
 	var detailResp []Response
+	var testDataFiles []string
 	for i := 1; i <= 10; i++ {
 		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
 		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
+		testDataFiles = append(testDataFiles, lfn)
 		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		fileParentList := []dbs.FileParentLFNRecord{
 			{
@@ -168,6 +174,8 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		files = append(files, fileRecord)
 		detailResp = append(detailResp, createDetailedResponse(i+10, 1, 1, fileRecord))
 	}
+
+	TestData.Files = testDataFiles
 
 	// add run_num
 	var fileRunResp []Response
@@ -277,24 +285,77 @@ type filesPUTRequest struct {
 	IS_FILE_VALID     int64  `json:"is_file_valid" validate:"number"`
 }
 
-// files endpoint tests part 2
+// files endpoint update tests
 func getFilesTestTable2(t *testing.T) EndpointTestCase {
 	lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, 1)
 	fileReq := filesPUTRequest{
 		LOGICAL_FILE_NAME: lfn,
 		IS_FILE_VALID:     0,
 	}
+
+	fileResp := fileDetailResponse{
+		ADLER32:                "NOTSET",
+		AUTO_CROSS_SECTION:     0.0,
+		BLOCK_ID:               1,
+		BLOCK_NAME:             TestData.Block,
+		CHECK_SUM:              "1504266448",
+		CREATE_BY:              TestData.CreateBy,
+		CREATION_DATE:          0,
+		DATASET:                TestData.Dataset,
+		DATASET_ID:             1,
+		EventCount:             1619,
+		FILE_ID:                11,
+		FILE_SIZE:              2.012211901e+09,
+		FILE_TYPE:              "EDM",
+		FILE_TYPE_ID:           1,
+		IS_FILE_VALID:          1,
+		LAST_MODIFICATION_DATE: 0,
+		LAST_MODIFIED_BY:       TestData.CreateBy,
+		LOGICAL_FILE_NAME:      lfn,
+		MD5:                    "",
+	}
+
+	fileResp2 := fileResp
+	fileResp2.IS_FILE_VALID = 0
+	fileResp2.LAST_MODIFIED_BY = "DBS-workflow"
+
 	return EndpointTestCase{
-		description:     "Test files 2",
+		description:     "Test files update",
 		defaultHandler:  web.FilesHandler,
 		defaultEndpoint: "/dbs/files",
 		testCases: []testCase{
+			{
+				description: "Test GET before update",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{lfn},
+					"detail":            []string{"true"},
+				},
+				output: []Response{
+					fileResp,
+				},
+				respCode: http.StatusOK,
+			},
 			{
 				description: "Test update file status",
 				method:      "PUT",
 				serverType:  "DBSWriter",
 				input:       fileReq,
 				respCode:    http.StatusOK,
+			},
+			{
+				description: "Test GET after update",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{lfn},
+					"detail":            []string{"true"},
+				},
+				output: []Response{
+					fileResp2,
+				},
+				respCode: http.StatusOK,
 			},
 		},
 	}

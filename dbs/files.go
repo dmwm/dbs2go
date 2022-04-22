@@ -561,6 +561,22 @@ func (a *API) InsertFiles() error {
 			}
 		}
 
+		// match output_mod_config
+		for _, oc := range rec.FILE_OUTPUT_CONFIG_LIST {
+			ocid, err := GetID(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", oc.OUTPUT_MODULE_LABEL)
+			if err != nil {
+				return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+			}
+			r := FileOutputModConfigs{
+				OUTPUT_MOD_CONFIG_ID: ocid,
+				FILE_ID:              fid,
+			}
+			err = r.Insert(tx)
+			if err != nil {
+				return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+			}
+		}
+
 		// we need to update block info about inserted file
 		a.UpdateBlockStats(tx, blkId)
 

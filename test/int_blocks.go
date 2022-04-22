@@ -157,3 +157,110 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 		},
 	}
 }
+
+// struct for block status update
+type blockUpdateStatusRequest struct {
+	BLOCK_NAME       string `json:"block_name"`
+	OPEN_FOR_WRITING string `json:"open_for_writing"`
+}
+
+// struct for block status update
+type blockUpdateSiteRequest struct {
+	BLOCK_NAME       string `json:"block_name"`
+	ORIGIN_SITE_NAME string `json:"origin_site_name"`
+}
+
+// detailed blocks API response
+func getBlocksTestTable2(t *testing.T) EndpointTestCase {
+	blkStatusReq := blockUpdateStatusRequest{
+		BLOCK_NAME:       TestData.Block,
+		OPEN_FOR_WRITING: "1",
+	}
+	blkSiteReq := blockUpdateSiteRequest{
+		BLOCK_NAME:       TestData.Block,
+		ORIGIN_SITE_NAME: "cmssrm2.fnal.gov",
+	}
+	blockDetailResp := blockDetailResponse{
+		BlockID:              1,
+		BlockName:            TestData.Block,
+		BlockSize:            20122119010,
+		CreateBy:             TestData.CreateBy,
+		CreationDate:         0,
+		Dataset:              TestData.Dataset,
+		DatasetID:            1,
+		FileCount:            10,
+		LastModificationDate: 0,
+		LastModifiedBy:       TestData.CreateBy,
+		OpenForWriting:       0,
+		OriginSiteName:       TestData.Site,
+	}
+	blockDetailResp2 := blockDetailResp
+	blockDetailResp2.OpenForWriting = 1
+	blockDetailResp2.LastModifiedBy = "DBS-workflow"
+	blockDetailResp3 := blockDetailResp2
+	blockDetailResp3.OriginSiteName = "cmssrm2.fnal.gov"
+	return EndpointTestCase{
+		description:     "Test blocks update API",
+		defaultEndpoint: "/dbs/blocks",
+		defaultHandler:  web.BlocksHandler,
+		testCases: []testCase{
+			{
+				description: "Initial GET block",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"block_name": []string{TestData.Block},
+					"detail":     []string{"true"},
+				},
+				output:   []Response{blockDetailResp},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test update block status", // DBSClientWriter_t.test21
+				serverType:  "DBSWriter",
+				method:      "PUT",
+				params: url.Values{
+					"block_name":       []string{TestData.Block},
+					"open_for_writing": []string{"1"},
+				},
+				input:    blkStatusReq,
+				output:   []Response{},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "GET block after status update",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"block_name": []string{TestData.Block},
+					"detail":     []string{"true"},
+				},
+				output:   []Response{blockDetailResp2},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test update block site name", // DBSClientWriter_t.test22
+				serverType:  "DBSWriter",
+				method:      "PUT",
+				params: url.Values{
+					"block_name":       []string{TestData.Block},
+					"origin_site_name": []string{"cmssrm2.fnal.gov"},
+				},
+				input:    blkSiteReq,
+				output:   []Response{},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "GET block after site update",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"block_name": []string{TestData.Block},
+					"detail":     []string{"true"},
+				},
+				output:   []Response{blockDetailResp3},
+				respCode: http.StatusOK,
+			},
+		},
+	}
+}
