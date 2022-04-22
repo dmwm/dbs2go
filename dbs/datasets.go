@@ -637,6 +637,7 @@ func (a *API) InsertDatasets() error {
 	if err != nil {
 		return Error(err, GetIDErrorCode, "", "dbs.datasets.InsertDatasets")
 	}
+	// match output_mod_config
 	for _, oc := range rec.OUTPUT_CONFIGS {
 		ocid, err := GetID(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", oc.OUTPUT_MODULE_LABEL)
 		if err != nil {
@@ -645,7 +646,7 @@ func (a *API) InsertDatasets() error {
 		r := DatasetOutputModConfigs{OUTPUT_MOD_CONFIG_ID: ocid, DATASET_ID: dsid}
 		err = r.Insert(tx)
 		if err != nil {
-			return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, InsertErrorCode, "", "dbs.datasets.InsertDatasets")
 		}
 	}
 

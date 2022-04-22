@@ -137,14 +137,18 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	}
 	var parentFiles []dbs.FileRecord
 	var parentLFNs []Response
+	var testDataParentFiles []string
 	var parentDetailResp []Response
 	for i := 1; i <= 10; i++ {
 		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		parentLFNs = append(parentLFNs, fileResponse{LOGICAL_FILE_NAME: parentLFN})
+		testDataParentFiles = append(testDataParentFiles, parentLFN)
 		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
 		parentFiles = append(parentFiles, fileRecord)
 		parentDetailResp = append(parentDetailResp, createDetailedResponse(i, 2, 2, fileRecord))
 	}
+
+	TestData.ParentFiles = testDataParentFiles
 
 	fileLumiList := []dbs.FileLumi{
 		{LumiSectionNumber: 27414, RunNumber: 97},
@@ -155,9 +159,11 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	var files []dbs.FileRecord
 	var lfns []Response
 	var detailResp []Response
+	var testDataFiles []string
 	for i := 1; i <= 10; i++ {
 		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
 		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
+		testDataFiles = append(testDataFiles, lfn)
 		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		fileParentList := []dbs.FileParentLFNRecord{
 			{
@@ -168,6 +174,8 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		files = append(files, fileRecord)
 		detailResp = append(detailResp, createDetailedResponse(i+10, 1, 1, fileRecord))
 	}
+
+	TestData.Files = testDataFiles
 
 	// add run_num
 	var fileRunResp []Response
