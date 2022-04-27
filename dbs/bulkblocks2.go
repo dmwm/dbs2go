@@ -38,11 +38,6 @@ func insertDatasetConfigurations(api *API, datasetConfigList DatasetConfigList, 
 	if utils.VERBOSE > 1 {
 		log.Println(hash, "insert output configs")
 	}
-	tx, err := DB.Begin()
-	if err != nil {
-		return Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
-	}
-	defer tx.Rollback()
 	for _, rrr := range datasetConfigList {
 		data, err := json.Marshal(rrr)
 		if err != nil {
@@ -50,15 +45,20 @@ func insertDatasetConfigurations(api *API, datasetConfigList DatasetConfigList, 
 			return Error(err, MarshalErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
 		}
 		api.Reader = bytes.NewReader(data)
+		tx, err := DB.Begin()
+		if err != nil {
+			return Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+		}
+		defer tx.Rollback()
 		err = api.InsertOutputConfigsTx(tx)
 		if err != nil {
 			return Error(err, InsertErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
 		}
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Println(hash, "fail to commit transaction", err)
-		return Error(err, CommitErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+		err = tx.Commit()
+		if err != nil {
+			log.Println(hash, "fail to commit transaction", err)
+			return Error(err, CommitErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+		}
 	}
 	return nil
 }
