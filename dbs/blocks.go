@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -22,6 +23,21 @@ func (a *API) Blocks() error {
 	tmpl["Owner"] = DBOWNER
 	tmpl["TokenGenerator"] = ""
 	tmpl["Detail"] = false
+
+	// check for required parameters
+	required := []string{
+		"dataset",
+		"block_name",
+		"data_tier_name",
+		"logical_file_name",
+	}
+	pattern := strings.Join(required, "|")
+	re := regexp.MustCompile(pattern)
+	match := re.MatchString(fmt.Sprintf("%v", a.Params))
+	if !match {
+		msg := fmt.Sprintf("Blocks API requires one of the following: %v", required)
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocks.Blocks")
+	}
 
 	// parse detail argument
 	detail, _ := getSingleValue(a.Params, "detail")

@@ -198,7 +198,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 			} else if utils.InList(field, ignoredFields) {
 				continue
 			} else {
-				t.Fatalf("Incorrect %v, received %v (%T), expected %v (%T)", field, a.To, a.To, a.From, a.From)
+				t.Fatalf("Incorrect %v:\nreceived %v (%T),\nexpected %v (%T)", field, a.To, a.To, a.From, a.From)
 			}
 		}
 	}

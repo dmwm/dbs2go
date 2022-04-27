@@ -60,8 +60,9 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 
 				// Set headers
 				headers := http.Header{
-					"Accept":       []string{"application/json"},
-					"Content-Type": []string{"application/json"},
+					"Accept":          []string{"application/json"},
+					"Content-Type":    []string{"application/json"},
+					"Accept-Encoding": []string{"identity"},
 				}
 				req := newreq(t, v.method, server.URL, endpoint, reader, v.params, headers)
 
