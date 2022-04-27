@@ -646,8 +646,6 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 		err = api.FileSummaries()
 	} else if a == "filelumis" {
 		err = api.FileLumis()
-	} else if a == "primarydstypes" {
-		err = api.PrimaryDSTypes()
 	} else if a == "datasetparents" {
 		err = api.DatasetParents()
 	} else if a == "datatypes" {
