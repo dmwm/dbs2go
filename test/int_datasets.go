@@ -1,7 +1,7 @@
 package main
 
 // this file contains logic for datasets API
-// the HTTP requests body is defined by datasetsRequest struct defined in this file
+// the HTTP requests body is defined by dbs.DatasetRecord struct defined in dbs/datasets.go
 // the HTTP response body is defined by datasetsResponse struct defined in this file
 // the HTTP response body for the `detail` query is defined by datasetsDetailResponse struct defined in this file
 // the HTTP handlers and endpoints are defined in the EndpointTestCase struct defined in test/integration_cases.go
@@ -16,25 +16,6 @@ import (
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/web"
 )
-
-// struct for datasets POST request body
-type datasetsRequest struct {
-	DATASET                string                   `json:"dataset" validate:"required"`
-	PRIMARY_DS_NAME        string                   `json:"primary_ds_name" validate:"required"`
-	PRIMARY_DS_TYPE        string                   `json:"primary_ds_type" validate:"required"`
-	PROCESSED_DS_NAME      string                   `json:"processed_ds_name" validate:"required"`
-	DATA_TIER_NAME         string                   `json:"data_tier_name" validate:"required"`
-	ACQUISITION_ERA_NAME   string                   `json:"acquisition_era_name" validate:"required"`
-	DATASET_ACCESS_TYPE    string                   `json:"dataset_access_type" validate:"required"`
-	PROCESSING_VERSION     int64                    `json:"processing_version" validate:"required,number,gt=0"`
-	PHYSICS_GROUP_NAME     string                   `json:"physics_group_name" validate:"required"`
-	XTCROSSSECTION         float64                  `json:"xtcrosssection" validate:"required,number"`
-	CREATION_DATE          int64                    `json:"creation_date" validate:"required,number,gt=0"`
-	CREATE_BY              string                   `json:"create_by" validate:"required"`
-	LAST_MODIFICATION_DATE int64                    `json:"last_modification_date" validate:"required,number,gt=0"`
-	LAST_MODIFIED_BY       string                   `json:"last_modified_by" validate:"required"`
-	OUTPUT_CONFIGS         []dbs.OutputConfigRecord `json:"output_configs"`
-}
 
 // struct for datasets GET response
 type datasetsResponse struct {
@@ -821,6 +802,48 @@ func getDatasetsTestTable3(t *testing.T) EndpointTestCase {
 				output: []Response{
 					dsResp,
 				},
+				respCode: http.StatusOK,
+			},
+		},
+	}
+}
+
+type datasetParentResponse struct {
+	PARENT_DATASET string `json:"parent_dataset"`
+	PARENT_DS_ID   int    `json:"parent_dataset_id"`
+	THIS_DATASET   string `json:"this_dataset"`
+}
+
+// datasetparents test cases
+func getDatasetParentsTestTable(t *testing.T) EndpointTestCase {
+	dsParentsResp := datasetParentResponse{
+		PARENT_DATASET: TestData.ParentDataset,
+		PARENT_DS_ID:   2,
+		THIS_DATASET:   TestData.Dataset,
+	}
+	return EndpointTestCase{
+		description:     "Test datasetparents",
+		defaultHandler:  web.DatasetParentsHandler,
+		defaultEndpoint: "/dbs/datasetparents",
+		testCases: []testCase{
+			{
+				description: "Test GET", // DBSClientReader_t.test030
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset": []string{TestData.Dataset},
+				},
+				output:   []Response{dsParentsResp},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET for non-existing", // DBSClientReader_t.test031
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset": []string{"/does/not/EXIST"},
+				},
+				output:   []Response{},
 				respCode: http.StatusOK,
 			},
 		},

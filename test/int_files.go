@@ -232,13 +232,33 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET",
+				description: "Test GET", // DBSClientReader_t.test032
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
 					"dataset": []string{TestData.Dataset},
 				},
 				output:   lfns,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET validFileOnly", // DBSClientReader_t.test033
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"validFileOnly": []string{"1"},
+				},
+				output:   append(parentLFNs, lfns...),
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET validFileOnly false", // DBSClientReader_t.test034
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"validFileOnly": []string{"0"},
+				},
+				output:   append(parentLFNs, lfns...),
 				respCode: http.StatusOK,
 			},
 			{
@@ -287,6 +307,73 @@ type filesPUTRequest struct {
 
 // files endpoint update tests
 func getFilesTestTable2(t *testing.T) EndpointTestCase {
+	parentFileLumiList := []dbs.FileLumi{
+		{LumiSectionNumber: 27414, RunNumber: 97, EventCount: 66},
+		{LumiSectionNumber: 26422, RunNumber: 97, EventCount: 67},
+		{LumiSectionNumber: 29838, RunNumber: 97, EventCount: 68},
+		{LumiSectionNumber: 248, RunNumber: 97, EventCount: 69},
+		{LumiSectionNumber: 250, RunNumber: 97, EventCount: 70},
+		{LumiSectionNumber: 300, RunNumber: 97, EventCount: 71},
+		{LumiSectionNumber: 534, RunNumber: 97, EventCount: 72},
+		{LumiSectionNumber: 546, RunNumber: 97, EventCount: 73},
+		{LumiSectionNumber: 638, RunNumber: 97, EventCount: 74},
+		{LumiSectionNumber: 650, RunNumber: 97, EventCount: 75},
+		{LumiSectionNumber: 794, RunNumber: 97, EventCount: 76},
+		{LumiSectionNumber: 1313, RunNumber: 97, EventCount: 77},
+		{LumiSectionNumber: 1327, RunNumber: 97, EventCount: 78},
+		{LumiSectionNumber: 1339, RunNumber: 97, EventCount: 79},
+		{LumiSectionNumber: 1353, RunNumber: 97, EventCount: 80},
+		{LumiSectionNumber: 1428, RunNumber: 97, EventCount: 81},
+		{LumiSectionNumber: 1496, RunNumber: 97, EventCount: 82},
+		{LumiSectionNumber: 1537, RunNumber: 97, EventCount: 83},
+		{LumiSectionNumber: 1652, RunNumber: 97, EventCount: 84},
+		{LumiSectionNumber: 1664, RunNumber: 97, EventCount: 85},
+		{LumiSectionNumber: 1743, RunNumber: 97, EventCount: 86},
+		{LumiSectionNumber: 1755, RunNumber: 97, EventCount: 87},
+		{LumiSectionNumber: 1860, RunNumber: 97, EventCount: 88},
+		{LumiSectionNumber: 1872, RunNumber: 97, EventCount: 89},
+	}
+	var parentFiles []dbs.FileRecord
+	var parentLFNs []Response
+	var testDataParentFiles []string
+	var parentDetailResp []Response
+	for i := 1; i <= 10; i++ {
+		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
+		parentLFNs = append(parentLFNs, fileResponse{LOGICAL_FILE_NAME: parentLFN})
+		testDataParentFiles = append(testDataParentFiles, parentLFN)
+		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
+		parentFiles = append(parentFiles, fileRecord)
+		parentDetailResp = append(parentDetailResp, createDetailedResponse(i, 2, 2, fileRecord))
+	}
+
+	TestData.ParentFiles = testDataParentFiles
+
+	fileLumiList := []dbs.FileLumi{
+		{LumiSectionNumber: 27414, RunNumber: 97},
+		{LumiSectionNumber: 26422, RunNumber: 98},
+		{LumiSectionNumber: 29838, RunNumber: 99},
+	}
+
+	var files []dbs.FileRecord
+	var lfns []Response
+	var detailResp []Response
+	var testDataFiles []string
+	for i := 1; i <= 10; i++ {
+		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
+		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
+		testDataFiles = append(testDataFiles, lfn)
+		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
+		fileParentList := []dbs.FileParentLFNRecord{
+			{
+				FILE_PARENT_LFN: fileParentLFN,
+			},
+		}
+		fileRecord := createFileRecord(i, TestData.Dataset, TestData.Block, fileLumiList, lfn, fileParentList)
+		files = append(files, fileRecord)
+		detailResp = append(detailResp, createDetailedResponse(i+10, 1, 1, fileRecord))
+	}
+
+	TestData.Files = testDataFiles
 	lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, 1)
 	fileReq := filesPUTRequest{
 		LOGICAL_FILE_NAME: lfn,
@@ -355,6 +442,16 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 				output: []Response{
 					fileResp2,
 				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET validFileOnly false", // DBSClientReader_t.test034
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"validFileOnly": []string{"0"},
+				},
+				output:   append(parentLFNs, lfns...),
 				respCode: http.StatusOK,
 			},
 		},
