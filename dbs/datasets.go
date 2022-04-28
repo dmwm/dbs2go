@@ -70,15 +70,6 @@ func (a *API) Datasets() error {
 		conds, args = AddParam("dataset", "D.DATASET", a.Params, conds, args)
 	}
 
-	// parse is_dataset_valid argument
-	isValid, _ := getSingleValue(a.Params, "is_dataset_valid")
-	if isValid == "" {
-		isValid = "1"
-	}
-	cond := fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
-	conds = append(conds, cond)
-	args = append(args, isValid)
-
 	// parse dataset_id argument
 	datasetAccessType, _ := getSingleValue(a.Params, "dataset_access_type")
 	oper := "="
@@ -88,10 +79,18 @@ func (a *API) Datasets() error {
 		datasetAccessType = "%"
 		oper = "like"
 	}
-	cond = fmt.Sprintf("DP.DATASET_ACCESS_TYPE %s %s", oper, placeholder("dataset_access_type"))
+	cond := fmt.Sprintf("DP.DATASET_ACCESS_TYPE %s %s", oper, placeholder("dataset_access_type"))
 	conds = append(conds, cond)
 	args = append(args, datasetAccessType)
 	//     }
+
+	// parse is_dataset_valid argument
+	isValid, _ := getSingleValue(a.Params, "is_dataset_valid")
+	if isValid != "" {
+		cond = fmt.Sprintf("D.IS_DATASET_VALID = %s", placeholder("is_dataset_valid"))
+		conds = append(conds, cond)
+		args = append(args, isValid)
+	}
 
 	// optional arguments
 	if _, e := getSingleValue(a.Params, "parent_dataset"); e == nil {
