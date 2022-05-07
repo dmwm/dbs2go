@@ -123,6 +123,31 @@ func InList(a string, list []string) bool {
 	return false
 }
 
+// Set implementa basic set
+func Set(list []int64) []int64 {
+	var out []int64
+	for _, v := range list {
+		if !InInt64List(v, out) {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+// Equal tells whether a and b contain the same elements.
+// A nil argument is equivalent to an empty slice.
+func Equal(a, b []int64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // MapKeys returns string keys from a map
 func MapKeys(rec map[string]interface{}) []string {
 	keys := make([]string, 0, len(rec))
