@@ -25,7 +25,7 @@ func TestUtilsInList(t *testing.T) {
 func TestUtilsSet(t *testing.T) {
 	vals := []int64{1, 2, 3, 1}
 	res := utils.Set(vals)
-	if !utils.Equal(res, []int64{1, 2, 3}) {
+	if !utils.Equal(res, utils.Set([]int64{3, 2, 1})) {
 		t.Error("Fail TestUtilsSet")
 	}
 	arr := []int64{4, 5, 6}
