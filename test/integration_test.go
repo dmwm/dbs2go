@@ -36,10 +36,12 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 			t.Run(v.description, func(t *testing.T) {
 
 				// set the default handler
-				handler := c.defaultHandler
-				if v.handler != nil {
-					handler = v.handler
-				}
+				/*
+					handler := c.defaultHandler
+					if v.handler != nil {
+						handler = v.handler
+					}
+				*/
 
 				// set the endpoint
 				endpoint := c.defaultEndpoint
@@ -87,18 +89,20 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 					}
 					verifyResponse(t, d, v.output)
 				}
-				if v.method == "POST" {
-					rURL := parseURL(t, server.URL, endpoint, v.params)
-					rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
-					if err != nil {
-						t.Error(err)
+				/*
+					if v.method == "POST" {
+						rURL := parseURL(t, server.URL, endpoint, v.params)
+						rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
+						if err != nil {
+							t.Error(err)
+						}
+						data = rr.Body.Bytes()
+						err = json.Unmarshal(data, &d)
+						if err != nil {
+							t.Fatal(err)
+						}
 					}
-					data = rr.Body.Bytes()
-					err = json.Unmarshal(data, &d)
-					if err != nil {
-						t.Fatal(err)
-					}
-				}
+				*/
 			})
 		}
 	})
@@ -113,8 +117,12 @@ func TestIntegration(t *testing.T) {
 	if testCaseFile == "" {
 		log.Fatal("INTEGRATION_DATA_FILE not defined")
 	}
+	bulkblocksFile := os.Getenv("BULKBLOCKS_DATA_FILE")
+	if bulkblocksFile == "" {
+		log.Fatal("BULKBLOCKS_DATA_FILE not defined")
+	}
 
-	testCases := LoadTestCases(t, testCaseFile)
+	testCases := LoadTestCases(t, testCaseFile, bulkblocksFile)
 
 	for _, v := range testCases {
 		runTestWorkflow(t, v)

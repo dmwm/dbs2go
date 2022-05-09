@@ -176,10 +176,6 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 		"http", // client http information on errors
 	}
 
-	ignoredFields := []string{
-		"branch_hash_id", // TODO: Need to fix
-	}
-
 	for i, r := range received {
 		log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		// see difference between expected and received structs
@@ -195,10 +191,12 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 				if a.To == nil {
 					t.Fatalf("Field empty: %v", field)
 				}
-			} else if utils.InList(field, ignoredFields) {
-				continue
 			} else {
-				t.Fatalf("Incorrect %v:\nreceived %v (%T),\nexpected %v (%T)", field, a.To, a.To, a.From, a.From)
+				if a.To == nil && a.From == nil { // check if both values are nil
+					t.Logf("Both values for field %v are nil", field)
+				} else {
+					t.Fatalf("Incorrect %v:\nreceived %v (%T),\nexpected %v (%T)", field, a.To, a.To, a.From, a.From)
+				}
 			}
 		}
 	}
