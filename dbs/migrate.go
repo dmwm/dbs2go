@@ -504,8 +504,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	// get parent blocks at source DBS instance for given input
 	//     srcParentBlocks = prepareMigrationList(localhost, input)
 	srcParentBlocks = prepareMigrationListAtSource(localhost, dstParentBlocks)
-	dstParentBlocks = utils.List2Set(dstParentBlocks)
-	srcParentBlocks = utils.List2Set(srcParentBlocks)
+	dstParentBlocks = utils.Set(dstParentBlocks)
+	srcParentBlocks = utils.Set(srcParentBlocks)
 	if utils.VERBOSE > 0 {
 		log.Printf("Migration blocks from destination %s %+v", rurl, dstParentBlocks)
 		log.Printf("Migration blocks from source %s %+v", localhost, srcParentBlocks)

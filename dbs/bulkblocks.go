@@ -673,7 +673,7 @@ func (a *API) InsertBulkBlocks() error {
 	for _, d := range rec.DsParentList {
 		datasetParentList = append(datasetParentList, d.ParentDataset)
 	}
-	datasetParentList = utils.List2Set(datasetParentList)
+	datasetParentList = utils.Set(datasetParentList)
 	for _, ds := range datasetParentList {
 		// get file id for parent dataset
 		pid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", ds)

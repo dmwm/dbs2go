@@ -17,6 +17,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/constraints"
 )
 
 // VERBOSE controls verbosity level of the package
@@ -96,22 +98,13 @@ func GoDeferFunc(api string, f func()) {
 	}
 }
 
-// InInt64List checks item in a list
-func InInt64List(a int64, list []int64) bool {
-	check := 0
-	for _, b := range list {
-		if b == a {
-			check += 1
-		}
-	}
-	if check != 0 {
-		return true
-	}
-	return false
+// ListEntry identifies types used by list's generics function
+type ListEntry interface {
+	int | int64 | float64 | string
 }
 
 // InList checks item in a list
-func InList(a string, list []string) bool {
+func InList[T ListEntry](a T, list []T) bool {
 	check := 0
 	for _, b := range list {
 		if b == a {
@@ -124,33 +117,35 @@ func InList(a string, list []string) bool {
 	return false
 }
 
-// Int64List implement sort for []int type
-type Int64List []int64
-
-// Len provides length of the []int64 type
-func (s Int64List) Len() int { return len(s) }
-
-// Swap implements swap function for []int64 type
-func (s Int64List) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-
-// Less implements less function for []int64 type
-func (s Int64List) Less(i, j int) bool { return s[i] < s[j] }
-
-// Set implementa basic set
-func Set(list []int64) []int64 {
-	var out []int64
-	for _, v := range list {
-		if !InInt64List(v, out) {
+// Set converts input list into set
+func Set[T ListEntry](arr []T) []T {
+	var out []T
+	for _, v := range arr {
+		if !InList(v, out) {
 			out = append(out, v)
 		}
 	}
-	sort.Sort(Int64List(out))
+	return out
+}
+
+// sortSlice helper function on any ordered generic list
+// https://gosamples.dev/generics-sort-slice/
+func sortSlice[T constraints.Ordered](s []T) {
+    sort.Slice(s, func(i, j int) bool {
+        return s[i] < s[j]
+    })
+}
+
+// OrderedSet implementa ordered set
+func OrderedSet[T ListEntry](list []T) []T {
+	out := Set(list)
+	sortSlice(out)
 	return out
 }
 
 // Equal tells whether a and b contain the same elements.
 // A nil argument is equivalent to an empty slice.
-func Equal(a, b []int64) bool {
+func Equal[T ListEntry](a, b []T) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -179,29 +174,6 @@ func MapIntKeys(rec map[int]interface{}) []int {
 	}
 	return keys
 }
-
-// List2Set converts input list into set
-func List2Set(arr []string) []string {
-	var out []string
-	for _, key := range arr {
-		if !InList(key, out) {
-			out = append(out, key)
-		}
-	}
-	return out
-}
-
-// StringList implements sort for []string type
-type StringList []string
-
-// Len provide length method of StringList
-func (s StringList) Len() int { return len(s) }
-
-// Swap provide swap method of StringList
-func (s StringList) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-
-// Less provide less method of StringList
-func (s StringList) Less(i, j int) bool { return s[i] < s[j] }
 
 // ListFiles lists files in a given directory
 func ListFiles(dir string) []string {
