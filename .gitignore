@@ -39,3 +39,4 @@ migrate.json
 migration.json
 test/data/dbsdata
 .env
+.vscode
