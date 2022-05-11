@@ -184,7 +184,6 @@ func createParentFileLumiList() []dbs.FileLumi {
 		{LumiSectionNumber: 1860, RunNumber: 97, EventCount: 88},
 		{LumiSectionNumber: 1872, RunNumber: 97, EventCount: 89},
 	}
-
 }
 
 // files endpoint tests
@@ -344,43 +343,12 @@ type filesPUTRequest struct {
 
 // files endpoint update tests
 func getFilesTestTable2(t *testing.T) EndpointTestCase {
-	parentFileLumiList := []dbs.FileLumi{
-		{LumiSectionNumber: 27414, RunNumber: 97, EventCount: 66},
-		{LumiSectionNumber: 26422, RunNumber: 97, EventCount: 67},
-		{LumiSectionNumber: 29838, RunNumber: 97, EventCount: 68},
-		{LumiSectionNumber: 248, RunNumber: 97, EventCount: 69},
-		{LumiSectionNumber: 250, RunNumber: 97, EventCount: 70},
-		{LumiSectionNumber: 300, RunNumber: 97, EventCount: 71},
-		{LumiSectionNumber: 534, RunNumber: 97, EventCount: 72},
-		{LumiSectionNumber: 546, RunNumber: 97, EventCount: 73},
-		{LumiSectionNumber: 638, RunNumber: 97, EventCount: 74},
-		{LumiSectionNumber: 650, RunNumber: 97, EventCount: 75},
-		{LumiSectionNumber: 794, RunNumber: 97, EventCount: 76},
-		{LumiSectionNumber: 1313, RunNumber: 97, EventCount: 77},
-		{LumiSectionNumber: 1327, RunNumber: 97, EventCount: 78},
-		{LumiSectionNumber: 1339, RunNumber: 97, EventCount: 79},
-		{LumiSectionNumber: 1353, RunNumber: 97, EventCount: 80},
-		{LumiSectionNumber: 1428, RunNumber: 97, EventCount: 81},
-		{LumiSectionNumber: 1496, RunNumber: 97, EventCount: 82},
-		{LumiSectionNumber: 1537, RunNumber: 97, EventCount: 83},
-		{LumiSectionNumber: 1652, RunNumber: 97, EventCount: 84},
-		{LumiSectionNumber: 1664, RunNumber: 97, EventCount: 85},
-		{LumiSectionNumber: 1743, RunNumber: 97, EventCount: 86},
-		{LumiSectionNumber: 1755, RunNumber: 97, EventCount: 87},
-		{LumiSectionNumber: 1860, RunNumber: 97, EventCount: 88},
-		{LumiSectionNumber: 1872, RunNumber: 97, EventCount: 89},
-	}
-	var parentFiles []dbs.FileRecord
 	var parentLFNs []Response
 	var testDataParentFiles []string
-	var parentDetailResp []Response
 	for i := 1; i <= 10; i++ {
 		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		parentLFNs = append(parentLFNs, fileResponse{LOGICAL_FILE_NAME: parentLFN})
 		testDataParentFiles = append(testDataParentFiles, parentLFN)
-		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
-		parentFiles = append(parentFiles, fileRecord)
-		parentDetailResp = append(parentDetailResp, createFileDetailedResponse(i, 2, 2, fileRecord))
 	}
 
 	TestData.ParentFiles = testDataParentFiles
@@ -451,7 +419,6 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 
 	// add run_num
 	var fileRunDetailResp []Response
-	var fileRunDetailResp2 []Response
 	for _, fd := range detailResp2 {
 		for i := 0; i < 9; i++ {
 			var frr fileDetailRunResponse
@@ -477,7 +444,6 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 		}
 		frr.RUN_NUM = 97
 		frr.EventCount = 1619
-		fileRunDetailResp2 = append(fileRunDetailResp2, frr)
 	}
 
 	// filtered detailed response
@@ -595,139 +561,120 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 
 // test files with lumi_list range
 func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
-	parentFileLumiList := []dbs.FileLumi{
-		{LumiSectionNumber: 27414, RunNumber: 97, EventCount: 66},
-		{LumiSectionNumber: 26422, RunNumber: 97, EventCount: 67},
-		{LumiSectionNumber: 29838, RunNumber: 97, EventCount: 68},
-		{LumiSectionNumber: 248, RunNumber: 97, EventCount: 69},
-		{LumiSectionNumber: 250, RunNumber: 97, EventCount: 70},
-		{LumiSectionNumber: 300, RunNumber: 97, EventCount: 71},
-		{LumiSectionNumber: 534, RunNumber: 97, EventCount: 72},
-		{LumiSectionNumber: 546, RunNumber: 97, EventCount: 73},
-		{LumiSectionNumber: 638, RunNumber: 97, EventCount: 74},
-		{LumiSectionNumber: 650, RunNumber: 97, EventCount: 75},
-		{LumiSectionNumber: 794, RunNumber: 97, EventCount: 76},
-		{LumiSectionNumber: 1313, RunNumber: 97, EventCount: 77},
-		{LumiSectionNumber: 1327, RunNumber: 97, EventCount: 78},
-		{LumiSectionNumber: 1339, RunNumber: 97, EventCount: 79},
-		{LumiSectionNumber: 1353, RunNumber: 97, EventCount: 80},
-		{LumiSectionNumber: 1428, RunNumber: 97, EventCount: 81},
-		{LumiSectionNumber: 1496, RunNumber: 97, EventCount: 82},
-		{LumiSectionNumber: 1537, RunNumber: 97, EventCount: 83},
-		{LumiSectionNumber: 1652, RunNumber: 97, EventCount: 84},
-		{LumiSectionNumber: 1664, RunNumber: 97, EventCount: 85},
-		{LumiSectionNumber: 1743, RunNumber: 97, EventCount: 86},
-		{LumiSectionNumber: 1755, RunNumber: 97, EventCount: 87},
-		{LumiSectionNumber: 1860, RunNumber: 97, EventCount: 88},
-		{LumiSectionNumber: 1872, RunNumber: 97, EventCount: 89},
-	}
-	var parentFiles []dbs.FileRecord
-	var parentLFNs []Response
-	var testDataParentFiles []string
-	var parentDetailResp []Response
-	for i := 1; i <= 10; i++ {
-		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
-		parentLFNs = append(parentLFNs, fileResponse{LOGICAL_FILE_NAME: parentLFN})
-		testDataParentFiles = append(testDataParentFiles, parentLFN)
-		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
-		parentFiles = append(parentFiles, fileRecord)
-		parentDetailResp = append(parentDetailResp, createFileDetailedResponse(i, 2, 2, fileRecord))
-	}
-
-	TestData.ParentFiles = testDataParentFiles
-
-	fileLumiList := []dbs.FileLumi{
-		{LumiSectionNumber: 27414, RunNumber: 97},
-		{LumiSectionNumber: 26422, RunNumber: 98},
-		{LumiSectionNumber: 29838, RunNumber: 99},
-	}
-
-	var lfns []Response
-	var detailResp []Response
-	var detailResp2 []Response // for testing GET after PUT
-	var testDataFiles []string
-	for i := 1; i <= 10; i++ {
-		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
-		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
-		testDataFiles = append(testDataFiles, lfn)
-		fileParentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
-		fileParentList := []dbs.FileParentLFNRecord{
-			{
-				FILE_PARENT_LFN: fileParentLFN,
-			},
-		}
-		fileRecord := createFileRecord(i, TestData.Dataset, TestData.Block, fileLumiList, lfn, fileParentList)
-		singleDetailResp := createFileDetailedResponse(i+10, 1, 1, fileRecord)
-		singleDetailResp2 := singleDetailResp
-		if i == 1 {
-			singleDetailResp2.IS_FILE_VALID = 0
-			singleDetailResp2.LAST_MODIFIED_BY = "DBS-workflow"
-		}
-		detailResp = append(detailResp, singleDetailResp)
-		detailResp2 = append(detailResp2, singleDetailResp2)
-	}
-
-	TestData.Files = testDataFiles
-	lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, 1)
-
-	fileResp := fileDetailResponse{
-		ADLER32:                "NOTSET",
-		AUTO_CROSS_SECTION:     0.0,
-		BLOCK_ID:               1,
-		BLOCK_NAME:             TestData.Block,
-		CHECK_SUM:              "1504266448",
-		CREATE_BY:              TestData.CreateBy,
-		CREATION_DATE:          0,
-		DATASET:                TestData.Dataset,
-		DATASET_ID:             1,
-		EventCount:             1619,
-		FILE_ID:                11,
-		FILE_SIZE:              2.012211901e+09,
-		FILE_TYPE:              "EDM",
-		FILE_TYPE_ID:           1,
-		IS_FILE_VALID:          1,
-		LAST_MODIFICATION_DATE: 0,
-		LAST_MODIFIED_BY:       TestData.CreateBy,
-		LOGICAL_FILE_NAME:      lfn,
-		MD5:                    "",
-	}
-
-	fileResp2 := fileResp
-	fileResp2.IS_FILE_VALID = 0
-	fileResp2.LAST_MODIFIED_BY = "DBS-workflow"
-
-	// add run_num
-	var fileRunDetailResp []Response
-	var fileRunDetailResp2 []Response
-	for _, fd := range detailResp2 {
-		for i := 0; i < 9; i++ {
-			var frr fileDetailRunResponse
-			fr, err := json.Marshal(fd)
-			if err != nil {
-				t.Fatal(err)
-			}
-			err = json.Unmarshal(fr, &frr)
-			if err != nil {
-				t.Fatal(err)
-			}
-			frr.RUN_NUM = 97
-			fileRunDetailResp = append(fileRunDetailResp, frr)
-		}
-		var frr fileDetailRunEventResponse
-		fr, err := json.Marshal(fd)
-		if err != nil {
-			t.Fatal(err)
-		}
-		err = json.Unmarshal(fr, &frr)
-		if err != nil {
-			t.Fatal(err)
-		}
-		frr.RUN_NUM = 97
-		frr.EventCount = 1619
-		fileRunDetailResp2 = append(fileRunDetailResp2, frr)
-	}
-
 	// filtered detailed response
+	childBulk := BulkBlocksData.ChildData
+	var lfns2 []Response
+	var detailResp3 []Response
+	var detailRunResp []Response
+	var fileRunResp []Response
+	for i, v := range childBulk.Files {
+		r := fileResponse{
+			LOGICAL_FILE_NAME: v.LogicalFileName,
+		}
+		lfns2 = append(lfns2, r)
+		detail := fileDetailResponse{
+			ADLER32:                v.Adler32,
+			AUTO_CROSS_SECTION:     v.AutoCrossSection,
+			BLOCK_ID:               4,
+			BLOCK_NAME:             childBulk.Block.BlockName,
+			CHECK_SUM:              v.CheckSum,
+			CREATE_BY:              "DBS-workflow",
+			CREATION_DATE:          childBulk.Dataset.CreationDate,
+			DATASET:                childBulk.Dataset.Dataset,
+			DATASET_ID:             5,
+			EventCount:             v.EventCount,
+			FILE_ID:                int64(26 + i),
+			FILE_SIZE:              v.FileSize,
+			FILE_TYPE:              v.FileType,
+			FILE_TYPE_ID:           1,
+			IS_FILE_VALID:          v.IsFileValid,
+			LAST_MODIFICATION_DATE: 1652196887,
+			LAST_MODIFIED_BY:       "DBS-workflow",
+			LOGICAL_FILE_NAME:      v.LogicalFileName,
+			MD5:                    "",
+		}
+		var detailRun fileDetailRunEventResponse
+		d, err := json.Marshal(detail)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		err = json.Unmarshal(d, &detailRun)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		detailRun.RUN_NUM = 98
+		detailRun.EventCount = 201
+		detailRunResp = append(detailRunResp, detailRun)
+
+		detailResp3 = append(detailResp3, detail)
+		fileRunResp = append(fileRunResp, fileRunResponse{
+			LOGICAL_FILE_NAME: v.LogicalFileName,
+			RUN_NUM:           v.FileLumiList[0].RunNumber,
+		})
+	}
+
+	runNumParam := fmt.Sprint(childBulk.Files[0].FileLumiList[0].RunNumber)
+	// runNumParam2 := fmt.Sprint(childBulk.Files[0].FileLumiList[2].RunNumber)
+
+	dbsErrorNest := dbs.DBSError{
+		Reason:   "near \"AS\": syntax error",
+		Code:     dbs.QueryErrorCode,
+		Message:  "",
+		Function: "dbs.executeAll",
+	}
+	dbsError := dbs.DBSError{
+		Function: "dbs.files.Files",
+		Code:     dbs.QueryErrorCode,
+		Reason:   dbsErrorNest.Error(),
+		Message:  "",
+	}
+	hrec := web.HTTPError{
+		Method:    "GET",
+		Timestamp: "",
+		HTTPCode:  http.StatusBadRequest,
+		Path:      "/dbs/files?block_name=/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-v8268/GEN-SIM-RAW#8268&detail=true&lumi_list=[27414,26422,29838]&run_num=98&sumOverLumi=1",
+		UserAgent: "Go-http-client/1.1",
+	}
+	errorResp := web.ServerError{
+		HTTPError: hrec,
+		DBSError:  &dbsError,
+		Exception: http.StatusBadRequest,
+		Type:      "HTTPError",
+		Message:   dbsError.Error(),
+	}
+
+	dbsError2 := dbs.DBSError{
+		Reason:   dbs.InvalidParamErr.Error(),
+		Code:     dbs.ParametersErrorCode,
+		Message:  "When sumOverLumi=1, no run_num list is allowed",
+		Function: "dbs.files.Files",
+	}
+	hrec2 := web.HTTPError{
+		Method:    "GET",
+		Timestamp: "",
+		HTTPCode:  http.StatusBadRequest,
+		Path:      "/dbs/files?block_name=/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-v8268/GEN-SIM-RAW#8268&detail=true&lumi_list=[27414,26422,29838]&run_num=98&sumOverLumi=1",
+		UserAgent: "Go-http-client/1.1",
+	}
+	errorResp2 := web.ServerError{
+		HTTPError: hrec2,
+		DBSError:  &dbsError2,
+		Exception: http.StatusBadRequest,
+		Type:      "HTTPError",
+		Message:   dbsError2.Error(),
+	}
+
+	var largeFileResp []Response
+	err := readJsonFile(t, "./data/integration/files_response_data.json", &largeFileResp)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	var largeFileResp2 []Response
+	err = readJsonFile(t, "./data/integration/files_response_data2.json", &largeFileResp2)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	return EndpointTestCase{
 		description:     "Test files with lumi_list ranges",
@@ -741,7 +688,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				params: url.Values{
 					"block_name": []string{TestData.StepchainBlock},
 				},
-				output:   lfns,
+				output:   lfns2,
 				respCode: http.StatusOK,
 			},
 			{
@@ -749,10 +696,10 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name": []string{TestData.Block},
+					"block_name": []string{TestData.StepchainBlock},
 					"detail":     []string{"true"},
 				},
-				output:   detailResp2,
+				output:   detailResp3,
 				respCode: http.StatusOK,
 			},
 			{
@@ -760,10 +707,10 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
+					"block_name":    []string{TestData.StepchainBlock},
 					"validFileOnly": []string{"1"},
 				},
-				output:   lfns[1:],
+				output:   lfns2,
 				respCode: http.StatusOK,
 			},
 			{
@@ -771,11 +718,11 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
+					"block_name":    []string{TestData.StepchainBlock},
 					"validFileOnly": []string{"1"},
 					"detail":        []string{"true"},
 				},
-				output:   detailResp[1:],
+				output:   detailResp3,
 				respCode: http.StatusOK,
 			},
 			{
@@ -783,10 +730,10 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
+					"block_name":    []string{TestData.StepchainBlock},
 					"validFileOnly": []string{"0"},
 				},
-				output:   lfns,
+				output:   lfns2,
 				respCode: http.StatusOK,
 			},
 			{
@@ -794,11 +741,11 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
+					"block_name":    []string{TestData.StepchainBlock},
 					"validFileOnly": []string{"0"},
 					"detail":        []string{"true"},
 				},
-				output:   detailResp2,
+				output:   detailResp3,
 				respCode: http.StatusOK,
 			},
 			{
@@ -806,23 +753,23 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name": []string{TestData.Block},
-					"run_num":    []string{fmt.Sprint(TestData.Runs[0])},
-					"lumi_list":  []string{"[29838]"},
+					"block_name": []string{TestData.StepchainBlock},
+					"run_num":    []string{runNumParam},
+					"lumi_list":  []string{"[27414,26422,29838]"},
 				},
-				output:   []Response{}, // TODO: Verify this response
-				respCode: http.StatusBadRequest,
+				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
 			},
 			{
 				description: "Test GET with block_name, run_num, nested lumi_list", // DBSClientReader_t.test033h
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name": []string{TestData.Block},
-					"run_num":    []string{fmt.Sprint(TestData.Runs[0])},
-					"lumi_list":  []string{"[[1 20] [30 40] [50 60]]"},
+					"block_name": []string{TestData.StepchainBlock},
+					"run_num":    []string{runNumParam},
+					"lumi_list":  []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
 				},
-				output:   []Response{}, // TODO: do this after bulkblocks
+				output:   fileRunResp,
 				respCode: http.StatusOK,
 			},
 			{
@@ -830,13 +777,12 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name": []string{TestData.Block},
-					"run_num":    []string{fmt.Sprint(TestData.Runs[0])},
-					// "lumi_list":  []string{"[1,2,3,4,5,6]"},
-					"lumi_list": []string{"[27414,26422,29838]"},
-					"detail":    []string{"true"},
+					"block_name": []string{TestData.StepchainBlock},
+					"run_num":    []string{runNumParam},
+					"lumi_list":  []string{"[27414,26422,29838]"},
+					"detail":     []string{"true"},
 				},
-				output:   fileRunDetailResp2, // TODO: Verify this response
+				output:   detailRunResp[:1],
 				respCode: http.StatusOK,
 			},
 			{
@@ -844,25 +790,25 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name": []string{TestData.Block},
-					"run_num":    []string{fmt.Sprint(TestData.Runs[0])},
-					"lumi_list":  []string{"[[248, 248],[300, 300],[546, 546]]"},
+					"block_name": []string{TestData.StepchainBlock},
+					"run_num":    []string{runNumParam},
+					"lumi_list":  []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
 					"detail":     []string{"true"},
 				},
-				output:   []Response{}, // TODO: redo this after bulkblocks insert DBSClientWriter_t.test23
+				output:   detailRunResp,
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET with block_name, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test033k
+				description: "Test GET with block_name, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test033k
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
-					"run_num":       []string{fmt.Sprint(TestData.Runs[0])},
-					"lumi_list":     []string{"[1,2,3,4,5,6]"},
+					"block_name":    []string{TestData.StepchainBlock},
+					"run_num":       []string{runNumParam},
+					"lumi_list":     []string{"[27414,26422,29838]"},
 					"validFileOnly": []string{"1"},
 				},
-				output:   []Response{}, // TODO: Verify this response
+				output:   fileRunResp[:1],
 				respCode: http.StatusOK,
 			},
 			{
@@ -870,12 +816,12 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
-					"run_num":       []string{fmt.Sprint(TestData.Runs[0])},
-					"lumi_list":     []string{"[[1, 20],[30, 40],[50, 60]]"},
+					"block_name":    []string{TestData.StepchainBlock},
+					"run_num":       []string{runNumParam},
+					"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
 					"validFileOnly": []string{"1"},
 				},
-				output:   []Response{}, // TODO: Verify this response
+				output:   fileRunResp,
 				respCode: http.StatusOK,
 			},
 			{
@@ -883,13 +829,126 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
-					"block_name":    []string{TestData.Block},
-					"run_num":       []string{fmt.Sprint(TestData.Runs[0])},
-					"lumi_list":     []string{"[1,2,3,4,5,6]"},
+					"block_name":    []string{TestData.StepchainBlock},
+					"run_num":       []string{runNumParam},
+					"lumi_list":     []string{"[27414,26422,29838]"},
 					"validFileOnly": []string{"1"},
 					"detail":        []string{"true"},
 				},
-				output:   []Response{}, // TODO: Verify this response
+				output:   detailRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with block_name, run_num, nested lumi_list, detail, validFileOnly", // DBSClientReader_t.test033n
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name":    []string{TestData.StepchainBlock},
+					"run_num":       []string{runNumParam},
+					"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					"validFileOnly": []string{"1"},
+					"detail":        []string{"true"},
+				},
+				output:   detailRunResp,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with block_name, run_num, lumi_list", // DBSClientReader_t.test033o
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name": []string{TestData.StepchainBlock},
+					"run_num":    []string{fmt.Sprintf("[%s]", runNumParam)},
+					"lumi_list":  []string{"[27414,26422,29838]"},
+				},
+				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test bad GET with block_name, sumOverLumi, run_num, lumi_list, detail", // DBSClientReader_t.test033p
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name":  []string{TestData.StepchainBlock},
+					"sumOverLumi": []string{"1"},
+					"run_num":     []string{runNumParam},
+					"lumi_list":   []string{"[27414,26422,29838]"},
+					"detail":      []string{"true"},
+				},
+				output:   []Response{errorResp},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test bad GET with block_name, sumOverLumi, single run_num, detail", // DBSClientReader_t.test033q
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name":  []string{TestData.StepchainBlock},
+					"sumOverLumi": []string{"1"},
+					"run_num":     []string{fmt.Sprintf("[%s]", runNumParam)},
+					"detail":      []string{"true"},
+				},
+				output:   []Response{errorResp2},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test GET with block_name, sumOverLumi, run_num, detail", // DBSClientReader_t.test033r
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name":  []string{TestData.Block},
+					"sumOverLumi": []string{"1"},
+					"run_num":     []string{"97-99"},
+					"detail":      []string{"true"},
+				},
+				output:   largeFileResp,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with block_name, sumOverLumi, validFileOnly, run_num, detail", // DBSClientReader_t.test033s
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name":    []string{TestData.Block},
+					"sumOverLumi":   []string{"1"},
+					"validFileOnly": []string{"1"},
+					"run_num":       []string{"97-99"},
+					"detail":        []string{"true"},
+				},
+				output:   largeFileResp2,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn", // DBSClientReader_t.test034a
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+				},
+				output:   lfns2[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, validFileOnly", // DBSClientReader_t.test034b
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"validFileOnly":     []string{"1"},
+				},
+				output:   lfns2[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034c
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[27414,26422,29838]"},
+				},
+				output:   fileRunResp[:1],
 				respCode: http.StatusOK,
 			},
 		},

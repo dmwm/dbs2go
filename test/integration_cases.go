@@ -297,6 +297,7 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 			},
 			EventCount:      201,
 			LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v/%v.root", TestData.UID, i),
+			IsFileValid:     1,
 		}
 		parentFileList = append(parentFileList, f)
 		var parentAlgo dbs.FileConfig

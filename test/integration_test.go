@@ -87,6 +87,7 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 					if err != nil {
 						t.Fatalf("Failed to decode body, %v", err)
 					}
+
 					verifyResponse(t, d, v.output)
 				}
 				/*

@@ -98,7 +98,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p8268/0.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -128,7 +128,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p8268/1.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -158,7 +158,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p8268/2.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -188,7 +188,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p8268/3.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -218,7 +218,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p8268/4.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       }
     ],
     "processing_era": {
@@ -232,19 +232,19 @@
       "create_by": "WMAgent",
       "primary_ds_type": "test",
       "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain",
-      "creation_date": 1652123790
+      "creation_date": 1652206084
     },
     "dataset": {
       "dataset_id": 0,
       "create_by": "WMAgent",
-      "creation_date": 1652123790,
+      "creation_date": 1652206084,
       "physics_group_name": "Tracker",
       "dataset_access_type": "PRODUCTION",
       "data_tier_name": "GEN-SIM-RAW",
       "last_modified_by": "WMAgent",
       "processed_ds_name": "acq_era_8268-ptsr-v8268",
       "xtcrosssection": 0,
-      "last_modification_date": 1652123790,
+      "last_modification_date": 1652206084,
       "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-ptsr-v8268/GEN-SIM-RAW",
       "prep_id": "TestPrepID"
     },
@@ -373,7 +373,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/0.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -403,7 +403,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/1.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -433,7 +433,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/2.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -463,7 +463,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/3.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       },
       {
         "check_sum": "1504266448",
@@ -493,7 +493,7 @@
         "logical_file_name": "/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/4.root",
         "md5": "",
         "auto_cross_section": 0,
-        "is_file_valid": 0
+        "is_file_valid": 1
       }
     ],
     "processing_era": {
@@ -507,19 +507,19 @@
       "create_by": "WMAgent",
       "primary_ds_type": "test",
       "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain",
-      "creation_date": 1652123790
+      "creation_date": 1652206084
     },
     "dataset": {
       "dataset_id": 0,
       "create_by": "WMAgent",
-      "creation_date": 1652123790,
+      "creation_date": 1652206084,
       "physics_group_name": "Tracker",
       "dataset_access_type": "PRODUCTION",
       "data_tier_name": "GEN-SIM-RAW",
       "last_modified_by": "WMAgent",
       "processed_ds_name": "acq_era_8268-v8268",
       "xtcrosssection": 0,
-      "last_modification_date": 1652123790,
+      "last_modification_date": 1652206084,
       "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-v8268/GEN-SIM-RAW",
       "prep_id": "TestPrepID"
     },
