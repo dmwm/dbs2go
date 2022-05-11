@@ -342,7 +342,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	if utils.VERBOSE > 1 {
 		log.Println("InsertFileParentsBlock fids", fids, "bfids", bfids)
 	}
-	if len(fids) != len(bfids) {
+	if !utils.Equal(utils.OrderedSet(fids), utils.OrderedSet(bfids)) {
 		log.Println("block fids != file ids")
 		log.Println("block ids", bfids)
 		log.Println("file  ids", fids)

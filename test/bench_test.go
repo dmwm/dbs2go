@@ -1,7 +1,9 @@
 package main
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/utils"
@@ -47,5 +49,42 @@ func BenchmarkUpdateOrderedDict(b *testing.B) {
 	}
 	for i := 0; i < b.N; i++ {
 		utils.UpdateOrderedDict(omap, nmap)
+	}
+}
+
+// BenchmarkInList
+func BenchmarkInList(b *testing.B) {
+	utils.VERBOSE = 0
+	N := 1000
+	list := make([]int, N)
+	for i := 0; i < N; i++ {
+		list[i] = i
+	}
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < b.N; i++ {
+		elem := rand.Intn(N)
+		res := utils.InList(elem, list)
+		if res != true {
+			b.Fatal("unable to find random element in a list")
+		}
+	}
+}
+
+// BenchmarkEqual
+func BenchmarkEqual(b *testing.B) {
+	utils.VERBOSE = 0
+	N := 1000
+	list := make([]int, N)
+	for i := 0; i < N; i++ {
+		list[i] = i
+	}
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < b.N; i++ {
+		set1 := utils.Set(list)
+		set2 := utils.Set(list)
+		res := utils.Equal(set1, set2)
+		if res != true {
+			b.Fatal("unable to compare sets")
+		}
 	}
 }

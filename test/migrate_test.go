@@ -186,7 +186,7 @@ func TestMigrate(t *testing.T) {
 	var sids []int64
 	for _, rrr := range statusRecords {
 		sids = append(sids, rrr.MIGRATION_REQUEST_ID)
-		if !utils.InInt64List(rrr.MIGRATION_REQUEST_ID, rids) {
+		if !utils.InList(rrr.MIGRATION_REQUEST_ID, rids) {
 			t.Errorf("unvalid status request id %d, expect %+v", rrr.MIGRATION_REQUEST_ID, rids)
 		}
 	}

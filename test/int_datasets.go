@@ -529,6 +529,40 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 				},
 				respCode: http.StatusOK,
 			},
+			{
+				description: "Test is_dataset_valid true",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"is_dataset_valid": []string{"1"},
+				},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test is_dataset_valid false",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"is_dataset_valid": []string{"0"},
+				},
+				output:   []Response{},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test is_dataset_valid none",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params:      url.Values{},
+				output: []Response{
+					dsResp,
+					dsParentResp,
+				},
+				respCode: http.StatusOK,
+			},
 		},
 	}
 }
@@ -747,6 +781,7 @@ type datasetsUpdateRequest struct {
 func getDatasetsTestTable3(t *testing.T) EndpointTestCase {
 	// basic responses
 	dsResp := createDSResponse(TestData.Dataset)
+	// dsParentResp := createDSResponse(TestData.ParentDataset)
 
 	// detail responses
 	// dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)

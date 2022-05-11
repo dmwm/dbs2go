@@ -21,6 +21,32 @@ func TestUtilsInList(t *testing.T) {
 	}
 }
 
+// TestUtilsSet
+func TestUtilsSet(t *testing.T) {
+	vals := []int64{1, 2, 3, 1}
+	res := utils.Set(vals)
+	if !utils.Equal(res, utils.Set([]int64{1, 2, 3})) {
+		t.Error("Fail TestUtilsSet")
+	}
+	arr := []int64{4, 5, 6}
+	if utils.Equal(res, arr) {
+		t.Error("Fail of Equal in TestUtilsSet")
+	}
+}
+
+// TestUtilsOrderedSet
+func TestUtilsOrderedSet(t *testing.T) {
+	vals := []int64{1, 2, 3, 1}
+	res := utils.Set(vals)
+	if !utils.Equal(res, utils.OrderedSet([]int64{3, 2, 1})) {
+		t.Error("Fail TestUtilsSet")
+	}
+	arr := []int64{4, 5, 6}
+	if utils.Equal(res, arr) {
+		t.Error("Fail of Equal in TestUtilsOrderedSet")
+	}
+}
+
 // TestUtilsRecordSize
 func TestUtilsRecordSize(t *testing.T) {
 	rec := make(map[string]int)

@@ -14,8 +14,11 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/constraints"
 )
 
 // VERBOSE controls verbosity level of the package
@@ -95,8 +98,13 @@ func GoDeferFunc(api string, f func()) {
 	}
 }
 
-// InInt64List checks item in a list
-func InInt64List(a int64, list []int64) bool {
+// ListEntry identifies types used by list's generics function
+type ListEntry interface {
+	int | int64 | float64 | string
+}
+
+// InList checks item in a list
+func InList[T ListEntry](a T, list []T) bool {
 	check := 0
 	for _, b := range list {
 		if b == a {
@@ -109,18 +117,44 @@ func InInt64List(a int64, list []int64) bool {
 	return false
 }
 
-// InList checks item in a list
-func InList(a string, list []string) bool {
-	check := 0
-	for _, b := range list {
-		if b == a {
-			check += 1
+// Set converts input list into set
+func Set[T ListEntry](arr []T) []T {
+	var out []T
+	for _, v := range arr {
+		if !InList(v, out) {
+			out = append(out, v)
 		}
 	}
-	if check != 0 {
-		return true
+	return out
+}
+
+// sortSlice helper function on any ordered generic list
+// https://gosamples.dev/generics-sort-slice/
+func sortSlice[T constraints.Ordered](s []T) {
+    sort.Slice(s, func(i, j int) bool {
+        return s[i] < s[j]
+    })
+}
+
+// OrderedSet implementa ordered set
+func OrderedSet[T ListEntry](list []T) []T {
+	out := Set(list)
+	sortSlice(out)
+	return out
+}
+
+// Equal tells whether a and b contain the same elements.
+// A nil argument is equivalent to an empty slice.
+func Equal[T ListEntry](a, b []T) bool {
+	if len(a) != len(b) {
+		return false
 	}
-	return false
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // MapKeys returns string keys from a map
@@ -140,29 +174,6 @@ func MapIntKeys(rec map[int]interface{}) []int {
 	}
 	return keys
 }
-
-// List2Set converts input list into set
-func List2Set(arr []string) []string {
-	var out []string
-	for _, key := range arr {
-		if !InList(key, out) {
-			out = append(out, key)
-		}
-	}
-	return out
-}
-
-// StringList implements sort for []string type
-type StringList []string
-
-// Len provide length method of StringList
-func (s StringList) Len() int { return len(s) }
-
-// Swap provide swap method of StringList
-func (s StringList) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-
-// Less provide less method of StringList
-func (s StringList) Less(i, j int) bool { return s[i] < s[j] }
 
 // ListFiles lists files in a given directory
 func ListFiles(dir string) []string {
