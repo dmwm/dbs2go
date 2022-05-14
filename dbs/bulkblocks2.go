@@ -678,7 +678,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 			rrr.FileType,
 		)
 		if err != nil {
-			msg := fmt.Sprintf("%s unable to find file_type_id for %s, error %v", hash, ftype, err)
+			msg := fmt.Sprintf("%s unable to find file_type_id for %v, error %v", hash, ftype, err)
 			log.Println(msg)
 			return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}

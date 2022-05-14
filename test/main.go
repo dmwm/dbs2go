@@ -95,10 +95,10 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 }
 
 // helper funtion to return DBS server with basic parameters
-func dbsServer(t *testing.T, base, dbFile, serverType string) *httptest.Server {
+func dbsServer(t *testing.T, base, dbFile, serverType string, concurrent bool) *httptest.Server {
 	dbfile := os.Getenv(dbFile)
 	if dbfile == "" {
-		log.Fatal(fmt.Sprintf("no %s env variable, please define", dbFile))
+		log.Fatalf("no %s env variable, please define", dbFile)
 	}
 
 	var lexiconFile string
@@ -123,6 +123,7 @@ func dbsServer(t *testing.T, base, dbFile, serverType string) *httptest.Server {
 	web.Config.ServerType = serverType
 	web.Config.LogFile = fmt.Sprintf("/tmp/dbs2go-%s.log", base)
 	web.Config.Verbose = 0
+	web.Config.ConcurrentBulkBlocks = concurrent
 	utils.VERBOSE = 0
 	utils.BASE = base
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)

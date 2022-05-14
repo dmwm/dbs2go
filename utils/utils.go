@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"golang.org/x/exp/constraints"
+	constraints "golang.org/x/exp/constraints"
 )
 
 // VERBOSE controls verbosity level of the package
@@ -131,9 +131,9 @@ func Set[T ListEntry](arr []T) []T {
 // sortSlice helper function on any ordered generic list
 // https://gosamples.dev/generics-sort-slice/
 func sortSlice[T constraints.Ordered](s []T) {
-    sort.Slice(s, func(i, j int) bool {
-        return s[i] < s[j]
-    })
+	sort.Slice(s, func(i, j int) bool {
+		return s[i] < s[j]
+	})
 }
 
 // OrderedSet implementa ordered set

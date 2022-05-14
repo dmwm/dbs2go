@@ -36,12 +36,10 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 			t.Run(v.description, func(t *testing.T) {
 
 				// set the default handler
-				/*
-					handler := c.defaultHandler
-					if v.handler != nil {
-						handler = v.handler
-					}
-				*/
+				handler := c.defaultHandler
+				if v.handler != nil {
+					handler = v.handler
+				}
 
 				// set the endpoint
 				endpoint := c.defaultEndpoint
@@ -50,7 +48,7 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				}
 
 				// run a test server for a single test case
-				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType)
+				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType, c.concurrentBulkBlocks)
 				defer server.Close()
 
 				// create request body
@@ -90,20 +88,18 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 
 					verifyResponse(t, d, v.output)
 				}
-				/*
-					if v.method == "POST" {
-						rURL := parseURL(t, server.URL, endpoint, v.params)
-						rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
-						if err != nil {
-							t.Error(err)
-						}
-						data = rr.Body.Bytes()
-						err = json.Unmarshal(data, &d)
-						if err != nil {
-							t.Fatal(err)
-						}
+				if v.method == "POST" {
+					rURL := parseURL(t, server.URL, endpoint, v.params)
+					rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
+					if err != nil {
+						t.Error(err)
 					}
-				*/
+					data = rr.Body.Bytes()
+					err = json.Unmarshal(data, &d)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
 			})
 		}
 	})

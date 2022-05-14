@@ -99,10 +99,11 @@ var BulkBlocksData bulkBlocksData
 
 // defines a testcase for an endpoint
 type EndpointTestCase struct {
-	description     string
-	defaultHandler  func(http.ResponseWriter, *http.Request)
-	defaultEndpoint string
-	testCases       []testCase
+	description          string
+	defaultHandler       func(http.ResponseWriter, *http.Request)
+	defaultEndpoint      string
+	concurrentBulkBlocks bool
+	testCases            []testCase
 }
 
 // get a UUID time_mid as an int
@@ -199,6 +200,37 @@ func generateBaseData(t *testing.T, filepath string) {
 	_ = ioutil.WriteFile(filepath, file, os.ModePerm)
 }
 
+// creates a file for bulkblocks
+func createFile(t *testing.T, i int) dbs.File {
+	return dbs.File{
+		Adler32:          "NOTSET",
+		FileType:         "EDM",
+		FileSize:         2012211901,
+		AutoCrossSection: 0.0,
+		CheckSum:         "1504266448",
+		FileLumiList: []dbs.FileLumi{
+			{
+				LumiSectionNumber: int64(27414 + i),
+				RunNumber:         98,
+				EventCount:        66,
+			},
+			{
+				LumiSectionNumber: int64(26422 + i),
+				RunNumber:         98,
+				EventCount:        67,
+			},
+			{
+				LumiSectionNumber: int64(29838 + i),
+				RunNumber:         98,
+				EventCount:        68,
+			},
+		},
+		EventCount:      201,
+		LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v/%v.root", TestData.UID, i),
+		IsFileValid:     1,
+	}
+}
+
 // generates bulkblocks data
 func generateBulkBlocksData(t *testing.T, filepath string) {
 	var parentBulk dbs.BulkBlocks
@@ -271,37 +303,15 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 
 	var parentFileList []dbs.File
 	var childFileList []dbs.File
+	var parentFileList2 []dbs.File
+	var childFileList2 []dbs.File
 	for i := 0; i < fileCount; i++ {
-		f := dbs.File{
-			Adler32:          "NOTSET",
-			FileType:         "EDM",
-			FileSize:         2012211901,
-			AutoCrossSection: 0.0,
-			CheckSum:         "1504266448",
-			FileLumiList: []dbs.FileLumi{
-				{
-					LumiSectionNumber: int64(27414 + i),
-					RunNumber:         98,
-					EventCount:        66,
-				},
-				{
-					LumiSectionNumber: int64(26422 + i),
-					RunNumber:         98,
-					EventCount:        67,
-				},
-				{
-					LumiSectionNumber: int64(29838 + i),
-					RunNumber:         98,
-					EventCount:        68,
-				},
-			},
-			EventCount:      201,
-			LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v/%v.root", TestData.UID, i),
-			IsFileValid:     1,
-		}
+		f := createFile(t, i)
 		parentFileList = append(parentFileList, f)
+
 		var parentAlgo dbs.FileConfig
-		pa, err := json.Marshal(algo)
+
+		pa, err := json.Marshal(algo) // convert DatasetConfig to FileConfig
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -309,7 +319,7 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 
 		parentAlgo.LFN = f.LogicalFileName
 		parentBulk.FileConfigList = append(parentBulk.FileConfigList, parentAlgo)
-		// parentBulk.ParentStepChainFiles
+
 		childf := f
 		childf.LogicalFileName = fmt.Sprintf("/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/%v/%v.root", TestData.UID, i)
 		childFileList = append(childFileList, childf)
@@ -318,6 +328,11 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 		json.Unmarshal(pa, &childAlgo)
 		childAlgo.LFN = childf.LogicalFileName
 		bulk.FileConfigList = append(bulk.FileConfigList, childAlgo)
+
+		f2 := createFile(t, i+fileCount)
+		parentFileList2 = append(parentFileList2, f2)
+		childf2 := f2
+		childFileList2 = append(childFileList2, childf2)
 	}
 	parentBulk.Files = parentFileList
 	bulk.Files = childFileList

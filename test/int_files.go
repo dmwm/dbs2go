@@ -563,7 +563,7 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 	// filtered detailed response
 	childBulk := BulkBlocksData.ChildData
-	var lfns2 []Response
+	var lfns []Response
 	var detailResp3 []Response
 	var detailRunResp []Response
 	var fileRunResp []Response
@@ -571,7 +571,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 		r := fileResponse{
 			LOGICAL_FILE_NAME: v.LogicalFileName,
 		}
-		lfns2 = append(lfns2, r)
+		lfns = append(lfns, r)
 		detail := fileDetailResponse{
 			ADLER32:                v.Adler32,
 			AUTO_CROSS_SECTION:     v.AutoCrossSection,
@@ -688,7 +688,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				params: url.Values{
 					"block_name": []string{TestData.StepchainBlock},
 				},
-				output:   lfns2,
+				output:   lfns,
 				respCode: http.StatusOK,
 			},
 			{
@@ -710,7 +710,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 					"block_name":    []string{TestData.StepchainBlock},
 					"validFileOnly": []string{"1"},
 				},
-				output:   lfns2,
+				output:   lfns,
 				respCode: http.StatusOK,
 			},
 			{
@@ -733,7 +733,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 					"block_name":    []string{TestData.StepchainBlock},
 					"validFileOnly": []string{"0"},
 				},
-				output:   lfns2,
+				output:   lfns,
 				respCode: http.StatusOK,
 			},
 			{
@@ -925,7 +925,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 				params: url.Values{
 					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
 				},
-				output:   lfns2[:1],
+				output:   lfns[:1],
 				respCode: http.StatusOK,
 			},
 			{
@@ -936,17 +936,79 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
 					"validFileOnly":     []string{"1"},
 				},
-				output:   lfns2[:1],
+				output:   lfns[:1],
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034c
+				description: "Test GET with lfn, validFileOnly false", // DBSClientReader_t.test034c
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"validFileOnly":     []string{"0"},
+				},
+				output:   lfns[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034d
 				method:      "GET",
 				serverType:  "DBSReader",
 				params: url.Values{
 					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
 					"run_num":           []string{runNumParam},
 					"lumi_list":         []string{"[27414,26422,29838]"},
+				},
+				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, nested lumi_list", // DBSClientReader_t.test034e
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+				},
+				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list, detail", // DBSClientReader_t.test034f
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[27414,26422,29838]"},
+					"detail":            []string{"true"},
+				},
+				output:   detailRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, nested lumi_list, detail", // DBSClientReader_t.test034g
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					"detail":            []string{"true"},
+				},
+				output:   detailRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test034h
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[27414,26422,29838]"},
+					"validFileOnly":     []string{"1"},
 				},
 				output:   fileRunResp[:1],
 				respCode: http.StatusOK,
