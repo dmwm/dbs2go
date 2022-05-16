@@ -192,12 +192,10 @@ func createParentFileLumiList() []dbs.FileLumi {
 func getFilesTestTable(t *testing.T) EndpointTestCase {
 	parentFileLumiList := createParentFileLumiList()
 	var parentFiles []dbs.FileRecord
-	var parentLFNs []Response
 	var testDataParentFiles []string
 	var parentDetailResp []Response
 	for i := 1; i <= 10; i++ {
 		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
-		parentLFNs = append(parentLFNs, fileResponse{LOGICAL_FILE_NAME: parentLFN})
 		testDataParentFiles = append(testDataParentFiles, parentLFN)
 		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
 		parentFiles = append(parentFiles, fileRecord)

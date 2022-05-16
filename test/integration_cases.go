@@ -86,8 +86,10 @@ type initialData struct {
 
 // struct containing bulk blocks data
 type bulkBlocksData struct {
-	ParentData dbs.BulkBlocks `json:"parent_bulk"`
-	ChildData  dbs.BulkBlocks `json:"child_bulk"`
+	ParentData  dbs.BulkBlocks `json:"parent_bulk"`  // for concurrent bulkblocks
+	ChildData   dbs.BulkBlocks `json:"child_bulk"`   // for concurrent bulkblocks
+	ParentData2 dbs.BulkBlocks `json:"parent_bulk2"` // for sequential bulkblocks
+	ChildData2  dbs.BulkBlocks `json:"child_bulk2"`  // for sequential bulkblocks
 }
 
 // TestData contains the generated data
@@ -234,7 +236,9 @@ func createFile(t *testing.T, i int) dbs.File {
 // generates bulkblocks data
 func generateBulkBlocksData(t *testing.T, filepath string) {
 	var parentBulk dbs.BulkBlocks
+	var parentBulk2 dbs.BulkBlocks
 	var bulk dbs.BulkBlocks
+	var bulk2 dbs.BulkBlocks
 	var primDS dbs.PrimaryDataset
 	var dataset dbs.Dataset
 	var processingEra dbs.ProcessingEra
@@ -301,6 +305,20 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 	parentBulk.PrimaryDataset.PrimaryDSName = TestData.StepPrimaryDSName
 	parentBulk.Dataset.ProcessedDSName = TestData.ParentProcDataset
 
+	bulk2 = bulk
+	bulk2.Dataset.Dataset = bulk2.Dataset.Dataset + "2"
+	bulk2.Block.BlockName = bulk2.Block.BlockName + "2"
+	bulk2.DatasetParentList = []string{TestData.ParentStepchainDataset + "2"}
+	bulk2.PrimaryDataset.PrimaryDSName = bulk2.PrimaryDataset.PrimaryDSName + "2"
+	bulk2.Dataset.ProcessedDSName = bulk2.Dataset.ProcessedDSName + "2"
+
+	parentBulk2 = bulk2
+	parentBulk2.Dataset.Dataset = TestData.ParentStepchainDataset + "2"
+	parentBulk2.Block.BlockName = TestData.ParentStepchainBlock + "2"
+	parentBulk2.DatasetParentList = []string{}
+	parentBulk2.PrimaryDataset.PrimaryDSName = TestData.StepPrimaryDSName + "2"
+	parentBulk2.Dataset.ProcessedDSName = TestData.ParentProcDataset + "2"
+
 	var parentFileList []dbs.File
 	var childFileList []dbs.File
 	var parentFileList2 []dbs.File
@@ -337,9 +355,14 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 	parentBulk.Files = parentFileList
 	bulk.Files = childFileList
 
+	parentBulk2.Files = parentFileList2
+	bulk2.Files = childFileList2
+
 	BulkBlocksData = bulkBlocksData{
-		ParentData: parentBulk,
-		ChildData:  bulk,
+		ParentData:  parentBulk,
+		ChildData:   bulk,
+		ParentData2: parentBulk2,
+		ChildData2:  bulk2,
 	}
 
 	file, err := json.MarshalIndent(BulkBlocksData, "", "  ")
@@ -404,6 +427,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	outputConfigTestCase2 := getOutputConfigTestTable2(t)
 	datasetParentsTestCase := getDatasetParentsTestTable(t)
 	bulkBlocksTest := getBulkBlocksTestTable(t)
+	bulkBlocksConcurrentTest := getConcurrentBulkBlocksTestTable(t)
 	filesReaderTestTable := getFilesLumiListRangeTestTable(t)
 
 	return []EndpointTestCase{
@@ -423,7 +447,8 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 		blockUpdateTestCase,
 		outputConfigTestCase2,
 		datasetParentsTestCase,
-		bulkBlocksTest,
+		bulkBlocksConcurrentTest,
 		filesReaderTestTable,
+		bulkBlocksTest,
 	}
 }

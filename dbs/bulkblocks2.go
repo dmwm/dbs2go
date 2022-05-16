@@ -956,6 +956,15 @@ func insertFilesChunk(
 		if lBy == "" {
 			lBy = trec.CreateBy
 		}
+		// if the data string does contain the is_file_valid field, use value from request
+		if trec.IsFileValid == 0 {
+			if rrr.IsFileValid != 0 && rrr.IsFileValid != 1 {
+				log.Println("### wrong is_file_valid value for", rrr.FileType, "lfn", lfn, "error", err)
+				trec.NErrors += 1
+				return
+			}
+			trec.IsFileValid = rrr.IsFileValid
+		}
 		fileID := ids[idx]
 		r := Files{
 			FILE_ID:                fileID,
