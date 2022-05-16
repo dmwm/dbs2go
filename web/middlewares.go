@@ -54,10 +54,25 @@ func authMiddleware(next http.Handler) http.Handler {
 		}
 
 		// check if user has proper roles to DBS (non GET) APIs
-		if r.Method != "GET" && Config.CMSRole != "" && Config.CMSGroup != "" {
-			status = CMSAuth.CheckCMSAuthz(r.Header, Config.CMSRole, Config.CMSGroup, "")
+		//         if r.Method != "GET" && len(Config.CMSRole) > 0 && len(Config.CMSGroup) > 0 {
+		if len(Config.CMSRole) > 0 && len(Config.CMSGroup) > 0 {
+			if len(Config.CMSRole) != len(Config.CMSGroup) {
+				log.Println("not equal length of cms_role and cms_group attributes")
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			status = false
+			for i, role := range Config.CMSRole {
+				group := Config.CMSGroup[i]
+				// if user has at least one role/group (s)he ok to use the service
+				if CMSAuth.CheckCMSAuthz(r.Header, role, group, "") {
+					status = true
+					break
+				}
+			}
+			//             status = CMSAuth.CheckCMSAuthz(r.Header, Config.CMSRole, Config.CMSGroup, "")
 			if !status {
-				log.Printf("ERROR: fail to authorize used with role=%v and group=%v, HTTP headers %+v\n", Config.CMSRole, Config.CMSGroup, r.Header)
+				log.Printf("ERROR: fail to authorize user with role=%v and group=%v, HTTP headers %+v\n", Config.CMSRole, Config.CMSGroup, r.Header)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
