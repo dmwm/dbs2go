@@ -54,8 +54,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		}
 
 		// check if user has proper roles to DBS (non GET) APIs
-		//         if r.Method != "GET" && len(Config.CMSRole) > 0 && len(Config.CMSGroup) > 0 {
-		if len(Config.CMSRole) > 0 && len(Config.CMSGroup) > 0 {
+		if r.Method != "GET" && len(Config.CMSRole) > 0 && len(Config.CMSGroup) > 0 {
 			if len(Config.CMSRole) != len(Config.CMSGroup) {
 				log.Println("not equal length of cms_role and cms_group attributes")
 				w.WriteHeader(http.StatusInternalServerError)
