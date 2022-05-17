@@ -45,6 +45,16 @@ func LoadApiParameters(fname string) (ApiParametersMap, error) {
 	return pmap, nil
 }
 
+// CreateInvalidParamError creates the error for parameter validation
+func CreateInvalidParamError(param string, api string) error {
+	msg := fmt.Sprintf("parameter '%s' is not accepted by '%s' API", param, api)
+	return Error(
+		InvalidParamErr,
+		ParametersErrorCode,
+		msg,
+		"dbs.parameters.CheckQueryParameters")
+}
+
 // CheckQueryParameters checks query parameters against API parameters map
 func CheckQueryParameters(r *http.Request, api string) error {
 	var err error
@@ -58,12 +68,7 @@ func CheckQueryParameters(r *http.Request, api string) error {
 	for k, _ := range r.URL.Query() {
 		if params, ok := ApiParamMap[api]; ok {
 			if !utils.InList(k, params) {
-				msg := fmt.Sprintf("parameter '%s' is not accepted by '%s' API", k, api)
-				return Error(
-					InvalidParamErr,
-					ParametersErrorCode,
-					msg,
-					"dbs.parameters.CheckQueryParameters")
+				return CreateInvalidParamError(k, api)
 			}
 		} else {
 			log.Printf("DBS %s API is not presented in ApiParamMap", api)

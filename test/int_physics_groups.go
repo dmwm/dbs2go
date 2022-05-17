@@ -7,6 +7,7 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -26,6 +27,11 @@ func getPhysicsGroupsTestTable(t *testing.T) EndpointTestCase {
 	physGroupResp := physicsGroupsResponse{
 		PHYSICS_GROUP_NAME: "Tracker",
 	}
+
+	pgInvalidParam := dbs.CreateInvalidParamError("fnal", "physicsgroups")
+	hrec := createHTTPError("GET", "/dbs/physicsgroups?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, pgInvalidParam)
+
 	return EndpointTestCase{
 		description:     "Test physicsgroups",
 		defaultHandler:  web.PhysicsGroupsHandler,
@@ -53,6 +59,18 @@ func getPhysicsGroupsTestTable(t *testing.T) EndpointTestCase {
 					physGroupResp,
 				},
 				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

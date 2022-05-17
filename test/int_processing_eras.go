@@ -7,6 +7,7 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -27,6 +28,11 @@ func getProcessingErasTestTable(t *testing.T) EndpointTestCase {
 		Description:       "this_is_a_test",
 		CreationDate:      0,
 	}
+
+	peParamErr := dbs.CreateInvalidParamError("fnal", "processingeras")
+	hrec := createHTTPError("GET", "/dbs/processingeras?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, peParamErr)
+
 	return EndpointTestCase{
 		description:     "Test processingeras",
 		defaultHandler:  web.ProcessingErasHandler,
@@ -40,6 +46,18 @@ func getProcessingErasTestTable(t *testing.T) EndpointTestCase {
 				params:      nil,
 				output:      []Response{},
 				respCode:    http.StatusOK,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 			{
 				description: "Test POST", // DBSClientWriter_t.test07

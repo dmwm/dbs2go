@@ -7,6 +7,7 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -29,6 +30,10 @@ func getAcquisitionErasTestTable(t *testing.T) EndpointTestCase {
 		CreateBy:           TestData.CreateBy,
 		Description:        "note",
 	}
+
+	aeParamError := dbs.CreateInvalidParamError("fnal", "acquisitioneras")
+	hrec := createHTTPError("GET", "/dbs/acquisitioneras?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, aeParamError)
 	return EndpointTestCase{
 		description:     "Test acquisitioneras",
 		defaultHandler:  web.AcquisitionErasHandler,
@@ -56,6 +61,18 @@ func getAcquisitionErasTestTable(t *testing.T) EndpointTestCase {
 					acqEraResp,
 				},
 				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

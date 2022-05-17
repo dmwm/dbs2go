@@ -92,20 +92,13 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 		Reason:   dbs.InvalidParamErr.Error(),
 		Message:  "Blocks API requires one of the following: [dataset block_name data_tier_name logical_file_name]",
 	}
-	hrec := web.HTTPError{
-		Method:    "GET",
-		Timestamp: "",
-		HTTPCode:  http.StatusBadRequest,
-		Path:      "/dbs/blocks?origin_site_name=cmssrm.fnal.gov",
-		UserAgent: "Go-http-client/1.1",
-	}
-	errorResp := web.ServerError{
-		HTTPError: hrec,
-		DBSError:  &dbsError,
-		Exception: http.StatusBadRequest,
-		Type:      "HTTPError",
-		Message:   dbsError.Error(),
-	}
+	hrec := createHTTPError("GET", "/dbs/blocks?origin_site_name=cmssrm.fnal.gov")
+	errorResp := createServerErrorResponse(hrec, &dbsError)
+
+	blocksParamErr := dbs.CreateInvalidParamError("fnal", "blocks")
+	hrec2 := createHTTPError("GET", "/dbs/blocks?fnal=cern")
+	errParamResp := createServerErrorResponse(hrec2, blocksParamErr)
+
 	return EndpointTestCase{
 		description:     "Test blocks",
 		defaultHandler:  web.BlocksHandler,
@@ -287,6 +280,18 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 				},
 				output: []Response{
 					errorResp,
+				},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errParamResp,
 				},
 				respCode: http.StatusBadRequest,
 			},

@@ -578,6 +578,11 @@ func getDatasetsTestTable2(t *testing.T) EndpointTestCase {
 	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
 	dsDetailParentResp := createDetailDSResponse(2, TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType)
 	runs := strings.ReplaceAll(fmt.Sprint(TestData.Runs), " ", ",")
+
+	datasetsParamErr := dbs.CreateInvalidParamError("fnal", "datasets")
+	hrec := createHTTPError("GET", "/dbs/datasets?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, datasetsParamErr)
+
 	return EndpointTestCase{
 		description:     "Test datasets 2",
 		defaultHandler:  web.DatasetsHandler,
@@ -767,6 +772,18 @@ func getDatasetsTestTable2(t *testing.T) EndpointTestCase {
 				},
 				respCode: http.StatusOK,
 			},
+			{
+				description: "Test GET dataset invalid parameter key",
+				serverType:  "DBSReader",
+				method:      "GET",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
+			},
 		},
 	}
 }
@@ -856,6 +873,10 @@ func getDatasetParentsTestTable(t *testing.T) EndpointTestCase {
 		PARENT_DS_ID:   2,
 		THIS_DATASET:   TestData.Dataset,
 	}
+	datasetsParamErr := dbs.CreateInvalidParamError("fnal", "datasetparents")
+	hrec := createHTTPError("GET", "/dbs/datasetparents?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, datasetsParamErr)
+
 	return EndpointTestCase{
 		description:     "Test datasetparents",
 		defaultHandler:  web.DatasetParentsHandler,
@@ -880,6 +901,18 @@ func getDatasetParentsTestTable(t *testing.T) EndpointTestCase {
 				},
 				output:   []Response{},
 				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

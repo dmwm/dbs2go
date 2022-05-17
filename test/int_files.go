@@ -241,11 +241,27 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 		fileRunResp = append(fileRunResp, frr)
 	}
 
+	fileParamErr := dbs.CreateInvalidParamError("fnal", "files")
+	hrec := createHTTPError("GET", "/dbs/files?fnal=files")
+	errParamResp := createServerErrorResponse(hrec, fileParamErr)
+
 	return EndpointTestCase{
 		description:     "Test files",
 		defaultHandler:  web.FilesHandler,
 		defaultEndpoint: "/dbs/files",
 		testCases: []testCase{
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errParamResp,
+				},
+				respCode: http.StatusBadRequest,
+			},
 			{
 				description: "Test parent file POST", // DBSClientWriter_t.test16
 				method:      "POST",
