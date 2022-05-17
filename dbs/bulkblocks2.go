@@ -678,7 +678,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 			rrr.FileType,
 		)
 		if err != nil {
-			msg := fmt.Sprintf("%s unable to find file_type_id for %s, error %v", hash, ftype, err)
+			msg := fmt.Sprintf("%s unable to find file_type_id for %v, error %v", hash, ftype, err)
 			log.Println(msg)
 			return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
@@ -955,6 +955,15 @@ func insertFilesChunk(
 		lBy := rrr.LastModifiedBy
 		if lBy == "" {
 			lBy = trec.CreateBy
+		}
+		// if the data string does contain the is_file_valid field, use value from request
+		if trec.IsFileValid == 0 {
+			if rrr.IsFileValid != 0 && rrr.IsFileValid != 1 {
+				log.Println("### wrong is_file_valid value for", rrr.FileType, "lfn", lfn, "error", err)
+				trec.NErrors += 1
+				return
+			}
+			trec.IsFileValid = rrr.IsFileValid
 		}
 		fileID := ids[idx]
 		r := Files{

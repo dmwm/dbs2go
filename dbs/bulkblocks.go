@@ -583,6 +583,14 @@ func (a *API) InsertBulkBlocks() error {
 		if lBy == "" {
 			lBy = a.CreateBy
 		}
+		// if the data string does contain the is_file_valid field, use value from request
+		if isFileValid == 0 {
+			if rrr.IsFileValid != 0 && rrr.IsFileValid != 1 {
+				msg := "wrong is_file_valid value"
+				return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
+			}
+			isFileValid = rrr.IsFileValid
+		}
 		r := Files{
 			LOGICAL_FILE_NAME:      rrr.LogicalFileName,
 			IS_FILE_VALID:          isFileValid,

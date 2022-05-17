@@ -95,10 +95,10 @@ func newreq(t *testing.T, method string, hostname string, endpoint string, body 
 }
 
 // helper funtion to return DBS server with basic parameters
-func dbsServer(t *testing.T, base, dbFile, serverType string) *httptest.Server {
+func dbsServer(t *testing.T, base, dbFile, serverType string, concurrent bool) *httptest.Server {
 	dbfile := os.Getenv(dbFile)
 	if dbfile == "" {
-		log.Fatal(fmt.Sprintf("no %s env variable, please define", dbFile))
+		log.Fatalf("no %s env variable, please define", dbFile)
 	}
 
 	var lexiconFile string
@@ -123,6 +123,7 @@ func dbsServer(t *testing.T, base, dbFile, serverType string) *httptest.Server {
 	web.Config.ServerType = serverType
 	web.Config.LogFile = fmt.Sprintf("/tmp/dbs2go-%s.log", base)
 	web.Config.Verbose = 0
+	web.Config.ConcurrentBulkBlocks = concurrent
 	utils.VERBOSE = 0
 	utils.BASE = base
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
@@ -176,10 +177,6 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 		"http", // client http information on errors
 	}
 
-	ignoredFields := []string{
-		"branch_hash_id", // TODO: Need to fix
-	}
-
 	for i, r := range received {
 		log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		// see difference between expected and received structs
@@ -195,10 +192,12 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 				if a.To == nil {
 					t.Fatalf("Field empty: %v", field)
 				}
-			} else if utils.InList(field, ignoredFields) {
-				continue
 			} else {
-				t.Fatalf("Incorrect %v:\nreceived %v (%T),\nexpected %v (%T)", field, a.To, a.To, a.From, a.From)
+				if a.To == nil && a.From == nil { // check if both values are nil
+					t.Logf("Both values for field %v are nil", field)
+				} else {
+					t.Fatalf("Incorrect %v:\nreceived %v (%T),\nexpected %v (%T)", field, a.To, a.To, a.From, a.From)
+				}
 			}
 		}
 	}

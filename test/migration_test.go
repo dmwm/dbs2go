@@ -29,32 +29,32 @@ func TestMigration(t *testing.T) {
 
 	// start DBSReader server from which we will read the data for migration process
 	base := "dbs-one-reader"
-	srv1 := dbsServer(t, base, "DBS_DB_FILE_1", "DBSReader")
+	srv1 := dbsServer(t, base, "DBS_DB_FILE_1", "DBSReader", false)
 	checkServer(t, srv1.URL, base)
 
 	// start DBSWriter server to which we will write the data
 	base = "dbs-one-writer"
-	srv2 := dbsServer(t, base, "DBS_DB_FILE_1", "DBSWriter")
+	srv2 := dbsServer(t, base, "DBS_DB_FILE_1", "DBSWriter", false)
 	checkServer(t, srv2.URL, base)
 
 	// start DBSReader server from which we will read the data after migration process
 	base = "dbs-two-reader"
-	srv3 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSReader")
+	srv3 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSReader", false)
 	checkServer(t, srv3.URL, base)
 
 	// start DBSWriter server to which we will write the data durign migration process
 	base = "dbs-two-writer"
-	srv4 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSWriter")
+	srv4 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSWriter", false)
 	checkServer(t, srv4.URL, base)
 
 	// start DBSMigrate server to which we will post migration requests
 	base = "dbs-migrate"
-	srv5 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSMigrate")
+	srv5 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSMigrate", false)
 	checkServer(t, srv5.URL, base)
 
 	// start DBSMigration server which will process migration requests
 	base = "dbs-migration"
-	srv6 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSMigration")
+	srv6 := dbsServer(t, base, "DBS_DB_FILE_2", "DBSMigration", false)
 	checkServer(t, srv6.URL, base)
 }
 

@@ -48,7 +48,7 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				}
 
 				// run a test server for a single test case
-				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType)
+				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType, v.concurrentBulkBlocks)
 				defer server.Close()
 
 				// create request body
@@ -85,6 +85,7 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 					if err != nil {
 						t.Fatalf("Failed to decode body, %v", err)
 					}
+
 					verifyResponse(t, d, v.output)
 				}
 				if v.method == "POST" {
@@ -113,8 +114,12 @@ func TestIntegration(t *testing.T) {
 	if testCaseFile == "" {
 		log.Fatal("INTEGRATION_DATA_FILE not defined")
 	}
+	bulkblocksFile := os.Getenv("BULKBLOCKS_DATA_FILE")
+	if bulkblocksFile == "" {
+		log.Fatal("BULKBLOCKS_DATA_FILE not defined")
+	}
 
-	testCases := LoadTestCases(t, testCaseFile)
+	testCases := LoadTestCases(t, testCaseFile, bulkblocksFile)
 
 	for _, v := range testCases {
 		runTestWorkflow(t, v)

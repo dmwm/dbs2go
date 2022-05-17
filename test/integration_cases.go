@@ -15,7 +15,9 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
+	"github.com/dmwm/dbs2go/dbs"
 	"github.com/google/uuid"
 )
 
@@ -32,15 +34,16 @@ type BadRequest struct {
 
 // basic elements to define a test case
 type testCase struct {
-	description string                                   // test case description
-	serverType  string                                   // DBSWriter, DBSReader, DBSMigrate
-	method      string                                   // http method
-	endpoint    string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
-	params      url.Values                               // url parameters, optional
-	handler     func(http.ResponseWriter, *http.Request) // optional if EndpointTestCase.defaultHandler is defined
-	input       RequestBody                              // POST and PUT body, optional for GET request
-	output      []Response                               // expected response
-	respCode    int                                      // expected HTTP response code
+	description          string                                   // test case description
+	serverType           string                                   // DBSWriter, DBSReader, DBSMigrate
+	concurrentBulkBlocks bool                                     // true for concurrentBulkBlocks
+	method               string                                   // http method
+	endpoint             string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
+	params               url.Values                               // url parameters, optional
+	handler              func(http.ResponseWriter, *http.Request) // optional if EndpointTestCase.defaultHandler is defined
+	input                RequestBody                              // POST and PUT body, optional for GET request
+	output               []Response                               // expected response
+	respCode             int                                      // expected HTTP response code
 }
 
 // initialData struct for test data generation
@@ -82,8 +85,20 @@ type initialData struct {
 	ParentStepchainFiles   []string `json:"parent_stepchain_files"`
 }
 
+// struct containing bulk blocks data
+type bulkBlocksData struct {
+	ConcurrentParentData dbs.BulkBlocks `json:"con_parent_bulk"` // for concurrent bulkblocks
+	ConcurrentChildData  dbs.BulkBlocks `json:"con_child_bulk"`  // for concurrent bulkblocks
+	SequentialParentData dbs.BulkBlocks `json:"seq_parent_bulk"` // for sequential bulkblocks
+	SequentialChildData  dbs.BulkBlocks `json:"seq_child_bulk"`  // for sequential bulkblocks
+}
+
 // TestData contains the generated data
 var TestData initialData
+
+// BulkBlocksData contains data for bulkblocks
+// TestData must first be filled
+var BulkBlocksData bulkBlocksData
 
 // defines a testcase for an endpoint
 type EndpointTestCase struct {
@@ -187,30 +202,213 @@ func generateBaseData(t *testing.T, filepath string) {
 	_ = ioutil.WriteFile(filepath, file, os.ModePerm)
 }
 
+// creates a file for bulkblocks
+func createFile(t *testing.T, i int) dbs.File {
+	return dbs.File{
+		Adler32:          "NOTSET",
+		FileType:         "EDM",
+		FileSize:         2012211901,
+		AutoCrossSection: 0.0,
+		CheckSum:         "1504266448",
+		FileLumiList: []dbs.FileLumi{
+			{
+				LumiSectionNumber: int64(27414 + i),
+				RunNumber:         98,
+				EventCount:        66,
+			},
+			{
+				LumiSectionNumber: int64(26422 + i),
+				RunNumber:         98,
+				EventCount:        67,
+			},
+			{
+				LumiSectionNumber: int64(29838 + i),
+				RunNumber:         98,
+				EventCount:        68,
+			},
+		},
+		EventCount:      201,
+		LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v/%v.root", TestData.UID, i),
+		IsFileValid:     1,
+	}
+}
+
+// generates bulkblocks data
+func generateBulkBlocksData(t *testing.T, filepath string) {
+	var parentBulk dbs.BulkBlocks
+	var parentBulk2 dbs.BulkBlocks
+	var bulk dbs.BulkBlocks
+	var bulk2 dbs.BulkBlocks
+	var primDS dbs.PrimaryDataset
+	var dataset dbs.Dataset
+	var processingEra dbs.ProcessingEra
+	var acqEra dbs.AcquisitionEra
+	var block dbs.Block
+
+	algo := dbs.DatasetConfig{
+		ReleaseVersion:    TestData.ReleaseVersion,
+		PsetHash:          TestData.PsetHash,
+		AppName:           TestData.AppName,
+		OutputModuleLabel: TestData.OutputModuleLabel,
+		GlobalTag:         TestData.GlobalTag,
+	}
+
+	primDS.PrimaryDSName = TestData.StepPrimaryDSName
+	primDS.PrimaryDSType = "test"
+	primDS.CreateBy = "WMAgent"
+	primDS.CreationDate = time.Now().Unix() // Replace with fixed time
+
+	dataset = dbs.Dataset{
+		PhysicsGroupName:     TestData.PhysicsGroupName,
+		ProcessedDSName:      TestData.ProcDataset,
+		DataTierName:         TestData.Tier,
+		DatasetAccessType:    TestData.DatasetAccessType2,
+		Dataset:              TestData.StepchainDataset,
+		PrepID:               "TestPrepID",
+		CreateBy:             "WMAgent",
+		LastModifiedBy:       "WMAgent",
+		CreationDate:         time.Now().Unix(),
+		LastModificationDate: time.Now().Unix(),
+	}
+
+	processingEra = dbs.ProcessingEra{
+		ProcessingVersion: TestData.ProcessingVersion,
+		CreateBy:          "WMAgent",
+	}
+
+	acqEra = dbs.AcquisitionEra{
+		AcquisitionEraName: TestData.AcquisitionEra,
+		StartDate:          123456789,
+	}
+
+	fileCount := 5
+
+	block = dbs.Block{
+		BlockName:      TestData.StepchainBlock,
+		OriginSiteName: TestData.Site,
+		FileCount:      int64(fileCount),
+		BlockSize:      20122119010,
+	}
+
+	bulk.DatasetConfigList = []dbs.DatasetConfig{algo}
+	bulk.PrimaryDataset = primDS
+	bulk.Dataset = dataset
+	bulk.ProcessingEra = processingEra
+	bulk.AcquisitionEra = acqEra
+	bulk.DatasetParentList = []string{TestData.ParentStepchainDataset}
+	bulk.Block = block
+
+	parentBulk = bulk
+	parentBulk.Dataset.Dataset = TestData.ParentStepchainDataset
+	parentBulk.Block.BlockName = TestData.ParentStepchainBlock
+	parentBulk.DatasetParentList = []string{}
+	parentBulk.PrimaryDataset.PrimaryDSName = TestData.StepPrimaryDSName
+	parentBulk.Dataset.ProcessedDSName = TestData.ParentProcDataset
+
+	bulk2 = bulk
+	bulk2.Dataset.Dataset = bulk2.Dataset.Dataset + "2"
+	bulk2.Block.BlockName = bulk2.Block.BlockName + "2"
+	bulk2.DatasetParentList = []string{TestData.ParentStepchainDataset + "2"}
+	bulk2.PrimaryDataset.PrimaryDSName = bulk2.PrimaryDataset.PrimaryDSName + "2"
+	bulk2.Dataset.ProcessedDSName = bulk2.Dataset.ProcessedDSName + "2"
+
+	parentBulk2 = bulk2
+	parentBulk2.Dataset.Dataset = TestData.ParentStepchainDataset + "2"
+	parentBulk2.Block.BlockName = TestData.ParentStepchainBlock + "2"
+	parentBulk2.DatasetParentList = []string{}
+	parentBulk2.PrimaryDataset.PrimaryDSName = TestData.StepPrimaryDSName + "2"
+	parentBulk2.Dataset.ProcessedDSName = TestData.ParentProcDataset + "2"
+
+	var parentFileList []dbs.File
+	var childFileList []dbs.File
+	var parentFileList2 []dbs.File
+	var childFileList2 []dbs.File
+	for i := 0; i < fileCount; i++ {
+		f := createFile(t, i)
+		parentFileList = append(parentFileList, f)
+
+		var parentAlgo dbs.FileConfig
+
+		pa, err := json.Marshal(algo) // convert DatasetConfig to FileConfig
+		if err != nil {
+			t.Fatal(err)
+		}
+		json.Unmarshal(pa, &parentAlgo)
+
+		parentAlgo.LFN = f.LogicalFileName
+		parentBulk.FileConfigList = append(parentBulk.FileConfigList, parentAlgo)
+
+		childf := f
+		childf.LogicalFileName = fmt.Sprintf("/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/%v/%v.root", TestData.UID, i)
+		childFileList = append(childFileList, childf)
+
+		var childAlgo dbs.FileConfig
+		json.Unmarshal(pa, &childAlgo)
+		childAlgo.LFN = childf.LogicalFileName
+		bulk.FileConfigList = append(bulk.FileConfigList, childAlgo)
+
+		f2 := createFile(t, i+fileCount)
+		parentFileList2 = append(parentFileList2, f2)
+		childf2 := f2
+		childFileList2 = append(childFileList2, childf2)
+	}
+	parentBulk.Files = parentFileList
+	bulk.Files = childFileList
+
+	parentBulk2.Files = parentFileList2
+	bulk2.Files = childFileList2
+
+	BulkBlocksData = bulkBlocksData{
+		ConcurrentParentData: parentBulk,
+		ConcurrentChildData:  bulk,
+		SequentialParentData: parentBulk2,
+		SequentialChildData:  bulk2,
+	}
+
+	file, err := json.MarshalIndent(BulkBlocksData, "", "  ")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	_ = ioutil.WriteFile(filepath, file, os.ModePerm)
+}
+
 // reads a json file and load into TestData
-func readJsonFile(t *testing.T, filename string) {
+func readJsonFile(t *testing.T, filename string, obj any) error {
 	var data []byte
 	var err error
 	// var testData map[string]interface{}
 	data, err = os.ReadFile(filename)
 	if err != nil {
 		log.Printf("ERROR: unable to read %s error %v", filename, err.Error())
-		t.Fatal(err.Error())
+		return err
 	}
-	err = json.Unmarshal(data, &TestData)
+	err = json.Unmarshal(data, &obj)
 	if err != nil {
 		log.Println("unable to unmarshal received data")
-		t.Fatal(err.Error())
+		return err
 	}
+	return nil
 }
 
 // LoadTestCases loads the InitialData from a json file
-func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
+func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []EndpointTestCase {
 	if _, err := os.Stat(filepath); errors.Is(err, os.ErrNotExist) {
-		fmt.Println("Generating data")
+		fmt.Println("Generating base data")
 		generateBaseData(t, filepath)
 	}
-	readJsonFile(t, filepath)
+	err := readJsonFile(t, filepath, &TestData)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	// load bulkblocks data
+	if _, err := os.Stat(bulkblockspath); errors.Is(err, os.ErrNotExist) {
+		fmt.Println("Generating bulkblocks data")
+		generateBulkBlocksData(t, bulkblockspath)
+	}
+	err = readJsonFile(t, bulkblockspath, &BulkBlocksData)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	primaryDatasetAndTypesTestCase := getPrimaryDatasetTestTable(t)
 	outputConfigTestCase := getOutputConfigTestTable(t)
@@ -228,6 +426,8 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 	blockUpdateTestCase := getBlocksTestTable2(t)
 	outputConfigTestCase2 := getOutputConfigTestTable2(t)
 	datasetParentsTestCase := getDatasetParentsTestTable(t)
+	bulkBlocksTest := getBulkBlocksTestTable(t)
+	filesReaderTestTable := getFilesLumiListRangeTestTable(t)
 
 	return []EndpointTestCase{
 		primaryDatasetAndTypesTestCase,
@@ -246,5 +446,7 @@ func LoadTestCases(t *testing.T, filepath string) []EndpointTestCase {
 		blockUpdateTestCase,
 		outputConfigTestCase2,
 		datasetParentsTestCase,
+		bulkBlocksTest,
+		filesReaderTestTable,
 	}
 }
