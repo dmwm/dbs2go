@@ -1,5 +1,5 @@
 {
-  "parent_bulk": {
+  "con_parent_bulk": {
     "dataset_conf_list": [
       {
         "release_version": "CMSSW_1_2_3",
@@ -232,19 +232,19 @@
       "create_by": "WMAgent",
       "primary_ds_type": "test",
       "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain",
-      "creation_date": 1652729861
+      "creation_date": 1652798955
     },
     "dataset": {
       "dataset_id": 0,
       "create_by": "WMAgent",
-      "creation_date": 1652729861,
+      "creation_date": 1652798955,
       "physics_group_name": "Tracker",
       "dataset_access_type": "PRODUCTION",
       "data_tier_name": "GEN-SIM-RAW",
       "last_modified_by": "WMAgent",
       "processed_ds_name": "acq_era_8268-ptsr-v8268",
       "xtcrosssection": 0,
-      "last_modification_date": 1652729861,
+      "last_modification_date": 1652798955,
       "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-ptsr-v8268/GEN-SIM-RAW",
       "prep_id": "TestPrepID"
     },
@@ -274,7 +274,7 @@
     "dataset_parent_list": [],
     "ds_parent_list": null
   },
-  "child_bulk": {
+  "con_child_bulk": {
     "dataset_conf_list": [
       {
         "release_version": "CMSSW_1_2_3",
@@ -507,19 +507,19 @@
       "create_by": "WMAgent",
       "primary_ds_type": "test",
       "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain",
-      "creation_date": 1652729861
+      "creation_date": 1652798955
     },
     "dataset": {
       "dataset_id": 0,
       "create_by": "WMAgent",
-      "creation_date": 1652729861,
+      "creation_date": 1652798955,
       "physics_group_name": "Tracker",
       "dataset_access_type": "PRODUCTION",
       "data_tier_name": "GEN-SIM-RAW",
       "last_modified_by": "WMAgent",
       "processed_ds_name": "acq_era_8268-v8268",
       "xtcrosssection": 0,
-      "last_modification_date": 1652729861,
+      "last_modification_date": 1652798955,
       "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-v8268/GEN-SIM-RAW",
       "prep_id": "TestPrepID"
     },
@@ -551,7 +551,7 @@
     ],
     "ds_parent_list": null
   },
-  "parent_bulk2": {
+  "seq_parent_bulk": {
     "dataset_conf_list": [
       {
         "release_version": "CMSSW_1_2_3",
@@ -728,19 +728,19 @@
       "create_by": "WMAgent",
       "primary_ds_type": "test",
       "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain2",
-      "creation_date": 1652729861
+      "creation_date": 1652798955
     },
     "dataset": {
       "dataset_id": 0,
       "create_by": "WMAgent",
-      "creation_date": 1652729861,
+      "creation_date": 1652798955,
       "physics_group_name": "Tracker",
       "dataset_access_type": "PRODUCTION",
       "data_tier_name": "GEN-SIM-RAW",
       "last_modified_by": "WMAgent",
       "processed_ds_name": "acq_era_8268-ptsr-v82682",
       "xtcrosssection": 0,
-      "last_modification_date": 1652729861,
+      "last_modification_date": 1652798955,
       "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-ptsr-v8268/GEN-SIM-RAW2",
       "prep_id": "TestPrepID"
     },
@@ -770,7 +770,7 @@
     "dataset_parent_list": [],
     "ds_parent_list": null
   },
-  "child_bulk2": {
+  "seq_child_bulk": {
     "dataset_conf_list": [
       {
         "release_version": "CMSSW_1_2_3",
@@ -947,19 +947,19 @@
       "create_by": "WMAgent",
       "primary_ds_type": "test",
       "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain2",
-      "creation_date": 1652729861
+      "creation_date": 1652798955
     },
     "dataset": {
       "dataset_id": 0,
       "create_by": "WMAgent",
-      "creation_date": 1652729861,
+      "creation_date": 1652798955,
       "physics_group_name": "Tracker",
       "dataset_access_type": "PRODUCTION",
       "data_tier_name": "GEN-SIM-RAW",
       "last_modified_by": "WMAgent",
       "processed_ds_name": "acq_era_8268-v82682",
       "xtcrosssection": 0,
-      "last_modification_date": 1652729861,
+      "last_modification_date": 1652798955,
       "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-v8268/GEN-SIM-RAW2",
       "prep_id": "TestPrepID"
     },

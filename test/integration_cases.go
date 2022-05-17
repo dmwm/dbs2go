@@ -34,15 +34,16 @@ type BadRequest struct {
 
 // basic elements to define a test case
 type testCase struct {
-	description string                                   // test case description
-	serverType  string                                   // DBSWriter, DBSReader, DBSMigrate
-	method      string                                   // http method
-	endpoint    string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
-	params      url.Values                               // url parameters, optional
-	handler     func(http.ResponseWriter, *http.Request) // optional if EndpointTestCase.defaultHandler is defined
-	input       RequestBody                              // POST and PUT body, optional for GET request
-	output      []Response                               // expected response
-	respCode    int                                      // expected HTTP response code
+	description          string                                   // test case description
+	serverType           string                                   // DBSWriter, DBSReader, DBSMigrate
+	concurrentBulkBlocks bool                                     // true for concurrentBulkBlocks
+	method               string                                   // http method
+	endpoint             string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
+	params               url.Values                               // url parameters, optional
+	handler              func(http.ResponseWriter, *http.Request) // optional if EndpointTestCase.defaultHandler is defined
+	input                RequestBody                              // POST and PUT body, optional for GET request
+	output               []Response                               // expected response
+	respCode             int                                      // expected HTTP response code
 }
 
 // initialData struct for test data generation
@@ -86,10 +87,10 @@ type initialData struct {
 
 // struct containing bulk blocks data
 type bulkBlocksData struct {
-	ParentData  dbs.BulkBlocks `json:"parent_bulk"`  // for concurrent bulkblocks
-	ChildData   dbs.BulkBlocks `json:"child_bulk"`   // for concurrent bulkblocks
-	ParentData2 dbs.BulkBlocks `json:"parent_bulk2"` // for sequential bulkblocks
-	ChildData2  dbs.BulkBlocks `json:"child_bulk2"`  // for sequential bulkblocks
+	ConcurrentParentData dbs.BulkBlocks `json:"con_parent_bulk"` // for concurrent bulkblocks
+	ConcurrentChildData  dbs.BulkBlocks `json:"con_child_bulk"`  // for concurrent bulkblocks
+	SequentialParentData dbs.BulkBlocks `json:"seq_parent_bulk"` // for sequential bulkblocks
+	SequentialChildData  dbs.BulkBlocks `json:"seq_child_bulk"`  // for sequential bulkblocks
 }
 
 // TestData contains the generated data
@@ -101,11 +102,10 @@ var BulkBlocksData bulkBlocksData
 
 // defines a testcase for an endpoint
 type EndpointTestCase struct {
-	description          string
-	defaultHandler       func(http.ResponseWriter, *http.Request)
-	defaultEndpoint      string
-	concurrentBulkBlocks bool
-	testCases            []testCase
+	description     string
+	defaultHandler  func(http.ResponseWriter, *http.Request)
+	defaultEndpoint string
+	testCases       []testCase
 }
 
 // get a UUID time_mid as an int
@@ -359,10 +359,10 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 	bulk2.Files = childFileList2
 
 	BulkBlocksData = bulkBlocksData{
-		ParentData:  parentBulk,
-		ChildData:   bulk,
-		ParentData2: parentBulk2,
-		ChildData2:  bulk2,
+		ConcurrentParentData: parentBulk,
+		ConcurrentChildData:  bulk,
+		SequentialParentData: parentBulk2,
+		SequentialChildData:  bulk2,
 	}
 
 	file, err := json.MarshalIndent(BulkBlocksData, "", "  ")
@@ -427,7 +427,6 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	outputConfigTestCase2 := getOutputConfigTestTable2(t)
 	datasetParentsTestCase := getDatasetParentsTestTable(t)
 	bulkBlocksTest := getBulkBlocksTestTable(t)
-	bulkBlocksConcurrentTest := getConcurrentBulkBlocksTestTable(t)
 	filesReaderTestTable := getFilesLumiListRangeTestTable(t)
 
 	return []EndpointTestCase{
@@ -447,8 +446,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 		blockUpdateTestCase,
 		outputConfigTestCase2,
 		datasetParentsTestCase,
-		bulkBlocksConcurrentTest,
-		filesReaderTestTable,
 		bulkBlocksTest,
+		filesReaderTestTable,
 	}
 }

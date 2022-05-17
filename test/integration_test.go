@@ -48,7 +48,7 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				}
 
 				// run a test server for a single test case
-				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType, c.concurrentBulkBlocks)
+				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType, v.concurrentBulkBlocks)
 				defer server.Close()
 
 				// create request body

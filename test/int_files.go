@@ -560,7 +560,7 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 // test files with lumi_list range
 func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 	// filtered detailed response
-	childBulk := BulkBlocksData.ChildData
+	childBulk := BulkBlocksData.ConcurrentChildData
 	var lfns []Response
 	var detailResp3 []Response
 	var detailRunResp []Response
