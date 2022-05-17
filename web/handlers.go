@@ -573,6 +573,12 @@ func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	time0 := time.Now()
 	defer updateGetRequestTime(time0)
 
+	// first, check if provided URL parameter is accepted by DBS API
+	if err := dbs.CheckQueryParameters(r, a); err != nil {
+		responseMsg(w, r, err, http.StatusBadRequest)
+		return
+	}
+
 	// all outputs will be added to output list
 	sep := ","
 	if r.Header.Get("Accept") == "application/ndjson" {

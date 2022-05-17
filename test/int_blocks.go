@@ -270,7 +270,7 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 				serverType:  "DBSReader",
 				params: url.Values{
 					"dataset":          []string{TestData.Dataset},
-					"block":            []string{TestData.Block},
+					"block_name":       []string{TestData.Block},
 					"origin_site_name": []string{TestData.Site},
 				},
 				output: []Response{

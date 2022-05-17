@@ -20,6 +20,7 @@ The following environment variables are required:
 - `PKG_CONFIG_PATH`: This is the location of the `oci8.pc` file
 - `DYLD_LIBRARY_PATH`: This is the location of the Oracle instantclient files
   - The instructions to prepare the files and directories for these are in the [Installation instructions](docs/Installation.md)
+- `DBS_API_PARAMETERS_FILE`: DBS API parameters file for DBS server; default `static/parameters.json`
 - `DBS_READER_LEXICON_FILE`: Lexicon file for DBSReader server; default: `static/lexicon_reader.json`
 - `DBS_WRITER_LEXICON_FILE`: Lexicon file for DBSWriter server; default: `static/lexicon_writer.json`
 - `INTEGRATION_DATA_FILE`: File for initial data for test case tables; default: `test/data/integration/integration_data.json`

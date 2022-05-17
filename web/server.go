@@ -355,6 +355,7 @@ func Server(configFile string) {
 	dbs.FileLumiChunkSize = Config.FileLumiChunkSize
 	dbs.FileLumiMaxSize = Config.FileLumiMaxSize
 	dbs.FileLumiInsertMethod = Config.FileLumiInsertMethod
+	dbs.ApiParametersFile = Config.ApiParametersFile
 
 	// initialize templates
 	tmplData := make(map[string]interface{})

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,11 +11,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	_ "github.com/mattn/go-oci8"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/utils"
 	"github.com/dmwm/dbs2go/web"
+	_ "github.com/mattn/go-oci8"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // helper function to create http test response recorder
@@ -39,9 +40,11 @@ func respRecorder(method, url string, reader io.Reader, hdlr func(http.ResponseW
 		if e != nil {
 			log.Println("unable to read reasponse body, error:", e)
 		}
-		log.Printf("handler returned wrong status code: got %v want %v message: %s",
-			status, http.StatusOK, string(data))
-		return nil, err
+		log.Printf("handler returned status code: %v message: %s",
+			status, string(data))
+		msg := fmt.Sprintf("HTTP status %v", status)
+		return nil, errors.New(msg)
+		//         return nil, err
 	}
 	return rr, nil
 }

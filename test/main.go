@@ -65,6 +65,15 @@ func initDB(dryRun bool) *sql.DB {
 	// init validator
 	dbs.RecordValidator = validator.New()
 	dbs.FileLumiChunkSize = 1000
+
+	// init parameters file
+	if dbs.ApiParametersFile == "" {
+		apiParametersFile := os.Getenv("DBS_API_PARAMETERS_FILE")
+		if apiParametersFile == "" {
+			log.Fatal("no DBS_API_PARAMETERS_FILE env variable, please define")
+		}
+		dbs.ApiParametersFile = apiParametersFile
+	}
 	return db
 }
 
@@ -115,9 +124,15 @@ func dbsServer(t *testing.T, base, dbFile, serverType string, concurrent bool) *
 		}
 	}
 
+	apiParametersFile := os.Getenv("DBS_API_PARAMETERS_FILE")
+	if apiParametersFile == "" {
+		log.Fatal("no DBS_API_PARAMETERS_FILE env variable, please define")
+	}
+
 	web.Config.Base = base
 	web.Config.DBFile = dbfile
 	web.Config.LexiconFile = lexiconFile
+	web.Config.ApiParametersFile = apiParametersFile
 	web.Config.ServerCrt = ""
 	web.Config.ServerKey = ""
 	web.Config.ServerType = serverType

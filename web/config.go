@@ -30,8 +30,8 @@ type Configuration struct {
 	ServerType      string   `json:"server_type"`       // DBS server type to start: DBSReader, DBSWriter, DBSMigrate, DBSMigration
 	Etag            string   `json:"etag"`              // etag value to use for ETag generation
 	CacheControl    string   `json:"cache_control"`     // Cache-Control value, e.g. max-age=300
-	CMSRole         []string   `json:"cms_role"`          // cms role for write access
-	CMSGroup        []string   `json:"cms_group"`         // cms group for write access
+	CMSRole         []string `json:"cms_role"`          // cms role for write access
+	CMSGroup        []string `json:"cms_group"`         // cms group for write access
 
 	// Migration server settings
 	MigrationDBFile          string `json:"migration_dbfile"`           // dbfile with secrets
@@ -45,6 +45,7 @@ type Configuration struct {
 	MaxDBConnections     int    `json:"max_db_connections"`      // maximum number of DB connections
 	MaxIdleConnections   int    `json:"max_idle_connections"`    // maximum number of idle connections
 	DBMonitoringInterval int    `json:"db_monitoring_interval"`  // db mon interval in seconds
+	ApiParametersFile    string `json:"api_parameters_file"`     // api parameters json file
 	LexiconFile          string `json:"lexicon_file"`            // lexicon json file
 	FileChunkSize        int    `json:"file_chunk_size"`         // chunk size for []File insertion
 	FileLumiChunkSize    int    `json:"file_lumi_chunk_size"`    // chunk size for []FileLumi insertion

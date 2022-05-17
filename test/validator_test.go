@@ -13,8 +13,10 @@ import (
 	"testing"
 	"time"
 
-	validator "github.com/go-playground/validator/v10"
 	"github.com/dmwm/dbs2go/dbs"
+	"github.com/dmwm/dbs2go/utils"
+	"github.com/dmwm/dbs2go/web"
+	validator "github.com/go-playground/validator/v10"
 )
 
 // TestLexiconPositive
@@ -719,4 +721,26 @@ func TestValidatorMigrationBlocs(t *testing.T) {
 		LAST_MODIFICATION_DATE: 123456789,
 	}
 	validationSuccess(t, rec)
+}
+
+// TestValidatorCheckQueryParameters
+func TestValidatorCheckQueryParameters(t *testing.T) {
+	initDB(false)
+	var err error
+	utils.VERBOSE = 1
+	apiParametersFile := os.Getenv("DBS_API_PARAMETERS_FILE")
+	if apiParametersFile == "" {
+		t.Fatal(errors.New("Please setup DBS_API_PARAMETERS_FILE env"))
+	}
+	dbs.ApiParametersFile = apiParametersFile
+
+	// test HTTP request with unusual parameter
+	_, err = respRecorder("GET", "/dbs2go/datasets?bla=1", nil, web.DatasetsHandler)
+	if err == nil {
+		t.Error("FAIL to test unusual input parameter")
+	}
+	_, err = respRecorder("GET", "/dbs2go/datasets?dataset=/ASKJDHkshd/alkjlJSDL/RAW", nil, web.DatasetsHandler)
+	if err != nil {
+		t.Error(err)
+	}
 }
