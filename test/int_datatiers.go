@@ -30,6 +30,11 @@ func getDatatiersTestTable(t *testing.T) EndpointTestCase {
 	badReq := BadRequest{
 		BAD_FIELD: "BAD",
 	}
+
+	dsParamErr := dbs.CreateInvalidParamError("fnal", "datatiers")
+	hrec := createHTTPError("GET", "/dbs/datatiers?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, dsParamErr)
+
 	return EndpointTestCase{
 		description:     "Test datatiers",
 		defaultHandler:  web.DatatiersHandler,
@@ -108,6 +113,18 @@ func getDatatiersTestTable(t *testing.T) EndpointTestCase {
 					"data_tier_name": []string{"A*"},
 				},
 				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

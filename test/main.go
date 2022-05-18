@@ -170,6 +170,28 @@ func responseToRecord(t *testing.T, rec []Response) []dbs.Record {
 	return e
 }
 
+// create server error response
+func createServerErrorResponse(hrec web.HTTPError, dbsError error) web.ServerError {
+	return web.ServerError{
+		HTTPError: hrec,
+		DBSError:  dbsError,
+		Exception: http.StatusBadRequest,
+		Type:      "HTTPError",
+		Message:   dbsError.Error(),
+	}
+}
+
+// create HTTPError
+func createHTTPError(method string, path string) web.HTTPError {
+	return web.HTTPError{
+		Method:    method,
+		Timestamp: "",
+		HTTPCode:  http.StatusBadRequest,
+		Path:      path,
+		UserAgent: "Go-http-client/1.1",
+	}
+}
+
 // compares received response to expected
 func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	expect := expected

@@ -7,6 +7,7 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -30,6 +31,11 @@ func getDatasetAccessTypesTestTable(t *testing.T) EndpointTestCase {
 	dataATresp := datasetAccessTypeResponse{
 		DATASET_ACCESS_TYPE: TestData.DatasetAccessType,
 	}
+
+	dsATInvalidParam := dbs.CreateInvalidParamError("fnal", "datasetaccesstypes")
+	hrec := createHTTPError("GET", "/dbs/datasetaccesstypes?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, dsATInvalidParam)
+
 	return EndpointTestCase{
 		description:     "Test datasetaccesstypes",
 		defaultHandler:  web.DatasetAccessTypesHandler,
@@ -66,6 +72,18 @@ func getDatasetAccessTypesTestTable(t *testing.T) EndpointTestCase {
 				input:       datasetATreq2,
 				output:      []Response{},
 				respCode:    http.StatusOK,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

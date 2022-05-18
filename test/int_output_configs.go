@@ -52,6 +52,10 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 		SCENARIO:            "note",
 	}
 	outputConfigResp := createOutputConfigResponse(t)
+
+	ocError := dbs.CreateInvalidParamError("fnal", "outputconfigs")
+	hrec := createHTTPError("GET", "/dbs/outputconfigs?fnal=cern")
+	errorResp := createServerErrorResponse(hrec, ocError)
 	return EndpointTestCase{
 		description:     "Test outputconfigs",
 		defaultHandler:  web.OutputConfigsHandler,
@@ -104,6 +108,18 @@ func getOutputConfigTestTable(t *testing.T) EndpointTestCase {
 				},
 				params:   nil,
 				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp,
+				},
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

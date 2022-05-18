@@ -69,13 +69,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 		Reason:   dbsError1.Error(),
 		Message:  "not str type",
 	}
-	hrec := web.HTTPError{
-		Method:    "GET",
-		Timestamp: "",
-		HTTPCode:  http.StatusBadRequest,
-		Path:      "/dbs/primarydstypes?dataset=fnal",
-		UserAgent: "Go-http-client/1.1",
-	}
+	hrec := createHTTPError("GET", "/dbs/primarydstypes?dataset=fnal")
 	errorResp := web.ServerError{
 		HTTPError: hrec,
 		DBSError:  &dbsError,
@@ -83,6 +77,15 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 		Type:      "HTTPError",
 		Message:   dbsError.Error(),
 	}
+
+	primaryDSParamError := dbs.CreateInvalidParamError("fnal", "primarydatasets")
+	hrec2 := createHTTPError("GET", "/dbs/primarydatasets?fnal=cern")
+	errorResp2 := createServerErrorResponse(hrec2, primaryDSParamError)
+
+	primaryDSTypeParamError := dbs.CreateInvalidParamError("fnal", "primarydstypes")
+	hrec3 := createHTTPError("GET", "/dbs/primarydstypes?fnal=cern")
+	errorResp3 := createServerErrorResponse(hrec3, primaryDSTypeParamError)
+
 	return EndpointTestCase{
 		description:     "Test primarydataset",
 		defaultHandler:  web.PrimaryDatasetsHandler,
@@ -107,6 +110,31 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 				input:       nil,
 				output:      []Response{},
 				respCode:    http.StatusOK,
+			},
+			{
+				description: "primarydatasets GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp2,
+				},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "primarydstypes GET with invalid parameter key",
+				method:      "GET",
+				serverType:  "DBSReader",
+				endpoint:    "/dbs/primarydstypes",
+				params: url.Values{
+					"fnal": []string{"cern"},
+				},
+				output: []Response{
+					errorResp3,
+				},
+				respCode: http.StatusBadRequest,
 			},
 			{
 				description: "Test primarydatasets bad POST",
