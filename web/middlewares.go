@@ -69,7 +69,6 @@ func authMiddleware(next http.Handler) http.Handler {
 					break
 				}
 			}
-			//             status = CMSAuth.CheckCMSAuthz(r.Header, Config.CMSRole, Config.CMSGroup, "")
 			if !status {
 				log.Printf("ERROR: fail to authorize user with role=%v and group=%v, HTTP headers %+v\n", Config.CMSRole, Config.CMSGroup, r.Header)
 				w.WriteHeader(http.StatusUnauthorized)
