@@ -574,7 +574,7 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 }
 
 // test files with lumi_list range
-func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
+func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 	// filtered detailed response
 	childBulk := BulkBlocksData.ConcurrentChildData
 	var lfns []Response
@@ -738,483 +738,751 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 	}
 
 	var lfns2 []Response
+	var t61bResp []Response
+	var t61cResp []Response
+	var t61dResp []Response
 	for _, v := range TestData.Files {
 		lfn := fileResponse{
 			LOGICAL_FILE_NAME: v,
 		}
 		lfns2 = append(lfns2, lfn)
+		lfnRun := fileRunResponse{
+			LOGICAL_FILE_NAME: v,
+			RUN_NUM:           97,
+		}
+		t61cResp = append(t61cResp, lfnRun)
+		lfnRun2 := fileRunResponse{
+			LOGICAL_FILE_NAME: v,
+			RUN_NUM:           99,
+		}
+		t61dResp = append(t61dResp, lfnRun2)
+		t61bResp = append(t61bResp, lfnRun, lfnRun2)
 	}
 
-	return EndpointTestCase{
-		description:     "Test files with lumi_list ranges",
-		defaultHandler:  web.FilesHandler,
-		defaultEndpoint: "/dbs/files",
-		testCases: []testCase{
-			{
-				description: "Test GET with block_name", // DBSClientReader_t.test033a
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
+	return []EndpointTestCase{
+		{
+			description:     "Test GET files with block_name",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with block_name", // DBSClientReader_t.test033a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+					},
+					output:   lfns,
+					respCode: http.StatusOK,
 				},
-				output:   lfns,
-				respCode: http.StatusOK,
+				{
+					description: "Test GET with block_name, detail", // DBSClientReader_t.test033b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+						"detail":     []string{"true"},
+					},
+					output:   detailResp3,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name and validFileOnly", // DBSClientReader_t.test033c
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"validFileOnly": []string{"1"},
+					},
+					output:   lfns,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, validFileOnly, detail", // DBSClientReader_t.test033d
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"validFileOnly": []string{"1"},
+						"detail":        []string{"true"},
+					},
+					output:   detailResp3,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name and validFileOnly false", // DBSClientReader_t.test033e
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"validFileOnly": []string{"0"},
+					},
+					output:   lfns,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, validFileOnly false, detail", // DBSClientReader_t.test033f
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"validFileOnly": []string{"0"},
+						"detail":        []string{"true"},
+					},
+					output:   detailResp3,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, lumi_list", // DBSClientReader_t.test033g
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+						"run_num":    []string{runNumParam},
+						"lumi_list":  []string{"[27414,26422,29838]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, nested lumi_list", // DBSClientReader_t.test033h
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+						"run_num":    []string{runNumParam},
+						"lumi_list":  []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					},
+					output:   fileRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, lumi_list, detail", // DBSClientReader_t.test033i
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+						"run_num":    []string{runNumParam},
+						"lumi_list":  []string{"[27414,26422,29838]"},
+						"detail":     []string{"true"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, nested lumi_list, detail", // DBSClientReader_t.test033j
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+						"run_num":    []string{runNumParam},
+						"lumi_list":  []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"detail":     []string{"true"},
+					},
+					output:   detailRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test033k
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[27414,26422,29838]"},
+						"validFileOnly": []string{"1"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test033l
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"validFileOnly": []string{"1"},
+					},
+					output:   fileRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, lumi_list, detail, validFileOnly", // DBSClientReader_t.test033m
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[27414,26422,29838]"},
+						"validFileOnly": []string{"1"},
+						"detail":        []string{"true"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, nested lumi_list, detail, validFileOnly", // DBSClientReader_t.test033n
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.StepchainBlock},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"validFileOnly": []string{"1"},
+						"detail":        []string{"true"},
+					},
+					output:   detailRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, run_num, lumi_list", // DBSClientReader_t.test033o
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.StepchainBlock},
+						"run_num":    []string{fmt.Sprintf("[%s]", runNumParam)},
+						"lumi_list":  []string{"[27414,26422,29838]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test bad GET with block_name, sumOverLumi, run_num, lumi_list, detail", // DBSClientReader_t.test033p
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":  []string{TestData.StepchainBlock},
+						"sumOverLumi": []string{"1"},
+						"run_num":     []string{runNumParam},
+						"lumi_list":   []string{"[27414,26422,29838]"},
+						"detail":      []string{"true"},
+					},
+					output:   []Response{errorResp},
+					respCode: http.StatusBadRequest,
+				},
+				{
+					description: "Test bad GET with block_name, sumOverLumi, single run_num, detail", // DBSClientReader_t.test033q
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":  []string{TestData.StepchainBlock},
+						"sumOverLumi": []string{"1"},
+						"run_num":     []string{fmt.Sprintf("[%s]", runNumParam)},
+						"detail":      []string{"true"},
+					},
+					output:   []Response{errorResp2},
+					respCode: http.StatusBadRequest,
+				},
+				{
+					description: "Test GET with block_name, sumOverLumi, run_num, detail", // DBSClientReader_t.test033r
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":  []string{TestData.Block},
+						"sumOverLumi": []string{"1"},
+						"run_num":     []string{"97-99"},
+						"detail":      []string{"true"},
+					},
+					output:   largeFileResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with block_name, sumOverLumi, validFileOnly, run_num, detail", // DBSClientReader_t.test033s
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name":    []string{TestData.Block},
+						"sumOverLumi":   []string{"1"},
+						"validFileOnly": []string{"1"},
+						"run_num":       []string{"97-99"},
+						"detail":        []string{"true"},
+					},
+					output:   largeFileResp2,
+					respCode: http.StatusOK,
+				},
 			},
-			{
-				description: "Test GET with block_name, detail", // DBSClientReader_t.test033b
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
-					"detail":     []string{"true"},
+		},
+		{
+			description:     "Test GET files with logical_file_name",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with lfn", // DBSClientReader_t.test034a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					},
+					output:   lfns[:1],
+					respCode: http.StatusOK,
 				},
-				output:   detailResp3,
-				respCode: http.StatusOK,
+				{
+					description: "Test GET with lfn, validFileOnly", // DBSClientReader_t.test034b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"validFileOnly":     []string{"1"},
+					},
+					output:   lfns[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, validFileOnly false", // DBSClientReader_t.test034c
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"validFileOnly":     []string{"0"},
+					},
+					output:   lfns[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034d
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[27414,26422,29838]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, nested lumi_list", // DBSClientReader_t.test034e
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, lumi_list, detail", // DBSClientReader_t.test034f
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[27414,26422,29838]"},
+						"detail":            []string{"true"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, nested lumi_list, detail", // DBSClientReader_t.test034g
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"detail":            []string{"true"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test034h
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[27414,26422,29838]"},
+						"validFileOnly":     []string{"1"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test034i
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"validFileOnly":     []string{"1"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, lumi_list, validFileOnly, detail", // DBSClientReader_t.test034j
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[27414,26422,29838]"},
+						"detail":            []string{"1"},
+						"validFileOnly":     []string{"1"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, nested lumi_list, validFileOnly, detail", // DBSClientReader_t.test034k
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"detail":            []string{"1"},
+						"validFileOnly":     []string{"1"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034l
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{runNumParam},
+						"lumi_list":         []string{"[27414,26422,29838]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with lfn, run_num, lumi_list, detail, sumOverLumi", // DBSClientReader_t.test034m
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{"[" + runNumParam + "]"},
+						"lumi_list":         []string{"[27414,26422,29838]"},
+						"detail":            []string{"1"},
+						"sumOverLumi":       []string{"1"},
+					},
+					output: []Response{
+						errorResp3,
+					},
+					respCode: http.StatusBadRequest,
+				},
+				{
+					description: "Test GET with lfn, run_num, detail, sumOverLumi", // DBSClientReader_t.test034n
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+						"run_num":           []string{"[" + runNumParam + "]"},
+						"detail":            []string{"1"},
+						"sumOverLumi":       []string{"1"},
+					},
+					output: []Response{
+						errorResp4,
+					},
+					respCode: http.StatusBadRequest,
+				},
+				{
+					description: "Test GET with lfn, hyphen run_num range, detail, sumOverLumi", // DBSClientReader_t.test034o
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{TestData.Files[0]},
+						"run_num":           []string{"97-99"},
+						"detail":            []string{"1"},
+						"sumOverLumi":       []string{"1"},
+					},
+					output:   t34oResp,
+					respCode: http.StatusOK,
+				},
 			},
-			{
-				description: "Test GET with block_name and validFileOnly", // DBSClientReader_t.test033c
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"validFileOnly": []string{"1"},
+		},
+		{
+			description:     "Test GET files with dataset config fields",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with dataset, release_version", // DBSClientReader_t.test035a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":         []string{TestData.Dataset},
+						"release_version": []string{TestData.ReleaseVersion},
+					},
+					output:   lfns2,
+					respCode: http.StatusOK,
 				},
-				output:   lfns,
-				respCode: http.StatusOK,
+				{
+					description: "Test GET with dataset, release_version, validFileOnly", // DBSClientReader_t.test035b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":         []string{TestData.Dataset},
+						"release_version": []string{TestData.ReleaseVersion},
+						"validFileOnly":   []string{"1"},
+					},
+					output:   lfns2[1:],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, release_version, pset_hash, app_name, output_module_label", // DBSClientReader_t.test036
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":             []string{TestData.Dataset},
+						"release_version":     []string{TestData.ReleaseVersion},
+						"pset_hash":           []string{TestData.PsetHash},
+						"app_name":            []string{TestData.AppName},
+						"output_module_label": []string{TestData.OutputModuleLabel},
+					},
+					output:   lfns2,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with logical_file_name, pset_hash, app_name, output_module_label", // DBSClientReader_t.test037a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name":   []string{TestData.Files[0]},
+						"pset_hash":           []string{TestData.PsetHash},
+						"app_name":            []string{TestData.AppName},
+						"output_module_label": []string{TestData.OutputModuleLabel},
+					},
+					output:   lfns2[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with logical_file_name, pset_hash, app_name, output_module_label, validFileOnly", // DBSClientReader_t.test037b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name":   []string{TestData.Files[1]},
+						"pset_hash":           []string{TestData.PsetHash},
+						"app_name":            []string{TestData.AppName},
+						"output_module_label": []string{TestData.OutputModuleLabel},
+						"validFileOnly":       []string{"1"},
+					},
+					output:   lfns2[1:2],
+					respCode: http.StatusOK,
+				},
 			},
-			{
-				description: "Test GET with block_name, validFileOnly, detail", // DBSClientReader_t.test033d
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"validFileOnly": []string{"1"},
-					"detail":        []string{"true"},
+		},
+		{
+			description:     "Test GET files with non existing dataset, block_name, logical_file_name",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with dataset that does not exist", // DBSClientReader_t.test038
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset": []string{"/does/not/EXIST"},
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
 				},
-				output:   detailResp3,
-				respCode: http.StatusOK,
+				{
+					description: "Test GET with block_name that does not exist", // DBSClientReader_t.test039
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{"/does/not/EXIST#123"},
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with logical_file_name that does not exist", // DBSClientReader_t.test040
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"logical_file_name": []string{"/store/mc/does/not/EXIST/NotReally/0815/doesnotexist.root"},
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
+				},
 			},
-			{
-				description: "Test GET with block_name and validFileOnly false", // DBSClientReader_t.test033e
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"validFileOnly": []string{"0"},
+		},
+		{
+			description:     "Test GET files with dataset",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with dataset, run_num, lumi_list", // DBSClientReader_t.test040a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":   []string{childBulk.Dataset.Dataset},
+						"run_num":   []string{runNumParam},
+						"lumi_list": []string{"[27414,26422,29838]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
 				},
-				output:   lfns,
-				respCode: http.StatusOK,
+				{
+					description: "Test GET with dataset, run_num, nested lumi_list", // DBSClientReader_t.test40b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":   []string{childBulk.Dataset.Dataset},
+						"run_num":   []string{runNumParam},
+						"lumi_list": []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					},
+					output:   fileRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, lumi_list, detail", // DBSClientReader_t.test040c
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":   []string{childBulk.Dataset.Dataset},
+						"run_num":   []string{runNumParam},
+						"lumi_list": []string{"[27414,26422,29838]"},
+						"detail":    []string{"true"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, nested lumi_list, detail", // DBSClientReader_t.test040d
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":   []string{childBulk.Dataset.Dataset},
+						"run_num":   []string{runNumParam},
+						"lumi_list": []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"detail":    []string{"true"},
+					},
+					output:   detailRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test040e
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":       []string{childBulk.Dataset.Dataset},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[27414,26422,29838]"},
+						"validFileOnly": []string{"1"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test040f
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":       []string{childBulk.Dataset.Dataset},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"validFileOnly": []string{"1"},
+					},
+					output:   fileRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, lumi_list, validFileOnly, detail", // DBSClientReader_t.test040g
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":       []string{childBulk.Dataset.Dataset},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[27414,26422,29838]"},
+						"detail":        []string{"1"},
+						"validFileOnly": []string{"1"},
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, nested lumi_list, validFileOnly, detail", // DBSClientReader_t.test040h
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":       []string{childBulk.Dataset.Dataset},
+						"run_num":       []string{runNumParam},
+						"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+						"detail":        []string{"1"},
+						"validFileOnly": []string{"1"},
+					},
+					output:   detailRunResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num, lumi_list", // DBSClientReader_t.test040i
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset":   []string{childBulk.Dataset.Dataset},
+						"run_num":   []string{runNumParam},
+						"lumi_list": []string{"[27414,26422,29838]"},
+					},
+					output:   fileRunResp[:1],
+					respCode: http.StatusOK,
+				},
 			},
-			{
-				description: "Test GET with block_name, validFileOnly false, detail", // DBSClientReader_t.test033f
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"validFileOnly": []string{"0"},
-					"detail":        []string{"true"},
+		},
+		{
+			description:     "Test GET files with dataset, run_num",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with dataset, run_num (hyphen)", // DBSClientReader_t.test061a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset": []string{childBulk.Dataset.Dataset},
+						"run_num": []string{"97-99"},
+					},
+					output:   fileRunResp,
+					respCode: http.StatusOK,
 				},
-				output:   detailResp3,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, lumi_list", // DBSClientReader_t.test033g
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
-					"run_num":    []string{runNumParam},
-					"lumi_list":  []string{"[27414,26422,29838]"},
+				{
+					description: "Test GET with dataset, run_num (list)", // DBSClientReader_t.test061b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset": []string{TestData.Dataset},
+						"run_num": []string{"[97,99]"},
+					},
+					output:   t61bResp,
+					respCode: http.StatusOK,
 				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, nested lumi_list", // DBSClientReader_t.test033h
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
-					"run_num":    []string{runNumParam},
-					"lumi_list":  []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+				{
+					description: "Test GET with dataset, run_num (one)", // DBSClientReader_t.test061c
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset": []string{TestData.Dataset},
+						"run_num": []string{"97"},
+					},
+					output:   t61cResp,
+					respCode: http.StatusOK,
 				},
-				output:   fileRunResp,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, lumi_list, detail", // DBSClientReader_t.test033i
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
-					"run_num":    []string{runNumParam},
-					"lumi_list":  []string{"[27414,26422,29838]"},
-					"detail":     []string{"true"},
+				{
+					description: "Test GET with dataset, run_num (one, list)", // DBSClientReader_t.test061d
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset": []string{childBulk.Dataset.Dataset},
+						"run_num": []string{"[97]"},
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
 				},
-				output:   detailRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, nested lumi_list, detail", // DBSClientReader_t.test033j
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
-					"run_num":    []string{runNumParam},
-					"lumi_list":  []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-					"detail":     []string{"true"},
-				},
-				output:   detailRunResp,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test033k
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"run_num":       []string{runNumParam},
-					"lumi_list":     []string{"[27414,26422,29838]"},
-					"validFileOnly": []string{"1"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test033l
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"run_num":       []string{runNumParam},
-					"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-					"validFileOnly": []string{"1"},
-				},
-				output:   fileRunResp,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, lumi_list, detail, validFileOnly", // DBSClientReader_t.test033m
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"run_num":       []string{runNumParam},
-					"lumi_list":     []string{"[27414,26422,29838]"},
-					"validFileOnly": []string{"1"},
-					"detail":        []string{"true"},
-				},
-				output:   detailRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, nested lumi_list, detail, validFileOnly", // DBSClientReader_t.test033n
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.StepchainBlock},
-					"run_num":       []string{runNumParam},
-					"lumi_list":     []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-					"validFileOnly": []string{"1"},
-					"detail":        []string{"true"},
-				},
-				output:   detailRunResp,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, run_num, lumi_list", // DBSClientReader_t.test033o
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock},
-					"run_num":    []string{fmt.Sprintf("[%s]", runNumParam)},
-					"lumi_list":  []string{"[27414,26422,29838]"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test bad GET with block_name, sumOverLumi, run_num, lumi_list, detail", // DBSClientReader_t.test033p
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":  []string{TestData.StepchainBlock},
-					"sumOverLumi": []string{"1"},
-					"run_num":     []string{runNumParam},
-					"lumi_list":   []string{"[27414,26422,29838]"},
-					"detail":      []string{"true"},
-				},
-				output:   []Response{errorResp},
-				respCode: http.StatusBadRequest,
-			},
-			{
-				description: "Test bad GET with block_name, sumOverLumi, single run_num, detail", // DBSClientReader_t.test033q
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":  []string{TestData.StepchainBlock},
-					"sumOverLumi": []string{"1"},
-					"run_num":     []string{fmt.Sprintf("[%s]", runNumParam)},
-					"detail":      []string{"true"},
-				},
-				output:   []Response{errorResp2},
-				respCode: http.StatusBadRequest,
-			},
-			{
-				description: "Test GET with block_name, sumOverLumi, run_num, detail", // DBSClientReader_t.test033r
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":  []string{TestData.Block},
-					"sumOverLumi": []string{"1"},
-					"run_num":     []string{"97-99"},
-					"detail":      []string{"true"},
-				},
-				output:   largeFileResp,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with block_name, sumOverLumi, validFileOnly, run_num, detail", // DBSClientReader_t.test033s
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"block_name":    []string{TestData.Block},
-					"sumOverLumi":   []string{"1"},
-					"validFileOnly": []string{"1"},
-					"run_num":       []string{"97-99"},
-					"detail":        []string{"true"},
-				},
-				output:   largeFileResp2,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn", // DBSClientReader_t.test034a
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-				},
-				output:   lfns[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, validFileOnly", // DBSClientReader_t.test034b
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"validFileOnly":     []string{"1"},
-				},
-				output:   lfns[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, validFileOnly false", // DBSClientReader_t.test034c
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"validFileOnly":     []string{"0"},
-				},
-				output:   lfns[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034d
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[27414,26422,29838]"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, nested lumi_list", // DBSClientReader_t.test034e
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, lumi_list, detail", // DBSClientReader_t.test034f
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[27414,26422,29838]"},
-					"detail":            []string{"true"},
-				},
-				output:   detailRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, nested lumi_list, detail", // DBSClientReader_t.test034g
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-					"detail":            []string{"true"},
-				},
-				output:   detailRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test034h
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[27414,26422,29838]"},
-					"validFileOnly":     []string{"1"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test034i
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-					"validFileOnly":     []string{"1"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, lumi_list, validFileOnly, detail", // DBSClientReader_t.test034j
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[27414,26422,29838]"},
-					"detail":            []string{"1"},
-					"validFileOnly":     []string{"1"},
-				},
-				output:   detailRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, nested lumi_list, validFileOnly, detail", // DBSClientReader_t.test034k
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
-					"detail":            []string{"1"},
-					"validFileOnly":     []string{"1"},
-				},
-				output:   detailRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034l
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{runNumParam},
-					"lumi_list":         []string{"[27414,26422,29838]"},
-				},
-				output:   fileRunResp[:1],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with lfn, run_num, lumi_list, detail, sumOverLumi", // DBSClientReader_t.test034m
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{"[" + runNumParam + "]"},
-					"lumi_list":         []string{"[27414,26422,29838]"},
-					"detail":            []string{"1"},
-					"sumOverLumi":       []string{"1"},
-				},
-				output: []Response{
-					errorResp3,
-				},
-				respCode: http.StatusBadRequest,
-			},
-			{
-				description: "Test GET with lfn, run_num, detail, sumOverLumi", // DBSClientReader_t.test034n
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
-					"run_num":           []string{"[" + runNumParam + "]"},
-					"detail":            []string{"1"},
-					"sumOverLumi":       []string{"1"},
-				},
-				output: []Response{
-					errorResp4,
-				},
-				respCode: http.StatusBadRequest,
-			},
-			{
-				description: "Test GET with lfn, hyphen run_num range, detail, sumOverLumi", // DBSClientReader_t.test034o
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"logical_file_name": []string{TestData.Files[0]},
-					"run_num":           []string{"97-99"},
-					"detail":            []string{"1"},
-					"sumOverLumi":       []string{"1"},
-				},
-				output:   t34oResp,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with dataset, release_version", // DBSClientReader_t.test035a
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"dataset":         []string{TestData.Dataset},
-					"release_version": []string{TestData.ReleaseVersion},
-				},
-				output:   lfns2,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with dataset, release_version, validFileOnly", // DBSClientReader_t.test035b
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"dataset":         []string{TestData.Dataset},
-					"release_version": []string{TestData.ReleaseVersion},
-					"validFileOnly":   []string{"1"},
-				},
-				output:   lfns2[1:],
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test GET with dataset, release_version, pset_hash, app_name, output_module_label", // DBSClientReader_t.test036
-				method:      "GET",
-				serverType:  "DBSReader",
-				params: url.Values{
-					"dataset":             []string{TestData.Dataset},
-					"release_version":     []string{TestData.ReleaseVersion},
-					"pset_hash":           []string{TestData.PsetHash},
-					"app_name":            []string{TestData.AppName},
-					"output_module_label": []string{TestData.OutputModuleLabel},
-				},
-				output:   lfns2,
-				respCode: http.StatusOK,
 			},
 		},
 	}
