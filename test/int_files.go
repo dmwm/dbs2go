@@ -690,6 +690,61 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 		t.Fatal(err.Error())
 	}
 
+	dbsError3 := dbs.DBSError{
+		Function: "dbs.files.Files",
+		Code:     dbs.ParametersErrorCode,
+		Reason:   dbs.InvalidParamErr.Error(),
+		Message:  "cannot supply more than one list (lfn, run_num or lumi) at one query",
+	}
+	hrec3 := createHTTPError("GET", "/dbs/files?detail=1&logical_file_name=/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/0.root&lumi_list=[27414,26422,29838]&run_num=98&sumOverLumi=1")
+	errorResp3 := createServerErrorResponse(hrec3, &dbsError3)
+
+	dbsError4 := dbs.DBSError{
+		Reason:   dbs.InvalidParamErr.Error(),
+		Code:     dbs.ParametersErrorCode,
+		Message:  "When sumOverLumi=1, no run_num list is allowed",
+		Function: "dbs.files.Files",
+	}
+	hrec4 := createHTTPError("GET", "/dbs/files?detail=1&logical_file_name=/store/mc/Fall08/BBJets250t500-madgraph/GEN-SIM/StepChain_/8268/0.root&lumi_list=[27414,26422,29838]&run_num=[98]&sumOverLumi=1")
+	errorResp4 := createServerErrorResponse(hrec4, &dbsError4)
+
+	// response for test034o
+	var t34oResp []Response
+	for i := 97; i < 100; i++ {
+		for j := 0; j < 3; j++ {
+			r := fileDetailRunResponse{
+				ADLER32:                "NOTSET",
+				AUTO_CROSS_SECTION:     0,
+				BLOCK_ID:               1,
+				BLOCK_NAME:             TestData.Block,
+				CHECK_SUM:              "1504266448",
+				CREATE_BY:              TestData.CreateBy,
+				CREATION_DATE:          0,
+				DATASET:                TestData.Dataset,
+				DATASET_ID:             1,
+				FILE_ID:                11,
+				FILE_SIZE:              2012211901,
+				FILE_TYPE:              "EDM",
+				FILE_TYPE_ID:           1,
+				IS_FILE_VALID:          0,
+				LAST_MODIFICATION_DATE: 0,
+				LAST_MODIFIED_BY:       "DBS-workflow",
+				LOGICAL_FILE_NAME:      TestData.Files[0],
+				MD5:                    "",
+				RUN_NUM:                int64(i),
+			}
+			t34oResp = append(t34oResp, r)
+		}
+	}
+
+	var lfns2 []Response
+	for _, v := range TestData.Files {
+		lfn := fileResponse{
+			LOGICAL_FILE_NAME: v,
+		}
+		lfns2 = append(lfns2, lfn)
+	}
+
 	return EndpointTestCase{
 		description:     "Test files with lumi_list ranges",
 		defaultHandler:  web.FilesHandler,
@@ -1025,6 +1080,140 @@ func getFilesLumiListRangeTestTable(t *testing.T) EndpointTestCase {
 					"validFileOnly":     []string{"1"},
 				},
 				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test034i
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					"validFileOnly":     []string{"1"},
+				},
+				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list, validFileOnly, detail", // DBSClientReader_t.test034j
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[27414,26422,29838]"},
+					"detail":            []string{"1"},
+					"validFileOnly":     []string{"1"},
+				},
+				output:   detailRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, nested lumi_list, validFileOnly, detail", // DBSClientReader_t.test034k
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[[27414 27418] [26422 26426] [29838 29842]]"},
+					"detail":            []string{"1"},
+					"validFileOnly":     []string{"1"},
+				},
+				output:   detailRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list", // DBSClientReader_t.test034l
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{runNumParam},
+					"lumi_list":         []string{"[27414,26422,29838]"},
+				},
+				output:   fileRunResp[:1],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with lfn, run_num, lumi_list, detail, sumOverLumi", // DBSClientReader_t.test034m
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{"[" + runNumParam + "]"},
+					"lumi_list":         []string{"[27414,26422,29838]"},
+					"detail":            []string{"1"},
+					"sumOverLumi":       []string{"1"},
+				},
+				output: []Response{
+					errorResp3,
+				},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test GET with lfn, run_num, detail, sumOverLumi", // DBSClientReader_t.test034n
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
+					"run_num":           []string{"[" + runNumParam + "]"},
+					"detail":            []string{"1"},
+					"sumOverLumi":       []string{"1"},
+				},
+				output: []Response{
+					errorResp4,
+				},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test GET with lfn, hyphen run_num range, detail, sumOverLumi", // DBSClientReader_t.test034o
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"logical_file_name": []string{TestData.Files[0]},
+					"run_num":           []string{"97-99"},
+					"detail":            []string{"1"},
+					"sumOverLumi":       []string{"1"},
+				},
+				output:   t34oResp,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset, release_version", // DBSClientReader_t.test035a
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset":         []string{TestData.Dataset},
+					"release_version": []string{TestData.ReleaseVersion},
+				},
+				output:   lfns2,
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset, release_version, validFileOnly", // DBSClientReader_t.test035b
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset":         []string{TestData.Dataset},
+					"release_version": []string{TestData.ReleaseVersion},
+					"validFileOnly":   []string{"1"},
+				},
+				output:   lfns2[1:],
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET with dataset, release_version, pset_hash, app_name, output_module_label", // DBSClientReader_t.test036
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset":             []string{TestData.Dataset},
+					"release_version":     []string{TestData.ReleaseVersion},
+					"pset_hash":           []string{TestData.PsetHash},
+					"app_name":            []string{TestData.AppName},
+					"output_module_label": []string{TestData.OutputModuleLabel},
+				},
+				output:   lfns2,
 				respCode: http.StatusOK,
 			},
 		},

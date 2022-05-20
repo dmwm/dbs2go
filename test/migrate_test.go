@@ -274,7 +274,7 @@ func TestMigrateRemove(t *testing.T) {
 	reader = bytes.NewReader(data)
 
 	// remove migration request
-	rr, err = respRecorder("POST", "/dbs2go/cancel", reader, web.MigrationCancelHandler)
+	_, err = respRecorder("POST", "/dbs2go/cancel", reader, web.MigrationCancelHandler)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -294,9 +294,7 @@ func TestMigrateRemove(t *testing.T) {
 	// we should expect one cancelled request
 	var foundCancelledRequest bool
 	var removeRecords []dbs.MigrationRemoveRequest
-	var sids []int64
 	for _, rrr := range statusRecords {
-		sids = append(sids, rrr.MIGRATION_REQUEST_ID)
 		mstatus := rrr.MIGRATION_STATUS
 		if mstatus == 9 {
 			foundCancelledRequest = true

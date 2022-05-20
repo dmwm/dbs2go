@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"reflect"
 	"testing"
 
@@ -44,8 +43,7 @@ func TestSQL(t *testing.T) {
 
 	// fetch this record from DB, here we can either use nil writer
 	// or use StdoutWriter instance (defined in test/main.go)
-	var w http.ResponseWriter
-	w = utils.StdoutWriter("")
+	w := utils.StdoutWriter("")
 	sep := ",\n"
 	for _, rec := range records {
 		params := make(dbs.Record)
@@ -98,8 +96,7 @@ func TestInsertSQL(t *testing.T) {
 		cby := "test"
 
 		// create new writer for our test
-		var w http.ResponseWriter
-		w = utils.StdoutWriter("")
+		w := utils.StdoutWriter("")
 
 		// insert some info in DBS
 		dbs.DRYRUN = true
