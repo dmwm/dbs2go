@@ -258,7 +258,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 		var wg sync.WaitGroup
 		ngoroutines := 0
 		for i := k; i < k+maxSize; i = i + chunkSize {
-			if i > len(records) {
+			if i > nrec {
 				// we went too far and can't longer take slice from records
 				break
 			}
