@@ -392,6 +392,7 @@ func readJsonFile(t *testing.T, filename string, obj any) error {
 
 // LoadTestCases loads the InitialData from a json file
 func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []EndpointTestCase {
+	var endpointTestCases []EndpointTestCase
 	if _, err := os.Stat(filepath); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Generating base data")
 		generateBaseData(t, filepath)
@@ -429,8 +430,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	bulkBlocksTest := getBulkBlocksTestTable(t)
 	filesReaderTestTable := getFilesLumiListRangeTestTable(t)
 
-	return []EndpointTestCase{
-		primaryDatasetAndTypesTestCase,
+	endpointTestCases = append(endpointTestCases, primaryDatasetAndTypesTestCase,
 		outputConfigTestCase,
 		acquisitionErasTestCase,
 		processingErasTestCase,
@@ -447,6 +447,8 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 		outputConfigTestCase2,
 		datasetParentsTestCase,
 		bulkBlocksTest,
-		filesReaderTestTable,
-	}
+	)
+	endpointTestCases = append(endpointTestCases, filesReaderTestTable...)
+
+	return endpointTestCases
 }

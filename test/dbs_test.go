@@ -200,10 +200,10 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 	input := "[[1, 3], [5, 7]]"
 	lumis, err := dbs.FlatLumis(input)
 	if err != nil {
-		t.Error(fmt.Sprintf("fail to flat lumis with error %v", err))
+		t.Errorf("fail to flat lumis with error %v", err)
 	}
 	if len(lumis) == 0 {
-		t.Error(fmt.Sprintf("fail to flat lumis, zero output"))
+		t.Errorf("fail to flat lumis, zero output")
 	}
 	output := []string{"1", "2", "3", "5", "6", "7"}
 	log.Println("lumis input", input, "flat output", output)
@@ -215,10 +215,10 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 	input = "[[[1, 3], [5, 7]]]"
 	lumis, err = dbs.FlatLumis(input)
 	if err != nil {
-		t.Error(fmt.Sprintf("fail to flat lumis with error %v", err))
+		t.Errorf("fail to flat lumis with error %v", err)
 	}
 	if len(lumis) == 0 {
-		t.Error(fmt.Sprintf("fail to flat lumis, zero output"))
+		t.Error("fail to flat lumis, zero output")
 	}
 	output = []string{"1", "2", "3", "5", "6", "7"}
 	log.Println("lumis input", input, "flat output", output)
@@ -230,10 +230,10 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 	input = "[[1,+3], [5,+7]]"
 	lumis, err = dbs.FlatLumis(input)
 	if err != nil {
-		t.Error(fmt.Sprintf("fail to flat lumis with error %v", err))
+		t.Errorf("fail to flat lumis with error %v", err)
 	}
 	if len(lumis) == 0 {
-		t.Error(fmt.Sprintf("fail to flat lumis, zero output"))
+		t.Error("fail to flat lumis, zero output")
 	}
 	output = []string{"1", "2", "3", "5", "6", "7"}
 	log.Println("lumis input", input, "flat output", output)
@@ -245,10 +245,10 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 	input = "[1, 3, 5, 7]"
 	lumis, err = dbs.FlatLumis(input)
 	if err != nil {
-		t.Error(fmt.Sprintf("fail to flat lumis with error %v", err))
+		t.Errorf("fail to flat lumis with error %v", err)
 	}
 	if len(lumis) == 0 {
-		t.Error(fmt.Sprintf("fail to flat lumis, zero output"))
+		t.Error("fail to flat lumis, zero output")
 	}
 	output = []string{"1", "3", "5", "7"}
 	log.Println("lumis input", input, "flat output", output)
@@ -260,10 +260,10 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 	input = "[[1, 2, 3, 4, 5, 6]]"
 	lumis, err = dbs.FlatLumis(input)
 	if err != nil {
-		t.Error(fmt.Sprintf("fail to flat lumis with error %v", err))
+		t.Errorf("fail to flat lumis with error %v", err)
 	}
 	if len(lumis) == 0 {
-		t.Error(fmt.Sprintf("fail to flat lumis, zero output"))
+		t.Error("fail to flat lumis, zero output")
 	}
 	output = []string{"1", "2", "3", "4", "5", "6"}
 	log.Println("lumis input", input, "flat output", output)
@@ -275,10 +275,10 @@ func TestDBSUtilFlatLumis(t *testing.T) {
 	input2 := []string{"[1, 2, 3, 4, 5, 6]"}
 	lumis, err = dbs.FlatLumis(input2)
 	if err != nil {
-		t.Error(fmt.Sprintf("fail to flat lumis with error %v", err))
+		t.Errorf("fail to flat lumis with error %v", err)
 	}
 	if len(lumis) == 0 {
-		t.Error(fmt.Sprintf("fail to flat lumis, zero output"))
+		t.Error("fail to flat lumis, zero output")
 	}
 	output = []string{"1", "2", "3", "4", "5", "6"}
 	log.Println("lumis input", input2, "flat output", output)

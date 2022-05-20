@@ -101,6 +101,7 @@ func TestHTTPGet(t *testing.T) {
 
 // TestHTTPPost provides test of GET method for our service
 func TestHTTPPost(t *testing.T) {
+	var rr *httptest.ResponseRecorder
 	// initialize DB for testing
 	db := initDB(false)
 	defer db.Close()
@@ -110,7 +111,7 @@ func TestHTTPPost(t *testing.T) {
 	reader := bytes.NewReader(data)
 
 	// test existing DBS API
-	rr, err := respRecorder("POST", "/dbs2go/datatiers", reader, web.DatatiersHandler)
+	_, err := respRecorder("POST", "/dbs2go/datatiers", reader, web.DatatiersHandler)
 	if err != nil {
 		t.Error(err)
 	}
@@ -149,6 +150,7 @@ func TestHTTPPost(t *testing.T) {
 
 // TestHTTPPut
 func TestHTTPPut(t *testing.T) {
+	var rr *httptest.ResponseRecorder
 	// initialize DB for testing
 	db := initDB(false)
 	defer db.Close()
@@ -182,7 +184,7 @@ func TestHTTPPut(t *testing.T) {
 	// test existing DBS API
 	endDate := 1616109166
 	rurl := fmt.Sprintf("/dbs2go/acquisitioneras?end_date=%d&acquisition_era_name=%s", endDate, era)
-	rr, err := respRecorder("PUT", rurl, nil, web.AcquisitionErasHandler)
+	_, err = respRecorder("PUT", rurl, nil, web.AcquisitionErasHandler)
 	if err != nil {
 		t.Error(err)
 	}
