@@ -577,7 +577,7 @@ func getFilesTestTable2(t *testing.T) EndpointTestCase {
 func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 	// filtered detailed response
 	childBulk := BulkBlocksData.ConcurrentChildData
-	var lfns []Response
+	var childLFNs []Response
 	var detailResp3 []Response
 	var detailRunResp []Response
 	var fileRunResp []Response
@@ -585,7 +585,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 		r := fileResponse{
 			LOGICAL_FILE_NAME: v.LogicalFileName,
 		}
-		lfns = append(lfns, r)
+		childLFNs = append(childLFNs, r)
 		detail := fileDetailResponse{
 			ADLER32:                v.Adler32,
 			AUTO_CROSS_SECTION:     v.AutoCrossSection,
@@ -738,25 +738,32 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 	}
 
 	var lfns2 []Response
-	var t61bResp []Response
-	var t61cResp []Response
-	var t61dResp []Response
+	var lfnsRunsResp []Response
+	var lfnsRun9799Resp []Response
+	var lfnsRun97Resp []Response
+	// var lfnsRun98Resp []Response
+	var lfnsRun99Resp []Response
 	for _, v := range TestData.Files {
 		lfn := fileResponse{
 			LOGICAL_FILE_NAME: v,
 		}
 		lfns2 = append(lfns2, lfn)
-		lfnRun := fileRunResponse{
+		lfnRun97 := fileRunResponse{
 			LOGICAL_FILE_NAME: v,
 			RUN_NUM:           97,
 		}
-		t61cResp = append(t61cResp, lfnRun)
-		lfnRun2 := fileRunResponse{
+		lfnRun98 := fileRunResponse{
+			LOGICAL_FILE_NAME: v,
+			RUN_NUM:           98,
+		}
+		lfnRun99 := fileRunResponse{
 			LOGICAL_FILE_NAME: v,
 			RUN_NUM:           99,
 		}
-		t61dResp = append(t61dResp, lfnRun2)
-		t61bResp = append(t61bResp, lfnRun, lfnRun2)
+		lfnsRun97Resp = append(lfnsRun97Resp, lfnRun97)
+		lfnsRun99Resp = append(lfnsRun99Resp, lfnRun99)
+		lfnsRun9799Resp = append(lfnsRun9799Resp, lfnRun97, lfnRun99)
+		lfnsRunsResp = append(lfnsRunsResp, lfnRun97, lfnRun98, lfnRun99)
 	}
 
 	return []EndpointTestCase{
@@ -772,7 +779,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 					params: url.Values{
 						"block_name": []string{TestData.StepchainBlock},
 					},
-					output:   lfns,
+					output:   childLFNs,
 					respCode: http.StatusOK,
 				},
 				{
@@ -794,7 +801,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 						"block_name":    []string{TestData.StepchainBlock},
 						"validFileOnly": []string{"1"},
 					},
-					output:   lfns,
+					output:   childLFNs,
 					respCode: http.StatusOK,
 				},
 				{
@@ -817,7 +824,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 						"block_name":    []string{TestData.StepchainBlock},
 						"validFileOnly": []string{"0"},
 					},
-					output:   lfns,
+					output:   childLFNs,
 					respCode: http.StatusOK,
 				},
 				{
@@ -1016,7 +1023,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 					params: url.Values{
 						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
 					},
-					output:   lfns[:1],
+					output:   childLFNs[:1],
 					respCode: http.StatusOK,
 				},
 				{
@@ -1027,7 +1034,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
 						"validFileOnly":     []string{"1"},
 					},
-					output:   lfns[:1],
+					output:   childLFNs[:1],
 					respCode: http.StatusOK,
 				},
 				{
@@ -1038,7 +1045,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 						"logical_file_name": []string{childBulk.Files[0].LogicalFileName},
 						"validFileOnly":     []string{"0"},
 					},
-					output:   lfns[:1],
+					output:   childLFNs[:1],
 					respCode: http.StatusOK,
 				},
 				{
@@ -1458,7 +1465,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 						"dataset": []string{TestData.Dataset},
 						"run_num": []string{"[97,99]"},
 					},
-					output:   t61bResp,
+					output:   lfnsRun9799Resp,
 					respCode: http.StatusOK,
 				},
 				{
@@ -1469,7 +1476,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 						"dataset": []string{TestData.Dataset},
 						"run_num": []string{"97"},
 					},
-					output:   t61cResp,
+					output:   lfnsRun97Resp,
 					respCode: http.StatusOK,
 				},
 				{
@@ -1477,10 +1484,90 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 					method:      "GET",
 					serverType:  "DBSReader",
 					params: url.Values{
-						"dataset": []string{childBulk.Dataset.Dataset},
+						"dataset": []string{TestData.Dataset},
 						"run_num": []string{"[97]"},
 					},
-					output:   []Response{},
+					output:   lfnsRun97Resp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with dataset, run_num (one, list)", // DBSClientReader_t.test061e
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"dataset": []string{TestData.Dataset},
+						"run_num": []string{"[99]"},
+					},
+					output:   lfnsRun99Resp,
+					respCode: http.StatusOK,
+				},
+			},
+		},
+		{
+			description:     "Test GET files with mixed run_num range and list of run_num",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with run_num range", // DBSClientReader_t.test062
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.Block},
+						"run_num":    []string{"[97-99]"},
+					},
+					output:   lfnsRunsResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with mixed run_num range and list", // DBSClientReader_t.test063a
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.Block},
+						"run_num":    []string{"[97-99, 100, 10000]"},
+					},
+					output:   lfnsRunsResp,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with mixed run_num range, list, and range", // DBSClientReader_t.test063b
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"block_name": []string{TestData.Block},
+						"run_num":    []string{"[97-99, 100, 10000, 50-100]"},
+					},
+					output:   lfnsRunsResp,
+					respCode: http.StatusOK,
+				},
+			},
+		},
+		{
+			description:     "Test GET files with origin_site_name",
+			defaultHandler:  web.FilesHandler,
+			defaultEndpoint: "/dbs/files",
+			testCases: []testCase{
+				{
+					description: "Test GET with origin_site_name and dataset", // DBSClientReader_t.test069
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"origin_site_name": []string{childBulk.Block.OriginSiteName},
+						"dataset":          []string{childBulk.Dataset.Dataset},
+					},
+					output:   childLFNs,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test GET with origin_site_name and block_name", // DBSClientReader_t.test070
+					method:      "GET",
+					serverType:  "DBSReader",
+					params: url.Values{
+						"origin_site_name": []string{childBulk.Block.OriginSiteName},
+						"block_name":       []string{childBulk.Block.BlockName},
+					},
+					output:   childLFNs,
 					respCode: http.StatusOK,
 				},
 			},
