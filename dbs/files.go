@@ -657,7 +657,12 @@ func (a *API) UpdateFiles() error {
 	if err != nil {
 		return Error(err, LoadErrorCode, "", "dbs.files.UpdateFiles")
 	}
-	stm = WhereClause(stm, conds)
+	if len(lfns) == 1 {
+		// we only add where clause if lfns are present
+		// for dataset where clause it is not necessary since
+		// update_files.sql contains it as part of the wrapped query
+		stm = WhereClause(stm, conds)
+	}
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 1 {
 		utils.PrintSQL(stm, args, "execute")
