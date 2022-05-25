@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -80,15 +81,15 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 
 				var d []dbs.Record
 				// decode and verify the GET request
-				if v.method == "GET" {
+				// Also handles fileArray using POST to fetch data
+				if v.method == "GET" || (v.method == "POST" && strings.Contains(endpoint, "fileArray")) {
 					err = json.NewDecoder(r.Body).Decode(&d)
 					if err != nil {
 						t.Fatalf("Failed to decode body, %v", err)
 					}
 
 					verifyResponse(t, d, v.output)
-				}
-				if v.method == "POST" {
+				} else if v.method == "POST" {
 					rURL := parseURL(t, server.URL, endpoint, v.params)
 					rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
 					if err != nil {
