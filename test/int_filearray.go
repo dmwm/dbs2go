@@ -127,6 +127,67 @@ type fileArrayBlockNameRunNumSumOverLumiRequest struct {
 	SumOverLumi string `json:"sumOverLumi"`
 }
 
+// logical_file_name structs
+
+// fileArray request with logical_file_name
+type fileArrayLFNRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+}
+
+// fileArray request with logical_file_name, validFileOnly
+type fileArrayLFNValidFileRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	ValidFileOnly   string `json:"validFileOnly"`
+}
+
+// fileArray request with logical_file_name, run_num, lumi_list
+type fileArrayLFNRunNumLumiListRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	RunNum          string `json:"run_num"`
+	LumiList        string `json:"lumi_list"`
+}
+
+// fileArray request with logical_file_name, run_num, lumi_list, detail
+type fileArrayLFNRunNumLumiListDetailRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	RunNum          string `json:"run_num"`
+	LumiList        string `json:"lumi_list"`
+	Detail          string `json:"detail"`
+}
+
+// fileArray request with logical_file_name, run_num, lumi_list, validFileOnly
+type fileArrayLFNRunNumLumiListValidFileRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	RunNum          string `json:"run_num"`
+	LumiList        string `json:"lumi_list"`
+	ValidFileOnly   string `json:"validFileOnly"`
+}
+
+// fileArray request with logical_file_name, run_num, lumi_list, detail
+type fileArrayLFNRunNumLumiListValidFileDetailRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	RunNum          string `json:"run_num"`
+	LumiList        string `json:"lumi_list"`
+	ValidFileOnly   string `json:"validFileOnly"`
+	Detail          string `json:"detail"`
+}
+
+// fileArray request with logical_file_name, run_num, lumi_list, sumOverLumi
+type fileArrayLFNRunNumLumiListSumOverLumiRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	RunNum          string `json:"run_num"`
+	LumiList        string `json:"lumi_list"`
+	SumOverLumi     string `json:"sumOverLumi"`
+}
+
+// fileArray request with logical_file_name, run_num, sumOverLumi, detail
+type fileArrayLFNRunNumSumOverLumiDetailRequest struct {
+	LogicalFileName string `json:"logical_file_name"`
+	RunNum          string `json:"run_num"`
+	SumOverLumi     string `json:"sumOverLumi"`
+	Detail          string `json:"detail"`
+}
+
 // test fileArray
 func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 	fileLumiList := []dbs.FileLumi{
@@ -139,6 +200,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 	var lfnsRun97 []Response
 	var detailResp []Response
 	var detailRunResp []Response
+	var detailRunSumLumiResp []Response
 	for i := 1; i <= 10; i++ {
 		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/%v/%v.root", TestData.UID, i)
 		lfns = append(lfns, fileResponse{LOGICAL_FILE_NAME: lfn})
@@ -155,6 +217,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 			RUN_NUM:           97,
 		}
 		lfnsRun97 = append(lfnsRun97, fileRunResp)
+
 		if i == 1 {
 			r.LAST_MODIFIED_BY = "DBS-workflow"
 			r.IS_FILE_VALID = 0
@@ -172,6 +235,24 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 		detailRun.RUN_NUM = 97
 		detailRun.EventCount = 1619
 		detailRunResp = append(detailRunResp, detailRun)
+
+		var detailRunResp fileDetailRunResponse
+		d, err = json.Marshal(detailRun)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		err = json.Unmarshal(d, &detailRunResp)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		if i == 1 {
+			for j := 97; j < 100; j++ {
+				for i := 0; i < 3; i++ {
+					detailRunResp.RUN_NUM = int64(j)
+					detailRunSumLumiResp = append(detailRunSumLumiResp, detailRunResp)
+				}
+			}
+		}
 	}
 
 	dbsError := dbs.DBSError{
@@ -204,7 +285,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 			defaultEndpoint: "/dbs/fileArray",
 			testCases: []testCase{
 				{
-					description: "Test GET with datasets", // DBSClientReader.test03200
+					description: "Test POST with datasets", // DBSClientReader.test03200
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayDatasetRequest{
@@ -214,7 +295,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with datasets, validFileOnly true", // DBSClientReader.test03200a
+					description: "Test POST with datasets, validFileOnly true", // DBSClientReader.test03200a
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayDatasetValidFileRequest{
@@ -225,7 +306,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with datasets, validFileOnly false", // DBSClientReader.test03200b
+					description: "Test POST with datasets, validFileOnly false", // DBSClientReader.test03200b
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayDatasetValidFileRequest{
@@ -236,7 +317,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with datasets, validFileOnly true, detail, sumOverLumi", // DBSClientReader.test03200c
+					description: "Test POST with datasets, validFileOnly true, detail, sumOverLumi", // DBSClientReader.test03200c
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayDatasetValidFileDetailSumOverLumiRequest{
@@ -249,7 +330,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with datasets, validFileOnly false, detail, sumOverLumi", // DBSClientReader.test03200d
+					description: "Test POST with datasets, validFileOnly false, detail, sumOverLumi", // DBSClientReader.test03200d
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayDatasetValidFileDetailSumOverLumiRequest{
@@ -269,7 +350,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 			defaultEndpoint: "/dbs/fileArray",
 			testCases: []testCase{
 				{
-					description: "Test GET with block_name", // DBSClientReader.test03300a
+					description: "Test POST with block_name", // DBSClientReader.test03300a
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRequest{
@@ -279,7 +360,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name and detail", // DBSClientReader.test03300b
+					description: "Test POST with block_name and detail", // DBSClientReader.test03300b
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameDetailRequest{
@@ -290,7 +371,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name and validFileOnly true", // DBSClientReader.test03300c
+					description: "Test POST with block_name and validFileOnly true", // DBSClientReader.test03300c
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameValidFileRequest{
@@ -301,7 +382,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, detail, validFileOnly true", // DBSClientReader.test03300d
+					description: "Test POST with block_name, detail, validFileOnly true", // DBSClientReader.test03300d
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameDetailValidFileRequest{
@@ -313,7 +394,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name and validFileOnly 0", // DBSClientReader.test03300e
+					description: "Test POST with block_name and validFileOnly 0", // DBSClientReader.test03300e
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameValidFileRequest{
@@ -324,7 +405,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, detail, validFileOnly 0", // DBSClientReader.test03300f
+					description: "Test POST with block_name, detail, validFileOnly 0", // DBSClientReader.test03300f
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameDetailValidFileRequest{
@@ -336,7 +417,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, lumi_list", // DBSClientReader.test03300g
+					description: "Test POST with block_name, run_num, lumi_list", // DBSClientReader.test03300g
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListRequest{
@@ -348,7 +429,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, nested lumi_list", // DBSClientReader.test03300h
+					description: "Test POST with block_name, run_num, nested lumi_list", // DBSClientReader.test03300h
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListRequest{
@@ -360,7 +441,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, lumi_list, detail", // DBSClientReader.test03300i
+					description: "Test POST with block_name, run_num, lumi_list, detail", // DBSClientReader.test03300i
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListDetailRequest{
@@ -373,7 +454,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, nested lumi_list, detail", // DBSClientReader.test03300j
+					description: "Test POST with block_name, run_num, nested lumi_list, detail", // DBSClientReader.test03300j
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListDetailRequest{
@@ -386,7 +467,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, lumi_list, validFileOnly 1", // DBSClientReader.test03300k
+					description: "Test POST with block_name, run_num, lumi_list, validFileOnly 1", // DBSClientReader.test03300k
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListValidFileRequest{
@@ -399,7 +480,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, nested lumi_list, validFileOnly 1", // DBSClientReader.test03300l
+					description: "Test POST with block_name, run_num, nested lumi_list, validFileOnly 1", // DBSClientReader.test03300l
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListValidFileRequest{
@@ -412,7 +493,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, lumi_list, detail, validFileOnly 1", // DBSClientReader.test03300m
+					description: "Test POST with block_name, run_num, lumi_list, detail, validFileOnly 1", // DBSClientReader.test03300m
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListValidFileDetailRequest{
@@ -426,7 +507,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, run_num, nested lumi_list, detail, validFileOnly 1", // DBSClientReader.test03300n
+					description: "Test POST with block_name, run_num, nested lumi_list, detail, validFileOnly 1", // DBSClientReader.test03300n
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListValidFileDetailRequest{
@@ -440,7 +521,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, list run_num, lumi_list", // DBSClientReader.test03300o
+					description: "Test POST with block_name, list run_num, lumi_list", // DBSClientReader.test03300o
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListRequest{
@@ -452,7 +533,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusOK,
 				},
 				{
-					description: "Test GET with block_name, list run_num, lumi_list, sumOverLumi", // DBSClientReader.test03300p
+					description: "Test POST with block_name, list run_num, lumi_list, sumOverLumi", // DBSClientReader.test03300p
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListSumOverLumiRequest{
@@ -465,7 +546,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusBadRequest,
 				},
 				{
-					description: "Test GET with block_name, list run_num, lumi_list, sumOverLumi, detail", // DBSClientReader.test03300q
+					description: "Test POST with block_name, list run_num, lumi_list, sumOverLumi, detail", // DBSClientReader.test03300q
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumLumiListSumOverLumiDetailRequest{
@@ -479,7 +560,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusBadRequest,
 				},
 				{
-					description: "Test GET with block_name, list run_num, sumOverLumi, detail", // DBSClientReader.test03300r
+					description: "Test POST with block_name, list run_num, sumOverLumi, detail", // DBSClientReader.test03300r
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumSumOverLumiDetailRequest{
@@ -492,7 +573,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusBadRequest,
 				},
 				{
-					description: "Test GET with block_name, list run_num, sumOverLumi", // DBSClientReader.test03300s
+					description: "Test POST with block_name, list run_num, sumOverLumi", // DBSClientReader.test03300s
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumSumOverLumiRequest{
@@ -504,7 +585,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusBadRequest,
 				},
 				{
-					description: "Test GET with block_name, range run_num, sumOverLumi, detail", // DBSClientReader.test03300t
+					description: "Test POST with block_name, range run_num, sumOverLumi, detail", // DBSClientReader.test03300t
 					method:      "POST",
 					serverType:  "DBSReader",
 					input: fileArrayBlockNameRunNumSumOverLumiDetailRequest{
@@ -514,6 +595,210 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 						Detail:      "1",
 					},
 					output:   largeFileResp,
+					respCode: http.StatusOK,
+				},
+			},
+		},
+		{
+			description:     "Test fileArray API with logical_file_name parameter",
+			defaultHandler:  web.FileArrayHandler,
+			defaultEndpoint: "/dbs/fileArray",
+			testCases: []testCase{
+				{
+					description: "Test POST with logical_file_name", // DBSClientReader_t.test03400a
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRequest{
+						LogicalFileName: TestData.Files[0],
+					},
+					output:   lfns[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, validFileOnly 1", // DBSClientReader_t.test03400b
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNValidFileRequest{
+						LogicalFileName: TestData.Files[0],
+						ValidFileOnly:   "1",
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, validFileOnly 1", // DBSClientReader_t.test03400b2
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNValidFileRequest{
+						LogicalFileName: TestData.Files[1],
+						ValidFileOnly:   "1",
+					},
+					output:   lfns[1:2],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, validFileOnly 0", // DBSClientReader_t.test03400c
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNValidFileRequest{
+						LogicalFileName: TestData.Files[0],
+						ValidFileOnly:   "0",
+					},
+					output:   lfns[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, lumi_list", // DBSClientReader_t.test03400d
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "97",
+						LumiList:        "[27414,26422,29838]",
+					},
+					output:   lfnsRun97[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, nested lumi_list", // DBSClientReader_t.test03400e
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "97",
+						LumiList:        "[[27414 27418] [26422 26426] [29838 29842]]",
+					},
+					output:   lfnsRun97[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, lumi_list, detail", // DBSClientReader_t.test03400f
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListDetailRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "97",
+						LumiList:        "[27414,26422,29838]",
+						Detail:          "1",
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, nested lumi_list, detail", // DBSClientReader_t.test03400g
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListDetailRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "97",
+						LumiList:        "[[27414 27418] [26422 26426] [29838 29842]]",
+						Detail:          "1",
+					},
+					output:   detailRunResp[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, lumi_list, validFileOnly", // DBSClientReader_t.test03400h
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListValidFileRequest{
+						LogicalFileName: TestData.Files[1],
+						RunNum:          "97",
+						LumiList:        "[27414,26422,29838]",
+						ValidFileOnly:   "1",
+					},
+					output:   lfnsRun97[1:2],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, nested lumi_list, validFileOnly", // DBSClientReader_t.test03400i
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListValidFileRequest{
+						LogicalFileName: TestData.Files[1],
+						RunNum:          "97",
+						LumiList:        "[[27414 27418] [26422 26426] [29838 29842]]",
+						ValidFileOnly:   "1",
+					},
+					output:   lfnsRun97[1:2],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, lumi_list, validFileOnly, detail", // DBSClientReader_t.test03400j
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListValidFileDetailRequest{
+						LogicalFileName: TestData.Files[1],
+						RunNum:          "97",
+						LumiList:        "[27414,26422,29838]",
+						ValidFileOnly:   "1",
+						Detail:          "1",
+					},
+					output:   detailRunResp[1:2],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, nested lumi_list, validFileOnly, detail", // DBSClientReader_t.test03400k
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListValidFileDetailRequest{
+						LogicalFileName: TestData.Files[1],
+						RunNum:          "97",
+						LumiList:        "[[27414 27418] [26422 26426] [29838 29842]]",
+						ValidFileOnly:   "1",
+						Detail:          "1",
+					},
+					output:   detailRunResp[1:2],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, list run_num, lumi_list", // DBSClientReader_t.test03400l
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "[97]",
+						LumiList:        "[27414,26422,29838]",
+					},
+					output:   lfnsRun97[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, run_num, lumi_list", // DBSClientReader_t.test03400m
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumLumiListRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "97",
+						LumiList:        "[27414,26422,29838]",
+					},
+					output:   lfnsRun97[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with logical_file_name, list run_num, sumOverLumi, detail", // DBSClientReader_t.test03400n
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumSumOverLumiDetailRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "[97]",
+						SumOverLumi:     "1",
+						Detail:          "1",
+					},
+					output:   []Response{errorResp2},
+					respCode: http.StatusBadRequest,
+				},
+				{
+					description: "Test POST with logical_file_name, ranged run_num, sumOverLumi, detail", // DBSClientReader_t.test03400o
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRunNumSumOverLumiDetailRequest{
+						LogicalFileName: TestData.Files[0],
+						RunNum:          "97-99",
+						SumOverLumi:     "1",
+						Detail:          "1",
+					},
+					output:   detailRunSumLumiResp,
 					respCode: http.StatusOK,
 				},
 			},
