@@ -429,6 +429,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	datasetParentsTestCase := getDatasetParentsTestTable(t)
 	bulkBlocksTest := getBulkBlocksTestTable(t)
 	filesReaderTestTable := getFilesLumiListRangeTestTable(t)
+	fileArrayTestTable := getFileArrayTestTable(t)
 
 	endpointTestCases = append(endpointTestCases, primaryDatasetAndTypesTestCase,
 		outputConfigTestCase,
@@ -449,6 +450,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 		bulkBlocksTest,
 	)
 	endpointTestCases = append(endpointTestCases, filesReaderTestTable...)
+	endpointTestCases = append(endpointTestCases, fileArrayTestTable...)
 
 	return endpointTestCases
 }
