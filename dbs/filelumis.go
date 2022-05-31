@@ -358,7 +358,7 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	_, err := tx.Exec(stm, valueArgs...)
 	if err != nil {
 		if utils.VERBOSE > 0 {
-			log.Printf("Unable to insert FileLumis records, error %v", err)
+			log.Printf("Unable to insert FileLumis records, statement=\n%s\n, error %v", stm, err)
 		}
 		return Error(err, InsertErrorCode, "", "dbs.filelumis.insertFLChunk")
 	}
