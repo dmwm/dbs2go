@@ -706,12 +706,13 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		log.Printf("trec %+v", trec)
 	}
 	tempTable := fmt.Sprintf("ORA$PTT_TEMP_FILE_LUMIS_%d", time.Now().UnixMicro())
-	if DBOWNER == "sqlite" {
-		tempTable = "FILE_LUMIS"
-	}
 
 	// if we use chunks method we don't use tempTable
 	if FileLumiInsertMethod == "chunks" {
+		tempTable = fmt.Sprintf("%s.FILE_LUMIS", DBOWNER)
+	}
+	// for sqlite we simply use table name
+	if DBOWNER == "sqlite" {
 		tempTable = "FILE_LUMIS"
 	}
 
