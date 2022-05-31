@@ -709,6 +709,12 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	if DBOWNER == "sqlite" {
 		tempTable = "FILE_LUMIS"
 	}
+
+	// if we use chunks method we don't use tempTable
+	if FileLumiInsertMethod == "chunks" {
+		tempTable = "FILE_LUMIS"
+	}
+
 	for _, rrr := range rec.Files {
 		lfn := rrr.LogicalFileName
 		//         fileID, ok := trec.FilesMap[lfn]
