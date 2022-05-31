@@ -358,7 +358,15 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	_, err := tx.Exec(stm, valueArgs...)
 	if err != nil {
 		if utils.VERBOSE > 0 {
-			log.Printf("Unable to insert FileLumis records, statement=\n%s\n, error %v", stm, err)
+			pstm := stm
+			// our statement can be very large, to reduce its size we'll split it
+			// and use only first parts
+			arr := strings.Split(stm, "\n")
+			if len(arr) > 3 {
+				pstm = strings.Join(arr[:2], "\n")
+				pstm = fmt.Sprintf("%s...\nSELECT * FROM dual", pstm)
+			}
+			log.Printf("Unable to insert FileLumis records, statement=\n%s\n, error %v", pstm, err)
 		}
 		return Error(err, InsertErrorCode, "", "dbs.filelumis.insertFLChunk")
 	}
