@@ -188,6 +188,47 @@ type fileArrayLFNRunNumSumOverLumiDetailRequest struct {
 	Detail          string `json:"detail"`
 }
 
+// fileArray request with dataset, release_version
+type fileArrayDatasetReleaseRequest struct {
+	Dataset        string `json:"dataset"`
+	ReleaseVersion string `json:"release_version"`
+}
+
+// fileArray request with dataset, release_version, validFileOnly
+type fileArrayDatasetReleaseValidFileRequest struct {
+	Dataset        string `json:"dataset"`
+	ReleaseVersion string `json:"release_version"`
+	ValidFileOnly  string `json:"validFileOnly"`
+}
+
+// fileArray request with dataset, output_module_config fields
+type fileArrayDatasetOutputModRequest struct {
+	Dataset           string `json:"dataset"`
+	ReleaseVersion    string `json:"release_version"`
+	PsetHash          string `json:"pset_hash"`
+	AppName           string `json:"app_name"`
+	OutputModuleLabel string `json:"output_module_label"`
+}
+
+// fileArray request with lfn, output_module_config fields
+type fileArrayLFNOutputModRequest struct {
+	LogicalFileName   string `json:"logical_file_name"`
+	ReleaseVersion    string `json:"release_version"`
+	PsetHash          string `json:"pset_hash"`
+	AppName           string `json:"app_name"`
+	OutputModuleLabel string `json:"output_module_label"`
+}
+
+// fileArray request with lfn, output_module_config fields, validFileOnly
+type fileArrayLFNOutputModValidFileRequest struct {
+	LogicalFileName   string `json:"logical_file_name"`
+	ReleaseVersion    string `json:"release_version"`
+	PsetHash          string `json:"pset_hash"`
+	AppName           string `json:"app_name"`
+	OutputModuleLabel string `json:"output_module_label"`
+	ValidFileOnly     string `json:"validFileOnly"`
+}
+
 // test fileArray
 func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 	fileLumiList := []dbs.FileLumi{
@@ -799,6 +840,123 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 						Detail:          "1",
 					},
 					output:   detailRunSumLumiResp,
+					respCode: http.StatusOK,
+				},
+			},
+		},
+		{
+			description:     "Test fileArray with dataset and output_module_config parameters",
+			defaultHandler:  web.FileArrayHandler,
+			defaultEndpoint: "/dbs/fileArray",
+			testCases: []testCase{
+				{
+					description: "Test POST with dataset and release_version", // DBSClientReader_t.test03500a
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayDatasetReleaseRequest{
+						Dataset:        TestData.Dataset,
+						ReleaseVersion: TestData.ReleaseVersion,
+					},
+					output:   lfns,
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with dataset, release_version, validFileOnly 1", // DBSClientReader_t.test03500b
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayDatasetReleaseValidFileRequest{
+						Dataset:        TestData.Dataset,
+						ReleaseVersion: TestData.ReleaseVersion,
+						ValidFileOnly:  "1",
+					},
+					output:   lfns[1:],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with dataset, release_version, pset_hash, app_name, output_module_label", // DBSClientReader_t.test03600
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayDatasetOutputModRequest{
+						Dataset:           TestData.Dataset,
+						ReleaseVersion:    TestData.ReleaseVersion,
+						PsetHash:          TestData.PsetHash,
+						AppName:           TestData.AppName,
+						OutputModuleLabel: TestData.OutputModuleLabel,
+					},
+					output:   lfns,
+					respCode: http.StatusOK,
+				},
+			},
+		},
+		{
+			description:     "Test fileArray with logical_file_name and output_module_config parameters",
+			defaultHandler:  web.FileArrayHandler,
+			defaultEndpoint: "/dbs/fileArray",
+			testCases: []testCase{
+				{
+					description: "Test POST with dataset and release_version", // DBSClientReader_t.test03700a
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNOutputModRequest{
+						LogicalFileName:   TestData.Files[0],
+						ReleaseVersion:    TestData.ReleaseVersion,
+						PsetHash:          TestData.PsetHash,
+						AppName:           TestData.AppName,
+						OutputModuleLabel: TestData.OutputModuleLabel,
+					},
+					output:   lfns[:1],
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with dataset, release_version, pset_hash, app_name, output_module_label", // DBSClientReader_t.test03700b
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNOutputModValidFileRequest{
+						LogicalFileName:   TestData.Files[1],
+						ReleaseVersion:    TestData.ReleaseVersion,
+						PsetHash:          TestData.PsetHash,
+						AppName:           TestData.AppName,
+						OutputModuleLabel: TestData.OutputModuleLabel,
+						ValidFileOnly:     "1",
+					},
+					output:   lfns[1:2],
+					respCode: http.StatusOK,
+				},
+			},
+		},
+		{
+			description:     "Test fileArray with non-existing fields",
+			defaultHandler:  web.FileArrayHandler,
+			defaultEndpoint: "/dbs/fileArray",
+			testCases: []testCase{
+				{
+					description: "Test POST with non-existing dataset", // DBSClientReader_t.test03800
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayDatasetRequest{
+						Dataset: "/does/not/EXIST",
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with non-existing block_name", // DBSClientReader_t.test03900
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayBlockNameRequest{
+						BlockName: "/does/not/EXIST#123",
+					},
+					output:   []Response{},
+					respCode: http.StatusOK,
+				},
+				{
+					description: "Test POST with non-existing logical_file_name", // DBSClientReader_t.test0400
+					method:      "POST",
+					serverType:  "DBSReader",
+					input: fileArrayLFNRequest{
+						LogicalFileName: "/store/mc/does/not/EXIST/NotReally/0815/doesnotexist.root",
+					},
+					output:   []Response{},
 					respCode: http.StatusOK,
 				},
 			},
