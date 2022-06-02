@@ -256,6 +256,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 	for k := 0; k < nrec; k = k + maxSize {
 		t0 := time.Now()
 		var wg sync.WaitGroup
+		var chkError int
 		ngoroutines := 0
 		for i := k; i < k+maxSize; i = i + chunkSize {
 			if i > nrec {
@@ -270,7 +271,7 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 			if size > nrec {
 				size = nrec
 			}
-			go insertFLChunk(tx, &wg, table, records[i:size])
+			go insertFLChunk(tx, &wg, table, records[i:size], &chkError)
 			ngoroutines += 1
 		}
 		limit := k + maxSize
@@ -283,6 +284,14 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 				ngoroutines, k, limit, time.Since(t0))
 		}
 		wg.Wait()
+
+		// check for errors from all goroutines
+		if chkError > 0 {
+			// if at least one chunk fails we should return error
+			msg := "fail to inject FL chunk"
+			return Error(err, InsertErrorCode, msg, "dbs.filelumis.insertFLChunk")
+		}
+
 	}
 
 	if FileLumiInsertMethod == "temptable" {
@@ -318,19 +327,23 @@ func InsertFileLumisTxViaChunks(tx *sql.Tx, table string, records []FileLumis) e
 }
 
 // helper function to insert FileLumis chunk via ORACLE INSERT ALL statement
-func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileLumis) error {
+func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileLumis, chkError *int) error {
 	defer wg.Done()
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	if len(records) == 0 {
 		msg := "zero array of FileLumi records"
 		log.Println(msg)
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filelumis.insertFLChunk")
+		err := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filelumis.insertFLChunk")
+		*chkError += 1 // increment chunk error
+		return err
 	}
 	if FileLumiInsertMethod == "temptable" && DBOWNER == "sqlite" {
 		msg := "unable to use temp table with sqlite backend"
 		log.Println(msg)
-		return Error(DatabaseErr, DatabaseErrorCode, msg, "dbs.filelumis.insertFLChunk")
+		err := Error(DatabaseErr, DatabaseErrorCode, msg, "dbs.filelumis.insertFLChunk")
+		*chkError += 1 // increment chunk error
+		return err
 	}
 
 	// prepare statement for insering all rows
@@ -358,9 +371,19 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	_, err := tx.Exec(stm, valueArgs...)
 	if err != nil {
 		if utils.VERBOSE > 0 {
-			log.Printf("Unable to insert FileLumis records, error %v", err)
+			pstm := stm
+			// our statement can be very large, to reduce its size we'll split it
+			// and use only first parts
+			arr := strings.Split(stm, "\n")
+			if len(arr) > 3 {
+				pstm = strings.Join(arr[:2], "\n")
+				pstm = fmt.Sprintf("%s...\nSELECT * FROM dual", pstm)
+			}
+			log.Printf("Unable to insert FileLumis records, statement=\n%s\n, error %v", pstm, err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.filelumis.insertFLChunk")
+		e := Error(err, InsertErrorCode, "", "dbs.filelumis.insertFLChunk")
+		*chkError += 1 // increment chunk error
+		return e
 	}
 	return nil
 }
