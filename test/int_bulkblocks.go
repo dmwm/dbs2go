@@ -79,3 +79,28 @@ func getBulkBlocksTestTable(t *testing.T) EndpointTestCase {
 		},
 	}
 }
+
+// bulkblocks test table
+func getBulkBlocksLargeFileLumiInsertTestTable(t *testing.T) EndpointTestCase {
+	return EndpointTestCase{
+		description:     "Test concurrent bulkblocks when fileLumiChunkSize less than number fileLumis inserted",
+		defaultHandler:  web.BulkBlocksHandler,
+		defaultEndpoint: "/dbs/bulkblocks",
+		testCases: []testCase{
+			{
+				description:          "Test POST with fileLumiChunk size 20",
+				serverType:           "DBSWriter",
+				method:               "POST",
+				fileLumiChunkSize:    20,
+				concurrentBulkBlocks: true,
+				input:                LargeBulkBlocksData,
+				params: url.Values{
+					"block_name": []string{TestData.StepchainBlock + "2"},
+				},
+				output:   []Response{},
+				handler:  web.FilesHandler,
+				respCode: http.StatusOK,
+			},
+		},
+	}
+}

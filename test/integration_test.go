@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -31,6 +32,12 @@ import (
 func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 
 	var server *httptest.Server
+
+	flChunkSize := 500
+	// override file lumi chunk size
+	if c.fileLumiChunkSize != 0 {
+		flChunkSize = c.fileLumiChunkSize
+	}
 
 	t.Run(c.description, func(t *testing.T) {
 		for _, v := range c.testCases {
@@ -48,8 +55,13 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 					endpoint = v.endpoint
 				}
 
+				// override file lumi chunk size
+				if v.fileLumiChunkSize != 0 {
+					flChunkSize = v.fileLumiChunkSize
+				}
+
 				// run a test server for a single test case
-				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType, v.concurrentBulkBlocks)
+				server = dbsServer(t, "dbs", "DBS_DB_FILE", v.serverType, v.concurrentBulkBlocks, flChunkSize)
 				defer server.Close()
 
 				// create request body
@@ -119,8 +131,22 @@ func TestIntegration(t *testing.T) {
 	if bulkblocksFile == "" {
 		log.Fatal("BULKBLOCKS_DATA_FILE not defined")
 	}
+	largeBulkBlocksFile := os.Getenv("LARGE_BULKBLOCKS_DATA_FILE")
+	if largeBulkBlocksFile == "" {
+		log.Fatal("LARGE_BULKBLOCKS_DATA_FILE not defined")
+	}
 
-	testCases := LoadTestCases(t, testCaseFile, bulkblocksFile)
+	fileLumiLength := os.Getenv("FILE_LUMI_LIST_LENGTH")
+	if fileLumiLength == "" {
+		fileLumiLength = "500"
+	}
+
+	flLength, err := strconv.Atoi(fileLumiLength)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	testCases := LoadTestCases(t, testCaseFile, bulkblocksFile, largeBulkBlocksFile, flLength)
 
 	for _, v := range testCases {
 		runTestWorkflow(t, v)

@@ -136,6 +136,8 @@ test-integration:
 	DBS_DB_FILE=./dbfile \
 	INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
 	BULKBLOCKS_DATA_FILE=./data/integration/bulkblocks_data.json \
+	LARGE_BULKBLOCKS_DATA_FILE=./data/integration/largebulkblocks_data.json \
+	FILE_LUMI_LIST_LENGTH=30 \
 	go test -v -failfast -run Integration
 test-migration:
 	cd test && rm -f /tmp/dbs-one.db && \

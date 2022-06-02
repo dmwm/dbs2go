@@ -37,6 +37,7 @@ type testCase struct {
 	description          string                                   // test case description
 	serverType           string                                   // DBSWriter, DBSReader, DBSMigrate
 	concurrentBulkBlocks bool                                     // true for concurrentBulkBlocks
+	fileLumiChunkSize    int                                      // if not used, will default to EndpointTestCase value
 	method               string                                   // http method
 	endpoint             string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
 	params               url.Values                               // url parameters, optional
@@ -100,12 +101,16 @@ var TestData initialData
 // TestData must first be filled
 var BulkBlocksData bulkBlocksData
 
+// LargeBulkBlocksData contains data for fileLumiChunkSize test
+var LargeBulkBlocksData dbs.BulkBlocks
+
 // defines a testcase for an endpoint
 type EndpointTestCase struct {
-	description     string
-	defaultHandler  func(http.ResponseWriter, *http.Request)
-	defaultEndpoint string
-	testCases       []testCase
+	description       string                                   // test description
+	defaultHandler    func(http.ResponseWriter, *http.Request) // default handler for GET in POST
+	defaultEndpoint   string                                   // default endpoint for requests
+	fileLumiChunkSize int                                      // if not used, will default to 500
+	testCases         []testCase                               // test cases
 }
 
 // get a UUID time_mid as an int
@@ -372,6 +377,118 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 	_ = ioutil.WriteFile(filepath, file, os.ModePerm)
 }
 
+// generate an individual fileLumi
+func generateFileLumi(t *testing.T, i int) dbs.FileLumi {
+	return dbs.FileLumi{
+		LumiSectionNumber: int64(22800 + i),
+		RunNumber:         100,
+		EventCount:        70,
+	}
+}
+
+// generates bulkblocks data with the # of file_lumi_list based on the fileLumiChunkSize
+func generateLargeBulkBlocksData(t *testing.T, fileLumiChunkSize int, filepath string) {
+	var parentBulk dbs.BulkBlocks
+	var bulk dbs.BulkBlocks
+	var primDS dbs.PrimaryDataset
+	var dataset dbs.Dataset
+	var processingEra dbs.ProcessingEra
+	var acqEra dbs.AcquisitionEra
+	var block dbs.Block
+
+	algo := dbs.DatasetConfig{
+		ReleaseVersion:    TestData.ReleaseVersion,
+		PsetHash:          TestData.PsetHash,
+		AppName:           TestData.AppName,
+		OutputModuleLabel: TestData.OutputModuleLabel,
+		GlobalTag:         TestData.GlobalTag,
+	}
+
+	primDS.PrimaryDSName = TestData.StepPrimaryDSName
+	primDS.PrimaryDSType = "test"
+	primDS.CreateBy = "WMAgent"
+	primDS.CreationDate = time.Now().Unix() // Replace with fixed time
+
+	dataset = dbs.Dataset{
+		PhysicsGroupName:     TestData.PhysicsGroupName,
+		ProcessedDSName:      TestData.ProcDataset,
+		DataTierName:         TestData.Tier,
+		DatasetAccessType:    TestData.DatasetAccessType2,
+		Dataset:              TestData.StepchainDataset,
+		PrepID:               "TestPrepID",
+		CreateBy:             "WMAgent",
+		LastModifiedBy:       "WMAgent",
+		CreationDate:         time.Now().Unix(),
+		LastModificationDate: time.Now().Unix(),
+	}
+
+	processingEra = dbs.ProcessingEra{
+		ProcessingVersion: TestData.ProcessingVersion,
+		CreateBy:          "WMAgent",
+	}
+
+	acqEra = dbs.AcquisitionEra{
+		AcquisitionEraName: TestData.AcquisitionEra,
+		StartDate:          123456789,
+	}
+
+	block = dbs.Block{
+		BlockName:      TestData.StepchainBlock,
+		OriginSiteName: TestData.Site,
+		FileCount:      int64(fileLumiChunkSize),
+		BlockSize:      20122119010,
+	}
+
+	bulk.DatasetConfigList = []dbs.DatasetConfig{algo}
+	bulk.PrimaryDataset = primDS
+	bulk.Dataset = dataset
+	bulk.ProcessingEra = processingEra
+	bulk.AcquisitionEra = acqEra
+	bulk.DatasetParentList = []string{TestData.ParentStepchainDataset}
+	bulk.Block = block
+
+	parentBulk = bulk
+	parentBulk.Dataset.Dataset = TestData.ParentStepchainDataset + "3"
+	parentBulk.Block.BlockName = TestData.ParentStepchainBlock + "3"
+	parentBulk.DatasetParentList = []string{}
+	parentBulk.PrimaryDataset.PrimaryDSName = TestData.StepPrimaryDSName + "3"
+	parentBulk.Dataset.ProcessedDSName = TestData.ParentProcDataset + "3"
+
+	var parentFileList []dbs.File
+	f := createFile(t, 1)
+
+	var fileLumiList []dbs.FileLumi
+	for i := 0; i < fileLumiChunkSize; i++ {
+		fl := generateFileLumi(t, i)
+		fileLumiList = append(fileLumiList, fl)
+	}
+
+	f.LogicalFileName = fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain10_/p%v/%v.root", TestData.UID, 1)
+
+	f.FileLumiList = fileLumiList
+
+	parentFileList = append(parentFileList, f)
+
+	var parentAlgo dbs.FileConfig
+
+	pa, err := json.Marshal(algo) // convert DatasetConfig to FileConfig
+	if err != nil {
+		t.Fatal(err)
+	}
+	json.Unmarshal(pa, &parentAlgo)
+
+	parentAlgo.LFN = f.LogicalFileName
+	parentBulk.FileConfigList = append(parentBulk.FileConfigList, parentAlgo)
+
+	parentBulk.Files = parentFileList
+
+	file, err := json.MarshalIndent(parentBulk, "", " ")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	_ = ioutil.WriteFile(filepath, file, os.ModePerm)
+}
+
 // reads a json file and load into TestData
 func readJsonFile(t *testing.T, filename string, obj any) error {
 	var data []byte
@@ -391,7 +508,7 @@ func readJsonFile(t *testing.T, filename string, obj any) error {
 }
 
 // LoadTestCases loads the InitialData from a json file
-func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []EndpointTestCase {
+func LoadTestCases(t *testing.T, filepath string, bulkblockspath string, largeBulkBlocksPath string, fileLumiLength int) []EndpointTestCase {
 	var endpointTestCases []EndpointTestCase
 	if _, err := os.Stat(filepath); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Generating base data")
@@ -409,6 +526,25 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	err = readJsonFile(t, bulkblockspath, &BulkBlocksData)
 	if err != nil {
 		t.Fatal(err.Error())
+	}
+
+	// load large fileChunk bulkblocks data
+	if _, err := os.Stat(largeBulkBlocksPath); errors.Is(err, os.ErrNotExist) {
+		fmt.Println("Generating large bulkblocks data")
+		generateLargeBulkBlocksData(t, fileLumiLength, largeBulkBlocksPath)
+	}
+	err = readJsonFile(t, largeBulkBlocksPath, &LargeBulkBlocksData)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if len(LargeBulkBlocksData.Files[0].FileLumiList) != fileLumiLength {
+		fmt.Println("Generating new large bulkblocks data")
+		generateLargeBulkBlocksData(t, fileLumiLength, largeBulkBlocksPath)
+
+		err = readJsonFile(t, largeBulkBlocksPath, &LargeBulkBlocksData)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
 	}
 
 	primaryDatasetAndTypesTestCase := getPrimaryDatasetTestTable(t)
@@ -430,8 +566,12 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	bulkBlocksTest := getBulkBlocksTestTable(t)
 	filesReaderTestTable := getFilesLumiListRangeTestTable(t)
 	fileArrayTestTable := getFileArrayTestTable(t)
+	largeFileLumiInsertTestTable := getBulkBlocksLargeFileLumiInsertTestTable(t)
+	filesReaderAfterChunkTestTable := getFileLumiChunkTestTable(t)
 
-	endpointTestCases = append(endpointTestCases, primaryDatasetAndTypesTestCase,
+	endpointTestCases = append(
+		endpointTestCases,
+		primaryDatasetAndTypesTestCase,
 		outputConfigTestCase,
 		acquisitionErasTestCase,
 		processingErasTestCase,
@@ -451,6 +591,8 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string) []Endpo
 	)
 	endpointTestCases = append(endpointTestCases, filesReaderTestTable...)
 	endpointTestCases = append(endpointTestCases, fileArrayTestTable...)
+	endpointTestCases = append(endpointTestCases, largeFileLumiInsertTestTable)
+	endpointTestCases = append(endpointTestCases, filesReaderAfterChunkTestTable)
 
 	return endpointTestCases
 }
