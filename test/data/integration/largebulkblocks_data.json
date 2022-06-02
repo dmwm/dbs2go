@@ -1,0 +1,246 @@
+{
+ "dataset_conf_list": [
+  {
+   "release_version": "CMSSW_1_2_3",
+   "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+   "pset_name": "",
+   "app_name": "cmsRun",
+   "output_module_label": "merged",
+   "global_tag": "my-cms-gtag_8268",
+   "create_by": "",
+   "creation_date": 0
+  }
+ ],
+ "file_conf_list": [
+  {
+   "release_version": "CMSSW_1_2_3",
+   "pset_hash": "76e303993a1c2f842159dbfeeed9a0dd",
+   "pset_name": "",
+   "lfn": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain10_/p8268/1.root",
+   "app_name": "cmsRun",
+   "output_module_label": "merged",
+   "global_tag": "my-cms-gtag_8268",
+   "create_by": "",
+   "creation_date": 0
+  }
+ ],
+ "files": [
+  {
+   "check_sum": "1504266448",
+   "file_lumi_list": [
+    {
+     "lumi_section_num": 22800,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22801,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22802,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22803,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22804,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22805,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22806,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22807,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22808,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22809,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22810,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22811,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22812,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22813,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22814,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22815,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22816,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22817,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22818,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22819,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22820,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22821,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22822,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22823,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22824,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22825,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22826,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22827,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22828,
+     "run_num": 100,
+     "event_count": 70
+    },
+    {
+     "lumi_section_num": 22829,
+     "run_num": 100,
+     "event_count": 70
+    }
+   ],
+   "adler32": "NOTSET",
+   "file_size": 2012211901,
+   "event_count": 201,
+   "file_type": "EDM",
+   "last_modified_by": "",
+   "last_modification_date": 0,
+   "logical_file_name": "/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain10_/p8268/1.root",
+   "md5": "",
+   "auto_cross_section": 0,
+   "is_file_valid": 1
+  }
+ ],
+ "processing_era": {
+  "create_by": "WMAgent",
+  "creation_date": 0,
+  "processing_version": 8268,
+  "description": ""
+ },
+ "primds": {
+  "primary_ds_id": 0,
+  "create_by": "WMAgent",
+  "primary_ds_type": "test",
+  "primary_ds_name": "unittest_web_primary_ds_name_8268_stepchain3",
+  "creation_date": 1654135395
+ },
+ "dataset": {
+  "dataset_id": 0,
+  "create_by": "WMAgent",
+  "creation_date": 1654135395,
+  "physics_group_name": "Tracker",
+  "dataset_access_type": "PRODUCTION",
+  "data_tier_name": "GEN-SIM-RAW",
+  "last_modified_by": "WMAgent",
+  "processed_ds_name": "acq_era_8268-ptsr-v82683",
+  "xtcrosssection": 0,
+  "last_modification_date": 1654135395,
+  "dataset": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-ptsr-v8268/GEN-SIM-RAW3",
+  "prep_id": "TestPrepID"
+ },
+ "acquisition_era": {
+  "acquisition_era_name": "acq_era_8268",
+  "start_date": 123456789,
+  "creation_date": 0,
+  "end_date": 0,
+  "create_by": "",
+  "description": ""
+ },
+ "block": {
+  "block_id": 0,
+  "dataset_id": 0,
+  "create_by": "",
+  "creation_date": 0,
+  "open_for_writing": 0,
+  "block_name": "/unittest_web_primary_ds_name_8268_stepchain/acq_era_8268-ptsr-v8268/GEN-SIM-RAW#82683",
+  "file_count": 30,
+  "origin_site_name": "cmssrm.fnal.gov",
+  "block_size": 20122119010,
+  "last_modified_by": "",
+  "last_modification_date": 0
+ },
+ "file_parent_list": null,
+ "block_parent_list": null,
+ "dataset_parent_list": [],
+ "ds_parent_list": null
+}
