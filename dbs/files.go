@@ -205,7 +205,7 @@ func (a *API) Files() error {
 		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
 	}
 	if sumOverLumi == "1" && lfnList {
-		msg := "When sumOverLumi=1, no lfn list list is allowed"
+		msg := "When sumOverLumi=1, no lfn list is allowed"
 		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
 	}
 	if len(runs) > 0 && sumOverLumi == "1" {
