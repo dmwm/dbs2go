@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -650,6 +651,15 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		LAST_MODIFICATION_DATE: rec.Block.CreationDate,
 		LAST_MODIFIED_BY:       rec.Block.CreateBy,
 	}
+	// check if give block name exist in DBS, if it does, we
+	// abort the entire process
+	bName := rec.Block.BlockName
+	if rid, err := GetID(tx, "BLOCKS", "block_id", "block_name", bName); err == nil && rid != 0 {
+		err := errors.New(fmt.Sprintf("Block %s already exists", bName))
+		msg := "Data already exist in DBS"
+		return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	}
+
 	// get blockID
 	blockID, err = GetRecID(
 		tx,
