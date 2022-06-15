@@ -29,8 +29,20 @@ import (
 
 // TestMigration tests DBS Migration process
 func TestIntMigration(t *testing.T) {
-	db := initDB(false)
+	// initialize DBs for testing
+	dburi := os.Getenv("DBS_DB_FILE_1")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE_1 not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
+
+	dburi2 := os.Getenv("DBS_DB_FILE_2")
+	if dburi2 == "" {
+		log.Fatal("DBS_DB_FILE_2 not defined")
+	}
+	db2 := initDB(false, dburi2)
+	defer db2.Close()
 
 	// start DBSReader server from which we will read the data for migration process
 	base := "dbs-one-reader"
@@ -74,6 +86,9 @@ func TestIntMigration(t *testing.T) {
 		generateBulkBlocksData(t, bulkblocksPath)
 	}
 	err := readJsonFile(t, bulkblocksPath, &BulkBlocksData)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
 	// insert a bulkblock
 	bulk := BulkBlocksData.ConcurrentParentData

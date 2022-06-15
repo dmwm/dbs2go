@@ -725,7 +725,12 @@ func TestValidatorMigrationBlocs(t *testing.T) {
 
 // TestValidatorCheckQueryParameters
 func TestValidatorCheckQueryParameters(t *testing.T) {
-	initDB(false)
+	// initialize DB for testing
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	initDB(false, dburi)
 	var err error
 	utils.VERBOSE = 1
 	apiParametersFile := os.Getenv("DBS_API_PARAMETERS_FILE")

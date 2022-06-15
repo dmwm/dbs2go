@@ -35,7 +35,7 @@ func initTestLimiter(t *testing.T, period string) {
 }
 
 // helper function to initialize DB for tests
-func initDB(dryRun bool) *sql.DB {
+func initDB(dryRun bool, dburi string) *sql.DB {
 	log.SetFlags(0)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	// current directory is a <pwd>/test
@@ -46,7 +46,6 @@ func initDB(dryRun bool) *sql.DB {
 	utils.STATICDIR = fmt.Sprintf("%s/../static", dir)
 	utils.VERBOSE = 1
 	dbtype := "sqlite3"
-	dburi := "/tmp/dbs-test.db"
 	dbowner := "sqlite"
 
 	db, err := sql.Open(dbtype, dburi)

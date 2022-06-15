@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -18,7 +19,11 @@ import (
 func TestBulkBlocks(t *testing.T) {
 
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	//     var api dbs.API

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -73,7 +74,11 @@ func TestDBSUtilParseRuns(t *testing.T) {
 // TestDBSGetID
 func TestDBSGetID(t *testing.T) {
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	// prepare record for insertion
@@ -117,7 +122,7 @@ func TestDBSGetID(t *testing.T) {
 // TestDBSGetRecID
 func TestDBSGetRecID(t *testing.T) {
 	// initialize DB for testing
-	db := initDB(false)
+	db := initDB(false, "/tmp/dbs-test.db")
 	defer db.Close()
 
 	// prepare record for insertion

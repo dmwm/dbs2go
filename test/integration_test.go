@@ -120,7 +120,12 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 
 // TestIntegration Tests both DBSReader and DBSWriter Endpoints
 func TestIntegration(t *testing.T) {
-	db := initDB(false)
+	// initialize DB for testing
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	testCaseFile := os.Getenv("INTEGRATION_DATA_FILE")
