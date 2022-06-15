@@ -34,6 +34,7 @@ func getFileLumiChunkTestTable(t *testing.T) EndpointTestCase {
 			fileLumiResp = append(fileLumiResp, flr)
 		}
 	}
+	resp := append(fileLumiResp[20:], fileLumiResp[:20]...)
 	return EndpointTestCase{
 		description:     "Test files GET after file lumi chunk insert",
 		defaultHandler:  web.FilesHandler,
@@ -46,7 +47,7 @@ func getFileLumiChunkTestTable(t *testing.T) EndpointTestCase {
 				params: url.Values{
 					"block_name": []string{LargeBulkBlocksData.Block.BlockName},
 				},
-				output:   fileLumiResp,
+				output:   resp,
 				respCode: http.StatusOK,
 			},
 		},

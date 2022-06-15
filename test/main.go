@@ -139,7 +139,17 @@ func dbsServer(t *testing.T, base, dbFile, serverType string, concurrent bool, f
 	web.Config.LogFile = fmt.Sprintf("/tmp/dbs2go-%s.log", base)
 	web.Config.Verbose = 0
 	web.Config.ConcurrentBulkBlocks = concurrent
+	dbs.ConcurrentBulkBlocks = concurrent
+
+	// TODO: Need to find method to ensure these are not 0 in test
 	web.Config.FileLumiChunkSize = flChunkSize
+	dbs.FileLumiChunkSize = flChunkSize
+
+	dbs.FileLumiMaxSize = 100000
+
+	dbs.FileChunkSize = 50
+	// end of TODO
+
 	utils.VERBOSE = 0
 	utils.BASE = base
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
@@ -214,6 +224,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 		"last_modification_date", // created upon POST
 		"start_date",
 		"end_date",
+		"file_id",
 		"http", // client http information on errors
 	}
 
@@ -222,7 +233,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 			log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		}
 		// see difference between expected and received structs
-		c, err := diff.Diff(e[i], r)
+		c, err := diff.Diff(e[i], r, diff.SliceOrdering(false))
 		if err != nil {
 			t.Fatal(err)
 		}
