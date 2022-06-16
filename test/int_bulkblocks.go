@@ -27,6 +27,32 @@ func getBulkBlocksTestTable(t *testing.T) EndpointTestCase {
 		defaultEndpoint: "/dbs/bulkblocks",
 		testCases: []testCase{
 			{
+				description:          "Test POST sequential parent bulkblocks",
+				serverType:           "DBSWriter",
+				concurrentBulkBlocks: false,
+				method:               "POST",
+				input:                BulkBlocksData.SequentialParentData,
+				params: url.Values{
+					"block_name": []string{TestData.ParentStepchainBlock + "2"},
+				},
+				output:   []Response{},
+				handler:  web.FilesHandler,
+				respCode: http.StatusOK,
+			},
+			{
+				description:          "Test POST sequential child bulkblocks",
+				serverType:           "DBSWriter",
+				concurrentBulkBlocks: false,
+				method:               "POST",
+				input:                BulkBlocksData.SequentialChildData,
+				params: url.Values{
+					"block_name": []string{TestData.StepchainBlock + "2"},
+				},
+				output:   []Response{},
+				handler:  web.FilesHandler,
+				respCode: http.StatusOK,
+			},
+			{
 				description:          "Test POST concurrent parent bulkblocks",
 				serverType:           "DBSWriter",
 				concurrentBulkBlocks: true,
@@ -49,30 +75,6 @@ func getBulkBlocksTestTable(t *testing.T) EndpointTestCase {
 				params: url.Values{
 					"block_name": []string{TestData.StepchainBlock},
 				},
-				handler:  web.FilesHandler,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test POST sequential parent bulkblocks",
-				serverType:  "DBSWriter",
-				method:      "POST",
-				input:       BulkBlocksData.SequentialParentData,
-				params: url.Values{
-					"block_name": []string{TestData.ParentStepchainBlock + "2"},
-				},
-				output:   []Response{},
-				handler:  web.FilesHandler,
-				respCode: http.StatusOK,
-			},
-			{
-				description: "Test POST sequential child bulkblocks",
-				serverType:  "DBSWriter",
-				method:      "POST",
-				input:       BulkBlocksData.SequentialChildData,
-				params: url.Values{
-					"block_name": []string{TestData.StepchainBlock + "2"},
-				},
-				output:   []Response{},
 				handler:  web.FilesHandler,
 				respCode: http.StatusOK,
 			},
