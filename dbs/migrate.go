@@ -644,7 +644,8 @@ func migrationReport(req MigrationRequest, report string, status int64, err erro
 func (a *API) ProcessMigration() {
 
 	var status int64
-	status = FAILED // change it if we succeed at the end
+	//     status = FAILED // change it if we succeed at the end
+	status = PENDING // change it if we succeed at the end
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
 	if v, ok := a.Params["migration_rqst_id"]; ok {
@@ -792,7 +793,8 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 	//     defer close(ch)
 
 	// set default status
-	status = FAILED
+	//     status = FAILED
+	status = PENDING
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
 	if v, ok := a.Params["migration_rqst_id"]; ok {
