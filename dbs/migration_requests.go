@@ -133,7 +133,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 				"dbs.migration_requests.MigrationRequests")
 	}
 
-	if mid > 0 {
+	if mid > -1 {
 		cond := fmt.Sprintf(" MR.MIGRATION_REQUEST_ID = %s", placeholder("migration_request_id"))
 		conds = append(conds, cond)
 		args = append(args, mid)
