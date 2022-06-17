@@ -457,6 +457,7 @@ func (a *API) SubmitMigration() error {
 		log.Println("unable to unmarshal migration request", err)
 		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
+	log.Println("submit migration request ", string(data))
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
 	mid := rec.MIGRATION_REQUEST_ID
@@ -963,6 +964,7 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 		log.Println("unable to load update_migration_status template", err)
 		return Error(err, LoadErrorCode, "", "dbs.migrate.updateMigrationStatus")
 	}
+	log.Printf("update migration request %d to status %s", mrec.MIGRATION_REQUEST_ID, status)
 
 	// start transaction
 	tx, err := DB.Begin()
