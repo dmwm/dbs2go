@@ -27,7 +27,7 @@ var MigrationCleanupOffset int64
 // it accepts migration process timeout used by ProcessMigration API and
 // exit channel
 func MigrationServer(interval, timeout int, ch <-chan bool) {
-	log.Println("Start migration server")
+	log.Println("Start migration server with verbose mode", utils.VERBOSE)
 	api := API{Api: "ProcessMigration"}
 
 	lastCall := time.Now()
