@@ -974,6 +974,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 
 // updateMigrationStatus updates migration status
 func updateMigrationStatus(mrec MigrationRequest, status int) error {
+	log.Printf("update migration request %d to status %s", mrec.MIGRATION_REQUEST_ID, status)
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
@@ -981,7 +982,6 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 		log.Println("unable to load update_migration_status template", err)
 		return Error(err, LoadErrorCode, "", "dbs.migrate.updateMigrationStatus")
 	}
-	log.Printf("update migration request %d to status %s", mrec.MIGRATION_REQUEST_ID, status)
 
 	// start transaction
 	tx, err := DB.Begin()
