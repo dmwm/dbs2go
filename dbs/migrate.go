@@ -141,10 +141,24 @@ func GetParents(rurl, val string) ([]string, error) {
 func prepareMigrationList(rurl, input string) []string {
 	var pblocks []string
 	var err error
+	if utils.VERBOSE > 0 {
+		log.Println("prepare migration list", rurl, input)
+	}
 	if strings.Contains(input, "#") {
 		pblocks, err = GetParentBlocks(rurl, input)
 	} else {
 		pblocks, err = GetParentDatasetBlocks(rurl, input)
+		// if no parents exist for given dataset we'll find its blocks
+		if len(pblocks) == 0 {
+			blocks, err := processDatasetBlocks(rurl, input)
+			if err == nil {
+				pblocks = blocks
+			} else {
+				if utils.VERBOSE > 1 {
+					log.Printf("unable to find blocks from %s for %s, error %v", rurl, input, err)
+				}
+			}
+		}
 	}
 	if err != nil {
 		if utils.VERBOSE > 1 {
@@ -550,7 +564,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 			log.Println("migration block", blk)
 		}
 	}
-	if !utils.InList(input, migBlocks) {
+	// add our block input to migration blocks
+	if !utils.InList(input, migBlocks) && strings.Contains(input, "#") {
 		migBlocks = append(migBlocks, input)
 	}
 
@@ -1190,6 +1205,7 @@ func (a *API) CancelMigration() error {
 		return Error(err, MigrationErrorCode, "", "dbs.migrate.CancelMigration")
 	}
 	mrec := records[0]
+	log.Printf("CancelMigration request %+v, status %v (TERM_FAILED)", mrec, TERM_FAILED)
 	updateMigrationStatus(mrec, TERM_FAILED)
 	return nil
 }
