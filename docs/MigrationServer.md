@@ -34,7 +34,7 @@ cat > m.json << EOF
 EOF
 
 # submit migration request
-curl -H "Content-Type: application/json" -d@PWD/m.json \
+curl -H "Content-Type: application/json" -d@$PWD/m.json \
     http://localhost:9898/dbs2go-migrate/submit
 ```
 
@@ -48,7 +48,7 @@ cat > m.json << EOF
 EOF
 
 # submit migration request
-curl -H "Content-Type: application/json" -d@PWD/m.json \
+curl -H "Content-Type: application/json" -d@$PWD/m.json \
     http://localhost:9898/dbs2go-migrate/process
 ```
 
