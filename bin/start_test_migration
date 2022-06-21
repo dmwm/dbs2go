@@ -1,0 +1,62 @@
+#!/bin/bash
+
+BUILD_DBS2GO=0
+while getopts 'hb' OPTION; do
+    case "$OPTION" in
+        h)
+            echo "usage: $(basename \$0) [-h] [-b]" >&2
+            ;;
+        b)
+            BUILD_DBS2GO=1
+            ;;
+    esac
+done
+shift $(($OPTIND -1))
+
+if [ $BUILD_DBS2GO -eq 1 ]; then
+    echo "building dbs2go"
+    # build dbs2go
+    make build
+fi
+
+# create pid file
+rm ./test-pids
+touch ./test-pids
+
+pwd
+
+# Start dbs-one-reader
+./dbs2go -config ./test/config/config_dbs_one_reader.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-one-writer
+./dbs2go -config ./test/config/config_dbs_one_writer.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-two-reader
+./dbs2go -config ./test/config/config_dbs_two_reader.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-two-writer
+./dbs2go -config ./test/config/config_dbs_two_writer.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-migrate
+./dbs2go -config ./test/config/config_dbs_migrate.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-migration
+./dbs2go -config ./test/config/config_dbs_migration.json &
+echo $! >> ./test-pids
+
+sleep 1

@@ -1,0 +1,15 @@
+{
+    "base": "/dbs-one-reader",
+    "port": 8989,
+    "staticdir": "./static",
+    "dbfile": "./dbfile_1",
+    "lexicon_file": "./static/lexicon_reader.json",
+    "api_parameters_file": "./static/parameters.json",
+    "server_type": "DBSReader",
+    "servercrt": "",
+    "serverkey": "",
+    "hkey": "",
+    "updateDNs": 60,
+    "log_file": "/tmp/dbs2go_reader_1.log",
+    "verbose": 0
+}

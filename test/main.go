@@ -17,7 +17,7 @@ import (
 	"github.com/dmwm/dbs2go/web"
 	validator "github.com/go-playground/validator/v10"
 	_ "github.com/mattn/go-sqlite3"
-	diff "github.com/r3labs/diff/v2"
+	diff "github.com/r3labs/diff/v3"
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
@@ -149,7 +149,7 @@ func dbsServer(t *testing.T, base, dbFile, serverType string, concurrent bool, f
 	dbs.FileChunkSize = 50
 	// end of TODO
 
-	utils.VERBOSE = 0
+	utils.VERBOSE = 2
 	utils.BASE = base
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
 	if err != nil {
