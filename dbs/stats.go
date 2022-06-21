@@ -25,7 +25,7 @@ type SchemaIndex struct {
 type TableInfo struct {
 	Owner   string
 	Table   string
-	Rows    int
+	Rows    int64
 	Size    float64
 	Indexes []TableIndex
 }
@@ -242,7 +242,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 	for rows.Next() {
 		var owner string
 		var table string
-		var nrows int
+		var nrows int64
 		var size float64
 		if err := rows.Scan(&owner, &table, &nrows, &size); err != nil {
 			log.Printf("unable to scan size row, error %v", err)
@@ -250,7 +250,7 @@ func tablesSize(tx *sql.Tx, tmpl Record) ([]TableInfo, error) {
 		}
 		tinfo := TableInfo{Owner: owner, Table: table, Rows: nrows, Size: size}
 		for _, t := range tableIndexes {
-			if t.Owner == owner {
+			if t.Owner == owner && t.Table == table {
 				tinfo.Indexes = append(tinfo.Indexes, t)
 			}
 		}
