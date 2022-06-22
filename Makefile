@@ -157,15 +157,15 @@ test-integration:
 	FILE_LUMI_LIST_LENGTH=30 \
 	go test -v -failfast -run Integration
 test-migration:
-	pushd test && rm -f /tmp/dbs-one.db && \
+	cd test && rm -f /tmp/dbs-one.db && \
 	sqlite3 /tmp/dbs-one.db < ../static/schema/sqlite-schema.sql && \
 	echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1 && \
 	rm -f /tmp/dbs-two.db && \
 	sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
 	echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
-	popd && \
-	bash ./bin/start_test_migration -b && \
-	pushd test && \
+	cd .. && \
+	./bin/start_test_migration && \
+	cd test && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
