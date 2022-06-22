@@ -2,7 +2,7 @@
     "base": "/dbs-one-writer",
     "port": 8990,
     "staticdir": "./static",
-    "dbfile": "./dbfile_1",
+    "dbfile": "./test/dbfile_1",
     "lexicon_file": "./static/lexicon_writer.json",
     "api_parameters_file": "./static/parameters.json",
     "server_type": "DBSWriter",

@@ -2,7 +2,7 @@
     "base": "/dbs-one-reader",
     "port": 8989,
     "staticdir": "./static",
-    "dbfile": "./dbfile_1",
+    "dbfile": "./test/dbfile_1",
     "lexicon_file": "./static/lexicon_reader.json",
     "api_parameters_file": "./static/parameters.json",
     "server_type": "DBSReader",

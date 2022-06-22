@@ -2,7 +2,7 @@
     "base": "/dbs-two-reader",
     "port": 8991,
     "staticdir": "./static",
-    "dbfile": "./dbfile_2",
+    "dbfile": "./test/dbfile_2",
     "lexicon_file": "./static/lexicon_reader.json",
     "api_parameters_file": "./static/parameters.json",
     "server_type": "DBSReader",

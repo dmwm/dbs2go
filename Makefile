@@ -1,5 +1,6 @@
 VERSION=`git describe --tags`
 flags=-ldflags="-s -w -X main.gitVersion=${VERSION}"
+debug_flags=-ldflags="-X main.gitVersion=${VERSION}"
 odir=`cat ${PKG_CONFIG_PATH}/oci8.pc | grep "libdir=" | sed -e "s,libdir=,,"`
 
 all: build
@@ -9,6 +10,9 @@ vet:
 
 build:
 	go clean; rm -rf pkg dbs2go*; go build ${flags}
+
+build_debug:
+	go clean; rm -rf pkg dbs2go*; go build -gcflags=all="-N -l" ${debug_flags}
 
 build_all: build build_osx build_linux build_power8 build_arm64
 
@@ -36,7 +40,7 @@ clean:
 
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
 
-test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration bench
+test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration bench
 
 test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reader-pos test-lexicon-reader-neg
 
@@ -155,10 +159,10 @@ test-integration:
 test-migration:
 	pushd test && rm -f /tmp/dbs-one.db && \
 	sqlite3 /tmp/dbs-one.db < ../static/schema/sqlite-schema.sql && \
-	echo "\"sqlite3 /tmp/dbs-one.db sqlite\"" > ./dbfile_1 && \
+	echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1 && \
 	rm -f /tmp/dbs-two.db && \
 	sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
-	echo "\"sqlite3 /tmp/dbs-two.db sqlite\"" > ./dbfile_2 && \
+	echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
 	popd && \
 	bash ./bin/start_test_migration -b && \
 	pushd test && \
@@ -172,7 +176,7 @@ test-migration:
 	DBS_DB_PATH_2=/tmp/dbs-two.db \
 	INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
 	BULKBLOCKS_DATA_FILE=./data/integration/bulkblocks_data.json \
-	go test -v -run IntMigration
+	go test -v -failfast -run IntMigration
 bench:
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
