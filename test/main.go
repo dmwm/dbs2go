@@ -232,7 +232,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 			log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		}
 		// see difference between expected and received structs
-		c, err := diff.Diff(e[i], r, diff.SliceOrdering(false))
+		c, err := diff.Diff(e[i], r)
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -1,10 +1,3 @@
 #!/bin/bash
 
-while read -r line; do
-    echo $line
-    kill $line
-done < ./test-pids
-
 pkill -f 'dbs2go'
-
-rm ./test-pids

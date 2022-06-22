@@ -100,7 +100,11 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 						t.Fatalf("Failed to decode body, %v", err)
 					}
 
-					verifyResponse(t, d, v.output)
+					if v.verifyFunc == nil {
+						verifyResponse(t, d, v.output)
+					} else {
+						v.verifyFunc(t, d, v.output)
+					}
 				} else if v.method == "POST" {
 					rURL := parseURL(t, server.URL, endpoint, v.params)
 					rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
