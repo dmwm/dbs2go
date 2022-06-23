@@ -332,11 +332,12 @@ func insertFLChunk(tx *sql.Tx, wg *sync.WaitGroup, table string, records []FileL
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
 	if len(records) == 0 {
-		msg := "zero array of FileLumi records"
+		msg := "WARNING: requested to inject zero array of FileLumi records"
 		log.Println(msg)
-		err := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filelumis.insertFLChunk")
-		*chkError += 1 // increment chunk error
-		return err
+		return nil
+		//         err := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filelumis.insertFLChunk")
+		//         *chkError += 1 // increment chunk error
+		//         return err
 	}
 	if FileLumiInsertMethod == "temptable" && DBOWNER == "sqlite" {
 		msg := "unable to use temp table with sqlite backend"

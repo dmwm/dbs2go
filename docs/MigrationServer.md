@@ -24,6 +24,11 @@ from underlying DB backend on periodic basis
 
 ### Examples
 Post migration request:
+- please note that in all section below I used
+  `http://localhost:9898/dbs2go-migrate` URL for DBSMigrate server and it
+  should be replaced with `https://cmsweb.cern.ch/dbs/prod/global/DBSMigrate`
+  or `https://cmsweb-testbed.cern.ch/dbs/int/global/DBSMigrate` or
+  corresponding `phys03` URLs
 ```
 # migration document
 cat > m.json << EOF
@@ -34,7 +39,7 @@ cat > m.json << EOF
 EOF
 
 # submit migration request
-curl -H "Content-Type: application/json" -d@PWD/m.json \
+curl -H "Content-Type: application/json" -d@$PWD/m.json \
     http://localhost:9898/dbs2go-migrate/submit
 ```
 
@@ -48,7 +53,7 @@ cat > m.json << EOF
 EOF
 
 # submit migration request
-curl -H "Content-Type: application/json" -d@PWD/m.json \
+curl -H "Content-Type: application/json" -d@$PWD/m.json \
     http://localhost:9898/dbs2go-migrate/process
 ```
 

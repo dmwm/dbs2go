@@ -141,10 +141,24 @@ func GetParents(rurl, val string) ([]string, error) {
 func prepareMigrationList(rurl, input string) []string {
 	var pblocks []string
 	var err error
+	if utils.VERBOSE > 0 {
+		log.Println("prepare migration list", rurl, input)
+	}
 	if strings.Contains(input, "#") {
 		pblocks, err = GetParentBlocks(rurl, input)
 	} else {
 		pblocks, err = GetParentDatasetBlocks(rurl, input)
+		// if no parents exist for given dataset we'll find its blocks
+		if len(pblocks) == 0 {
+			blocks, err := processDatasetBlocks(rurl, input)
+			if err == nil {
+				pblocks = blocks
+			} else {
+				if utils.VERBOSE > 1 {
+					log.Printf("unable to find blocks from %s for %s, error %v", rurl, input, err)
+				}
+			}
+		}
 	}
 	if err != nil {
 		if utils.VERBOSE > 1 {
@@ -457,6 +471,7 @@ func (a *API) SubmitMigration() error {
 		log.Println("unable to unmarshal migration request", err)
 		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.SubmitMigration")
 	}
+	log.Println("submit migration request ", string(data))
 	// check if migration input is already queued
 	input := rec.MIGRATION_INPUT
 	mid := rec.MIGRATION_REQUEST_ID
@@ -549,7 +564,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 			log.Println("migration block", blk)
 		}
 	}
-	if !utils.InList(input, migBlocks) {
+	// add our block input to migration blocks
+	if !utils.InList(input, migBlocks) && strings.Contains(input, "#") {
 		migBlocks = append(migBlocks, input)
 	}
 
@@ -643,7 +659,8 @@ func migrationReport(req MigrationRequest, report string, status int64, err erro
 func (a *API) ProcessMigration() {
 
 	var status int64
-	status = FAILED // change it if we succeed at the end
+	//     status = FAILED // change it if we succeed at the end
+	status = PENDING // change it if we succeed at the end
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
 	if v, ok := a.Params["migration_rqst_id"]; ok {
@@ -791,7 +808,8 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 	//     defer close(ch)
 
 	// set default status
-	status = FAILED
+	//     status = FAILED
+	status = PENDING
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
 	if v, ok := a.Params["migration_rqst_id"]; ok {
@@ -956,6 +974,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 
 // updateMigrationStatus updates migration status
 func updateMigrationStatus(mrec MigrationRequest, status int) error {
+	log.Printf("update migration request %d to status %s", mrec.MIGRATION_REQUEST_ID, status)
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
@@ -1186,6 +1205,7 @@ func (a *API) CancelMigration() error {
 		return Error(err, MigrationErrorCode, "", "dbs.migrate.CancelMigration")
 	}
 	mrec := records[0]
+	log.Printf("CancelMigration request %+v, status %v (TERM_FAILED)", mrec, TERM_FAILED)
 	updateMigrationStatus(mrec, TERM_FAILED)
 	return nil
 }
