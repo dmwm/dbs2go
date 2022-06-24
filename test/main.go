@@ -17,7 +17,7 @@ import (
 	"github.com/dmwm/dbs2go/web"
 	validator "github.com/go-playground/validator/v10"
 	_ "github.com/mattn/go-sqlite3"
-	diff "github.com/r3labs/diff/v2"
+	diff "github.com/r3labs/diff/v3"
 	limiter "github.com/ulule/limiter/v3"
 	stdlib "github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
@@ -35,7 +35,7 @@ func initTestLimiter(t *testing.T, period string) {
 }
 
 // helper function to initialize DB for tests
-func initDB(dryRun bool) *sql.DB {
+func initDB(dryRun bool, dburi string) *sql.DB {
 	log.SetFlags(0)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	// current directory is a <pwd>/test
@@ -46,7 +46,6 @@ func initDB(dryRun bool) *sql.DB {
 	utils.STATICDIR = fmt.Sprintf("%s/../static", dir)
 	utils.VERBOSE = 1
 	dbtype := "sqlite3"
-	dburi := "/tmp/dbs-test.db"
 	dbowner := "sqlite"
 
 	db, err := sql.Open(dbtype, dburi)
@@ -150,7 +149,7 @@ func dbsServer(t *testing.T, base, dbFile, serverType string, concurrent bool, f
 	dbs.FileChunkSize = 50
 	// end of TODO
 
-	utils.VERBOSE = 0
+	utils.VERBOSE = 2
 	utils.BASE = base
 	lexPatterns, err := dbs.LoadPatterns(lexiconFile)
 	if err != nil {
@@ -233,7 +232,7 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 			log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		}
 		// see difference between expected and received structs
-		c, err := diff.Diff(e[i], r, diff.SliceOrdering(false))
+		c, err := diff.Diff(e[i], r)
 		if err != nil {
 			t.Fatal(err)
 		}

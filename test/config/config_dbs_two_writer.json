@@ -1,0 +1,15 @@
+{
+    "base": "/dbs-two-writer",
+    "port": 8992,
+    "staticdir": "./static",
+    "dbfile": "./test/dbfile_2",
+    "lexicon_file": "./static/lexicon_writer.json",
+    "api_parameters_file": "./static/parameters.json",
+    "server_type": "DBSWriter",
+    "servercrt": "",
+    "serverkey": "",
+    "hkey": "",
+    "updateDNs": 60,
+    "log_file": "/tmp/dbs2go_writer_2.log",
+    "verbose": 0
+}

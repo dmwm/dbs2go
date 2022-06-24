@@ -12,17 +12,21 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/mattn/go-oci8"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/utils"
 	"github.com/dmwm/dbs2go/web"
+	_ "github.com/mattn/go-oci8"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // TestDBSWriter provides a test to DBS writer functionality
 func TestDBSWriter(t *testing.T) {
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	var err error
 	utils.VERBOSE = 3
 

@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -52,7 +53,11 @@ func respRecorder(method, url string, reader io.Reader, hdlr func(http.ResponseW
 // TestHTTPGet provides test of GET method for our service
 func TestHTTPGet(t *testing.T) {
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	// add new record to DB that we will query via HTTP request
@@ -103,7 +108,11 @@ func TestHTTPGet(t *testing.T) {
 func TestHTTPPost(t *testing.T) {
 	var rr *httptest.ResponseRecorder
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	// setup HTTP request
@@ -152,7 +161,11 @@ func TestHTTPPost(t *testing.T) {
 func TestHTTPPut(t *testing.T) {
 	var rr *httptest.ResponseRecorder
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	// insert record in DB

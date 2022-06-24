@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo "building dbs2go"
+make build
+
+# create pid file
+rm ./test-pids
+touch ./test-pids
+
+pwd
+
+# Start dbs-one-reader
+./dbs2go -config ./test/config/config_dbs_one_reader.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-one-writer
+./dbs2go -config ./test/config/config_dbs_one_writer.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-two-reader
+./dbs2go -config ./test/config/config_dbs_two_reader.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-two-writer
+./dbs2go -config ./test/config/config_dbs_two_writer.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-migrate
+./dbs2go -config ./test/config/config_dbs_migrate.json &
+echo $! >> ./test-pids
+
+sleep 1
+
+# Start dbs-migration
+./dbs2go -config ./test/config/config_dbs_migration.json &
+echo $! >> ./test-pids
+
+sleep 1

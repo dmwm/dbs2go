@@ -40,3 +40,4 @@ migration.json
 test/data/dbsdata
 .env
 .vscode
+test-pids

@@ -135,7 +135,11 @@ func TestMigrateGetParentDatasetBlocks(t *testing.T) {
 //gocyclo:ignore
 func TestMigrate(t *testing.T) {
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 	utils.VERBOSE = 1
 
@@ -225,7 +229,11 @@ func TestMigrate(t *testing.T) {
 //gocyclo:ignore
 func TestMigrateRemove(t *testing.T) {
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 	utils.VERBOSE = 1
 

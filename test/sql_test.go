@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"reflect"
 	"testing"
 
@@ -26,7 +27,11 @@ type SQLRecord struct {
 func TestSQL(t *testing.T) {
 
 	// initialize DB for testing with DRYRUN=true
-	db := initDB(true)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(true, dburi)
 	defer db.Close()
 
 	// get list of APIs and their parameters
@@ -70,7 +75,11 @@ func TestSQL(t *testing.T) {
 func TestInsertSQL(t *testing.T) {
 
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	defer db.Close()
 
 	// get list of APIs and their parameters
