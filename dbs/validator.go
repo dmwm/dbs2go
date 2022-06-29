@@ -359,12 +359,12 @@ func CheckPattern(key, value string) error {
 	if p, ok := LexiconPatterns[key]; ok {
 		for _, pat := range p.Patterns {
 			if matched := pat.MatchString(value); matched {
-				if utils.VERBOSE > 0 {
+				if utils.VERBOSE > 1 {
 					log.Printf("CheckPattern key=%s value='%s' found match %s", key, value, pat)
 				}
 				return nil
 			}
-			if utils.VERBOSE > 0 {
+			if utils.VERBOSE > 1 {
 				log.Printf("CheckPattern key=%s value='%s' does not match %s", key, value, pat)
 			}
 		}
