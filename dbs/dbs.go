@@ -919,7 +919,7 @@ func LastInsertID(tx *sql.Tx, table, idName string) (int64, error) {
 		stm = fmt.Sprintf("select MAX(%s) from %s", idName, table)
 	}
 	var pid sql.NullFloat64
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("execute", stm)
 	}
 	err := tx.QueryRow(stm).Scan(&pid)
