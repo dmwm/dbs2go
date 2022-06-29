@@ -34,17 +34,18 @@ type BadRequest struct {
 
 // basic elements to define a test case
 type testCase struct {
-	description          string                                   // test case description
-	serverType           string                                   // DBSWriter, DBSReader, DBSMigrate
-	concurrentBulkBlocks bool                                     // true for concurrentBulkBlocks
-	fileLumiChunkSize    int                                      // if not used, will default to EndpointTestCase value
-	method               string                                   // http method
-	endpoint             string                                   // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
-	params               url.Values                               // url parameters, optional
-	handler              func(http.ResponseWriter, *http.Request) // optional if EndpointTestCase.defaultHandler is defined
-	input                RequestBody                              // POST and PUT body, optional for GET request
-	output               []Response                               // expected response
-	respCode             int                                      // expected HTTP response code
+	description          string                                     // test case description
+	serverType           string                                     // DBSWriter, DBSReader, DBSMigrate
+	concurrentBulkBlocks bool                                       // true for concurrentBulkBlocks
+	fileLumiChunkSize    int                                        // if not used, will default to EndpointTestCase value
+	method               string                                     // http method
+	endpoint             string                                     // url endpoint, optional if EndpointTestCase.defaultEndpoint is defined
+	params               url.Values                                 // url parameters, optional
+	handler              func(http.ResponseWriter, *http.Request)   // optional if EndpointTestCase.defaultHandler is defined
+	input                RequestBody                                // POST and PUT body, optional for GET request
+	output               []Response                                 // expected response
+	respCode             int                                        // expected HTTP response code
+	verifyFunc           func(*testing.T, []dbs.Record, []Response) // function to verify a response
 }
 
 // initialData struct for test data generation

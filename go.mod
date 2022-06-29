@@ -13,7 +13,6 @@ require (
 	github.com/mattn/go-oci8 v0.1.1
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/prometheus/procfs v0.7.3
-	github.com/r3labs/diff/v2 v2.15.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/ulule/limiter/v3 v3.10.0
 	github.com/vkuznet/auth-proxy-server/logging v0.0.0-20220406163751-c36feb20c750
@@ -33,6 +32,7 @@ require (
 	github.com/lestrrat-go/strftime v1.0.5 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/r3labs/diff/v3 v3.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect

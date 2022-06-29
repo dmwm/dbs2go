@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -23,7 +25,11 @@ func BenchmarkRecordSize(b *testing.B) {
 // BenchmarkLoadTemplateSQL
 func BenchmarkLoadTemplateSQL(b *testing.B) {
 	// initialize DB for testing
-	db := initDB(false)
+	dburi := os.Getenv("DBS_DB_FILE")
+	if dburi == "" {
+		log.Fatal("DBS_DB_FILE not defined")
+	}
+	db := initDB(false, dburi)
 	utils.VERBOSE = 0
 	defer db.Close()
 
