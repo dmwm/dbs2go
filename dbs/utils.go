@@ -65,12 +65,37 @@ func tlsCerts(key, cert string) ([]tls.Certificate, error) {
 	return certs, nil
 }
 
+// TLSCertsManager manages TLS certificates
+type TLSCertsManager struct {
+	Certificates []tls.Certificate
+}
+
+// TlsCerts provides access to TLS certificates for given key and certificate
+func (t *TLSCertsManager) TlsCerts(key, cert string) ([]tls.Certificate, error) {
+	if t.Certificates == nil {
+		certs, err := tlsCerts(key, cert)
+		if err == nil {
+			t.Certificates = certs
+		} else {
+			return t.Certificates, err
+		}
+	}
+	return t.Certificates, nil
+}
+
+// tlsManager is a global tls certiticates manager
+var tlsManager *TLSCertsManager
+
 // HttpClient is HTTP client for urlfetch server
 func HttpClient(key, cert string, tout int) *http.Client {
 	var certs []tls.Certificate
 	var err error
 	// get X509 certs
-	certs, err = tlsCerts(key, cert)
+	if tlsManager == nil {
+		tlsManager = &TLSCertsManager{}
+	}
+	certs, err = tlsManager.TlsCerts(key, cert)
+	//     certs, err = tlsCerts(key, cert)
 	if err != nil {
 		log.Fatal("ERROR ", err.Error())
 	}
