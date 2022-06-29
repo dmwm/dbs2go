@@ -39,7 +39,7 @@ func (r *DatasetParents) Insert(tx *sql.Tx) error {
 	var err error
 	err = r.Validate()
 	if err != nil {
-		log.Println("unable to validate record", err)
+		log.Println("unable to validate record", r, err)
 		return Error(err, ValidateErrorCode, "", "dbs.datasetparents.Insert")
 	}
 	// check if record exists in DB
