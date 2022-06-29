@@ -137,17 +137,51 @@ func GetParents(rurl, val string) ([]string, error) {
 	return out, nil
 }
 
+// get list of migration blocks in order of processing (first parents then children)
+func GetMigrationBlocksInOrder(mblocks []MigrationBlock) []string {
+	if utils.VERBOSE > 1 {
+		log.Println("GetMigrationBlocksInOrder len(mblocks)", len(mblocks))
+		for _, r := range mblocks {
+			log.Printf("Migration block %+v", r)
+		}
+	}
+	bdict := make(map[int][]string)
+	var olist []int
+	for _, r := range mblocks {
+		olist = append(olist, r.Order)
+		if blocks, ok := bdict[r.Order]; ok {
+			blocks = append(blocks, r.Block)
+			bdict[r.Order] = blocks
+		} else {
+			bdict[r.Order] = []string{r.Block}
+		}
+	}
+	var blocks []string
+	orders := utils.Set(olist)
+	sort.Ints(orders)
+	for _, o := range orders {
+		for _, blk := range bdict[o] {
+			blocks = append(blocks, blk)
+		}
+	}
+	return blocks
+}
+
 // helper function to prepare the list of parent blocks for given input
 func prepareMigrationList(rurl, input string) []string {
 	var pblocks []string
+	var mblocks []MigrationBlock
 	var err error
 	if utils.VERBOSE > 0 {
 		log.Println("prepare migration list", rurl, input)
 	}
+	order := 0 // migration order
 	if strings.Contains(input, "#") {
-		pblocks, err = GetParentBlocks(rurl, input)
+		mblocks, err = GetParentBlocks(rurl, input, order)
+		pblocks = GetMigrationBlocksInOrder(mblocks)
 	} else {
-		pblocks, err = GetParentDatasetBlocks(rurl, input)
+		mblocks, err = GetParentDatasetBlocks(rurl, input, order)
+		pblocks = GetMigrationBlocksInOrder(mblocks)
 		// if no parents exist for given dataset we'll find its blocks
 		if len(pblocks) == 0 {
 			blocks, err := processDatasetBlocks(rurl, input)
@@ -230,14 +264,23 @@ type BlockResponse struct {
 	Error   error
 }
 
+// MigrationBlock represent block with migration order
+type MigrationBlock struct {
+	Block string
+	Order int
+}
+
 // GetParentBlocks returns parent blocks for given url and block name
 //gocyclo:ignore
-func GetParentBlocks(rurl, block string) ([]string, error) {
-	out := []string{}
+func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
+	if utils.VERBOSE > 1 {
+		log.Printf("GetParentBlocks for %s order %d from %s", block, order, rurl)
+	}
+	out := []MigrationBlock{}
 	if utils.VERBOSE > 1 {
 		log.Println("call GetParentBlocks with", block)
 	}
-	out = append(out, block)
+	out = append(out, MigrationBlock{Block: block, Order: order})
 	// get list of blocks from the source (remote url)
 	//     srcblocks, err := GetBlocks(rurl, "blockparents", block)
 	srcblocks, err := GetParents(rurl, block)
@@ -249,10 +292,10 @@ func GetParentBlocks(rurl, block string) ([]string, error) {
 	}
 	// add block parents to final list
 	for _, blk := range srcblocks {
-		out = append(out, blk)
+		out = append(out, MigrationBlock{Block: blk, Order: order})
 	}
 	// get list of parent blocks of previous parents
-	parentBlocks := []string{}
+	parentBlocks := []MigrationBlock{}
 	ch := make(chan BlockResponse)
 	umap := make(map[int]struct{})
 	for idx, blk := range srcblocks {
@@ -281,7 +324,7 @@ func GetParentBlocks(rurl, block string) ([]string, error) {
 				}
 			} else {
 				for _, blk := range r.Blocks {
-					parentBlocks = append(parentBlocks, blk)
+					parentBlocks = append(parentBlocks, MigrationBlock{Block: blk, Order: order})
 				}
 			}
 			delete(umap, r.Index)
@@ -297,12 +340,14 @@ func GetParentBlocks(rurl, block string) ([]string, error) {
 	}
 
 	// loop over parent blocks and get its parents
-	for _, blk := range parentBlocks {
-		out = append(out, blk)
-		results, err := GetParentBlocks(rurl, blk)
+	for _, pblk := range parentBlocks {
+		out = append(out, pblk)
+		// request parents of given block and decrease its order since
+		// it will allow to process it before our block
+		results, err := GetParentBlocks(rurl, pblk.Block, pblk.Order-1)
 		if err != nil {
 			if utils.VERBOSE > 1 {
-				log.Printf("fail to get url=%s block=%s error=%v", rurl, blk, err)
+				log.Printf("fail to get url=%s block=%v error=%v", rurl, pblk, err)
 			}
 			continue
 		}
@@ -344,18 +389,24 @@ func processDatasetBlocks(rurl, dataset string) ([]string, error) {
 
 // DatasetResponse represents response of processDatasetBlocks API
 type DatasetResponse struct {
-	Dataset string
-	Blocks  []string
-	Error   error
+	Dataset         string
+	MigrationBlocks []MigrationBlock
+	Error           error
 }
 
 // GetParentDatasetBlocks returns full list of parent blocks associated with given dataset
 //gocyclo:ignore
-func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
-	out := []string{}
+func GetParentDatasetBlocks(rurl, dataset string, order int) ([]MigrationBlock, error) {
+	if utils.VERBOSE > 1 {
+		log.Printf("GetParentDatasetBlocks for %s order %d from %s", dataset, order, rurl)
+	}
+	out := []MigrationBlock{}
 	parentDatasets, err := GetParents(rurl, dataset)
 	if err != nil {
 		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetParentDatasetBlocks")
+	}
+	if utils.VERBOSE > 1 {
+		log.Println("### for dataset %s we found parents datasets %v", dataset, parentDatasets)
 	}
 	ch := make(chan DatasetResponse)
 	umap := make(map[string]struct{})
@@ -363,7 +414,7 @@ func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
 		umap[dataset] = struct{}{}
 		go func() {
 			if utils.VERBOSE > 1 {
-				log.Printf("processDatasetBlocks for %s from %s", dataset, rurl)
+				log.Printf("processDatasetBlocks for %s order %d from %s", dataset, order, rurl)
 			}
 			blocks, err := processDatasetBlocks(rurl, dataset)
 			if err != nil {
@@ -371,17 +422,18 @@ func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
 					log.Println("unable to process dataset blocks", err)
 				}
 			}
-			// get recursive list of parent blocks
-			pblocks, err := GetParentDatasetBlocks(rurl, dataset)
+			// get recursive list of parent blocks in reverse order
+			pblocks, err := GetParentDatasetBlocks(rurl, dataset, order-1)
 			if err != nil {
 				if utils.VERBOSE > 1 {
 					log.Println("unable to process parent dataset blocks", err)
 				}
 			}
-			for _, blk := range pblocks {
-				blocks = append(blocks, blk)
+			// add dataset blocks to list of our parent blocks
+			for _, b := range blocks {
+				pblocks = append(pblocks, MigrationBlock{Block: b, Order: order})
 			}
-			ch <- DatasetResponse{Dataset: dataset, Blocks: blocks, Error: nil}
+			ch <- DatasetResponse{Dataset: dataset, MigrationBlocks: pblocks, Error: nil}
 		}()
 	}
 	if len(umap) == 0 {
@@ -404,8 +456,8 @@ func GetParentDatasetBlocks(rurl, dataset string) ([]string, error) {
 					log.Printf("unable to fetch blocks for url=%s dataset=%s error=%v", rurl, r.Dataset, r.Error)
 				}
 			} else {
-				for _, blk := range r.Blocks {
-					out = append(out, blk)
+				for _, blk := range r.MigrationBlocks {
+					out = append(out, MigrationBlock{Block: blk.Block, Order: blk.Order})
 				}
 			}
 			delete(umap, r.Dataset)
@@ -544,10 +596,6 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 		log.Printf("%s will migrate %d blocks", mstr, len(migBlocks))
 	}
 
-	// reverse list of migration blocks such that we will start
-	// migration from bottom parents
-	sort.Sort(sort.Reverse(sort.StringSlice(migBlocks)))
-
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
@@ -558,7 +606,7 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	}
 	defer tx.Rollback()
 
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Println("migrationt input", input)
 		for _, blk := range migBlocks {
 			log.Println("migration block", blk)
@@ -728,7 +776,9 @@ func (a *API) ProcessMigration() {
 	data, err := getData(rurl)
 	if utils.VERBOSE > 1 {
 		log.Println("place call", rurl)
-		log.Println("receive data", string(data))
+		if utils.VERBOSE > 3 {
+			log.Println("receive data", string(data))
+		}
 	}
 	if err != nil {
 		if utils.VERBOSE > 1 {
@@ -776,7 +826,11 @@ func (a *API) ProcessMigration() {
 	if utils.VERBOSE > 2 {
 		log.Printf("Insert bulkblocks %+v, data %+v", api, string(data))
 	}
-	err = api.InsertBulkBlocks()
+	if ConcurrentBulkBlocks {
+		err = api.InsertBulkBlocksConcurrently()
+	} else {
+		err = api.InsertBulkBlocks()
+	}
 	log.Printf("insert bulkblocks for mid %v error %v", mid, err)
 	if err != nil {
 		if utils.VERBOSE > 0 {
@@ -958,7 +1012,11 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 	if utils.VERBOSE > 2 {
 		log.Printf("Insert bulkblocks %+v, data %+v", api, string(data))
 	}
-	err = api.InsertBulkBlocks()
+	if ConcurrentBulkBlocks {
+		err = api.InsertBulkBlocksConcurrently()
+	} else {
+		err = api.InsertBulkBlocks()
+	}
 	log.Printf("insert bulk blocks for mid %v error %v", mid, err)
 	if err != nil {
 		if utils.VERBOSE > 0 {
@@ -974,7 +1032,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 
 // updateMigrationStatus updates migration status
 func updateMigrationStatus(mrec MigrationRequest, status int) error {
-	log.Printf("update migration request %d to status %s", mrec.MIGRATION_REQUEST_ID, status)
+	log.Printf("update migration request %d to status %d", mrec.MIGRATION_REQUEST_ID, status)
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)

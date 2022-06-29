@@ -13,6 +13,24 @@ import (
 	"github.com/dmwm/dbs2go/web"
 )
 
+// TestMigrateGetBlocksInOrder
+func TestMigrateGeBlocksInOrder(t *testing.T) {
+	blocks := []string{"c", "b", "a"}
+	mblocks := []dbs.MigrationBlock{
+		dbs.MigrationBlock{Block: "a", Order: 1},
+		dbs.MigrationBlock{Block: "b", Order: 0},
+		dbs.MigrationBlock{Block: "c", Order: -1},
+	}
+	for i, b := range dbs.GetMigrationBlocksInOrder(mblocks) {
+		if blocks[i] != b {
+			msg := "Fail to get proper order of migration blocks"
+			msg += fmt.Sprintf("\noriginal request %+v", mblocks)
+			msg += fmt.Sprintf("\nordered blocks %+v", blocks)
+			t.Error(msg)
+		}
+	}
+}
+
 // TestMigrateGetBlocks
 func TestMigrateGetBlocks(t *testing.T) {
 	rurl := "https://cmsweb.cern.ch/dbs/prod/global/DBSReader"
@@ -68,14 +86,19 @@ func TestMigrateGetParentBlocks(t *testing.T) {
 	utils.VERBOSE = 2
 	log.SetFlags(0)
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	result, err := dbs.GetParentBlocks(rurl, blk)
+	order := 0 // migration block order
+	result, err := dbs.GetParentBlocks(rurl, blk, order)
 	if err != nil {
 		t.Error("unable to get parent blocks, error", err)
 	}
+	var resultParentBlocks []string
+	for _, r := range result {
+		resultParentBlocks = append(resultParentBlocks, r.Block)
+	}
 	fmt.Println("expect", parents)
-	fmt.Println("result", result)
+	fmt.Printf("result %+v", result)
 	for _, blk := range parents {
-		if !utils.InList(blk, result) {
+		if !utils.InList(blk, resultParentBlocks) {
 			t.Error("block", blk, "not found in result list")
 		}
 	}
@@ -115,7 +138,8 @@ func TestMigrateGetParentDatasetBlocks(t *testing.T) {
 	}
 	dataset := "/ZMM_13TeV_TuneCP5-pythia8/RunIIAutumn18DR-SNBHP_SNB_HP_102X_upgrade2018_realistic_v17-v2/AODSIM"
 	// GetParentDatasetBlocks find full list of parent blocks
-	pblocks, err := dbs.GetParentDatasetBlocks(rurl, dataset)
+	order := 0
+	pblocks, err := dbs.GetParentDatasetBlocks(rurl, dataset, order)
 	if err != nil {
 		t.Error("Fail TestMigrateGetParentDatasets", err)
 	}
@@ -124,7 +148,11 @@ func TestMigrateGetParentDatasetBlocks(t *testing.T) {
 	if len(pblocks) == 0 {
 		t.Error("no parent blocks are found")
 	}
-	for _, blk := range pblocks {
+	var resultParentBlocks []string
+	for _, r := range pblocks {
+		resultParentBlocks = append(resultParentBlocks, r.Block)
+	}
+	for _, blk := range resultParentBlocks {
 		if !utils.InList(blk, parentBlocks) {
 			t.Error("block", blk, "not found in parent blocks list")
 		}
