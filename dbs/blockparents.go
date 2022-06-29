@@ -58,7 +58,7 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 	var err error
 	err = r.Validate()
 	if err != nil {
-		log.Println("unable to validate record", err)
+		log.Println("unable to validate record", r, err)
 		return Error(err, ValidateErrorCode, "", "dbs.blockparents.Insert")
 	}
 	// get SQL statement from static area
