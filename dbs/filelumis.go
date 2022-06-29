@@ -144,7 +144,7 @@ func (r *FileLumis) Insert(tx *sql.Tx) error {
 		stm = getSQL("insert_filelumis2")
 		_, err = tx.Exec(stm, r.RUN_NUM, r.LUMI_SECTION_NUM, r.FILE_ID)
 	}
-	if utils.VERBOSE > 0 {
+	if utils.VERBOSE > 1 {
 		log.Printf("Insert FileLumis\n%s\n%+v", stm, r)
 	}
 	if err != nil {
