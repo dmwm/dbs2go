@@ -61,6 +61,13 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 		log.Println("unable to validate record", r, err)
 		return Error(err, ValidateErrorCode, "", "dbs.blockparents.Insert")
 	}
+	// we first need to check if provided hlock ids exist in DB
+	pbid, err := QueryRow("BLOCK_PARENTS", "PARENT_BLOCK_ID", "THIS_BLOCK_ID", r.THIS_BLOCK_ID)
+	if err == nil && pbid == r.PARENT_BLOCK_ID {
+		// data already in DB no need to insert anything
+		return nil
+	}
+
 	// get SQL statement from static area
 	stm := getSQL("insert_block_parents")
 	if utils.VERBOSE > 0 {
