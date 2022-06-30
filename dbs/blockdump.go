@@ -287,7 +287,7 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 	for rows.Next() {
 		blockParent := BlockParent{}
 		err = rows.Scan(
-			&blockParent.ThisBlockID,
+			&blockParent.ThisBlockName,
 			&blockParent.ParentBlock,
 		)
 		if err != nil {
@@ -296,7 +296,6 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 		}
 		// make it backward compatible with python server
 		blockParent.ParentBlockName = blockParent.ParentBlock
-		blockParent.ThisBlockName = blk
 		*blockParentList = append(*blockParentList, blockParent)
 	}
 	if err = rows.Err(); err != nil {
