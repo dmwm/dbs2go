@@ -137,7 +137,7 @@ type Block struct {
 
 // BlockParent represents block parent structure used in BulkBlocks structure
 type BlockParent struct {
-	ThisBlockID     string `json:"this_block_id"`
+	//     ThisBlockID     string `json:"this_block_id"`
 	ParentBlock     string `json:"parent_block"`
 	ParentBlockName string `json:"parent_block_name"`
 	ThisBlockName   string `json:"this_block_name"`
@@ -172,6 +172,19 @@ func (a *API) InsertBulkBlocks() error {
 	if err != nil {
 		log.Printf("unable to unmarshal bulkblock record %s, error %v", string(data), err)
 		return Error(err, UnmarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+	}
+
+	// prepare file parentage map, i.e. find out file ids we need for FileParentList
+	parentFilesMap := make(map[string]int64)
+	for _, r := range rec.FileParentList {
+		// parent lfn should be already in DB
+		plfn := r.ParentLogicalFileName
+		pfid, err := QueryRow("FILES", "file_id", "logical_file_name", plfn)
+		if err != nil {
+			msg := fmt.Sprintf("unable to find parent lfn %s", plfn)
+			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+		parentFilesMap[plfn] = pfid
 	}
 
 	// start transaction
@@ -683,10 +696,11 @@ func (a *API) InsertBulkBlocks() error {
 			log.Println(msg)
 			return Error(err, SessionErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
-		plfn := r.ParentLogicalFileName
 		// parent lfn should be already in DB
-		if pfid, err := GetID(tx, "FILES", "file_id", "logical_file_name", plfn); err == nil {
+		plfn := r.ParentLogicalFileName
+		if pfid, ok := parentFilesMap[plfn]; ok {
 			rrr.PARENT_FILE_ID = pfid
+			//             log.Println("### parent_logical_file_name", plfn, pfid)
 		} else {
 			err := errors.New("unable to locate parent file id")
 			msg := fmt.Sprintf("no file id found for parent '%s'", lfn)
