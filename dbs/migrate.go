@@ -592,6 +592,22 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 		}
 	}
 
+	// if input is a dataset we should find its blocks and add them for migration
+	if !strings.Contains(input, "#") {
+		blocks, err := GetBlocks(rurl, input)
+		if err != nil {
+			msg = fmt.Sprintf("unable to get blocks for dataset %s", input)
+			log.Println(msg)
+			return []MigrationReport{migrationReport(req, msg, status, err)},
+				Error(err, DatabaseErrorCode, msg, "dbs.migrate.startMigrationRequest")
+		}
+		for _, blk := range blocks {
+			if !utils.InList(blk, srcParentBlocks) {
+				migBlocks = append(migBlocks, blk)
+			}
+		}
+	}
+
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
 		msg = fmt.Sprintf("%s is already fulfilled, no blocks found for migration", mstr)
