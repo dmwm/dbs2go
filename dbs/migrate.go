@@ -406,7 +406,7 @@ func GetParentDatasetBlocks(rurl, dataset string, order int) ([]MigrationBlock, 
 		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetParentDatasetBlocks")
 	}
 	if utils.VERBOSE > 1 {
-		log.Println("### for dataset %s we found parents datasets %v", dataset, parentDatasets)
+		log.Printf("### for dataset %s we found parents datasets %v", dataset, parentDatasets)
 	}
 	ch := make(chan DatasetResponse)
 	umap := make(map[string]struct{})
@@ -574,8 +574,14 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	dstParentBlocks = utils.Set(dstParentBlocks)
 	srcParentBlocks = utils.Set(srcParentBlocks)
 	if utils.VERBOSE > 0 {
-		log.Printf("Migration blocks from destination %s %+v", rurl, dstParentBlocks)
-		log.Printf("Migration blocks from source %s %+v", localhost, srcParentBlocks)
+		log.Printf("Migration blocks from destination %s, total %d", rurl, len(dstParentBlocks))
+		for _, b := range dstParentBlocks {
+			log.Println(b)
+		}
+		log.Printf("Migration blocks from source %s, total %d", localhost, len(srcParentBlocks))
+		for _, b := range srcParentBlocks {
+			log.Println(b)
+		}
 	}
 
 	// get list of blocks required for migration
@@ -606,15 +612,16 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	}
 	defer tx.Rollback()
 
-	if utils.VERBOSE > 1 {
-		log.Println("migrationt input", input)
-		for _, blk := range migBlocks {
-			log.Println("migration block", blk)
-		}
-	}
 	// add our block input to migration blocks
 	if !utils.InList(input, migBlocks) && strings.Contains(input, "#") {
 		migBlocks = append(migBlocks, input)
+	}
+
+	if utils.VERBOSE > 0 {
+		log.Println("final set of blocks for migrationt input", input)
+		for _, blk := range migBlocks {
+			log.Println("migration block", blk)
+		}
 	}
 
 	// loop over migBlocks
