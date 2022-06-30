@@ -294,6 +294,9 @@ func getBlockParentList(blk string, wg *sync.WaitGroup, blockParentList *BlockPa
 			log.Println("unable to scan rows", err)
 			return
 		}
+		// make it backward compatible with python server
+		blockParent.ParentBlockName = blockParent.ParentBlock
+		blockParent.ThisBlockName = blk
 		*blockParentList = append(*blockParentList, blockParent)
 	}
 	if err = rows.Err(); err != nil {
@@ -403,19 +406,14 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	defer rows.Close()
 	for rows.Next() {
 		fileParent := FileParentRecord{}
-		var pid sql.NullInt64
 		var pfn sql.NullString
 		// blockdump DBS API should yield this_logical_file_name
 		// therefore, here we use it
 		err = rows.Scan(
 			//             &fileParent.LogicalFileName,
 			&fileParent.ThisLogicalFileName,
-			&pid,
 			&pfn,
 		)
-		if pid.Valid {
-			fileParent.ParentFileId = pid.Int64
-		}
 		if pfn.Valid {
 			fileParent.ParentLogicalFileName = pfn.String
 		}

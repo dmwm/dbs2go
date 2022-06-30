@@ -828,21 +828,62 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		}
 	}
 
-	// insert file parent list
-	data, err = json.Marshal(rec.FileParentList)
-	if err != nil {
-		msg := fmt.Sprintf("%s unable to marshal file parent list, error %v", hash, err)
-		log.Println(msg)
-		return Error(err, MarshalErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	// find out file ids we need for FileParentList
+	for _, r := range rec.FileParentList {
+		rrr := FileParents{}
+		lfn := r.LogicalFileName
+		if lfn == "" {
+			lfn = r.ThisLogicalFileName
+		}
+		if lfn == "" {
+			err := errors.New("mailformed file parent record")
+			msg := fmt.Sprintf("file parent record %+v does not contain LFN", r)
+			log.Println(msg)
+			return Error(err, NotImplementedApiCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+		if fileID, ok := trec.FilesMap.Load(lfn); ok {
+			rrr.THIS_FILE_ID = fileID.(int64)
+		} else {
+			err := errors.New("unable to locate LFN file id")
+			msg := fmt.Sprintf("no file id found for '%s'", lfn)
+			log.Println(msg)
+			return Error(err, SessionErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+		plfn := r.ParentLogicalFileName
+		// parent lfn should be already in DB
+		if pfid, err := GetID(tx, "FILES", "file_id", "logical_file_name", plfn); err == nil {
+			rrr.PARENT_FILE_ID = pfid
+		} else {
+			err := errors.New("unable to locate parent file id")
+			msg := fmt.Sprintf("no file id found for parent '%s'", lfn)
+			log.Println(msg)
+			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+		err := rrr.Insert(tx)
+		if err != nil {
+			msg := fmt.Sprintf("%s unable to insert file parents record %+v, error %v", hash, rrr, err)
+			log.Println(msg)
+			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
 	}
-	api.Reader = bytes.NewReader(data)
-	api.Params = make(Record)
-	err = api.InsertFileParentsTxt(tx)
-	if err != nil {
-		msg := fmt.Sprintf("%s unable to insert file parents record %+v, error %v", hash, rec, err)
-		log.Println(msg)
-		return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
-	}
+
+	/*
+		// insert file parent list
+		data, err = json.Marshal(rec.FileParentList)
+		if err != nil {
+			msg := fmt.Sprintf("%s unable to marshal file parent list, error %v", hash, err)
+			log.Println(msg)
+			return Error(err, MarshalErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+		api.Reader = bytes.NewReader(data)
+		api.Params = make(Record)
+		err = api.InsertFileParentsTxt(tx)
+		if err != nil {
+			msg := fmt.Sprintf("%s unable to insert file parents record %+v, error %v", hash, rec, err)
+			log.Println(msg)
+			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+	*/
 
 	// insert dataset parent list
 	datasetParentList := rec.DatasetParentList
@@ -1000,6 +1041,9 @@ func insertFilesChunk(
 			CREATE_BY:              cBy,
 			LAST_MODIFICATION_DATE: trec.CreationDate,
 			LAST_MODIFIED_BY:       lBy,
+		}
+		if utils.VERBOSE > 0 { // NOTE: may be I should change it to VERBOSE > 1
+			log.Println("insert file", r.FILE_ID, r.LOGICAL_FILE_NAME)
 		}
 		// insert file lumi list record
 		err = r.Insert(tx)
