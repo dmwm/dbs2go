@@ -483,6 +483,19 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		return Error(err, UnmarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
+	// prepare file parentage map, i.e. find out file ids we need for FileParentList
+	parentFilesMap := make(map[string]int64)
+	for _, r := range rec.FileParentList {
+		// parent lfn should be already in DB
+		plfn := r.ParentLogicalFileName
+		pfid, err := QueryRow("FILES", "file_id", "logical_file_name", plfn)
+		if err != nil {
+			msg := fmt.Sprintf("unable to find parent lfn %s", plfn)
+			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		}
+		parentFilesMap[plfn] = pfid
+	}
+
 	var reader *bytes.Reader
 	api := &API{
 		Reader:   reader,
@@ -843,23 +856,25 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		}
 		if fileID, ok := trec.FilesMap.Load(lfn); ok {
 			rrr.THIS_FILE_ID = fileID.(int64)
+			log.Println("### this_logical_file_name", lfn, fileID)
 		} else {
 			err := errors.New("unable to locate LFN file id")
 			msg := fmt.Sprintf("no file id found for '%s'", lfn)
 			log.Println(msg)
 			return Error(err, SessionErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
-		plfn := r.ParentLogicalFileName
 		// parent lfn should be already in DB
-		if pfid, err := GetID(tx, "FILES", "file_id", "logical_file_name", plfn); err == nil {
+		plfn := r.ParentLogicalFileName
+		if pfid, ok := parentFilesMap[plfn]; ok {
 			rrr.PARENT_FILE_ID = pfid
+			//             log.Println("### parent_logical_file_name", plfn, pfid)
 		} else {
 			err := errors.New("unable to locate parent file id")
 			msg := fmt.Sprintf("no file id found for parent '%s'", lfn)
 			log.Println(msg)
 			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
-		err := rrr.Insert(tx)
+		err = rrr.Insert(tx)
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to insert file parents record %+v, error %v", hash, rrr, err)
 			log.Println(msg)
@@ -1041,9 +1056,6 @@ func insertFilesChunk(
 			CREATE_BY:              cBy,
 			LAST_MODIFICATION_DATE: trec.CreationDate,
 			LAST_MODIFIED_BY:       lBy,
-		}
-		if utils.VERBOSE > 0 { // NOTE: may be I should change it to VERBOSE > 1
-			log.Println("insert file", r.FILE_ID, r.LOGICAL_FILE_NAME)
 		}
 		// insert file lumi list record
 		err = r.Insert(tx)
