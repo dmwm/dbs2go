@@ -9,8 +9,11 @@ The DBS migration servers has the following responsibility:
 - *DBS migrate* server is HTTP service which access end-user request
 to submit and check status of migration requests. It has the following set
 of APIs:
-  - `/submit` accepts migration (HTTP POST) request
-  - `/process` performs processing given migration request
+  - `/submit` submits migration (HTTP POST) request
+  - `/process` explicitly performs processing given migration request (since
+    DBSMigration service process migration requests sequentially)
+  - `/cancel` cancels existing migration requests, i.e. it will be terminated
+    and moved to status 9
   - `/remove` removes migration request
   - `/status` fetches status of given migraton request
   - `/total` shows total number of migration requests in a system
@@ -21,6 +24,8 @@ of APIs:
   - `/serverinfo` provides server information
 - *DBS migration* server runs as a daemon to process migraton requests
 from underlying DB backend on periodic basis
+- by default the number of retries for migration request is set to 3 and it is
+  configurable parameter for DBSMigration server.
 
 ### Examples
 Post migration request:
