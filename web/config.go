@@ -39,7 +39,7 @@ type Configuration struct {
 	MigrationProcessTimeout  int    `json:"migration_process_timeout"`  // migration process timeout
 	MigrationCleanupInterval int    `json:"migration_cleanup_interval"` // migration cleanup interval
 	MigrationCleanupOffset   int64  `json:"migration_cleanup_offset"`   // migration cleanup offset
-	MigrationRetries         int    `json:"migration_retries"`          // migration retries
+	MigrationRetries         int64  `json:"migration_retries"`          // migration retries
 
 	// db related configuration
 	DBFile               string `json:"dbfile"`                  // dbs db file with secrets
@@ -138,6 +138,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.Templates == "" {
 		Config.Templates = fmt.Sprintf("%s/templates", Config.StaticDir)
+	}
+	if Config.MigrationRetries == 0 {
+		Config.MigrationRetries = 3
 	}
 	return nil
 }
