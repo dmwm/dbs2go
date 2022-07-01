@@ -416,6 +416,7 @@ func Server(configFile string) {
 	dbs.MigrationServerInterval = Config.MigrationServerInterval
 	dbs.MigrationCleanupInterval = Config.MigrationCleanupInterval
 	dbs.MigrationCleanupOffset = Config.MigrationCleanupOffset
+	dbs.MigrationRetries = Config.MigrationRetries
 
 	// DBS bulkblocks API
 	dbs.ConcurrentBulkBlocks = Config.ConcurrentBulkBlocks
