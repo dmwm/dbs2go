@@ -24,7 +24,7 @@ var MigrationCleanupInterval int
 var MigrationCleanupOffset int64
 
 // MigrationRetries specifies total number of migration retries
-var MigrationRetries int
+var MigrationRetries int64
 
 // MigrationServer represent migration server.
 // it accepts migration process timeout used by ProcessMigration API and
