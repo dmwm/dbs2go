@@ -72,7 +72,7 @@ type initialData struct {
 	ReleaseVersion         string   `json:"release_version"`
 	Site                   string   `json:"site"`
 	Block                  string   `json:"block"`
-	ParentBlock            string   `json:"parent_block"`
+	ParentBlockName        string   `json:"parent_block_name"`
 	Files                  []string `json:"files"`
 	ParentFiles            []string `json:"parent_files"`
 	Runs                   []int    `json:"runs"`
@@ -189,7 +189,7 @@ func generateBaseData(t *testing.T, filepath string) {
 	TestData.ReleaseVersion = release_version
 	TestData.Site = site
 	TestData.Block = block
-	TestData.ParentBlock = parent_block
+	TestData.ParentBlockName = parent_block
 	TestData.Files = []string{}
 	TestData.ParentFiles = []string{}
 	TestData.Runs = []int{97, 98, 99}

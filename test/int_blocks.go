@@ -47,7 +47,7 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 		LAST_MODIFIED_BY: TestData.CreateBy,
 	}
 	parentBlockReq := dbs.Blocks{
-		BLOCK_NAME:       TestData.ParentBlock,
+		BLOCK_NAME:       TestData.ParentBlockName,
 		ORIGIN_SITE_NAME: TestData.Site,
 		CREATE_BY:        TestData.CreateBy,
 		LAST_MODIFIED_BY: TestData.CreateBy,
@@ -56,7 +56,7 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 		BLOCK_NAME: TestData.Block,
 	}
 	blockParentResp := blockResponse{
-		BLOCK_NAME: TestData.ParentBlock,
+		BLOCK_NAME: TestData.ParentBlockName,
 	}
 	blockDetailResp := blockDetailResponse{
 		BlockID:              1,
@@ -74,7 +74,7 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 	}
 	blockParentDetailResp := blockDetailResponse{
 		BlockID:              2,
-		BlockName:            TestData.ParentBlock,
+		BlockName:            TestData.ParentBlockName,
 		BlockSize:            0,
 		CreateBy:             TestData.CreateBy,
 		CreationDate:         0,
