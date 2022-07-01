@@ -137,8 +137,6 @@ type Block struct {
 
 // BlockParent represents block parent structure used in BulkBlocks structure
 type BlockParent struct {
-	//     ThisBlockID     string `json:"this_block_id"`
-	ParentBlock     string `json:"parent_block"`
 	ParentBlockName string `json:"parent_block_name"`
 	ThisBlockName   string `json:"this_block_name"`
 }
