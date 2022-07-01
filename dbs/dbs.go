@@ -590,13 +590,14 @@ func QueryRow(table, id, attr string, val interface{}) (int64, error) {
 	// in SQLite the ids are int64 while on ORACLE they are float64
 	var err error
 	var tid int64
-	if DBOWNER == "sqlite" {
-		err = DB.QueryRow(stm, val).Scan(&tid)
-	} else { // ORACLE case
-		var otid float64
-		err = DB.QueryRow(stm, val).Scan(&otid)
-		tid = int64(otid)
-	}
+	err = DB.QueryRow(stm, val).Scan(&tid)
+	//     if DBOWNER == "sqlite" {
+	//         err = DB.QueryRow(stm, val).Scan(&tid)
+	//     } else { // ORACLE case
+	//         var otid float64
+	//         err = DB.QueryRow(stm, val).Scan(&otid)
+	//         tid = int64(otid)
+	//     }
 	if err != nil {
 		if utils.VERBOSE > 1 {
 			log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
@@ -620,13 +621,14 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 	// in SQLite the ids are int64 while on ORACLE they are float64
 	var err error
 	var tid int64
-	if DBOWNER == "sqlite" {
-		err = tx.QueryRow(stm, val...).Scan(&tid)
-	} else { // ORACLE
-		var otid float64
-		err = tx.QueryRow(stm, val...).Scan(&tid)
-		tid = int64(otid)
-	}
+	err = tx.QueryRow(stm, val...).Scan(&tid)
+	//     if DBOWNER == "sqlite" {
+	//         err = tx.QueryRow(stm, val...).Scan(&tid)
+	//     } else { // ORACLE
+	//         var otid float64
+	//         err = tx.QueryRow(stm, val...).Scan(&tid)
+	//         tid = int64(otid)
+	//     }
 	if err != nil {
 		if utils.VERBOSE > 1 {
 			log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
