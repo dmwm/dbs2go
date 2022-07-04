@@ -26,6 +26,22 @@ of APIs:
 from underlying DB backend on periodic basis
 - by default the number of retries for migration request is set to 3 and it is
   configurable parameter for DBSMigration server.
+- here is a full set of migration codes used by migration server:
+  - 0 pending request
+  - 1 migration request is in progress
+  - 2 migration request has successfully completed
+  - 3 migration request has failed
+  - 9 migration request termindated
+  Usually, the migration request goes throught the followin cycle:
+```
+status change:
+0 -> 1
+1 -> 2
+1 -> 3
+1 -> 9
+are only allowed changes for working through migration.
+3 -> 1 is allowed for retrying and retry count +1.
+```
 
 ### Examples
 Post migration request:
