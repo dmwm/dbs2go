@@ -30,17 +30,19 @@ from underlying DB backend on periodic basis
   - 0 pending request
   - 1 migration request is in progress
   - 2 migration request has successfully completed
-  - 3 migration request has failed
-  - 9 migration request termindated
-  Usually, the migration request goes throught the followin cycle:
+  - 3 migration request has failed, it will be retried according to DB
+    migration server settings (by default 3 times)
+  - 9 migration request termindated, this can happen in two scenarios
+    - migration request has been cancelled explicitly by user
+    - migration request failed N times and will no longer be retried
+      automatically
+The migration request goes throught the followin cycle:
 ```
 status change:
 0 -> 1
 1 -> 2
-1 -> 3
+1 -> 3, and if failed 3->1
 1 -> 9
-are only allowed changes for working through migration.
-3 -> 1 is allowed for retrying and retry count +1.
 ```
 
 ### Examples
