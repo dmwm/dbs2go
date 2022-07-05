@@ -47,11 +47,13 @@ DBS migration status codes:
         1=IN PROGRESS
         2=COMPLETED
         3=FAILED (will be retried)
+		4=EXIST_IN_DB
         9=Terminally FAILED
         status change:
         0 -> 1
         1 -> 2
         1 -> 3
+		1 -> 4
         1 -> 9
         are only allowed changes for working through migration.
         3 -> 1 is allowed for retrying and retry count +1.
@@ -63,6 +65,7 @@ const (
 	IN_PROGRESS
 	COMPLETED
 	FAILED
+	EXIST_IN_DB
 	TERM_FAILED = 9
 )
 
@@ -497,6 +500,8 @@ func statusString(status int64) string {
 		s = "FAILED"
 	} else if status == TERM_FAILED {
 		s = "TERMINATED"
+	} else if status == EXIST_IN_DB {
+		s = "EXIST_IN_DB"
 	}
 	return s
 }
@@ -610,6 +615,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
+		rec.MIGRATION_STATUS = EXIST_IN_DB
+		updateMigrationStatus(rec, EXIST_IN_DB)
 		msg = fmt.Sprintf("%s is already fulfilled, no blocks found for migration", mstr)
 		log.Println(msg)
 		return []MigrationReport{migrationReport(rec, msg, status, err)}, nil

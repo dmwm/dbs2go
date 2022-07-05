@@ -32,6 +32,8 @@ from underlying DB backend on periodic basis
   - 2 migration request has successfully completed
   - 3 migration request has failed, it will be retried according to DB
     migration server settings (by default 3 times)
+  - 4 migration request is already exist in DB, i.e. the requested block or
+    dataset is already found in database
   - 9 migration request termindated, this can happen in two scenarios
     - migration request has been cancelled explicitly by user
     - migration request failed N times and will no longer be retried
@@ -39,10 +41,11 @@ from underlying DB backend on periodic basis
 The migration request goes throught the followin cycle:
 ```
 status change:
-0 -> 1
-1 -> 2
+0 -> 1, request in progress
+1 -> 2, request is completed successfully
 1 -> 3, and if failed 3->1
-1 -> 9
+1 -> 4, if request is alaready in DB
+1 -> 9, request is terminated
 ```
 
 ### Examples
