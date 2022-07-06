@@ -283,7 +283,9 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	if utils.VERBOSE > 1 {
 		log.Println("call GetParentBlocks with", block)
 	}
-	out = append(out, MigrationBlock{Block: block, Order: order})
+	// when we insert given block in our migration blocks it should be last
+	// to process as it is up in a hierarchy, therefore for it we use order+1
+	out = append(out, MigrationBlock{Block: block, Order: order + 1})
 	// get list of blocks from the source (remote url)
 	//     srcblocks, err := GetBlocks(rurl, "blockparents", block)
 	srcblocks, err := GetParents(rurl, block)
