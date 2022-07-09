@@ -1083,8 +1083,17 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	stm = CleanStatement(stm)
 	mid := mrec.MIGRATION_REQUEST_ID
 	retryCount := mrec.RETRY_COUNT
-	if status == FAILED || status == TERM_FAILED {
-		retryCount += 1
+	// if our status is FAILED we check for retry count
+	// if retry count is less then threshold we increment retry count and set status to IN PROGRESS
+	// this will allow migration service to pick up failed migration request
+	// otherwise we permanently terminate the migration request and set its status to TERM_FAILED
+	if status == FAILED {
+		if retryCount <= MigrationRetries {
+			retryCount += 1
+			status = IN_PROGRESS
+		} else {
+			status = TERM_FAILED
+		}
 	}
 	if utils.VERBOSE > 0 {
 		var args []interface{}
