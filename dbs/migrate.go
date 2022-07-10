@@ -1120,8 +1120,7 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 
 // MigrationRemoveRequest represents migration remove request object
 type MigrationRemoveRequest struct {
-	MIGRATION_REQUEST_ID int64  `json:"migration_rqst_id"`
-	CREATE_BY            string `json:"create_by"`
+	MIGRATION_REQUEST_ID int64 `json:"migration_rqst_id"`
 }
 
 // RemoveMigration DBS API
@@ -1155,11 +1154,10 @@ func (a *API) RemoveMigration() error {
 	if utils.VERBOSE > 0 {
 		var args []interface{}
 		args = append(args, rec.MIGRATION_REQUEST_ID)
-		args = append(args, rec.CREATE_BY)
 		utils.PrintSQL(stm, args, "execute")
 	}
 	var tid float64
-	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY).Scan(&tid)
+	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID).Scan(&tid)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
@@ -1171,7 +1169,7 @@ func (a *API) RemoveMigration() error {
 
 	if tid > 0 {
 		stm = getSQL("remove_migration_requests")
-		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID)
 		if err != nil {
 			msg := fmt.Sprintf("fail to execute SQL statement '%s'", stm)
 			if utils.VERBOSE > 0 {
@@ -1188,8 +1186,7 @@ func (a *API) RemoveMigration() error {
 		return nil
 	}
 	msg := fmt.Sprintf(
-		"Invalid request, requestID=%v with create_by=%s is not found",
-		rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+		"Invalid request, requestID=%v is not found", rec.MIGRATION_REQUEST_ID)
 	return Error(InvalidRequestErr, InvalidRequestErrorCode, msg, "dbs.migrate.RemoveMigration")
 }
 
