@@ -245,15 +245,12 @@ func TestMigrate(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to unmarshal received data '%s', error %v", string(data), err)
 	}
-	// NOTE: revisit how to check status of processed request since it will require
-	// migration service and it should take time. Therefore, so far the code below
-	// is commented out.
-	//     log.Println("Received data", string(data))
-	//     for _, rec := range reportRecords {
-	//         if rec.Status != "COMPLETED" {
-	//             t.Errorf("invalid status in %+v, expected COMPLETED", rec)
-	//         }
-	//     }
+	log.Println("Received data", string(data))
+	for _, rec := range reportRecords {
+		if rec.Status != "COMPLETED" {
+			t.Fatalf("invalid status in %+v, expected COMPLETED", rec)
+		}
+	}
 }
 
 // TestMigrateRemove tests remove migration APIs
