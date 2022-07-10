@@ -329,7 +329,7 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 				}
 			} else {
 				for _, blk := range r.Blocks {
-					parentBlocks = append(parentBlocks, MigrationBlock{Block: blk, Order: order})
+					parentBlocks = append(parentBlocks, MigrationBlock{Block: blk, Order: order - 1})
 				}
 			}
 			delete(umap, r.Index)
@@ -349,7 +349,7 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 		out = append(out, pblk)
 		// request parents of given block and decrease its order since
 		// it will allow to process it before our block
-		results, err := GetParentBlocks(rurl, pblk.Block, pblk.Order-1)
+		results, err := GetParentBlocks(rurl, pblk.Block, pblk.Order-2)
 		if err != nil {
 			if utils.VERBOSE > 1 {
 				log.Printf("fail to get url=%s block=%v error=%v", rurl, pblk, err)
@@ -891,10 +891,9 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 
 	// create channel to report when operation will be completed
 	ch := make(chan bool)
-	//     defer close(ch)
+	defer close(ch)
 
 	// set default status
-	//     status = FAILED
 	status = PENDING
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
