@@ -174,8 +174,7 @@ test-migration:
 	DBS_DB_FILE_2=./dbfile_2 \
 	DBS_DB_PATH_1=/tmp/dbs-one.db \
 	DBS_DB_PATH_2=/tmp/dbs-two.db \
-	INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
-	BULKBLOCKS_DATA_FILE=./data/integration/bulkblocks_data.json \
+	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
 	go test -v -failfast -run IntMigration
 bench:
 	cd test && rm -f /tmp/dbs-test.db && \

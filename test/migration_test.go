@@ -19,7 +19,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -92,10 +91,6 @@ func TestIntMigration(t *testing.T) {
 	}
 
 	// load bulkblocks data
-	if _, err := os.Stat(bulkblocksPath); errors.Is(err, os.ErrNotExist) {
-		fmt.Println("Generating bulkblocks data")
-		generateBulkBlocksData(t, bulkblocksPath)
-	}
 	err := readJsonFile(t, bulkblocksPath, &BulkBlocksData)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -152,6 +147,8 @@ func TestIntMigration(t *testing.T) {
 			t.Fatal(err.Error())
 		}
 		defer r.Body.Close()
+
+		fmt.Println(r.Body)
 
 		if r.StatusCode != http.StatusOK {
 			t.Fatalf("Migration request failed! Different HTTP Status: Expected 200, Received %v", r.StatusCode)
