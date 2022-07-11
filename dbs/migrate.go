@@ -489,6 +489,44 @@ func alreadyQueued(input string) error {
 	return nil
 }
 
+// DatasetShortRecord represents short dataset record
+type DatasetShortRecord struct {
+	Dataset           string `json:"dataset"`
+	DatasetAccessType string `json:"dataset_access_type"`
+}
+
+// helper function to check if migration input is in VALID status
+func validInput(rurl, input string) error {
+	arr := strings.Split(input, "#")
+	dataset := arr[0]
+	rurl = fmt.Sprintf("%s/datasets?dataset=%s&detail=true&dataset_access_type=*", rurl, dataset)
+	data, err := getData(rurl)
+	if utils.VERBOSE > 0 {
+		log.Println("validInput", rurl, string(data))
+	}
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to get data for %s, error %v", rurl, err)
+		}
+		return Error(err, HttpRequestErrorCode, "", "dbs.migrate.validInput")
+	}
+	var records []Dataset
+	err = json.Unmarshal(data, &records)
+	if err != nil {
+		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.validInput")
+	}
+	if len(records) != 1 {
+		return Error(err, DatabaseErrorCode, "", "dbs.migrate.validInput")
+	}
+	rec := records[0]
+	dtype := rec.DatasetAccessType
+	if dtype == "VALID" {
+		return nil
+	}
+	msg := fmt.Sprintf("dataset %s has status %s", dataset, dtype)
+	return errors.New(msg)
+}
+
 // helper function to return string for status ID
 func statusString(status int64) string {
 	var s string
@@ -540,8 +578,14 @@ func (a *API) SubmitMigration() error {
 		if utils.VERBOSE > 1 {
 			log.Println(msg)
 		}
-		return Error(err, MigrationErrorCode, "", "dbs.migrate.SubmitMigration")
+		return Error(err, MigrationErrorCode, mstr, "dbs.migrate.SubmitMigration")
 	}
+	// check if given input is in VALID state in DBS
+	if err := validInput(rec.MIGRATION_URL, input); err != nil {
+		return Error(err, MigrationErrorCode, "not allowed for migration", "dbs.migrate.SubmitMigration")
+	}
+
+	// start migration request
 	reports, err := startMigrationRequest(rec)
 	if err != nil {
 		log.Println("unable to start migration request", err)
