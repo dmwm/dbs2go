@@ -197,7 +197,7 @@ func getFilesTestTable(t *testing.T) EndpointTestCase {
 	for i := 1; i <= 10; i++ {
 		parentLFN := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
 		testDataParentFiles = append(testDataParentFiles, parentLFN)
-		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlock, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
+		fileRecord := createFileRecord(i, TestData.ParentDataset, TestData.ParentBlockName, parentFileLumiList, parentLFN, []dbs.FileParentLFNRecord{})
 		parentFiles = append(parentFiles, fileRecord)
 		parentDetailResp = append(parentDetailResp, createFileDetailedResponse(i, 2, 2, fileRecord))
 	}

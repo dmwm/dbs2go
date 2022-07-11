@@ -282,7 +282,7 @@ func (a *API) Datasets() error {
 // Datasets represents Datasets DBS DB table
 type Datasets struct {
 	DATASET_ID             int64   `json:"dataset_id"`
-	DATASET                string  `json:"datset" validate:"required"`
+	DATASET                string  `json:"dataset" validate:"required"`
 	IS_DATASET_VALID       int     `json:"is_dataset_valid" validate:"required,number"`
 	PRIMARY_DS_ID          int64   `json:"primary_ds_id" validate:"required,number,gt=0"`
 	PROCESSED_DS_ID        int64   `json:"processed_ds_id" validate:"required,number,gt=0"`

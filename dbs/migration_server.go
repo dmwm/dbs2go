@@ -23,12 +23,19 @@ var MigrationCleanupInterval int
 // MigrationCleanupOffset defines offset in seconds to delete migration requests
 var MigrationCleanupOffset int64
 
+// MigrationRetries specifies total number of migration retries
+var MigrationRetries int64
+
 // MigrationServer represent migration server.
 // it accepts migration process timeout used by ProcessMigration API and
 // exit channel
 func MigrationServer(interval, timeout int, ch <-chan bool) {
 	log.Println("Start migration server with verbose mode", utils.VERBOSE)
 	api := API{Api: "ProcessMigration"}
+
+	if MigrationRetries == 0 {
+		MigrationRetries = 3 // by default we'll allow only 3 retries
+	}
 
 	lastCall := time.Now()
 	for {
@@ -59,6 +66,11 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 			for _, r := range records {
 				if utils.VERBOSE > 0 {
 					log.Printf("process %+v", r)
+				}
+				// check if request already processed multiple times and give up after certin threshold
+				if r.RETRY_COUNT > MigrationRetries {
+					updateMigrationStatus(r, TERM_FAILED)
+					continue
 				}
 				params := make(map[string]interface{})
 				params["migration_request_url"] = r.MIGRATION_URL

@@ -47,11 +47,13 @@ DBS migration status codes:
         1=IN PROGRESS
         2=COMPLETED
         3=FAILED (will be retried)
+		4=EXIST_IN_DB
         9=Terminally FAILED
         status change:
         0 -> 1
         1 -> 2
         1 -> 3
+		1 -> 4
         1 -> 9
         are only allowed changes for working through migration.
         3 -> 1 is allowed for retrying and retry count +1.
@@ -63,6 +65,7 @@ const (
 	IN_PROGRESS
 	COMPLETED
 	FAILED
+	EXIST_IN_DB
 	TERM_FAILED = 9
 )
 
@@ -280,7 +283,9 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	if utils.VERBOSE > 1 {
 		log.Println("call GetParentBlocks with", block)
 	}
-	out = append(out, MigrationBlock{Block: block, Order: order})
+	// when we insert given block in our migration blocks it should be last
+	// to process as it is up in a hierarchy, therefore for it we use order+1
+	out = append(out, MigrationBlock{Block: block, Order: order + 1})
 	// get list of blocks from the source (remote url)
 	//     srcblocks, err := GetBlocks(rurl, "blockparents", block)
 	srcblocks, err := GetParents(rurl, block)
@@ -324,7 +329,7 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 				}
 			} else {
 				for _, blk := range r.Blocks {
-					parentBlocks = append(parentBlocks, MigrationBlock{Block: blk, Order: order})
+					parentBlocks = append(parentBlocks, MigrationBlock{Block: blk, Order: order - 1})
 				}
 			}
 			delete(umap, r.Index)
@@ -344,7 +349,7 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 		out = append(out, pblk)
 		// request parents of given block and decrease its order since
 		// it will allow to process it before our block
-		results, err := GetParentBlocks(rurl, pblk.Block, pblk.Order-1)
+		results, err := GetParentBlocks(rurl, pblk.Block, pblk.Order-2)
 		if err != nil {
 			if utils.VERBOSE > 1 {
 				log.Printf("fail to get url=%s block=%v error=%v", rurl, pblk, err)
@@ -406,7 +411,7 @@ func GetParentDatasetBlocks(rurl, dataset string, order int) ([]MigrationBlock, 
 		return out, Error(err, HttpRequestErrorCode, "", "dbs.migrate.GetParentDatasetBlocks")
 	}
 	if utils.VERBOSE > 1 {
-		log.Println("### for dataset %s we found parents datasets %v", dataset, parentDatasets)
+		log.Printf("### for dataset %s we found parents datasets %v", dataset, parentDatasets)
 	}
 	ch := make(chan DatasetResponse)
 	umap := make(map[string]struct{})
@@ -484,6 +489,44 @@ func alreadyQueued(input string) error {
 	return nil
 }
 
+// DatasetShortRecord represents short dataset record
+type DatasetShortRecord struct {
+	Dataset           string `json:"dataset"`
+	DatasetAccessType string `json:"dataset_access_type"`
+}
+
+// helper function to check if migration input is in VALID status
+func validInput(rurl, input string) error {
+	arr := strings.Split(input, "#")
+	dataset := arr[0]
+	rurl = fmt.Sprintf("%s/datasets?dataset=%s&detail=true&dataset_access_type=*", rurl, dataset)
+	data, err := getData(rurl)
+	if utils.VERBOSE > 0 {
+		log.Println("validInput", rurl, string(data))
+	}
+	if err != nil {
+		if utils.VERBOSE > 0 {
+			log.Printf("unable to get data for %s, error %v", rurl, err)
+		}
+		return Error(err, HttpRequestErrorCode, "", "dbs.migrate.validInput")
+	}
+	var records []Dataset
+	err = json.Unmarshal(data, &records)
+	if err != nil {
+		return Error(err, UnmarshalErrorCode, "", "dbs.migrate.validInput")
+	}
+	if len(records) != 1 {
+		return Error(err, DatabaseErrorCode, "", "dbs.migrate.validInput")
+	}
+	rec := records[0]
+	dtype := rec.DatasetAccessType
+	if dtype == "VALID" {
+		return nil
+	}
+	msg := fmt.Sprintf("dataset %s has status %s", dataset, dtype)
+	return errors.New(msg)
+}
+
 // helper function to return string for status ID
 func statusString(status int64) string {
 	var s string
@@ -497,6 +540,8 @@ func statusString(status int64) string {
 		s = "FAILED"
 	} else if status == TERM_FAILED {
 		s = "TERMINATED"
+	} else if status == EXIST_IN_DB {
+		s = "EXIST_IN_DB"
 	}
 	return s
 }
@@ -533,8 +578,14 @@ func (a *API) SubmitMigration() error {
 		if utils.VERBOSE > 1 {
 			log.Println(msg)
 		}
-		return Error(err, MigrationErrorCode, "", "dbs.migrate.SubmitMigration")
+		return Error(err, MigrationErrorCode, mstr, "dbs.migrate.SubmitMigration")
 	}
+	// check if given input is in VALID state in DBS
+	if err := validInput(rec.MIGRATION_URL, input); err != nil {
+		return Error(err, MigrationErrorCode, "not allowed for migration", "dbs.migrate.SubmitMigration")
+	}
+
+	// start migration request
 	reports, err := startMigrationRequest(rec)
 	if err != nil {
 		log.Println("unable to start migration request", err)
@@ -574,8 +625,14 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	dstParentBlocks = utils.Set(dstParentBlocks)
 	srcParentBlocks = utils.Set(srcParentBlocks)
 	if utils.VERBOSE > 0 {
-		log.Printf("Migration blocks from destination %s %+v", rurl, dstParentBlocks)
-		log.Printf("Migration blocks from source %s %+v", localhost, srcParentBlocks)
+		log.Printf("Migration blocks from destination %s, total %d", rurl, len(dstParentBlocks))
+		for _, b := range dstParentBlocks {
+			log.Println(b)
+		}
+		log.Printf("Migration blocks from source %s, total %d", localhost, len(srcParentBlocks))
+		for _, b := range srcParentBlocks {
+			log.Println(b)
+		}
 	}
 
 	// get list of blocks required for migration
@@ -586,8 +643,26 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 		}
 	}
 
+	// if input is a dataset we should find its blocks and add them for migration
+	if !strings.Contains(input, "#") {
+		blocks, err := GetBlocks(rurl, input)
+		if err != nil {
+			msg = fmt.Sprintf("unable to get blocks for dataset %s", input)
+			log.Println(msg)
+			return []MigrationReport{migrationReport(req, msg, status, err)},
+				Error(err, DatabaseErrorCode, msg, "dbs.migrate.startMigrationRequest")
+		}
+		for _, blk := range blocks {
+			if !utils.InList(blk, srcParentBlocks) {
+				migBlocks = append(migBlocks, blk)
+			}
+		}
+	}
+
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
+		rec.MIGRATION_STATUS = EXIST_IN_DB
+		updateMigrationStatus(rec, EXIST_IN_DB)
 		msg = fmt.Sprintf("%s is already fulfilled, no blocks found for migration", mstr)
 		log.Println(msg)
 		return []MigrationReport{migrationReport(rec, msg, status, err)}, nil
@@ -606,15 +681,16 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	}
 	defer tx.Rollback()
 
-	if utils.VERBOSE > 1 {
-		log.Println("migrationt input", input)
-		for _, blk := range migBlocks {
-			log.Println("migration block", blk)
-		}
-	}
 	// add our block input to migration blocks
 	if !utils.InList(input, migBlocks) && strings.Contains(input, "#") {
 		migBlocks = append(migBlocks, input)
+	}
+
+	if utils.VERBOSE > 0 {
+		log.Println("final set of blocks for migrationt input", input)
+		for _, blk := range migBlocks {
+			log.Println("migration block", blk)
+		}
 	}
 
 	// loop over migBlocks
@@ -859,10 +935,9 @@ func (a *API) ProcessMigrationCtx(timeout int) error {
 
 	// create channel to report when operation will be completed
 	ch := make(chan bool)
-	//     defer close(ch)
+	defer close(ch)
 
 	// set default status
-	//     status = FAILED
 	status = PENDING
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
@@ -1051,8 +1126,17 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	stm = CleanStatement(stm)
 	mid := mrec.MIGRATION_REQUEST_ID
 	retryCount := mrec.RETRY_COUNT
-	if status == FAILED || status == TERM_FAILED {
-		retryCount += 1
+	// if our status is FAILED we check for retry count
+	// if retry count is less then threshold we increment retry count and set status to IN PROGRESS
+	// this will allow migration service to pick up failed migration request
+	// otherwise we permanently terminate the migration request and set its status to TERM_FAILED
+	if status == FAILED {
+		if retryCount <= MigrationRetries {
+			retryCount += 1
+			status = IN_PROGRESS
+		} else {
+			status = TERM_FAILED
+		}
 	}
 	if utils.VERBOSE > 0 {
 		var args []interface{}
@@ -1079,8 +1163,7 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 
 // MigrationRemoveRequest represents migration remove request object
 type MigrationRemoveRequest struct {
-	MIGRATION_REQUEST_ID int64  `json:"migration_rqst_id"`
-	CREATE_BY            string `json:"create_by"`
+	MIGRATION_REQUEST_ID int64 `json:"migration_rqst_id"`
 }
 
 // RemoveMigration DBS API
@@ -1114,11 +1197,10 @@ func (a *API) RemoveMigration() error {
 	if utils.VERBOSE > 0 {
 		var args []interface{}
 		args = append(args, rec.MIGRATION_REQUEST_ID)
-		args = append(args, rec.CREATE_BY)
 		utils.PrintSQL(stm, args, "execute")
 	}
 	var tid float64
-	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY).Scan(&tid)
+	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID).Scan(&tid)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
@@ -1130,7 +1212,7 @@ func (a *API) RemoveMigration() error {
 
 	if tid > 0 {
 		stm = getSQL("remove_migration_requests")
-		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID)
 		if err != nil {
 			msg := fmt.Sprintf("fail to execute SQL statement '%s'", stm)
 			if utils.VERBOSE > 0 {
@@ -1147,8 +1229,7 @@ func (a *API) RemoveMigration() error {
 		return nil
 	}
 	msg := fmt.Sprintf(
-		"Invalid request, requestID=%v with create_by=%s is not found",
-		rec.MIGRATION_REQUEST_ID, rec.CREATE_BY)
+		"Invalid request, requestID=%v is not found", rec.MIGRATION_REQUEST_ID)
 	return Error(InvalidRequestErr, InvalidRequestErrorCode, msg, "dbs.migrate.RemoveMigration")
 }
 

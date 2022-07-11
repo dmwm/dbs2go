@@ -540,7 +540,7 @@ or
   - removes given request from DBS migration server
   - inputs
 ```
-{"migration_rqst_id": 123, "create_by": "user"}
+{"migration_rqst_id": 123}
 ```
 - `/cancel`
   - cancels given request from DBS migration server

@@ -576,6 +576,29 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 	return nil
 }
 
+// QueryRow function fetches results from given table
+func QueryRow(table, id, attr string, val interface{}) (int64, error) {
+	var stm string
+	if DBOWNER == "sqlite" {
+		stm = fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", id, table, attr)
+	} else {
+		stm = fmt.Sprintf("SELECT T.%s FROM %s.%s T WHERE T.%s = :%s", id, DBOWNER, table, attr, attr)
+	}
+	if utils.VERBOSE > 1 {
+		log.Printf("QueryRow\n%s; binding value=%+v", stm, val)
+	}
+	// in SQLite the ids are int64 while on ORACLE they are float64
+	var tid int64
+	err := DB.QueryRow(stm, val).Scan(&tid)
+	if err != nil {
+		if utils.VERBOSE > 1 {
+			log.Printf("fail to get id for %s, %v, error %v", stm, val, err)
+		}
+		return int64(tid), Error(err, QueryErrorCode, "", "dbs.GetID")
+	}
+	return int64(tid), nil
+}
+
 // GetID function fetches table primary id for a given value
 func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error) {
 	var stm string
@@ -587,7 +610,8 @@ func GetID(tx *sql.Tx, table, id, attr string, val ...interface{}) (int64, error
 	if utils.VERBOSE > 1 {
 		log.Printf("getID\n%s; binding value=%+v", stm, val)
 	}
-	var tid float64
+	// in SQLite the ids are int64 while on ORACLE they are float64
+	var tid int64
 	err := tx.QueryRow(stm, val...).Scan(&tid)
 	if err != nil {
 		if utils.VERBOSE > 1 {

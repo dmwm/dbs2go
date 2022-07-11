@@ -21,7 +21,7 @@
   "release_version": "CMSSW_1_2_3",
   "site": "cmssrm.fnal.gov",
   "block": "/unittest_web_primary_ds_name_8268/acq_era_8268-v8268/GEN-SIM-RAW#8268",
-  "parent_block": "/unittest_web_primary_ds_name_8268/acq_era_8268-ptsr-v8268/GEN-SIM-RAW#8268",
+  "parent_block_name": "/unittest_web_primary_ds_name_8268/acq_era_8268-ptsr-v8268/GEN-SIM-RAW#8268",
   "files": [],
   "parent_files": [],
   "runs": [

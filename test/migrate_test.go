@@ -248,7 +248,7 @@ func TestMigrate(t *testing.T) {
 	log.Println("Received data", string(data))
 	for _, rec := range reportRecords {
 		if rec.Status != "COMPLETED" {
-			t.Errorf("invalid status in %+v, expected COMPLETED", rec)
+			t.Fatalf("invalid status in %+v, expected COMPLETED", rec)
 		}
 	}
 }
@@ -332,15 +332,15 @@ func TestMigrateRemove(t *testing.T) {
 	var removeRecords []dbs.MigrationRemoveRequest
 	for _, rrr := range statusRecords {
 		mstatus := rrr.MIGRATION_STATUS
-		if mstatus == 9 {
+		if mstatus == 9 || mstatus == 0 || mstatus == 3 {
 			foundCancelledRequest = true
+
+			// prepare migration request records to be used later in /remove API
+			rec := dbs.MigrationRemoveRequest{
+				MIGRATION_REQUEST_ID: rrr.MIGRATION_REQUEST_ID,
+			}
+			removeRecords = append(removeRecords, rec)
 		}
-		// prepare migration request records to be used later in /remove API
-		rec := dbs.MigrationRemoveRequest{
-			MIGRATION_REQUEST_ID: rrr.MIGRATION_REQUEST_ID,
-			CREATE_BY:            rrr.CREATE_BY,
-		}
-		removeRecords = append(removeRecords, rec)
 	}
 	if !foundCancelledRequest {
 		t.Fatal("we did not found cancelled migration request")
@@ -361,7 +361,8 @@ func TestMigrateRemove(t *testing.T) {
 		log.Println("/remove output", string(data))
 	}
 
-	// check again status of migration, now we should see it is empty
+	// check if number of original status records is reduced
+	origStatusRecords := len(statusRecords)
 	rr, err = respRecorder("GET", "dbs2go/status", reader, web.MigrationStatusHandler)
 	if err != nil {
 		t.Fatal(err)
@@ -371,7 +372,7 @@ func TestMigrateRemove(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to unmarshal received data '%s', error %v", string(data), err)
 	}
-	if len(statusRecords) != 0 {
-		t.Fatalf("wrong number of migration records, received %v, but expect 0", statusRecords)
+	if origStatusRecords <= len(statusRecords) {
+		t.Fatalf("wrong number of migration records did not reduced orig status records %d, remooved records %d, new set of status records %d", origStatusRecords, len(removeRecords), len(statusRecords))
 	}
 }

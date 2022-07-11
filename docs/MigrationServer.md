@@ -9,8 +9,11 @@ The DBS migration servers has the following responsibility:
 - *DBS migrate* server is HTTP service which access end-user request
 to submit and check status of migration requests. It has the following set
 of APIs:
-  - `/submit` accepts migration (HTTP POST) request
-  - `/process` performs processing given migration request
+  - `/submit` submits migration (HTTP POST) request
+  - `/process` explicitly performs processing given migration request (since
+    DBSMigration service process migration requests sequentially)
+  - `/cancel` cancels existing migration requests, i.e. it will be terminated
+    and moved to status 9
   - `/remove` removes migration request
   - `/status` fetches status of given migraton request
   - `/total` shows total number of migration requests in a system
@@ -21,6 +24,29 @@ of APIs:
   - `/serverinfo` provides server information
 - *DBS migration* server runs as a daemon to process migraton requests
 from underlying DB backend on periodic basis
+- by default the number of retries for migration request is set to 3 and it is
+  configurable parameter for DBSMigration server.
+- here is a full set of migration codes used by migration server:
+  - 0 pending request
+  - 1 migration request is in progress
+  - 2 migration request has successfully completed
+  - 3 migration request has failed, it will be retried according to DB
+    migration server settings (by default 3 times)
+  - 4 migration request is already exist in DB, i.e. the requested block or
+    dataset is already found in database
+  - 9 migration request termindated, this can happen in two scenarios
+    - migration request has been cancelled explicitly by user
+    - migration request failed N times and will no longer be retried
+      automatically
+The migration request goes throught the followin cycle:
+```
+status change:
+0 -> 1, request in progress
+1 -> 2, request is completed successfully
+1 -> 3, and if failed 3->1
+1 -> 4, if request is alaready in DB
+1 -> 9, request is terminated
+```
 
 ### Examples
 Post migration request:
@@ -62,15 +88,29 @@ Fetch status of migration request
 curl http://localhost:9898/dbs2go-migrate/status
 
 [
-{"create_by":"giffels","creation_date":1391014486,"last_modification_date":1391014924,"last_modified_by":"giffels","migration_input":"/GluGluToHToWWTo2LAndTau2Nu_M-90_7TeV-powheg-pythia6/Fall11-PU_S6_START42_V14B-v1/AODSIM","migration_request_id":5002,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
-,{"create_by":"giffels","creation_date":1391014486,"last_modification_date":1391014949,"last_modified_by":"giffels","migration_input":"/ZZTo2e2mu_8TeV_mll8_mZZ95-160-powheg15-pythia6/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM","migration_request_id":10001,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
-,{"create_by":"giffels","creation_date":1391014499,"last_modification_date":1391014965,"last_modified_by":"giffels","migration_input":"/CIToMuMu_Con_Lambda-19_M-800_TuneZ2star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V19E-v1/AODSIM","migration_request_id":5004,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
+{"create_by":"giffels",
+"creation_date":1391014486,
+"last_modification_date":1391014924,
+"last_modified_by":"giffels",
+"migration_input":"/GluGluToHToWWTo2LAndTau2Nu_M-90_7TeV-powheg-pythia6/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+"migration_request_id":5002,
+"migration_status":3,
+"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader",
+"retry_count":3}
 ...
 
 # or you can fetch status info of single request
 curl http://localhost:9898/dbs2go-migrate/status?migration_request_id=10005
 [
-{"create_by":"giffels","creation_date":1391014552,"last_modification_date":1391015023,"last_modified_by":"giffels","migration_input":"/ZJetToEE_Pt-170to230_TuneEE3C_8TeV_herwigpp/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM","migration_request_id":10005,"migration_status":3,"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader","retry_count":3}
+{"create_by":"giffels",
+"creation_date":1391014552,
+"last_modification_date":1391015023,
+"last_modified_by":"giffels",
+"migration_input":"/ZJetToEE_Pt-170to230_TuneEE3C_8TeV_herwigpp/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM",
+"migration_request_id":10005,
+"migration_status":3,
+"migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader",
+"retry_count":3}
 ]
 ```
 
@@ -87,5 +127,9 @@ curl -v -H "Content-type: application/json" \
     -d@$PWD/mig_request.json \
     http://localhost:9898/dbs2go-migrate/remove
 
-[{"api":"remove","error":"Invalid request. Successfully processed or processing requests cannot be removed, or the requested migration did not exist, or the requestor for removing and creating has to be the same user.","exception":400,"method":"POST","type":"HTTPError"}]
+[{"api":"remove",
+"error":"Invalid request. Successfully processed or processing requests cannot be removed, or the requested migration did not exist, or the requestor for removing and creating has to be the same user.",
+"exception":400,
+"method":"POST",
+"type":"HTTPError"}]
 ```
