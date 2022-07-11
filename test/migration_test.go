@@ -13,6 +13,8 @@ package main
 //      the DBSReader (1)/DBSWriter (2) will be associated with it
 //   2. DBS_DB_FILE_2 represents DBS db where data will be migrated
 //      the DBSReader (3)/DBSWriter (4) will be associated with it
+//
+// To properly run the test, the six servers must be started using ./bin/start_test_migration
 
 import (
 	"bytes"

@@ -41,3 +41,7 @@ test/data/dbsdata
 .env
 .vscode
 test-pids
+
+# custom development files
+.devcontainer
+.vscode
