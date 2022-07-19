@@ -175,11 +175,14 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 			log.Println("unable to execute", stm, "error", err)
 		}
 	}
-	if tbid == 0 && pbid == 0 { // there is no such ids in BlockParents table
+	if tbid == 0 && pbid == 0 {
+		// there is no such ids in BlockParents table
 		blockParents := BlockParents{THIS_BLOCK_ID: thisBlockID, PARENT_BLOCK_ID: parentBlockID}
 		err = blockParents.Insert(tx)
 		if err != nil {
-			if utils.VERBOSE > 0 {
+			// NOTE: we may have this error since we insert block parentage within
+			// the same transaction as file parentage.
+			if utils.VERBOSE > 1 {
 				log.Printf("unable to insert block parents %+v using input fileparents record %+v, error %v", blockParents, r, err)
 				log.Println("this block name", thisBlockName)
 				log.Println("parent block name", parentBlockName)
