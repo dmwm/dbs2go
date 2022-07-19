@@ -521,6 +521,28 @@ The DBS Migrate server APIs are listed below:
     "migration_input": "migration-input",
 }
 ```
+This API will return list of dicts where each dict represents migration
+request, e.g.
+```
+[{"migration_details":
+    {"migration_request_id":1,
+    "migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader",
+    "migration_input":"/XToYYprimeTo4Q_MX3000_MY170_MYprime25_narrow_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM#1b71f206-d0a4-4dc0-aaf5-1bb6a23e9343",
+    "migration_status":0,
+    "create_by":"DBS-workflow",
+    "creation_date":1658260738,
+    "last_modified_by":"DBS-workflow",
+    "last_modification_date":1658260738,
+    "retry_count":0},
+    "migration_report":"Migration request is started",
+    "status":"PENDING",
+    "error":null}
+    ...
+]
+```
+If your migration input requires migration of parents the output of submit API
+will provide list of all migration requests.
+
 - `/process`
   - invokes process request
   - inputs
