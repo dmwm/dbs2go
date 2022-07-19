@@ -112,6 +112,20 @@ curl http://localhost:9898/dbs2go-migrate/status?migration_request_id=10005
 "migration_url":"https://cmsweb.cern.ch/dbs/prod/global/DBSReader",
 "retry_count":3}
 ]
+
+# or you can fetch status info of single request
+blk=/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM-RAW%23eee377dc-76e2-11e7-a0c8-02163e00d7b3
+curl http://localhost:9898/dbs2go-migrate/status?migration_input=blk
+[
+{"create_by":"DBS-workflow",
+"creation_date":1658242505,
+"last_modification_date":1658242505,
+"last_modified_by":"DBS-workflow",
+"migration_input":"/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM-RAW#eee377dc-76e2-11e7-a0c8-02163e00d7b3",
+"migration_request_id":7,
+"migration_status":2,
+"migration_url":"https://cmsweb-testbed.cern.ch/dbs2go","retry_count":0}
+]
 ```
 
 Get total number of migraton requests in a system:
