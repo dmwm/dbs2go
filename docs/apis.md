@@ -517,15 +517,8 @@ The DBS Migrate server APIs are listed below:
   - inputs, for exact definition see [MigrationRequest](../dbs/migration_requests.go) struct, e.g.
 ```
 {
-    "migration_request_id": 123,
     "migration_url": "https://some-site.com",
     "migration_input": "migration-input",
-    "migration_status": 1,
-    "create_by": "tester",
-    "creation_date": 1631118749,
-    "last_modified_by": "tester",
-    "last_modification_date": 1631118749,
-    "retry_count: 1
 }
 ```
 - `/process`
