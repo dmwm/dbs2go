@@ -126,6 +126,9 @@ curl http://localhost:9898/dbs2go-migrate/status?migration_input=blk
 "migration_status":2,
 "migration_url":"https://cmsweb-testbed.cern.ch/dbs2go","retry_count":0}
 ]
+
+# or you can fetch status info of single request using block name
+curl http://localhost:9898/dbs2go-migrate/status?block_name=blk
 ```
 
 Get total number of migraton requests in a system:

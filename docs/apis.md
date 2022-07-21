@@ -503,7 +503,7 @@ The DBS Migrate server APIs are listed below:
 ##### DBS Migrate server GET APIs
 - `/status`
   - returns status of DBS migration requests
-  - arguments: None
+  - arguments: None or `migration_input` or `migration_rqst_id` or `block_name`
 - `/total`
   - returns total number of migration requests in DBS
   - arguments: None
