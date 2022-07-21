@@ -175,12 +175,13 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var mid, migRetryCount, migCreationDate, migLastModificationDate, migStatus int64
-		var migURL, migInput, migCreateBy, migLastModifiedBy string
+		var migURL, migInput, migServer, migCreateBy, migLastModifiedBy string
 		err := rows.Scan(
 			&mid,
 			&migURL,
 			&migInput,
 			&migStatus,
+			&migServer,
 			&migCreateBy,
 			&migCreationDate,
 			&migLastModifiedBy,
