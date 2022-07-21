@@ -659,6 +659,8 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 				migBlocks = append(migBlocks, blk)
 			}
 		}
+		// add dataset itself to the list of migration
+		migBlocks = append(migBlocks, input)
 	}
 
 	// if no migration blocks found to process return immediately
@@ -785,7 +787,6 @@ func migrationReport(req MigrationRequest, report string, status int64, err erro
 func (a *API) ProcessMigration() {
 
 	var status int64
-	//     status = FAILED // change it if we succeed at the end
 	status = PENDING // change it if we succeed at the end
 
 	// backward compatibility with DBS migration server which uses migration_rqst_id
@@ -840,14 +841,36 @@ func (a *API) ProcessMigration() {
 		utils.PrintSQL(stm, args, "execute")
 	}
 	var bid, bOrder, bStatus int64
-	var block string
+	var migInput string
 	err = DB.QueryRow(stm, args...).Scan(
-		&bid, &block, &bOrder, &bStatus,
+		&bid, &migInput, &bOrder, &bStatus,
 	)
 	if err != nil {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
+
+	// check if our migration input is block name or dataset
+	if !strings.Contains(migInput, "#") {
+		// if we got dataset name we simply check its presence and update the status
+		localhost := fmt.Sprintf("%s%s", utils.Localhost, utils.BASE)
+		blocks, err := GetBlocks(localhost, migInput)
+		if err == nil {
+			for _, blk := range blocks {
+				if strings.Contains(migInput, blk) {
+					status = COMPLETED
+					updateMigrationStatus(mrec, COMPLETED)
+					return
+				}
+			}
+		}
+		status = FAILED
+		updateMigrationStatus(mrec, FAILED)
+		return
+	}
+
+	// we will proceed with block name as migration input
+	block := migInput
 
 	// obtain block details from destination DBS
 	rurl := fmt.Sprintf("%s/blockdump?block_name=%s", mrec.MIGRATION_URL, url.QueryEscape(block))
@@ -1107,7 +1130,8 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 	log.Printf("updated migration request %v with status %v", mid, *status)
 }
 
-// updateMigrationStatus updates migration status
+// updateMigrationStatus updates migration status and increment retry count of
+// migration record.
 func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	log.Printf("update migration request %d to status %d", mrec.MIGRATION_REQUEST_ID, status)
 	tmplData := make(Record)
