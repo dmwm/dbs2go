@@ -175,13 +175,14 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var mid, migRetryCount, migCreationDate, migLastModificationDate, migStatus int64
-		var migURL, migInput, migServer, migCreateBy, migLastModifiedBy string
+		var migURL, migInput, migCreateBy, migLastModifiedBy string
+		var msrv sql.NullString
 		err := rows.Scan(
 			&mid,
 			&migURL,
 			&migInput,
 			&migStatus,
-			&migServer,
+			&msrv,
 			&migCreateBy,
 			&migCreationDate,
 			&migLastModifiedBy,
@@ -196,6 +197,7 @@ func MigrationRequests(mid int64) ([]MigrationRequest, error) {
 			MIGRATION_URL:          migURL,
 			MIGRATION_INPUT:        migInput,
 			MIGRATION_STATUS:       migStatus,
+			MIGRATION_SERVER:       msrv.String,
 			CREATE_BY:              migCreateBy,
 			CREATION_DATE:          migCreationDate,
 			LAST_MODIFIED_BY:       migLastModifiedBy,
