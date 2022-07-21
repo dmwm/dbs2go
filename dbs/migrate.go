@@ -16,12 +16,14 @@ package dbs
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/url"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -1126,6 +1128,30 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	stm = CleanStatement(stm)
 	mid := mrec.MIGRATION_REQUEST_ID
 	retryCount := mrec.RETRY_COUNT
+
+	// check if migration server is empty when migration status is IN_PROGRESS
+	// we use sql.NullString as migration server info may not be present in DB
+	// https://medium.com/aubergine-solutions/how-i-handled-null-possible-values-from-database-rows-in-golang-521fb0ee267
+	var msrv sql.NullString
+	s := getSQL("check_migration_server")
+	err = tx.QueryRow(s, mid).Scan(&msrv)
+	if err != nil {
+		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", s, err)
+		log.Println(msg)
+		return Error(err, QueryErrorCode, "", "dbs.migrate.updateMigrationStatus")
+	}
+	migServer := msrv.String
+	hostname, err := os.Hostname()
+	if err != nil {
+		return Error(err, GenericErrorCode, "", "dbs.migrate.updateMigrationStatus")
+	}
+	if migServer != "" && migServer != hostname {
+		msg := fmt.Sprintf("migration request %d is already taken by %s", mid, migServer)
+		log.Println(msg)
+		return Error(ConcurrencyErr, MigrationErrorCode, msg, "dbs.migrate.updateMigrationStatus")
+
+	}
+
 	// if our status is FAILED we check for retry count
 	// if retry count is less then threshold we increment retry count and set status to IN PROGRESS
 	// this will allow migration service to pick up failed migration request
@@ -1142,11 +1168,12 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 		var args []interface{}
 		args = append(args, status)
 		args = append(args, retryCount)
+		args = append(args, hostname)
 		args = append(args, mid)
-		utils.PrintSQL(stm, args, "execute")
+		utils.PrintSQL(stm, args, "execute update migration status query")
 	}
 
-	_, err = tx.Exec(stm, status, retryCount, mid)
+	_, err = tx.Exec(stm, status, retryCount, hostname, mid)
 	if err != nil {
 		log.Printf("unable to execute %s, error %v", stm, err)
 		return Error(err, UpdateErrorCode, "", "dbs.migrate.updateMigrationStatus")
@@ -1266,25 +1293,27 @@ func (a *API) StatusMigration() error {
 	if _, e := getSingleValue(a.Params, "migration_url"); e == nil {
 		conds, args = AddParam("migration_url", "MR.MIGRATION_URL", a.Params, conds, args)
 	}
-	if _, e := getSingleValue(a.Params, "dataset"); e == nil {
-		conds, args = AddParam("dataset", "MR.DATASET", a.Params, conds, args)
-	}
 	if _, e := getSingleValue(a.Params, "block_name"); e == nil {
-		conds, args = AddParam("block_name", "MR.BLOCK_NAME", a.Params, conds, args)
-	}
-	if _, e := getSingleValue(a.Params, "user"); e == nil {
-		conds, args = AddParam("user", "MR.USER", a.Params, conds, args)
+		tmpl["Blocks"] = true
+		conds, args = AddParam("block_name", "MB.MIGRATION_BLOCK_NAME", a.Params, conds, args)
 	}
 	if _, e := getSingleValue(a.Params, "create_by"); e == nil {
 		conds, args = AddParam("create_by", "MR.CREATE_BY", a.Params, conds, args)
 	}
 
 	// get SQL statement from static area
-	stm := getSQL("migration_requests")
+	stm, err := LoadTemplateSQL("migration_requests", tmpl)
+	if err != nil {
+		log.Println("unable to load migration_requests template", err)
+		return Error(err, LoadErrorCode, "", "dbs.migrate.StatusMigration")
+	}
 	stm = WhereClause(stm, conds)
+	if oldest == "true" {
+		stm += "ORDER BY MR.creation_date"
+	}
 
 	// use generic query API to fetch the results from DB
-	err := executeAll(a.Writer, a.Separator, stm, args...)
+	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
 		return Error(err, QueryErrorCode, "", "dbs.migrate.StatusMigration")
 	}

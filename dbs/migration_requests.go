@@ -17,6 +17,7 @@ type MigrationRequest struct {
 	MIGRATION_URL          string `json:"migration_url" validate:"required"`
 	MIGRATION_INPUT        string `json:"migration_input"  validate:"required"`
 	MIGRATION_STATUS       int64  `json:"migration_status" validate:"gte=0,lte=10"`
+	MIGRATION_SERVER       string `json:"migration_server"`
 	CREATE_BY              string `json:"create_by" validate:"required"`
 	CREATION_DATE          int64  `json:"creation_date" validate:"required,number,gt=0"`
 	LAST_MODIFIED_BY       string `json:"last_modified_by" validate:"required"`
@@ -57,6 +58,7 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 		r.MIGRATION_URL,
 		r.MIGRATION_INPUT,
 		r.MIGRATION_STATUS,
+		r.MIGRATION_SERVER,
 		r.CREATION_DATE,
 		r.CREATE_BY,
 		r.LAST_MODIFICATION_DATE,
