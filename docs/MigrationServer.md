@@ -129,6 +129,9 @@ curl http://localhost:9898/dbs2go-migrate/status?migration_input=blk
 
 # or you can fetch status info of single request using block name
 curl http://localhost:9898/dbs2go-migrate/status?block_name=blk
+
+# or you can fetch status info of requests using migration status value
+curl http://localhost:9898/dbs2go-migrate/status?migration_status=2
 ```
 
 Get total number of migraton requests in a system:
