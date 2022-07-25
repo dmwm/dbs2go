@@ -286,6 +286,14 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	if utils.VERBOSE > 1 {
 		log.Println("call GetParentBlocks with", block)
 	}
+	// check if we got RAW dataset/block, if so return immediately
+	arr := strings.Split(block, "#")
+	if len(arr) > 0 {
+		dataset := arr[0]
+		if strings.HasSuffix(dataset, "/RAW") {
+			return out, nil
+		}
+	}
 	// when we insert given block in our migration blocks it should be last
 	// to process as it is up in a hierarchy, therefore for it we use order+1
 	out = append(out, MigrationBlock{Block: block, Order: order + 1})
@@ -309,7 +317,6 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	for idx, blk := range srcblocks {
 		umap[idx] = struct{}{}
 		go func(i int, b string) {
-			//             blks, err := GetBlocks(rurl, "blockparents", b)
 			blks, err := GetParents(rurl, b)
 			ch <- BlockResponse{Index: i, Block: b, Blocks: blks, Error: err}
 		}(idx, blk)
@@ -713,6 +720,10 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 		if err != nil {
 			msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
 			log.Println(msg)
+			if strings.Contains(err.Error(), "unique") {
+				// we inserted the same block
+				continue
+			}
 			return []MigrationReport{migrationReport(req, msg, status, err)},
 				Error(err, InsertErrorCode, "", "dbs.migrate.SubmitMigration")
 		}
