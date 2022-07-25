@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/dmwm/dbs2go/utils"
@@ -65,6 +66,11 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 		r.LAST_MODIFIED_BY,
 		r.RETRY_COUNT)
 	if err != nil {
+		if strings.Contains(err.Error(), "unique") {
+			// if we try to insert the same migration input we'll continue
+			log.Println("warning: will skip", r, "since its migration input is already inserted in another request", err)
+			return nil
+		}
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert MigratinRequest", err)
 		}
