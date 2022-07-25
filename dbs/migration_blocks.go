@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"strings"
 
 	"github.com/dmwm/dbs2go/utils"
 )
@@ -72,6 +73,11 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		r.LAST_MODIFICATION_DATE,
 		r.LAST_MODIFIED_BY)
 	if err != nil {
+		if strings.Contains(err.Error(), "unique") {
+			// if we try to insert the same migration input we'll continue
+			log.Println("warning: skip", r, "since it is already inserted in another request", err)
+			return nil
+		}
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert migration block", err)
 		}
