@@ -404,15 +404,23 @@ func getFileParentList(blk string, wg *sync.WaitGroup, fileParentList *FileParen
 	for rows.Next() {
 		fileParent := FileParentRecord{}
 		var pfn sql.NullString
+		var pfnid sql.NullInt64
 		// blockdump DBS API should yield this_logical_file_name
 		// therefore, here we use it
+		// NOTE2: when we perform switch from python based DBSMigrate/DBSMigration
+		// to Go based one we do not need pfnid in this out, therefore we can
+		// remove it here and blockdump_fileparents template
 		err = rows.Scan(
 			//             &fileParent.LogicalFileName,
 			&fileParent.ThisLogicalFileName,
 			&pfn,
+			&pfnid,
 		)
 		if pfn.Valid {
 			fileParent.ParentLogicalFileName = pfn.String
+		}
+		if pfnid.Valid {
+			fileParent.ParentFileID = pfnid.Int64
 		}
 		if err != nil {
 			log.Println("unable to scan rows", err)
