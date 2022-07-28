@@ -392,4 +392,5 @@ type FileParentRecord struct {
 	ThisLogicalFileName   string `json:"this_logical_file_name,omitempty"`
 	LogicalFileName       string `json:"logical_file_name,omitempty"`
 	ParentLogicalFileName string `json:"parent_logical_file_name"`
+	ParentFileID          int64  `json:"parent_file_id,omitempty"`
 }
