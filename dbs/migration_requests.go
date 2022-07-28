@@ -68,7 +68,7 @@ func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "unique") {
 			// if we try to insert the same migration input we'll continue
-			log.Println("warning: will skip", r, "since its migration input is already inserted in another request", err)
+			log.Println("warning: skip", r, "since it is already inserted in another request", err)
 			return nil
 		}
 		if utils.VERBOSE > 0 {
