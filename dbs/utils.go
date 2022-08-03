@@ -22,6 +22,9 @@ var Cert string
 // Timeout represents DBS timeout used by HttpClient
 var Timeout int
 
+// TlsRefreshInterval represents refresh interval for Tls proxy
+var TlsRefreshInterval int64
+
 // client X509 certificates
 func tlsCerts(key, cert string) ([]tls.Certificate, error) {
 	uproxy := os.Getenv("X509_USER_PROXY")
@@ -68,11 +71,12 @@ func tlsCerts(key, cert string) ([]tls.Certificate, error) {
 // TLSCertsManager manages TLS certificates
 type TLSCertsManager struct {
 	Certificates []tls.Certificate
+	Time         time.Time
 }
 
 // TlsCerts provides access to TLS certificates for given key and certificate
 func (t *TLSCertsManager) TlsCerts(key, cert string) ([]tls.Certificate, error) {
-	if t.Certificates == nil {
+	if t.Certificates == nil || time.Since(t.Time).Seconds() > float64(TlsRefreshInterval) {
 		certs, err := tlsCerts(key, cert)
 		if err == nil {
 			t.Certificates = certs

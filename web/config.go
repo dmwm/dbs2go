@@ -61,11 +61,12 @@ type Configuration struct {
 	Styles    string `json:"styles"`    // location of server CSS styles
 
 	// security parts
-	ServerKey  string `json:"serverkey"`  // server key for https
-	ServerCrt  string `json:"servercrt"`  // server certificate for https
-	RootCA     string `json:"rootCA"`     // RootCA file
-	CSRFKey    string `json:"csrfKey"`    // CSRF 32-byte-long-auth-key
-	Production bool   `json:"production"` // production server or not
+	ServerKey          string `json:"serverkey"`          // server key for https
+	ServerCrt          string `json:"servercrt"`          // server certificate for https
+	RootCA             string `json:"rootCA"`             // RootCA file
+	CSRFKey            string `json:"csrfKey"`            // CSRF 32-byte-long-auth-key
+	Production         bool   `json:"production"`         // production server or not
+	TlsRefreshInterval int64  `json:"tlsRefreshInterval"` // interval to refresh tls proxy
 
 	// GraphQL parts
 	GraphQLSchema string `json:"graphqlSchema"` // graph ql schema file name
@@ -141,6 +142,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MigrationRetries == 0 {
 		Config.MigrationRetries = 3
+	}
+	if Config.TlsRefreshInterval == 0 {
+		Config.TlsRefreshInterval = 4 * 60 * 60 // 4 hours
 	}
 	return nil
 }
