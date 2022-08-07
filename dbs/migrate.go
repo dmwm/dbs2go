@@ -185,6 +185,9 @@ func prepareMigrationList(rurl, input string) []string {
 	if strings.Contains(input, "#") {
 		mblocks, err = GetParentBlocks(rurl, input, order)
 		pblocks = GetMigrationBlocksInOrder(mblocks)
+		if len(pblocks) == 0 {
+			pblocks = append(pblocks, input)
+		}
 	} else {
 		mblocks, err = GetParentDatasetBlocks(rurl, input, order)
 		pblocks = GetMigrationBlocksInOrder(mblocks)
@@ -663,12 +666,14 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 				Error(err, DatabaseErrorCode, msg, "dbs.migrate.startMigrationRequest")
 		}
 		for _, blk := range blocks {
-			if !utils.InList(blk, srcParentBlocks) {
+			if !utils.InList(blk, srcParentBlocks) && !utils.InList(blk, migBlocks) {
 				migBlocks = append(migBlocks, blk)
 			}
 		}
 		// add dataset itself to the list of migration
-		migBlocks = append(migBlocks, input)
+		if !utils.InList(input, migBlocks) {
+			migBlocks = append(migBlocks, input)
+		}
 	}
 
 	// if no migration blocks found to process return immediately
