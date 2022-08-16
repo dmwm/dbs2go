@@ -175,6 +175,7 @@ func GetMigrationBlocksInOrder(mblocks []MigrationBlock) []string {
 
 // helper function to prepare the list of parent blocks for given input
 func prepareMigrationList(rurl, input string) []string {
+	time0 := time.Now()
 	var pblocks []string
 	var mblocks []MigrationBlock
 	var err error
@@ -210,14 +211,42 @@ func prepareMigrationList(rurl, input string) []string {
 		return pblocks
 	}
 	if utils.VERBOSE > 1 {
-		log.Printf("prepareMigrationList yields %d blocks from %s for %s", len(pblocks), rurl, input)
+		log.Printf("prepareMigrationList yields %d blocks from %s for %s, elapsed time %v", len(pblocks), rurl, input, time.Since(time0))
 	}
 	return pblocks
+}
+
+// helper function to check blocks in local DB
+func blocksInDB(blocks []string) ([]string, error) {
+	if len(blocks) == 0 {
+		return blocks, nil
+	}
+	srcBlocks := []string{}
+	hash := utils.GetHash([]byte(blocks[0]))
+	tx, err := DB.Begin()
+	if err != nil {
+		return srcBlocks, Error(err, TransactionErrorCode, hash, "dbs.migrate.blocksInDB")
+	}
+	defer tx.Rollback()
+	for _, blk := range blocks {
+		if rid, err := GetID(tx, "BLOCKS", "block_id", "block_name", blk); err == nil && rid == 0 {
+			srcBlocks = append(srcBlocks, blk)
+		}
+	}
+	return srcBlocks, nil
 }
 
 // helper function to check blocks at source destination for provided
 // blocks list
 func prepareMigrationListAtSource(rurl string, blocks []string) []string {
+	if strings.Contains(rurl, "localhost") {
+		srcBlocks, err := blocksInDB(blocks)
+		if err != nil {
+			log.Println("WARNING: unable to get blocksInDB", err)
+		} else {
+			return srcBlocks
+		}
+	}
 	// get list of parent blocks of previous parents
 	srcBlocks := []string{}
 	ch := make(chan BlockResponse)
@@ -282,6 +311,8 @@ type MigrationBlock struct {
 // GetParentBlocks returns parent blocks for given url and block name
 //gocyclo:ignore
 func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
+	time0 := time.Now()
+
 	if utils.VERBOSE > 1 {
 		log.Printf("GetParentBlocks for %s order %d from %s", block, order, rurl)
 	}
@@ -313,6 +344,13 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	for _, blk := range srcblocks {
 		out = append(out, MigrationBlock{Block: blk, Order: order})
 	}
+	if len(srcblocks) == 0 {
+		// no parent blocks
+		if utils.VERBOSE > 1 {
+			log.Printf("no parent blocks found for %s in %s, elapsed time %v", block, rurl, time.Since(time0))
+		}
+		return out, nil
+	}
 	// get list of parent blocks of previous parents
 	parentBlocks := []MigrationBlock{}
 	ch := make(chan BlockResponse)
@@ -327,7 +365,7 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	if len(umap) == 0 {
 		// no parent blocks
 		if utils.VERBOSE > 1 {
-			log.Printf("no parent blocks found for %s in %s", block, rurl)
+			log.Printf("no parent blocks found for %s in %s, elapsed time %v", block, rurl, time.Since(time0))
 		}
 		return out, nil
 	}
@@ -375,7 +413,7 @@ func GetParentBlocks(rurl, block string, order int) ([]MigrationBlock, error) {
 	}
 
 	if utils.VERBOSE > 1 {
-		log.Printf("GetParentBlocks output yield %d blocks", len(out))
+		log.Printf("GetParentBlocks for %s yields %d block parents in %v", block, len(out), time.Since(time0))
 	}
 	return out, nil
 }
@@ -631,18 +669,22 @@ func startMigrationRequest(rec MigrationRequest) ([]MigrationReport, error) {
 	rurl := rec.MIGRATION_URL
 	localhost := fmt.Sprintf("%s%s", utils.Localhost, utils.BASE)
 	// get parent blocks at destination DBS instance for given input
+	time0 := time.Now()
 	dstParentBlocks = prepareMigrationList(rurl, input)
-	// get parent blocks at source DBS instance for given input
-	//     srcParentBlocks = prepareMigrationList(localhost, input)
-	srcParentBlocks = prepareMigrationListAtSource(localhost, dstParentBlocks)
 	dstParentBlocks = utils.Set(dstParentBlocks)
-	srcParentBlocks = utils.Set(srcParentBlocks)
 	if utils.VERBOSE > 0 {
-		log.Printf("Migration blocks from destination %s, total %d", rurl, len(dstParentBlocks))
+		log.Printf("Migration blocks from destination %s, total %d, elapsed time %v", rurl, len(dstParentBlocks), time.Since(time0))
 		for _, b := range dstParentBlocks {
 			log.Println(b)
 		}
-		log.Printf("Migration blocks from source %s, total %d", localhost, len(srcParentBlocks))
+	}
+	// get parent blocks at source DBS instance for given input
+	//     srcParentBlocks = prepareMigrationList(localhost, input)
+	time0 = time.Now()
+	srcParentBlocks = prepareMigrationListAtSource(localhost, dstParentBlocks)
+	srcParentBlocks = utils.Set(srcParentBlocks)
+	if utils.VERBOSE > 0 {
+		log.Printf("Migration blocks from source %s, total %d, elapsed time %v", localhost, len(srcParentBlocks), time.Since(time0))
 		for _, b := range srcParentBlocks {
 			log.Println(b)
 		}
