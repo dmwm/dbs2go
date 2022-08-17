@@ -40,6 +40,7 @@ type Configuration struct {
 	MigrationCleanupInterval int    `json:"migration_cleanup_interval"` // migration cleanup interval
 	MigrationCleanupOffset   int64  `json:"migration_cleanup_offset"`   // migration cleanup offset
 	MigrationRetries         int64  `json:"migration_retries"`          // migration retries
+	MigrationAsyncTimeout    int    `json:"migration_async_timeout"`    // timeout for aysnc migration request
 
 	// db related configuration
 	DBFile               string `json:"dbfile"`                  // dbs db file with secrets
@@ -105,6 +106,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.LimiterPeriod == "" {
 		Config.LimiterPeriod = "100-S"
+	}
+	if Config.MigrationAsyncTimeout == 0 {
+		Config.MigrationAsyncTimeout = 600 // in seconds
 	}
 	if Config.MigrationProcessTimeout == 0 {
 		Config.MigrationProcessTimeout = 300 // in seconds

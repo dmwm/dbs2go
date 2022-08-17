@@ -413,6 +413,7 @@ func Server(configFile string) {
 	dbs.DBOWNER = dbowner
 
 	// migration settings
+	dbs.MigrationAsyncTimeout = Config.MigrationAsyncTimeout
 	dbs.MigrationProcessTimeout = Config.MigrationProcessTimeout
 	dbs.MigrationServerInterval = Config.MigrationServerInterval
 	dbs.MigrationCleanupInterval = Config.MigrationCleanupInterval

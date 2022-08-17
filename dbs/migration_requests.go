@@ -26,6 +26,23 @@ type MigrationRequest struct {
 	RETRY_COUNT            int64  `json:"retry_count"`
 }
 
+// Copy creates a new copy of migration request
+func (r *MigrationRequest) Copy() MigrationRequest {
+	req := MigrationRequest{
+		MIGRATION_REQUEST_ID:   r.MIGRATION_REQUEST_ID,
+		MIGRATION_URL:          r.MIGRATION_URL,
+		MIGRATION_INPUT:        r.MIGRATION_INPUT,
+		MIGRATION_STATUS:       r.MIGRATION_STATUS,
+		MIGRATION_SERVER:       r.MIGRATION_SERVER,
+		CREATE_BY:              r.CREATE_BY,
+		CREATION_DATE:          r.CREATION_DATE,
+		LAST_MODIFIED_BY:       r.LAST_MODIFIED_BY,
+		LAST_MODIFICATION_DATE: r.LAST_MODIFICATION_DATE,
+		RETRY_COUNT:            r.RETRY_COUNT,
+	}
+	return req
+}
+
 // Insert implementation of MigrationRequest
 func (r *MigrationRequest) Insert(tx *sql.Tx) error {
 	var tid int64

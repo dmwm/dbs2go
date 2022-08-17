@@ -34,18 +34,21 @@ from underlying DB backend on periodic basis
     migration server settings (by default 3 times)
   - 4 migration request is already exist in DB, i.e. the requested block or
     dataset is already found in database
+  - 5 migration request is queued, i.e. initially submitted by a client
   - 9 migration request termindated, this can happen in two scenarios
     - migration request has been cancelled explicitly by user
     - migration request failed N times and will no longer be retried
       automatically
 The migration request goes throught the followin cycle:
+(using notations of Go-based server, see
+[DBS Migrate code](https://github.com/dmwm/dbs2go/blob/master/dbs/migrate.go)
 ```
-status change:
-0 -> 1, request in progress
-1 -> 2, request is completed successfully
-1 -> 3, and if failed 3->1
-1 -> 4, if request is alaready in DB
-1 -> 9, request is terminated
+QUEUED -> PENDING (5 -> 0), request is accepted for processing
+PENDING -> IN PROGRESS (0 -> 1), request is in progress by DBS migration server
+IN PROGRESS -> COMPLETED (1 -> 2), request is completed successfully
+IN PROGRESS -> FAILED (1 -> 3), request failed but can be retried
+IN PROGRESS -> EXIST_IN_DB (1 -> 4), request is alaready in DB
+IN PROGRESS -> (Terminally FAILED) (1 -> 9), request is terminated after all retries
 ```
 
 ### Examples
