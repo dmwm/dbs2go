@@ -176,6 +176,24 @@ test-migration:
 	DBS_DB_PATH_2=/tmp/dbs-two.db \
 	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
 	go test -v -failfast -run IntMigration
+test-migration-requests:
+	cd test && rm -f /tmp/dbs-one.db && \
+	sqlite3 /tmp/dbs-one.db < ../static/schema/sqlite-schema.sql && \
+	echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1 && \
+	rm -f /tmp/dbs-two.db && \
+	sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
+	echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
+	DBS_API_PARAMETERS_FILE=../static/parameters.json \
+	DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
+	DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json \
+	DBS_DB_FILE_1=./dbfile_1 \
+	DBS_DB_FILE_2=./dbfile_2 \
+	DBS_DB_PATH_1=/tmp/dbs-one.db \
+	DBS_DB_PATH_2=/tmp/dbs-two.db \
+	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
+	MIGRATION_REQUESTS_PATH=./data/migration/requests \
+	go test -v -failfast -run MigrationRequests
 bench:
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \

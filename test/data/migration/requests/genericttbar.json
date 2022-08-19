@@ -1,0 +1,4 @@
+{
+    "migration_url": "https://cmsweb-testbed.cern.ch/dbs/int/global/DBSReader",
+    "migration_input": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/AODSIM"
+}

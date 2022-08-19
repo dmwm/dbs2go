@@ -39,7 +39,7 @@ migrate.json
 migration.json
 test/data/dbsdata
 .env
-.vscode
+*.tmp
 test-pids
 
 # custom development files

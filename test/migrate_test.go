@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/utils"
@@ -382,5 +385,121 @@ func TestMigrateRemove(t *testing.T) {
 	}
 	if origStatusRecords <= len(statusRecords) {
 		t.Fatalf("wrong number of migration records did not reduced orig status records %d, remooved records %d, new set of status records %d", origStatusRecords, len(removeRecords), len(statusRecords))
+	}
+}
+
+// MigrationRequest is the struct for migration request POST body
+type MigrationRequest struct {
+	MigrationURL   string `json:"migration_url"`
+	MigrationInput string `json:"migration_input"`
+}
+
+// MigrationStatus is the struct returned when doing a GET on the /status endpoint
+type MigrationStatus struct {
+	CreateBy             string `json:"create_by"`
+	CreationDate         int64  `json:"creation_date"`
+	LastModificationDate int64  `json:"last_modification_date"`
+	LastModifiedBy       string `json:"last_modified_by"`
+	MigrationInput       string `json:"migration_input"`
+	MigrationRequestID   int    `json:"migration_request_id"`
+	MigrationStatus      int    `json:"migration_status"`
+	MigrationURL         string `json:"migration_url"`
+	RetryCount           int    `json:"retry_count"`
+}
+
+// TestMigrationRequests test migration requests located in MIGRATION_REQUESTS_PATH
+func TestMigrationRequests(t *testing.T) {
+	requestsPath := os.Getenv("MIGRATION_REQUESTS_PATH")
+	if requestsPath == "" {
+		log.Fatal("MIGRATION_REQUESTS_PATH not defined")
+	}
+
+	var matches []string
+	err := filepath.Walk(requestsPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if matched, err := filepath.Match("*.json", filepath.Base(path)); err != nil {
+			return err
+		} else if matched {
+			matches = append(matches, path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, m := range matches {
+		t.Run(filepath.Base(m), func(t *testing.T) {
+			fmt.Printf("%v\n", m)
+			data, err := os.ReadFile(m)
+			if err != nil {
+				t.Fatalf("File: %v, Error: %v\n", m, err)
+			}
+
+			// Load and verify the json data
+			var migReq MigrationRequest
+			err = json.Unmarshal(data, &migReq)
+			if err != nil {
+				t.Fatal("Failed to unmarshal request")
+			}
+
+			body, err := json.Marshal(migReq)
+			if err != nil {
+				t.Fatalf("Failed to marshal json")
+			}
+			resp, err := http.Post("http://localhost:9898/dbs2go/submit", "application/json", bytes.NewBuffer(body))
+			if err != nil {
+				t.Fatalf("HTTP Request Error: %v\n", err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				t.Fatalf("Not Status OK: %v", resp.StatusCode)
+			}
+
+			var d []dbs.MigrationReport
+			err = json.NewDecoder(resp.Body).Decode(&d)
+			if err != nil {
+				t.Fatalf("Failed to decode body, %v", err)
+			}
+
+			fmt.Printf("%+v\n", d)
+
+			// Check the status of the migration request
+			var requestStatus [10]int
+			requestStatus[0] = len(d)
+			for requestStatus[0] != 0 || requestStatus[1] != 0 {
+				var migrationStatus []MigrationStatus
+
+				requestStatus = [10]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+				resp, err := http.Get("http://localhost:9898/dbs2go/status")
+				if err != nil {
+					t.Fatalf("HTTP Request Error: %v\n", err)
+				}
+				defer resp.Body.Close()
+
+				err = json.NewDecoder(resp.Body).Decode(&migrationStatus)
+				if err != nil {
+					t.Fatalf("Failed to decode body, %v", err)
+				}
+
+				for _, m := range migrationStatus {
+					requestStatus[m.MigrationStatus] += 1
+				}
+				fmt.Printf("Number of Requests: %d, Successful: %d, Statuses: %v\n", len(d), requestStatus[2], requestStatus)
+				time.Sleep(2 * time.Second)
+			}
+
+			if requestStatus[9] > 0 {
+				t.Fatalf("%d requests failed\n", requestStatus[9])
+			}
+		})
 	}
 }
