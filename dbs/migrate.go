@@ -556,7 +556,7 @@ func alreadyQueued(input string) error {
 		return err
 	}
 	if mid != 0 {
-		msg := fmt.Sprintf("migration request %s is already in queue with id=%d", input, mid)
+		msg := fmt.Sprintf("migration request %s is already exist in DB with id=%d", input, mid)
 		return errors.New(msg)
 	}
 	return nil
