@@ -1428,6 +1428,12 @@ func (a *API) RemoveMigration() error {
 
 	if tid > 0 {
 		stm = getSQL("remove_migration_requests")
+		stm = CleanStatement(stm)
+		if utils.VERBOSE > 0 {
+			var args []interface{}
+			args = append(args, rec.MIGRATION_REQUEST_ID)
+			utils.PrintSQL(stm, args, "execute")
+		}
 		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID)
 		if err != nil {
 			msg := fmt.Sprintf("fail to execute SQL statement '%s'", stm)
