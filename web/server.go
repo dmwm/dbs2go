@@ -500,7 +500,7 @@ func Server(configFile string) {
 	}
 
 	migDone := make(chan bool)
-	clpDone := make(chan bool)
+	//     clpDone := make(chan bool)
 	if Config.ServerType == "DBSMigration" {
 		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
 		//go dbs.MigrationCleanupServer(dbs.MigrationCleanupInterval, dbs.MigrationCleanupOffset, clpDone)
@@ -525,9 +525,9 @@ func Server(configFile string) {
 		migDone <- true
 	}
 	// send notification to stop cleanup migration server
-	if Config.ServerType == "DBSMigration" {
-		clpDone <- true
-	}
+	//     if Config.ServerType == "DBSMigration" {
+	//         clpDone <- true
+	//     }
 
 	// add extra timeout for shutdown service stuff
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
