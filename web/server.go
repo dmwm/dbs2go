@@ -503,7 +503,7 @@ func Server(configFile string) {
 	clpDone := make(chan bool)
 	if Config.ServerType == "DBSMigration" {
 		go dbs.MigrationServer(dbs.MigrationServerInterval, dbs.MigrationProcessTimeout, migDone)
-		go dbs.MigrationCleanupServer(dbs.MigrationCleanupInterval, dbs.MigrationCleanupOffset, clpDone)
+		//go dbs.MigrationCleanupServer(dbs.MigrationCleanupInterval, dbs.MigrationCleanupOffset, clpDone)
 	}
 
 	// properly stop our HTTP and Migration Servers
