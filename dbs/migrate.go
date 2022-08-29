@@ -1001,6 +1001,7 @@ func (a *API) ProcessMigration() {
 	}
 	// if status of migration block is completed then we update status of migration request
 	if bid != 0 && bStatus == int64(COMPLETED) {
+		log.Printf("migration request %+v has block id=%d, status=%d input=%s is marked as completed", mrec, bid, bStatus, migInput)
 		status = COMPLETED
 		updateMigrationStatus(mrec, COMPLETED)
 		return
