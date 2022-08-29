@@ -712,7 +712,7 @@ func StartMigrationRequest(rec MigrationRequest) {
 		if err != nil {
 			ch <- fmt.Sprintf("fail to start migration request %v, error %v", rec, err)
 		} else {
-			ch <- fmt.Sprintf("finished %v with %d migration requests", rec, len(reports))
+			ch <- fmt.Sprintf("finished %+v with %d migration requests", rec, len(reports))
 		}
 	}(ctx, ch)
 	select {
@@ -796,6 +796,7 @@ func startMigrationRequest(req MigrationRequest) ([]MigrationReport, error) {
 
 	// if no migration blocks found to process return immediately
 	if len(migBlocks) == 0 {
+		status = int64(EXIST_IN_DB)
 		req.MIGRATION_STATUS = EXIST_IN_DB
 		updateMigrationStatus(req, EXIST_IN_DB)
 		msg = fmt.Sprintf("%s is already fulfilled, no blocks found for migration", mstr)
@@ -1008,6 +1009,10 @@ func (a *API) ProcessMigration() {
 					return
 				}
 			}
+		} else {
+			if utils.VERBOSE > 0 {
+				log.Printf("unable to get blocks from %s for migration input %s, error %v", localhost, migInput, err)
+			}
 		}
 		status = FAILED
 		updateMigrationStatus(mrec, FAILED)
@@ -1082,6 +1087,7 @@ func (a *API) ProcessMigration() {
 		if utils.VERBOSE > 0 {
 			log.Println("insert block dump record failed with", err)
 		}
+		status = FAILED
 		updateMigrationStatus(mrec, FAILED)
 	} else {
 		status = COMPLETED
@@ -1267,6 +1273,7 @@ func (a *API) processMigration(ch chan<- bool, status *int64, mrec MigrationRequ
 		if utils.VERBOSE > 0 {
 			log.Println("insert block dump record failed with", err)
 		}
+		*status = FAILED
 		updateMigrationStatus(mrec, FAILED)
 	} else {
 		*status = COMPLETED
@@ -1286,12 +1293,12 @@ func migrationHost(mid int64) (string, error) {
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
-		return "", Error(err, QueryErrorCode, "", "dbs.migrate.updateMigrationStatus")
+		return "", Error(err, QueryErrorCode, "", "dbs.migrate.migrationHost")
 	}
 	migServer := msrv.String
 	hostname, err := os.Hostname()
 	if err != nil {
-		return "", Error(err, GenericErrorCode, "", "dbs.migrate.updateMigrationStatus")
+		return "", Error(err, GenericErrorCode, "", "dbs.migrate.migrationHost")
 	}
 
 	// on k8s if migServer differ from hostname we need to check if such pod exists
@@ -1302,7 +1309,7 @@ func migrationHost(mid int64) (string, error) {
 		if migServer != "" && migServer != hostname {
 			msg := fmt.Sprintf("migration request %d is already taken by %s", mid, migServer)
 			log.Println(msg)
-			return "", Error(ConcurrencyErr, MigrationErrorCode, msg, "dbs.migrate.updateMigrationStatus")
+			return "", Error(ConcurrencyErr, MigrationErrorCode, msg, "dbs.migrate.migrationHost")
 
 		}
 	}
@@ -1361,6 +1368,7 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 		args = append(args, mid)
 		utils.PrintSQL(stm, args, "execute update migration status query")
 	}
+	log.Printf("update migration request %d to status %d", mid, status)
 
 	_, err = tx.Exec(stm, status, retryCount, hostname, mid)
 	if err != nil {
