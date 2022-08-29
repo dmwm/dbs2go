@@ -1412,11 +1412,11 @@ func (a *API) RemoveMigration() error {
 	stm = CleanStatement(stm)
 	if utils.VERBOSE > 0 {
 		var args []interface{}
-		args = append(args, rec.MIGRATION_REQUEST_ID)
+		args = append(args, mid)
 		utils.PrintSQL(stm, args, "execute")
 	}
 	var tid float64
-	err = tx.QueryRow(stm, rec.MIGRATION_REQUEST_ID).Scan(&tid)
+	err = tx.QueryRow(stm, mid).Scan(&tid)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
@@ -1431,10 +1431,10 @@ func (a *API) RemoveMigration() error {
 		stm = CleanStatement(stm)
 		if utils.VERBOSE > 0 {
 			var args []interface{}
-			args = append(args, rec.MIGRATION_REQUEST_ID)
+			args = append(args, mid)
 			utils.PrintSQL(stm, args, "execute")
 		}
-		_, err = tx.Exec(stm, rec.MIGRATION_REQUEST_ID)
+		_, err = tx.Exec(stm, mid)
 		if err != nil {
 			msg := fmt.Sprintf("fail to execute SQL statement '%s'", stm)
 			if utils.VERBOSE > 0 {
@@ -1448,11 +1448,12 @@ func (a *API) RemoveMigration() error {
 			log.Println(msg, err)
 			return Error(err, CommitErrorCode, "", "dbs.migrate.RemoveMigration")
 		}
+		data := fmt.Sprintf("[{\"status\":\"success\",\"migration_request_id\":%d}]", mid)
+		a.Writer.Write([]byte(data))
 		return nil
 	}
 	msg := fmt.Sprintf(
-		"unable to remove %v as it is either does not exists or its status is not failed",
-		rec.MIGRATION_REQUEST_ID)
+		"unable to remove %v as it is either does not exists or its status is not failed", mid)
 	return Error(InvalidRequestErr, InvalidRequestErrorCode, msg, "dbs.migrate.RemoveMigration")
 }
 
