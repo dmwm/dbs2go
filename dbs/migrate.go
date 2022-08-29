@@ -1000,7 +1000,7 @@ func (a *API) ProcessMigration() {
 		return
 	}
 	// if status of migration block is completed then we update status of migration request
-	if bid != 0 && bStatus == int64(COMPLETED) {
+	if bid != 0 && bStatus == int64(COMPLETED) && migInput == mrec.MIGRATION_INPUT {
 		log.Printf("migration request %+v has block id=%d, status=%d input=%s is marked as completed", mrec, bid, bStatus, migInput)
 		status = COMPLETED
 		updateMigrationStatus(mrec, COMPLETED)
