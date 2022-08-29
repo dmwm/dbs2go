@@ -77,13 +77,8 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				params["migration_request_id"] = r.MIGRATION_REQUEST_ID
 				api.Params = params
 				time0 := time.Now()
-				metrics := utils.ProcFSMetrics()
-				log.Printf("start new migration process with %+v metrics %+v", params, metrics)
 				api.ProcessMigration()
-				metrics = utils.ProcFSMetrics()
-				log.Printf(
-					"migration process %+v finished in %v metrics %+v",
-					params, time.Since(time0), metrics)
+				log.Printf("migration process %+v finished in %v", params, time.Since(time0))
 			}
 		}
 	}
