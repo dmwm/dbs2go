@@ -999,6 +999,12 @@ func (a *API) ProcessMigration() {
 		log.Printf("query='%s' args='%v' error=%v", stm, args, err)
 		return
 	}
+	// if status of migration block is completed then we update status of migration request
+	if bid != 0 && bStatus == int64(COMPLETED) {
+		status = COMPLETED
+		updateMigrationStatus(mrec, COMPLETED)
+		return
+	}
 
 	// check if our migration input is block name or dataset
 	if !strings.Contains(migInput, "#") {
