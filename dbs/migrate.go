@@ -884,8 +884,8 @@ func startMigrationRequest(req MigrationRequest) ([]MigrationReport, error) {
 		}
 		err = mrec.Insert(tx)
 		if err != nil {
-			msg = fmt.Sprintf("unable to insert MigrationBlocks record, error %v", err)
-			if utils.VERBOSE > 1 {
+			msg = fmt.Sprintf("%s unable to insert MigrationBlocks record %+v, error %v", mstr, mrec, err)
+			if utils.VERBOSE > 0 {
 				log.Println(msg)
 			}
 			return []MigrationReport{migrationReport(rec, msg, status, err)},
