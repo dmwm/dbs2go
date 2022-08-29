@@ -130,6 +130,7 @@ func (r *MigrationRequest) Decode(reader io.Reader) error {
 
 // MigrationRequests fetches migration requests from migration table
 func MigrationRequests(mid int64) ([]MigrationRequest, error) {
+	log.Println("process migration request", mid)
 	var records []MigrationRequest
 
 	// query MigrationRequest table and fetch all non-completed requests

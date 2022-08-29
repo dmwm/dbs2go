@@ -328,6 +328,7 @@ func Server(configFile string) {
 		if err == nil {
 			rotlogs := logging.RotateLogWriter{RotateLogs: rl}
 			log.SetOutput(rotlogs)
+			dbs.GlobalLog = &rotlogs
 		} else {
 			log.Println("ERROR: unable to get rotatelogs", err)
 		}

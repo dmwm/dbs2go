@@ -22,7 +22,11 @@ import (
 
 	"github.com/dmwm/dbs2go/utils"
 	validator "github.com/go-playground/validator/v10"
+	"github.com/vkuznet/auth-proxy-server/logging"
 )
+
+// GlobalLog represents global rorate log object
+var GlobalLog *logging.RotateLogWriter
 
 // API structure represents DBS API. Each API has reader (to read
 // HTTP POST payload), HTTP writer to write results back to client,
