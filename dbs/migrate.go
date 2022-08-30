@@ -701,10 +701,6 @@ func (a *API) SubmitMigration() error {
 // the code is based on the following example:
 // https://medium.com/geekculture/timeout-context-in-go-e88af0abd08d
 func StartMigrationRequest(rec MigrationRequest) {
-	// set GlobalLog if it is set
-	if GlobalLog != nil {
-		log.SetOutput(GlobalLog)
-	}
 	// setup context with timeout
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
@@ -1379,7 +1375,6 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 		args = append(args, mid)
 		utils.PrintSQL(stm, args, "execute update migration status query")
 	}
-	log.Printf("update migration request %d to status %d", mid, status)
 
 	_, err = tx.Exec(stm, status, retryCount, hostname, mid)
 	if err != nil {
