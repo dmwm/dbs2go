@@ -3,6 +3,7 @@ package dbs
 import (
 	"database/sql"
 	"log"
+	"sync/atomic"
 	"time"
 
 	"github.com/dmwm/dbs2go/utils"
@@ -25,6 +26,9 @@ var MigrationCleanupOffset int64
 
 // MigrationRetries specifies total number of migration retries
 var MigrationRetries int64
+
+// TotalMigrationRequests counts total number of migration requests processed by this server
+var TotalMigrationRequests uint64
 
 // MigrationServer represent migration server.
 // it accepts migration process timeout used by ProcessMigration API and
@@ -77,6 +81,7 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				params["migration_request_id"] = r.MIGRATION_REQUEST_ID
 				api.Params = params
 				time0 := time.Now()
+				atomic.AddUint64(&TotalMigrationRequests, 1)
 				api.ProcessMigration()
 				log.Printf("migration process %+v finished in %v", params, time.Since(time0))
 			}

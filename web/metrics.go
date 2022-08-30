@@ -115,6 +115,16 @@ type Metrics struct {
 	DBStats            sql.DBStats             `json:"dbstats"`            // metrics about database
 	MaxDBConnections   uint64                  `json:"maxDBConnections"`   // max number of DB connections
 	MaxIdleConnections uint64                  `json:"maxIdleConnections"` // max number of idle DB connections
+
+	// Migration server metrics
+	MigrationRequests   uint64 `json:"migrationRequests"`   // total number of migration requests across all services
+	MigrationPending    uint64 `json:"migrationPending"`    // total number of pending migration requests across all services
+	MigrationInProgress uint64 `json:"migrationInProgress"` // total number of in progress migration requests across all services
+	MigrationFailed     uint64 `json:"migrationFailed"`     // total number of failed migration requests across all services
+	MigrationTermFailed uint64 `json:"migrationTermFailed"` // total number of term failed migration requests across all services
+	MigrationCompleted  uint64 `json:"migrationCompleted"`  // total number of completed migration requests across all services
+	MigrationQueued     uint64 `json:"migrationQueued"`     // total number of queued migration requests across all services
+	MigrationExistInDB  uint64 `json:"migrationExistInDB"`  // total number of exist in db migration requests across all services
 }
 
 func metrics() Metrics {
@@ -175,10 +185,16 @@ func metrics() Metrics {
 	metrics.RPSLogical = float64(rstat.NumLogicalCores-NumLogicalCores) / lapse
 	metrics.RPSPhysical = float64(rstat.NumPhysicalCores-NumPhysicalCores) / lapse
 
-	// update time stamp
-	MetricsLastUpdateTime = time.Now()
+	// migration server metrics
+	metrics.MigrationRequests = dbs.TotalMigrationRequests
+	metrics.MigrationPending = dbs.TotalPending
+	metrics.MigrationInProgress = dbs.TotalInProgress
+	metrics.MigrationFailed = dbs.TotalFailed
+	metrics.MigrationTermFailed = dbs.TotalTermFailed
+	metrics.MigrationCompleted = dbs.TotalCompleted
+	metrics.MigrationQueued = dbs.TotalQueued
+	metrics.MigrationExistInDB = dbs.TotalExistInDB
 
-	// update request stats metrics
 	rstat.Update()
 
 	return metrics
@@ -392,6 +408,38 @@ func promMetrics(prefix string) string {
 	out += fmt.Sprintf("# TYPE %s_max_lifetime_closed counter\n", prefix)
 	out += fmt.Sprintf("%s_max_lifetime_closed %v\n", prefix, data.DBStats.MaxLifetimeClosed)
 
+	// migration server metrics
+	out += fmt.Sprintf("# HELP %s_migration_requests reports total number of migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_migration_requests counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_requests %v\n", prefix, data.MigrationRequests)
+
+	out += fmt.Sprintf("# HELP %s_pending reports total number of pending migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_pending counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_pending %v\n", prefix, data.MigrationPending)
+
+	out += fmt.Sprintf("# HELP %s_in_progress reports total number of in progress migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_in_progress counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_in_progress %v\n", prefix, data.MigrationInProgress)
+
+	out += fmt.Sprintf("# HELP %s_failed reports total number of failed migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_failed counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_failed %v\n", prefix, data.MigrationFailed)
+
+	out += fmt.Sprintf("# HELP %s_term_failed reports total number of term failed migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_term_failed counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_term_failed %v\n", prefix, data.MigrationTermFailed)
+
+	out += fmt.Sprintf("# HELP %s_completed reports total number of completed migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_completed counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_completed %v\n", prefix, data.MigrationCompleted)
+
+	out += fmt.Sprintf("# HELP %s_queued reports total number of queued migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_queued counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_queued %v\n", prefix, data.MigrationQueued)
+
+	out += fmt.Sprintf("# HELP %s_exist_in_db reports total number of exist in db migration requests\n", prefix)
+	out += fmt.Sprintf("# TYPE %s_exist_in_db counter\n", prefix)
+	out += fmt.Sprintf("%s_migration_exist_in_db %v\n", prefix, data.MigrationExistInDB)
 	return out
 }
 

@@ -28,6 +28,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/dmwm/dbs2go/utils"
@@ -62,6 +63,27 @@ DBS migration status codes (in sync with old python migration server):
         are only allowed changes for working through migration.
         FAILED -> IN PROGRESS (3 -> 1) is allowed for retrying and retry count +1.
 */
+
+// TotalPending represents total number pending migration requests
+var TotalPending uint64
+
+// TotalInProgress represents total number in progress migration requests
+var TotalInProgress uint64
+
+// TotalCompleted represents total number of completed migration requests
+var TotalCompleted uint64
+
+// TotalFailed represents total number of failed migration requests
+var TotalFailed uint64
+
+// TotalTermFailed represents total number of terminally failed migration requests
+var TotalTermFailed uint64
+
+// TotalExistInDB represents total number of exist in db migration requests
+var TotalExistInDB uint64
+
+// TotalQueued represents total number of queued migration requests
+var TotalQueued uint64
 
 // MigrationAsyncTimeout defines timeout of asynchrounous migration request process
 var MigrationAsyncTimeout int
@@ -1325,10 +1347,31 @@ func migrationHost(mid int64) (string, error) {
 	return hostname, nil
 }
 
+// updateMigrationStatusMetrics updates metrics about migration statuses
+func updateMigrationStatusMetrics(mrec MigrationRequest) {
+	status := mrec.MIGRATION_STATUS
+	if status == IN_PROGRESS {
+		atomic.AddUint64(&TotalInProgress, 1)
+	} else if status == PENDING {
+		atomic.AddUint64(&TotalPending, 1)
+	} else if status == COMPLETED {
+		atomic.AddUint64(&TotalCompleted, 1)
+	} else if status == FAILED {
+		atomic.AddUint64(&TotalFailed, 1)
+	} else if status == TERM_FAILED {
+		atomic.AddUint64(&TotalTermFailed, 1)
+	} else if status == EXIST_IN_DB {
+		atomic.AddUint64(&TotalExistInDB, 1)
+	} else if status == QUEUED {
+		atomic.AddUint64(&TotalQueued, 1)
+	}
+}
+
 // updateMigrationStatus updates migration status and increment retry count of
 // migration record.
 func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	log.Printf("update migration request %d to status %d", mrec.MIGRATION_REQUEST_ID, status)
+	updateMigrationStatusMetrics(mrec)
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
