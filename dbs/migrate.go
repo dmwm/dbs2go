@@ -1348,8 +1348,7 @@ func migrationHost(mid int64) (string, error) {
 }
 
 // updateMigrationStatusMetrics updates metrics about migration statuses
-func updateMigrationStatusMetrics(mrec MigrationRequest) {
-	status := mrec.MIGRATION_STATUS
+func updateMigrationStatusMetrics(mrec MigrationRequest, status int) {
 	if status == IN_PROGRESS {
 		atomic.AddUint64(&TotalInProgress, 1)
 	} else if status == PENDING {
@@ -1371,7 +1370,6 @@ func updateMigrationStatusMetrics(mrec MigrationRequest) {
 // migration record.
 func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	log.Printf("update migration request %d to status %d", mrec.MIGRATION_REQUEST_ID, status)
-	updateMigrationStatusMetrics(mrec)
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
 	stm, err := LoadTemplateSQL("update_migration_status", tmplData)
@@ -1410,6 +1408,7 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 			status = TERM_FAILED
 		}
 	}
+	updateMigrationStatusMetrics(mrec, status)
 	if utils.VERBOSE > 0 {
 		var args []interface{}
 		args = append(args, status)
