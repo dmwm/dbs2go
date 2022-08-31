@@ -867,7 +867,7 @@ func startMigrationRequest(req MigrationRequest) ([]MigrationReport, error) {
 		}
 		// we skip insert for migration request input since it is inserted upstream
 		if blk != input {
-			updateMigrationStatusStatus(rec, PENDING)
+			updateMigrationStatusMetrics(rec, PENDING)
 			err = rec.Insert(tx)
 			if err != nil {
 				msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
