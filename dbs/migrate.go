@@ -660,6 +660,7 @@ func (a *API) SubmitMigration() error {
 		LAST_MODIFIED_BY:       a.CreateBy,
 		LAST_MODIFICATION_DATE: tstamp,
 	}
+	updateMigrationStatusMetrics(rec, QUEUED)
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("unable to unmarshal migration request", err)
@@ -866,6 +867,7 @@ func startMigrationRequest(req MigrationRequest) ([]MigrationReport, error) {
 		}
 		// we skip insert for migration request input since it is inserted upstream
 		if blk != input {
+			updateMigrationStatusStatus(rec, PENDING)
 			err = rec.Insert(tx)
 			if err != nil {
 				msg = fmt.Sprintf("unable to insert MigrationRequest record %+v, error %v", rec, err)
@@ -1401,6 +1403,7 @@ func updateMigrationStatus(mrec MigrationRequest, status int) error {
 	// this will allow migration service to pick up failed migration request
 	// otherwise we permanently terminate the migration request and set its status to TERM_FAILED
 	if status == FAILED {
+		updateMigrationStatusMetrics(mrec, FAILED)
 		if retryCount <= MigrationRetries {
 			retryCount += 1
 			status = IN_PROGRESS
