@@ -63,7 +63,7 @@ Post migration request:
 cat > m.json << EOF
 {
     "migration_url": "https://.../dbs/prod/global/DBSReader",
-    "migraton_input": "/a/b/c#123"
+    "migration_input": "/a/b/c#123"
 }
 EOF
 
