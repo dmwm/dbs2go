@@ -1118,12 +1118,16 @@ func (a *API) ProcessMigration() {
 		if utils.VERBOSE > 0 {
 			log.Println("insert block dump record failed with", err)
 		}
-		status = FAILED
-		updateMigrationStatus(mrec, FAILED)
+		serr := fmt.Sprintf("%v", err)
+		if strings.Contains(serr, "Data already exist in DBS") {
+			status = EXIST_IN_DB
+		} else {
+			status = FAILED
+		}
 	} else {
 		status = COMPLETED
-		updateMigrationStatus(mrec, COMPLETED)
 	}
+	updateMigrationStatus(mrec, status)
 	log.Printf("updated migration request %v with status %v", mid, status)
 }
 
