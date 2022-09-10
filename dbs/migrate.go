@@ -1354,7 +1354,7 @@ func migrationHost(mid int64) (string, error) {
 }
 
 // updateMigrationStatusMetrics updates metrics about migration statuses
-func updateMigrationStatusMetrics(mrec MigrationRequest, status int) {
+func updateMigrationStatusMetrics(mrec MigrationRequest, status int64) {
 	if status == IN_PROGRESS {
 		atomic.AddUint64(&TotalInProgress, 1)
 	} else if status == PENDING {
@@ -1374,7 +1374,7 @@ func updateMigrationStatusMetrics(mrec MigrationRequest, status int) {
 
 // updateMigrationStatus updates migration status and increment retry count of
 // migration record.
-func updateMigrationStatus(mrec MigrationRequest, status int) error {
+func updateMigrationStatus(mrec MigrationRequest, status int64) error {
 	log.Printf("update migration request %d to status %d", mrec.MIGRATION_REQUEST_ID, status)
 	tmplData := make(Record)
 	tmplData["Owner"] = DBOWNER
