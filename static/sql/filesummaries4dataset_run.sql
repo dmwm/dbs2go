@@ -8,6 +8,33 @@ select
   f.FILE_ID in (select fl.file_id from {{.Owner}}.file_lumis fl where whererun)
  ) as num_file,
 
+ (select max(f.last_modification_date) from {{.Owner}}.files f
+  join {{.Owner}}.datasets d on d.DATASET_ID = f.dataset_id
+{{if .Valid}}
+  JOIN {{.Owner}}.DATASET_ACCESS_TYPES DT ON  DT.DATASET_ACCESS_TYPE_ID = D.DATASET_ACCESS_TYPE_ID
+{{end}}
+  where d.dataset=:dataset wheresql_isFileValid and
+  f.FILE_ID in (select fl.file_id from {{.Owner}}.file_lumis fl where whererun)
+ ) as max_ldate,
+
+ (select median(f.creation_date) from {{.Owner}}.files f
+  join {{.Owner}}.datasets d on d.DATASET_ID = f.dataset_id
+{{if .Valid}}
+  JOIN {{.Owner}}.DATASET_ACCESS_TYPES DT ON  DT.DATASET_ACCESS_TYPE_ID = D.DATASET_ACCESS_TYPE_ID
+{{end}}
+  where d.dataset=:dataset wheresql_isFileValid and
+  f.FILE_ID in (select fl.file_id from {{.Owner}}.file_lumis fl where whererun)
+ ) as median_cdate,
+
+ (select median(f.last_modification_date) from {{.Owner}}.files f
+  join {{.Owner}}.datasets d on d.DATASET_ID = f.dataset_id
+{{if .Valid}}
+  JOIN {{.Owner}}.DATASET_ACCESS_TYPES DT ON  DT.DATASET_ACCESS_TYPE_ID = D.DATASET_ACCESS_TYPE_ID
+{{end}}
+  where d.dataset=:dataset wheresql_isFileValid and
+  f.FILE_ID in (select fl.file_id from {{.Owner}}.file_lumis fl where whererun)
+ ) as median_ldate,
+
  nvl((select sum(f.event_count) event_count from {{.Owner}}.files f
   join {{.Owner}}.datasets d on d.DATASET_ID = f.dataset_id
 {{if .Valid}}

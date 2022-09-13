@@ -39,48 +39,43 @@ func (a *API) FileSummaries() error {
 	blockName := getValues(a.Params, "block_name")
 	if len(blockName) == 1 {
 		_, b := OperatorValue(blockName[0])
-		args = append(args, b, b, b, b, b) // pass 5 block values
+		args = append(args, b, b, b, b, b, b, b, b) // pass 8 block values used in sql
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4block_run", tmpl)
 			if e != nil {
 				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
-			//             stm += getSQL("filesummaries4block_run")
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4block_norun", tmpl)
 			if e != nil {
 				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
-			//             stm += getSQL("filesummaries4block_norun")
 		}
 	}
 
 	dataset := getValues(a.Params, "dataset")
 	if len(dataset) == 1 {
 		_, d := OperatorValue(dataset[0])
-		args = append(args, d, d, d, d, d) // pass 5 dataset values
+		args = append(args, d, d, d, d, d, d, d, d) // pass 8 dataset values used in sql
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4dataset_run", tmpl)
 			if e != nil {
 				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
-			//             stm += getSQL("filesummaries4dataset_run")
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4dataset_norun", tmpl)
 			if e != nil {
 				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
-			//             stm += getSQL("filesummaries4dataset_norun")
 		}
 	}
 	// replace whererun in stm
 	stm = strings.Replace(stm, "whererun", whererun, -1)
 	stm = strings.Replace(stm, "wheresql_isFileValid", wheresqlIsFileValid, -1)
-	//     stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
