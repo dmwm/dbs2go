@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd ..
-
 echo "building dbs2go"
 make build
 
@@ -49,5 +47,3 @@ sleep 1
 echo $! >> ./test-pids
 
 sleep 1
-
-cd test

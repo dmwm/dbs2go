@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/dmwm/dbs2go/dbs"
@@ -54,6 +55,11 @@ type migrationCountResponse struct {
 
 // TestMigration tests DBS Migration process
 func TestIntMigration(t *testing.T) {
+
+	t.Cleanup(func() {
+		exec.Command("pkill", "dbs2go").Output()
+	})
+
 	// start DBSReader server from which we will read the data for migration process
 	base1 := "dbs-one-reader"
 	srv1 := "http://localhost:8989"

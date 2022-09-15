@@ -40,7 +40,7 @@ clean:
 
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
 
-test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration bench
+test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration test-migration-requests bench
 
 test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reader-pos test-lexicon-reader-neg
 
@@ -164,7 +164,9 @@ test-migration:
 	rm -f /tmp/dbs-two.db && \
 	sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
 	echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
+	cd .. && \
 	./bin/start_test_migration && \
+	cd test && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
@@ -183,6 +185,9 @@ test-migration-requests:
 	# rm -f /tmp/dbs-two.db && \
 	# sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
 	# echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
+	cd .. && \
+	./bin/start_test_migration && \
+	cd test && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
