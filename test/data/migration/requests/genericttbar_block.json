@@ -1,0 +1,402 @@
+{
+  "dataset_conf_list": [
+    {
+      "release_version": "CMSSW_9_2_6",
+      "pset_hash": "GIBBERISH",
+      "pset_name": "",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "91X_mcRun1_realistic_v2",
+      "create_by": "wmagent@vocms0308.cern.ch",
+      "creation_date": 1501192514
+    }
+  ],
+  "file_conf_list": [
+    {
+      "release_version": "CMSSW_9_2_6",
+      "pset_hash": "GIBBERISH",
+      "pset_name": "",
+      "lfn": "/store/mc/HC/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/9A4871F8-DF76-E711-89C2-FA163E06E0D4.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "91X_mcRun1_realistic_v2",
+      "create_by": "wmagent@vocms0308.cern.ch",
+      "creation_date": 1501192514
+    }
+  ],
+  "files": [
+    {
+      "check_sum": "4172180309",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 143,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 209,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 280,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 510,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 585,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 629,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 765,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 770,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 868,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 910,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 912,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 940,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 945,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 954,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 957,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 960,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1357,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1402,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1517,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1648,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1689,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2078,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2107,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2109,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2157,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2173,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2193,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2199,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2219,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2247,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2248,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2253,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2259,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2267,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2393,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2466,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2471,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2473,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2531,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2534,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2542,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2543,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2549,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2556,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2559,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2593,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2600,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2612,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2615,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2633,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2642,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2652,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2961,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2974,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2979,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2997,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 3205,
+          "run_num": 1,
+          "event_count": 300
+        }
+      ],
+      "adler32": "e508e22d",
+      "file_size": 1957402486,
+      "event_count": 17100,
+      "file_type": "EDM",
+      "last_modified_by": "qnguyen",
+      "last_modification_date": 1501669009,
+      "logical_file_name": "/store/mc/HC/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/9A4871F8-DF76-E711-89C2-FA163E06E0D4.root",
+      "md5": "",
+      "auto_cross_section": 0,
+      "is_file_valid": 1
+    }
+  ],
+  "processing_era": {
+    "create_by": "WMAgent",
+    "creation_date": 0,
+    "processing_version": 2,
+    "description": ""
+  },
+  "primds": {
+    "primary_ds_id": 6930466,
+    "create_by": "/DC=org/DC=doegrids/OU=People/CN=Alan Malta Rodrigues 4861",
+    "primary_ds_type": "mc",
+    "primary_ds_name": "GenericTTbar",
+    "creation_date": 1338750774
+  },
+  "dataset": {
+    "dataset_id": 13428942,
+    "create_by": "wmagent@vocms0308.cern.ch",
+    "creation_date": 1501610387,
+    "physics_group_name": "NoGroup",
+    "dataset_access_type": "VALID",
+    "data_tier_name": "AODSIM",
+    "last_modified_by": "qnguyen",
+    "processed_ds_name": "HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2",
+    "xtcrosssection": 0,
+    "last_modification_date": 1501669009,
+    "dataset": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/AODSIM",
+    "prep_id": "CMSSW_9_2_2__prod_run1-1497042025-ProdTTbar"
+  },
+  "acquisition_era": {
+    "acquisition_era_name": "HC",
+    "start_date": 123456789,
+    "creation_date": 0,
+    "end_date": 0,
+    "create_by": "",
+    "description": ""
+  },
+  "block": {
+    "block_id": 17787215,
+    "dataset_id": 13428942,
+    "create_by": "wmagent@vocms0308.cern.ch",
+    "creation_date": 1501610394,
+    "open_for_writing": 0,
+    "block_name": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/AODSIM#3517e1b6-76e3-11e7-a0c8-02163e00d7b3",
+    "file_count": 43,
+    "origin_site_name": "T2_CH_CERN",
+    "block_size": 108723314200,
+    "last_modified_by": "wmagent@vocms0308.cern.ch",
+    "last_modification_date": 1501610394
+  },
+  "file_parent_list": [
+    {
+      "this_logical_file_name": "/store/mc/HC/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/9A4871F8-DF76-E711-89C2-FA163E06E0D4.root",
+      "parent_logical_file_name": "/store/mc/HC/GenericTTbar/GEN-SIM-RAW/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/2A1AFFE0-D076-E711-A057-FA163E181E37.root"
+    },
+    {
+      "this_logical_file_name": "/store/mc/HC/GenericTTbar/AODSIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/9A4871F8-DF76-E711-89C2-FA163E06E0D4.root",
+      "parent_logical_file_name": "/store/mc/HC/GenericTTbar/GEN-SIM-RAW/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/A61E3822-D176-E711-83D8-FA163E244D80.root"
+    }
+  ],
+  "block_parent_list": [
+    {
+      "parent_block_name": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM-RAW#eee338e4-76e2-11e7-a0c8-02163e00d7b3",
+      "this_block_name": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/AODSIM#3517e1b6-76e3-11e7-a0c8-02163e00d7b3"
+    }
+  ],
+  "dataset_parent_list": [
+    "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM-RAW"
+  ],
+  "ds_parent_list": [
+    {
+      "this_dataset_id": "",
+      "parent_dataset": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM-RAW"
+    }
+  ]
+}

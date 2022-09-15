@@ -17,7 +17,7 @@ import (
 )
 
 // TestMigrateGetBlocksInOrder
-func TestMigrateGeBlocksInOrder(t *testing.T) {
+func TestMigrateGetBlocksInOrder(t *testing.T) {
 	blocks := []string{"c", "b", "a"}
 	mblocks := []dbs.MigrationBlock{
 		dbs.MigrationBlock{Block: "a", Order: 1},
@@ -408,7 +408,7 @@ type MigrationStatus struct {
 }
 
 // TestMigrationRequests test migration requests located in MIGRATION_REQUESTS_PATH
-func TestMigrationRequests(t *testing.T) {
+func TestMigratinRequests(t *testing.T) {
 	requestsPath := os.Getenv("MIGRATION_REQUESTS_PATH")
 	if requestsPath == "" {
 		log.Fatal("MIGRATION_REQUESTS_PATH not defined")

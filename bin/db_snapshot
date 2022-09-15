@@ -27,12 +27,13 @@ echo $! >> ./test-pids
 sleep 1
 
 # Read and process migration requests from directory
-# REQUESTS=$PWD/test/data/migration/requests/*.json
-# for f in $REQUESTS
-# do
-#     echo "Processing $f file..."
-#     X509_USER_CERT=$X509_USER_CERT X509_USER_KEY=$X509_USER_KEY \
-#         curl -H "Content-Type: application/json" \
-#         http://localhost:9898/dbs2go/submit \
-#         -d@$f
-# done
+REQUESTS=$PWD/test/data/migration/requests/*.json
+for f in $REQUESTS
+do
+    echo "Processing $f file..."
+    X509_USER_CERT=$X509_USER_CERT X509_USER_KEY=$X509_USER_KEY \
+        curl -H "Content-Type: application/json" \
+        http://localhost:9898/dbs2go/submit \
+        -d@$f
+done
+#curl --cacert "$CA_CERT" --cert $X509_USER_CERT --key $X509_USER_KEY --header 'Content-Type: application/json' --verbose https://cmsweb.cern.ch/dbs/prod/global/DBSReader/blockdump?block_name=/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/AODSIM

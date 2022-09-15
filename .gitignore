@@ -45,3 +45,7 @@ test-pids
 # custom development files
 .devcontainer
 .vscode
+
+.globus
+instantclient*
+.DS_Store

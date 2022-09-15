@@ -1,13 +1,18 @@
 #!/bin/bash
 
+cd ..
+
 echo "building dbs2go"
 make build
 
-# create pid file
-rm ./test-pids
-touch ./test-pids
-
 pwd
+
+rm -f /tmp/dbs-one.db
+sqlite3 /tmp/dbs-one.db < ./static/schema/sqlite-schema.sql
+echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1
+rm -f /tmp/dbs-two.db
+sqlite3 /tmp/dbs-two.db < ./static/schema/sqlite-schema.sql
+echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2
 
 # Start dbs-one-reader
 ./dbs2go -config ./test/config/config_dbs_one_reader.json &
@@ -44,3 +49,5 @@ sleep 1
 echo $! >> ./test-pids
 
 sleep 1
+
+cd test
