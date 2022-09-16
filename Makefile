@@ -40,7 +40,7 @@ clean:
 
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
 
-test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration test-migration-requests bench
+test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration-requests test-migration bench
 
 test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reader-pos test-lexicon-reader-neg
 
@@ -165,6 +165,7 @@ test-migration:
 	sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
 	echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
 	cd .. && \
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_test_migration && \
 	cd test && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
@@ -178,14 +179,7 @@ test-migration:
 	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
 	go test -v -failfast -run IntMigration
 test-migration-requests:
-	cd test && \
-	# rm -f /tmp/dbs-one.db && \
-	# sqlite3 /tmp/dbs-one.db < ../static/schema/sqlite-schema.sql && \
-	# echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1 && \
-	# rm -f /tmp/dbs-two.db && \
-	# sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
-	# echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
-	cd .. && \
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_test_migration && \
 	cd test && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \

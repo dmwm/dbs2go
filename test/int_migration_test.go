@@ -111,7 +111,7 @@ func TestMigrationRequests2(t *testing.T) {
 	})
 
 	// delay for debugging
-	time.Sleep(1 * time.Minute)
+	// time.Sleep(1 * time.Minute)
 
 	t.Run("Test migration", func(t *testing.T) {
 		var d []dbs.MigrationReport
@@ -146,7 +146,7 @@ func TestMigrationRequests2(t *testing.T) {
 				t.Fatalf("Failed to decode body, %v", err)
 			}
 
-			fmt.Printf("%+v\n", d)
+			t.Logf("Migration Report: %v\n", d)
 		})
 
 		for _, migreq := range d {
@@ -174,13 +174,10 @@ func TestMigrationRequests2(t *testing.T) {
 					t.Logf("Response %v", resp)
 					t.Fatalf("Not Status OK: %v", resp.StatusCode)
 				}
-
-				fmt.Printf("%+v\n", resp.Body)
-
 			})
 		}
 
-		// get current time
+		// get current time for timeout
 		now := time.Now()
 		migTimeout := 3 * time.Minute
 
@@ -209,7 +206,7 @@ func TestMigrationRequests2(t *testing.T) {
 				for _, m := range migrationStatus {
 					requestStatus[m.MigrationStatus] += 1
 				}
-				fmt.Printf("Number of Requests: %d, Successful: %d, Statuses: %v\n", len(d), requestStatus[2], requestStatus)
+				fmt.Printf("Requests: %d, Successful: %d, Statuses: %v\n", len(migrationStatus), requestStatus[2], requestStatus)
 			}
 
 			if requestStatus[9] > 0 {

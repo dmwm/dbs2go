@@ -1,48 +1,55 @@
 #!/bin/bash
 
-echo "building dbs2go"
-make build
+echo $LD_LIBRARY_PATH
+echo $DYLD_LIBRARY_PATH
 
-pwd
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+# export PKG_CONFIG_PATH=$PWD
 
+echo Building dbs2go...
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH make build
+
+# Delete original dbfiles and databases and reinitializing them with the schema
 rm -f /tmp/dbs-one.db
 sqlite3 /tmp/dbs-one.db < ./static/schema/sqlite-schema.sql
-echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1
+echo sqlite3 /tmp/dbs-one.db sqlite > ./test/dbfile_1
 rm -f /tmp/dbs-two.db
 sqlite3 /tmp/dbs-two.db < ./static/schema/sqlite-schema.sql
-echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2
+echo sqlite3 /tmp/dbs-two.db sqlite > ./test/dbfile_2
 
-# Start dbs-one-reader
+# Starting DBS servers
+echo Starting dbs-one-reader
 ./dbs2go -config ./test/config/config_dbs_one_reader.json &
 echo $! >> ./test-pids
 
 sleep 1
 
-# Start dbs-one-writer
+echo Starting dbs-one-writer
 ./dbs2go -config ./test/config/config_dbs_one_writer.json &
 echo $! >> ./test-pids
 
 sleep 1
 
-# Start dbs-two-reader
+echo Starting dbs-two-reader
 ./dbs2go -config ./test/config/config_dbs_two_reader.json &
 echo $! >> ./test-pids
 
 sleep 1
 
-# Start dbs-two-writer
+echo Starting dbs-two-writer
 ./dbs2go -config ./test/config/config_dbs_two_writer.json &
 echo $! >> ./test-pids
 
 sleep 1
 
-# Start dbs-migrate
+echo Starting dbs-migrate
 ./dbs2go -config ./test/config/config_dbs_migrate.json &
 echo $! >> ./test-pids
 
 sleep 1
 
-# Start dbs-migration
+echo Starting dbs-migration
 ./dbs2go -config ./test/config/config_dbs_migration.json &
 echo $! >> ./test-pids
 
