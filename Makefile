@@ -177,7 +177,7 @@ test-migration:
 	DBS_DB_PATH_1=/tmp/dbs-one.db \
 	DBS_DB_PATH_2=/tmp/dbs-two.db \
 	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
-	go test -v -failfast -run IntMigration
+	go test -v -failfast -timeout 10m -run IntMigration
 test-migration-requests:
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_test_migration && \
@@ -189,7 +189,7 @@ test-migration-requests:
 	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
 	MIGRATION_BLOCKS_DATA_FILE=./data/migration/requests/genericttbar_blockdump.json \
 	MIGRATION_REQUESTS_PATH=./data/migration/requests \
-	go test -v -failfast -timeout 60m -run MigrationRequests
+	go test -v -failfast -timeout 10m -run MigrationRequests
 bench:
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
