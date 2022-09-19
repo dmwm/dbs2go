@@ -83,6 +83,17 @@ func (e *DBSError) Error() string {
 		sep += "nested "
 	}
 	return fmt.Sprintf(
+		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v",
+		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason)
+}
+
+// ErrorStacktrace function implements details of DBS error message and stacktrace
+func (e *DBSError) ErrorStacktrace() string {
+	sep := ": "
+	if strings.Contains(e.Reason, "DBSError") { // nested error
+		sep += "nested "
+	}
+	return fmt.Sprintf(
 		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v Stacktrace: %v",
 		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason, e.Stacktrace)
 }
