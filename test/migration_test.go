@@ -54,7 +54,7 @@ type migrationCountResponse struct {
 	Count int64 `json:"count"`
 }
 
-// TestMigration tests DBS Migration process
+// TestMigration tests DBS Migration for a single block
 func TestIntMigration(t *testing.T) {
 
 	t.Cleanup(func() {
@@ -661,7 +661,7 @@ func verifyBulkBlocksInsert(t *testing.T, server string, base string, isSecond b
 
 }
 
-// TestLocalMigrationRequests test local DBS Migration requests
+// TestLocalMigrationRequests test DBS Migration request that has parent blocks
 func TestMigrationRequests(t *testing.T) {
 	var GrandparentBulkBlocksData dbs.BulkBlocks
 	var ParentBulkBlocksData dbs.BulkBlocks
