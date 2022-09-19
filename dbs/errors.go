@@ -3,6 +3,7 @@ package dbs
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 )
 
@@ -68,10 +69,11 @@ const (
 
 // DBSError represents common structure for DBS errors
 type DBSError struct {
-	Reason   string `json:"reason"`   // error string
-	Message  string `json:"message"`  // additional message describing the issue
-	Function string `json:"function"` // DBS function
-	Code     int    `json:"code"`     // DBS error code
+	Reason     string `json:"reason"`     // error string
+	Message    string `json:"message"`    // additional message describing the issue
+	Function   string `json:"function"`   // DBS function
+	Code       int    `json:"code"`       // DBS error code
+	Stacktrace string `json:"stacktrace"` // Go stack trace
 }
 
 // Error function implements details of DBS error message
@@ -81,8 +83,8 @@ func (e *DBSError) Error() string {
 		sep += "nested "
 	}
 	return fmt.Sprintf(
-		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v",
-		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason)
+		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v Stacktrace: %v",
+		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason, e.Stacktrace)
 }
 
 func (e *DBSError) Explain() string {
@@ -155,10 +157,13 @@ func Error(err error, code int, msg, function string) error {
 	if err != nil {
 		reason = err.Error()
 	}
+	stackSlice := make([]byte, 1024)
+	s := runtime.Stack(stackSlice, false)
 	return &DBSError{
-		Reason:   reason,
-		Message:  msg,
-		Code:     code,
-		Function: function,
+		Reason:     reason,
+		Message:    msg,
+		Code:       code,
+		Function:   function,
+		Stacktrace: fmt.Sprintf("\n%s", stackSlice[0:s]),
 	}
 }
