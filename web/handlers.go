@@ -15,6 +15,7 @@ import (
 
 	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/utils"
+	"golang.org/x/exp/errors"
 )
 
 // helper function to get request URI
@@ -83,7 +84,12 @@ func responseMsg(w http.ResponseWriter, r *http.Request, err error, code int) in
 		Message:   err.Error(), // for compatibility with Python server
 	}
 
-	log.Printf(err.Error())
+	var dbsError *dbs.DBSError
+	if errors.As(err, &dbsError) {
+		log.Printf(dbsError.ErrorStacktrace())
+	} else {
+		log.Printf(err.Error())
+	}
 	// if we want to use JSON record output we'll use
 	//     data, _ := json.Marshal(rec)
 	// otherwise we'll use list of JSON records
