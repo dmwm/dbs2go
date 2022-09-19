@@ -202,6 +202,31 @@ func createHTTPError(method string, path string) web.HTTPError {
 	}
 }
 
+// helper function to remove stacktrace from dbs.Record
+func removeStacktrace(r dbs.Record, verbose bool) dbs.Record {
+	// we should replace error stacktraces
+	rnew := make(dbs.Record)
+	for k, v := range r {
+		if k == "error" {
+			switch t := v.(type) {
+			case map[string]interface{}:
+				delete(t, "stacktrace")
+				rnew[k] = t
+			}
+		} else if k == "message" {
+			rnew[k] = ""
+		} else {
+			rnew[k] = v
+		}
+	}
+	//     if verbose {
+	//         for k, v := range rnew {
+	//             fmt.Printf("### key=%s value='%v' type=%T\n\n", k, v, v)
+	//         }
+	//     }
+	return rnew
+}
+
 // compares received response to expected
 func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	expect := expected
@@ -228,6 +253,12 @@ func verifyResponse(t *testing.T, received []dbs.Record, expected []Response) {
 	}
 
 	for i, r := range received {
+		// we should replace error stacktraces
+		fmt.Println("### DBS Record r")
+		r = removeStacktrace(r, testing.Verbose())
+		fmt.Println("### DBS Record e[i]")
+		e[i] = removeStacktrace(e[i], testing.Verbose())
+
 		if testing.Verbose() {
 			log.Printf("\nReceived: %#v\nExpected: %#v\n", r, e[i])
 		}
