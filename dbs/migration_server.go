@@ -82,7 +82,14 @@ func MigrationServer(interval, timeout int, ch <-chan bool) {
 				api.Params = params
 				time0 := time.Now()
 				atomic.AddUint64(&TotalMigrationRequests, 1)
-				api.ProcessMigration()
+				if r.MIGRATION_STATUS == QUEUED {
+					// asynchronously start migration request
+					// the StartMigrationRequest relies on MigrationAsyncTimeout (in sec)
+					// context timeout
+					go StartMigrationRequest(r)
+				} else {
+					api.ProcessMigration()
+				}
 				log.Printf("migration process %+v finished in %v", params, time.Since(time0))
 			}
 		}
