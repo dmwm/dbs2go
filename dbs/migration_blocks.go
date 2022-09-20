@@ -73,7 +73,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		r.LAST_MODIFICATION_DATE,
 		r.LAST_MODIFIED_BY)
 	if err != nil {
-		if strings.Contains(err.Error(), "unique") {
+		if strings.Contains(strings.ToLower(err.Error()), "unique") {
 			// if we try to insert the same migration input we'll continue
 			log.Printf("warning: skip %+v since it is already inserted in another request, error=%v", r, err)
 			return nil
