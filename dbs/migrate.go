@@ -735,7 +735,7 @@ func StartMigrationRequest(rec MigrationRequest) {
 		if err != nil {
 			ch <- fmt.Sprintf("fail to start migration request %v, error %v", rec, err)
 		} else {
-			ch <- fmt.Sprintf("finished %+v with %d migration requests", rec, len(reports))
+			ch <- fmt.Sprintf("finished %+v with %d dependent migration requests", rec, len(reports))
 		}
 	}(ctx, ch)
 	select {
