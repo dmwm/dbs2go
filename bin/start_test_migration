@@ -1,15 +1,5 @@
 #!/bin/bash
 
-echo $LD_LIBRARY_PATH
-echo $DYLD_LIBRARY_PATH
-
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-# export PKG_CONFIG_PATH=$PWD
-
-echo Building dbs2go...
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH make build
-
 # Delete original dbfiles and databases and reinitializing them with the schema
 rm -f /tmp/dbs-one.db
 sqlite3 /tmp/dbs-one.db < ./static/schema/sqlite-schema.sql
