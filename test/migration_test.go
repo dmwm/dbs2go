@@ -311,7 +311,15 @@ func TestIntMigration(t *testing.T) {
 			for _, m := range migrationStatus {
 				requestStatus[m.MigrationStatus] += 1
 			}
-			fmt.Printf("Requests: %d, Successful: %d, Statuses: %v\n", len(migrationStatus), requestStatus[2], requestStatus)
+			fmt.Printf("Requests: %d, PENDING: %d, IN_PROGRESS: %d, COMPLETED: %d, FAILED: %d, EXIST_IN_DB: %d, QUEUED: %d, TERM_FAILED: %d\n",
+				len(migrationStatus),
+				requestStatus[dbs.PENDING],
+				requestStatus[dbs.IN_PROGRESS],
+				requestStatus[dbs.COMPLETED],
+				requestStatus[dbs.FAILED],
+				requestStatus[dbs.EXIST_IN_DB],
+				requestStatus[dbs.QUEUED],
+				requestStatus[dbs.TERM_FAILED])
 		}
 
 		if requestStatus[9] > 0 {
@@ -853,7 +861,15 @@ func TestMigrationRequests(t *testing.T) {
 				for _, m := range migrationStatus {
 					requestStatus[m.MigrationStatus] += 1
 				}
-				fmt.Printf("Requests: %d, Successful: %d, Statuses: %v\n", len(migrationStatus), requestStatus[2], requestStatus)
+				fmt.Printf("Requests: %d, PENDING: %d, IN_PROGRESS: %d, COMPLETED: %d, FAILED: %d, EXIST_IN_DB: %d, QUEUED: %d, TERM_FAILED: %d\n",
+					len(migrationStatus),
+					requestStatus[dbs.PENDING],
+					requestStatus[dbs.IN_PROGRESS],
+					requestStatus[dbs.COMPLETED],
+					requestStatus[dbs.FAILED],
+					requestStatus[dbs.EXIST_IN_DB],
+					requestStatus[dbs.QUEUED],
+					requestStatus[dbs.TERM_FAILED])
 			}
 
 			if requestStatus[9] > 0 {
