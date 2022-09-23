@@ -40,7 +40,7 @@ clean:
 
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
 
-test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration bench
+test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration-requests test-migration bench
 
 test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reader-pos test-lexicon-reader-neg
 
@@ -157,25 +157,19 @@ test-integration:
 	FILE_LUMI_LIST_LENGTH=30 \
 	go test -v -failfast -run Integration
 test-migration:
-	cd test && rm -f /tmp/dbs-one.db && \
-	sqlite3 /tmp/dbs-one.db < ../static/schema/sqlite-schema.sql && \
-	echo sqlite3 /tmp/dbs-one.db sqlite > ./dbfile_1 && \
-	rm -f /tmp/dbs-two.db && \
-	sqlite3 /tmp/dbs-two.db < ../static/schema/sqlite-schema.sql && \
-	echo sqlite3 /tmp/dbs-two.db sqlite > ./dbfile_2 && \
-	cd .. && \
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_test_migration && \
 	cd test && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
-	DBS_API_PARAMETERS_FILE=../static/parameters.json \
-	DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
-	DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json \
-	DBS_DB_FILE_1=./dbfile_1 \
-	DBS_DB_FILE_2=./dbfile_2 \
-	DBS_DB_PATH_1=/tmp/dbs-one.db \
-	DBS_DB_PATH_2=/tmp/dbs-two.db \
 	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
-	go test -v -failfast -run IntMigration
+	go test -v -failfast -timeout 10m -run IntMigration
+test-migration-requests:
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
+	./bin/start_test_migration && \
+	cd test && \
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
+	MIGRATION_REQUESTS_PATH=./data/migration/requests \
+	go test -v -failfast -timeout 10m -run MigrationRequests
 bench:
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \

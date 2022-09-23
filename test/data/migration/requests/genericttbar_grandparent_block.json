@@ -1,0 +1,318 @@
+{
+  "dataset_conf_list": [
+    {
+      "release_version": "CMSSW_9_2_6",
+      "pset_hash": "GIBBERISH",
+      "pset_name": "",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "91X_mcRun1_realistic_v2",
+      "create_by": "wmagent@vocms0308.cern.ch",
+      "creation_date": 1501192514
+    }
+  ],
+  "file_conf_list": [
+    {
+      "release_version": "CMSSW_9_2_6",
+      "pset_hash": "GIBBERISH",
+      "pset_name": "",
+      "lfn": "/store/mc/HC/GenericTTbar/GEN-SIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/CCD01870-0C76-E711-9565-FA163ED5F2E8.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "91X_mcRun1_realistic_v2",
+      "create_by": "wmagent@vocms0308.cern.ch",
+      "creation_date": 1501192514
+    },
+    {
+      "release_version": "CMSSW_9_2_6",
+      "pset_hash": "GIBBERISH",
+      "pset_name": "",
+      "lfn": "/store/mc/HC/GenericTTbar/GEN-SIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/A68E89C7-0B76-E711-A008-FA163EC5055B.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "91X_mcRun1_realistic_v2",
+      "create_by": "wmagent@vocms0308.cern.ch",
+      "creation_date": 1501192514
+    },
+    {
+      "release_version": "CMSSW_9_2_6",
+      "pset_hash": "GIBBERISH",
+      "pset_name": "",
+      "lfn": "/store/mc/HC/GenericTTbar/GEN-SIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/7C1F461A-1376-E711-BE70-FA163E345FD4.root",
+      "app_name": "cmsRun",
+      "output_module_label": "Merged",
+      "global_tag": "91X_mcRun1_realistic_v2",
+      "create_by": "wmagent@vocms0308.cern.ch",
+      "creation_date": 1501192514
+    }
+  ],
+  "files": [
+    {
+      "check_sum": "2220240063",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 510,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 776,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 784,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 788,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 790,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 791,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1483,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1757,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1807,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2334,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2651,
+          "run_num": 1,
+          "event_count": 300
+        }
+      ],
+      "adler32": "49262846",
+      "file_size": 2345934935,
+      "event_count": 3300,
+      "file_type": "EDM",
+      "last_modified_by": "qnguyen",
+      "last_modification_date": 1501668936,
+      "logical_file_name": "/store/mc/HC/GenericTTbar/GEN-SIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/CCD01870-0C76-E711-9565-FA163ED5F2E8.root",
+      "md5": "",
+      "auto_cross_section": 0,
+      "is_file_valid": 1
+    },
+    {
+      "check_sum": "342309090",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 774,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1112,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1387,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 1462,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2141,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2173,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2346,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2551,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2552,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2839,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2968,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2974,
+          "run_num": 1,
+          "event_count": 300
+        }
+      ],
+      "adler32": "0b39b79b",
+      "file_size": 2592082022,
+      "event_count": 3600,
+      "file_type": "EDM",
+      "last_modified_by": "qnguyen",
+      "last_modification_date": 1501668936,
+      "logical_file_name": "/store/mc/HC/GenericTTbar/GEN-SIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/A68E89C7-0B76-E711-A008-FA163EC5055B.root",
+      "md5": "",
+      "auto_cross_section": 0,
+      "is_file_valid": 1
+    },
+    {
+      "check_sum": "2214698916",
+      "file_lumi_list": [
+        {
+          "lumi_section_num": 868,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 912,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2078,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2107,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2109,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2219,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2267,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2393,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2549,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2556,
+          "run_num": 1,
+          "event_count": 300
+        },
+        {
+          "lumi_section_num": 2559,
+          "run_num": 1,
+          "event_count": 300
+        }
+      ],
+      "adler32": "ba6dded4",
+      "file_size": 2360649049,
+      "event_count": 3300,
+      "file_type": "EDM",
+      "last_modified_by": "qnguyen",
+      "last_modification_date": 1501668936,
+      "logical_file_name": "/store/mc/HC/GenericTTbar/GEN-SIM/CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/00000/7C1F461A-1376-E711-BE70-FA163E345FD4.root",
+      "md5": "",
+      "auto_cross_section": 0,
+      "is_file_valid": 1
+    }
+  ],
+  "processing_era": {
+    "create_by": "WMAgent",
+    "creation_date": 0,
+    "processing_version": 2,
+    "description": ""
+  },
+  "primds": {
+    "primary_ds_id": 6930466,
+    "create_by": "/DC=org/DC=doegrids/OU=People/CN=Alan Malta Rodrigues 4861",
+    "primary_ds_type": "mc",
+    "primary_ds_name": "GenericTTbar",
+    "creation_date": 1338750774
+  },
+  "dataset": {
+    "dataset_id": 13428866,
+    "create_by": "wmagent@vocms0308.cern.ch",
+    "creation_date": 1501499695,
+    "physics_group_name": "NoGroup",
+    "dataset_access_type": "VALID",
+    "data_tier_name": "GEN-SIM",
+    "last_modified_by": "qnguyen",
+    "processed_ds_name": "HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2",
+    "xtcrosssection": 0,
+    "last_modification_date": 1501668936,
+    "dataset": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM",
+    "prep_id": "CMSSW_9_2_2__prod_run1-1497042025-ProdTTbar"
+  },
+  "acquisition_era": {
+    "acquisition_era_name": "HC",
+    "start_date": 123456789,
+    "creation_date": 0,
+    "end_date": 0,
+    "create_by": "",
+    "description": ""
+  },
+  "block": {
+    "block_id": 17785904,
+    "dataset_id": 13428866,
+    "create_by": "wmagent@vocms0308.cern.ch",
+    "creation_date": 1501566163,
+    "open_for_writing": 0,
+    "block_name": "/GenericTTbar/HC-CMSSW_9_2_6_91X_mcRun1_realistic_v2-v2/GEN-SIM#7b7ce6a4-75e1-11e7-a0c8-02163e00d7b3",
+    "file_count": 206,
+    "origin_site_name": "T2_CH_CERN",
+    "block_size": 684517908177,
+    "last_modified_by": "wmagent@vocms0308.cern.ch",
+    "last_modification_date": 1501566163
+  },
+  "file_parent_list": [],
+  "block_parent_list": [],
+  "dataset_parent_list": [],
+  "ds_parent_list": []
+}

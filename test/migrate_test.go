@@ -14,7 +14,7 @@ import (
 )
 
 // TestMigrateGetBlocksInOrder
-func TestMigrateGeBlocksInOrder(t *testing.T) {
+func TestMigrateGetBlocksInOrder(t *testing.T) {
 	blocks := []string{"c", "b", "a"}
 	mblocks := []dbs.MigrationBlock{
 		dbs.MigrationBlock{Block: "a", Order: 1},
@@ -383,4 +383,23 @@ func TestMigrateRemove(t *testing.T) {
 	if origStatusRecords <= len(statusRecords) {
 		t.Fatalf("wrong number of migration records did not reduced orig status records %d, remooved records %d, new set of status records %d", origStatusRecords, len(removeRecords), len(statusRecords))
 	}
+}
+
+// MigrationRequest is the struct for migration request POST body
+type MigrationRequest struct {
+	MigrationURL   string `json:"migration_url"`
+	MigrationInput string `json:"migration_input"`
+}
+
+// MigrationStatus is the struct returned when doing a GET on the /status endpoint
+type MigrationStatus struct {
+	CreateBy             string `json:"create_by"`
+	CreationDate         int64  `json:"creation_date"`
+	LastModificationDate int64  `json:"last_modification_date"`
+	LastModifiedBy       string `json:"last_modified_by"`
+	MigrationInput       string `json:"migration_input"`
+	MigrationRequestID   int    `json:"migration_request_id"`
+	MigrationStatus      int    `json:"migration_status"`
+	MigrationURL         string `json:"migration_url"`
+	RetryCount           int    `json:"retry_count"`
 }

@@ -39,9 +39,13 @@ migrate.json
 migration.json
 test/data/dbsdata
 .env
-.vscode
+*.tmp
 test-pids
 
 # custom development files
 .devcontainer
 .vscode
+
+.globus
+instantclient*
+.DS_Store
