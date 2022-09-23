@@ -698,15 +698,6 @@ func TestMigrationRequests(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	// cmd := exec.Command("../bin/start_test_migration")
-	// err = cmd.Start()
-	// pid := cmd.Process.Pid
-	// t.Log(pid)
-	// if err != nil {
-	// 	t.Fatal(err.Error())
-	// }
-	// cmd.Wait()
-
 	t.Cleanup(func() {
 		exec.Command("pkill", "dbs2go").Output()
 	})
