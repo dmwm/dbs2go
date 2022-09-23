@@ -7,7 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -26,11 +25,11 @@ jobs:
         sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",,g" web/server.go
         make
 
-    - name: Build and test
+    - name: Prepare code for tests
       env:
         GOPATH: /home/runner/go
         PKG_CONFIG_PATH: /home/runner/go
-      run: |
+      run:
         curl -ksL https://gist.githubusercontent.com/vkuznet/6c1b1ded0a6b85da64a7c0a5386745ca/raw/3198086a7b6d8f41478e0423ff99cbe3616f547f/oci8.pc > /home/runner/go/oci8.pc
         sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" web/server.go
         sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",,g" web/server.go
@@ -40,4 +39,80 @@ jobs:
         sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" test/merge/main.go
         mkdir -p $GOPATH/src/github.com/vkuznet
         cp -r ../dbs2go $GOPATH/src/github.com/vkuznet
-        make test-github
+
+    - name: Test DBS
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-dbs
+
+    - name: Test SQL
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-sql
+
+    - name: Test validator
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-validator
+
+    - name: Test bulk
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-bulk
+
+    - name: Test http
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-http
+
+    - name: Test utils
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-utils
+
+    - name: Test writer
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-writer
+
+    - name: Test integration
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-integration
+
+    - name: Test migration requests
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-migration-requests
+
+    - name: Test migration
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make test-migration
+
+    - name: Benchmark
+      env:
+        GOPATH: /home/runner/go
+        PKG_CONFIG_PATH: /home/runner/go
+      run: |
+        make bench
