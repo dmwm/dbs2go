@@ -677,7 +677,7 @@ func TestMigrationRequests(t *testing.T) {
 
 	bulkblocksPath := os.Getenv("MIGRATION_REQUESTS_PATH")
 	if bulkblocksPath == "" {
-		log.Fatal("MIGRATION_REQUESTS_PATH not defined")
+		t.Fatal("MIGRATION_REQUESTS_PATH not defined")
 	}
 
 	// load grandparent data

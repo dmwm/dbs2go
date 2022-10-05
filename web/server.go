@@ -263,6 +263,7 @@ func dbInit(dbtype, dburi string) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(Config.MaxDBConnections)
 	db.SetMaxIdleConns(Config.MaxIdleConnections)
+	db.Exec("PRAGMA journal_mode=WAL;")
 	return db, nil
 }
 
@@ -291,6 +292,7 @@ func dbMonitor(dbtype, dburi string, interval int) {
 }
 
 // Server represents main web server for DBS service
+//
 //gocyclo:ignore
 func Server(configFile string) {
 	StartTime = time.Now()

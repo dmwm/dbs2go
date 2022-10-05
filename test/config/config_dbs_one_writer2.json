@@ -1,6 +1,6 @@
 {
     "base": "/dbs-one-writer",
-    "port": 8990,
+    "port": 9000,
     "staticdir": "./static",
     "dbfile": "./test/dbfile_1",
     "lexicon_file": "./static/lexicon_writer.json",
