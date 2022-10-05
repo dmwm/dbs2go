@@ -90,7 +90,7 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 		StartDate:          123456789,
 	}
 
-	fileCount := 50
+	fileCount := 100
 
 	block := dbs.Block{
 		BlockName:      fmt.Sprintf("%s%d", testData.StepchainBlock, factor),
@@ -137,7 +137,7 @@ func TestRaceConditions(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	numBlocks := 10000
+	numBlocks := 1000
 	var blocks []dbs.BulkBlocks
 
 	for i := 1; i < numBlocks+1; i++ {
@@ -160,7 +160,14 @@ func TestRaceConditions(t *testing.T) {
 					t.Error(err)
 				}
 				reader := bytes.NewReader(data)
-				resp, err := http.Post("http://localhost:8990/dbs-one-writer/bulkblocks", "application/json", reader)
+				ht := http.DefaultTransport.(*http.Transport).Clone()
+				ht.CloseIdleConnections()
+				ht.DisableKeepAlives = true
+				ht.MaxIdleConnsPerHost = 1
+				ht.MaxIdleConns = 1
+				c := &http.Client{Transport: ht}
+
+				resp, err := c.Post("http://localhost:8990/dbs-one-writer/bulkblocks", "application/json", reader)
 				if err != nil {
 					t.Error(err)
 				}
