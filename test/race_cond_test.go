@@ -17,6 +17,37 @@ import (
 
 var testData initialData
 
+// creates a file for bulkblocks
+func createFile2(t *testing.T, i int, factor int) dbs.File {
+	return dbs.File{
+		Adler32:          "NOTSET",
+		FileType:         "EDM",
+		FileSize:         2012211901,
+		AutoCrossSection: 0.0,
+		CheckSum:         "1504266448",
+		FileLumiList: []dbs.FileLumi{
+			{
+				LumiSectionNumber: int64(27414 + i),
+				RunNumber:         98,
+				EventCount:        66,
+			},
+			{
+				LumiSectionNumber: int64(26422 + i),
+				RunNumber:         98,
+				EventCount:        67,
+			},
+			{
+				LumiSectionNumber: int64(29838 + i),
+				RunNumber:         98,
+				EventCount:        68,
+			},
+		},
+		EventCount:      201,
+		LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v%d/%v%d.root", TestData.UID, i*10, i, factor*100),
+		IsFileValid:     1,
+	}
+}
+
 // generate a single bulkblock
 func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 	var bulkBlock dbs.BulkBlocks
@@ -62,7 +93,7 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 	fileCount := 50
 
 	block := dbs.Block{
-		BlockName:      testData.StepchainBlock,
+		BlockName:      fmt.Sprintf("%s%d", testData.StepchainBlock, factor),
 		OriginSiteName: testData.Site,
 		FileCount:      int64(fileCount),
 		BlockSize:      20122119010,
@@ -77,7 +108,7 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 	bulkBlock.Block = block
 
 	for i := 0; i < fileCount; i++ {
-		f := createFile(t, i*factor)
+		f := createFile2(t, i*factor, factor)
 		bulkBlock.Files = append(bulkBlock.Files, f)
 	}
 
@@ -106,12 +137,11 @@ func TestRaceConditions(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	numBlocks := 10
+	numBlocks := 10000
 	var blocks []dbs.BulkBlocks
 
 	for i := 1; i < numBlocks+1; i++ {
 		b := generateBulkBlock(t, i)
-		fmt.Printf("%v\n", b)
 		blocks = append(blocks, b)
 	}
 
@@ -121,7 +151,7 @@ func TestRaceConditions(t *testing.T) {
 
 	t.Run("Insert blocks simultaneously", func(t *testing.T) {
 		for _, block := range blocks {
-			time.Sleep(100 * time.Millisecond)
+			// time.Sleep(1 * time.Millisecond)
 			wg.Add(1)
 			go func(t *testing.T, b dbs.BulkBlocks) {
 				defer wg.Done()
@@ -134,7 +164,9 @@ func TestRaceConditions(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				t.Logf("%v\n", resp.StatusCode)
+				if resp.StatusCode != http.StatusOK {
+					t.Logf("%v\n", resp.StatusCode)
+				}
 			}(t, block)
 		}
 		wg.Wait()

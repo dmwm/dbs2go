@@ -10,8 +10,9 @@
     "serverkey": "",
     "hkey": "",
     "updateDNs": 60,
-    "log_file": "/tmp/dbs2go_writer_1.log",
-    "verbose": 0,
+    "log_file": "/tmp/dbs2go_writer_1_2.log",
+    "verbose": 2,
+    "limiter_rate": "10000-s",
     "max_db_connections": 1,
     "concurrent_bulkblocks": true
 }
