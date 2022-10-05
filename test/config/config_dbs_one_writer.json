@@ -11,7 +11,5 @@
     "hkey": "",
     "updateDNs": 60,
     "log_file": "/tmp/dbs2go_writer_1.log",
-    "verbose": 0,
-    "max_db_connections": 1,
-    "concurrent_bulkblocks": true
+    "verbose": 0
 }

@@ -7,12 +7,6 @@ echo sqlite3 /tmp/dbs-one.db sqlite > ./test/dbfile_1
 
 # Starting DBS servers
 echo Starting dbs-one-writer
-./dbs2go -config ./test/config/config_dbs_one_writer.json &
-echo $! >> ./test-pids
-
-sleep 1
-
-echo Starting second dbs-one-writer
 ./dbs2go -config ./test/config/config_dbs_one_writer2.json &
 echo $! >> ./test-pids
 
