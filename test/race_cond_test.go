@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/dmwm/dbs2go/dbs"
 )
@@ -18,8 +17,16 @@ import (
 var testData initialData
 
 // creates a file for bulkblocks
-func createFile2(t *testing.T, i int, factor int) dbs.File {
-	return dbs.File{
+func createFile2(t *testing.T, i int, factor int) (dbs.File, dbs.FileConfig) {
+	algo := dbs.FileConfig{
+		ReleaseVersion:    testData.ReleaseVersion,
+		PsetHash:          testData.PsetHash,
+		AppName:           testData.AppName,
+		OutputModuleLabel: testData.OutputModuleLabel,
+		GlobalTag:         testData.GlobalTag,
+	}
+
+	file := dbs.File{
 		Adler32:          "NOTSET",
 		FileType:         "EDM",
 		FileSize:         2012211901,
@@ -27,17 +34,17 @@ func createFile2(t *testing.T, i int, factor int) dbs.File {
 		CheckSum:         "1504266448",
 		FileLumiList: []dbs.FileLumi{
 			{
-				LumiSectionNumber: int64(27414 + i),
+				LumiSectionNumber: int64(27414 + i*100 + factor*100),
 				RunNumber:         98,
 				EventCount:        66,
 			},
 			{
-				LumiSectionNumber: int64(26422 + i),
+				LumiSectionNumber: int64(26422 + i*100 + factor*100),
 				RunNumber:         98,
 				EventCount:        67,
 			},
 			{
-				LumiSectionNumber: int64(29838 + i),
+				LumiSectionNumber: int64(29838 + i*100 + factor*100),
 				RunNumber:         98,
 				EventCount:        68,
 			},
@@ -46,6 +53,9 @@ func createFile2(t *testing.T, i int, factor int) dbs.File {
 		LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v%d/%v%d.root", TestData.UID, i*10, i, factor*100),
 		IsFileValid:     1,
 	}
+
+	algo.LFN = file.LogicalFileName
+	return file, algo
 }
 
 // generate a single bulkblock
@@ -58,13 +68,14 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 		AppName:           testData.AppName,
 		OutputModuleLabel: testData.OutputModuleLabel,
 		GlobalTag:         testData.GlobalTag,
+		CreationDate:      1501192514,
 	}
 
 	primDS := dbs.PrimaryDataset{
 		PrimaryDSName: testData.StepPrimaryDSName,
 		PrimaryDSType: "test",
 		CreateBy:      "WMAgent",
-		CreationDate:  time.Now().Unix(), // Replace with fixed time
+		CreationDate:  1501192514, // Replace with fixed time
 	}
 
 	dataset := dbs.Dataset{
@@ -76,30 +87,33 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 		PrepID:               "TestPrepID",
 		CreateBy:             "WMAgent",
 		LastModifiedBy:       "WMAgent",
-		CreationDate:         time.Now().Unix(),
-		LastModificationDate: time.Now().Unix(),
+		CreationDate:         1501192514,
+		LastModificationDate: 1501192514,
 	}
 
 	processingEra := dbs.ProcessingEra{
 		ProcessingVersion: testData.ProcessingVersion,
 		CreateBy:          "WMAgent",
+		CreationDate:      1501192514,
 	}
 
 	acqEra := dbs.AcquisitionEra{
 		AcquisitionEraName: testData.AcquisitionEra,
 		StartDate:          123456789,
+		CreationDate:       1501192514,
 	}
 
-	fileCount := 100
+	fileCount := 1000
 
 	block := dbs.Block{
 		BlockName:      fmt.Sprintf("%s%d", testData.StepchainBlock, factor),
 		OriginSiteName: testData.Site,
 		FileCount:      int64(fileCount),
 		BlockSize:      20122119010,
+		CreationDate:   1501192514,
 	}
 
-	bulkBlock.DatasetConfigList = []dbs.DatasetConfig{algo}
+	bulkBlock.DatasetConfigList = append(bulkBlock.DatasetConfigList, algo)
 	bulkBlock.PrimaryDataset = primDS
 	bulkBlock.Dataset = dataset
 	bulkBlock.ProcessingEra = processingEra
@@ -108,8 +122,9 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 	bulkBlock.Block = block
 
 	for i := 0; i < fileCount; i++ {
-		f := createFile2(t, i*factor, factor)
+		f, fileConfig := createFile2(t, i*factor, factor)
 		bulkBlock.Files = append(bulkBlock.Files, f)
+		bulkBlock.FileConfigList = append(bulkBlock.FileConfigList, fileConfig)
 	}
 
 	return bulkBlock
@@ -137,7 +152,7 @@ func TestRaceConditions(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	numBlocks := 1000
+	numBlocks := 2
 	var blocks []dbs.BulkBlocks
 
 	for i := 1; i < numBlocks+1; i++ {
@@ -145,15 +160,18 @@ func TestRaceConditions(t *testing.T) {
 		blocks = append(blocks, b)
 	}
 
-	// time.Sleep(time.Minute)
+	t.Log("Sleep for debugging")
+	// time.Sleep(30 * time.Second)
 
 	var wg sync.WaitGroup
 
 	t.Run("Insert blocks simultaneously", func(t *testing.T) {
-		for _, block := range blocks {
-			// time.Sleep(1 * time.Millisecond)
+		start := make(chan struct{})
+		for i, block := range blocks {
+			// time.Sleep(1 * time.Nanosecond)
 			wg.Add(1)
-			go func(t *testing.T, b dbs.BulkBlocks) {
+			go func(t *testing.T, b dbs.BulkBlocks, i int) {
+				<-start
 				defer wg.Done()
 				data, err := json.Marshal(b)
 				if err != nil {
@@ -163,9 +181,7 @@ func TestRaceConditions(t *testing.T) {
 				ht := http.DefaultTransport.(*http.Transport).Clone()
 				ht.CloseIdleConnections()
 				ht.DisableKeepAlives = true
-				ht.MaxIdleConnsPerHost = 1
-				ht.MaxIdleConns = 1
-				c := &http.Client{Transport: ht}
+				c := http.Client{Transport: ht}
 
 				resp, err := c.Post("http://localhost:8990/dbs-one-writer/bulkblocks", "application/json", reader)
 				if err != nil {
@@ -174,8 +190,9 @@ func TestRaceConditions(t *testing.T) {
 				if resp.StatusCode != http.StatusOK {
 					t.Logf("%v\n", resp.StatusCode)
 				}
-			}(t, block)
+			}(t, block, i)
 		}
+		close(start)
 		wg.Wait()
 		fmt.Println("Done")
 	})

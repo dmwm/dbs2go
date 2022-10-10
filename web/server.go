@@ -263,7 +263,9 @@ func dbInit(dbtype, dburi string) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(Config.MaxDBConnections)
 	db.SetMaxIdleConns(Config.MaxIdleConnections)
-	db.Exec("PRAGMA journal_mode=WAL;")
+	if dbtype == "sqlite3" {
+		db.Exec("PRAGMA journal_mode=WAL;")
+	}
 	return db, nil
 }
 
