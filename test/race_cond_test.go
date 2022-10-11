@@ -1,5 +1,8 @@
 package main
 
+// Race Condition Tests
+// This file contains code necessary to test for racing conditions in DBSWriter APIs
+
 import (
 	"bytes"
 	"encoding/json"
@@ -10,13 +13,14 @@ import (
 	"os/exec"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/dmwm/dbs2go/dbs"
 )
 
 var testData initialData
 
-// creates a file for bulkblocks
+// creates a file with shared Output Module Config for bulkblocks
 func createFile2(t *testing.T, i int, factor int) (dbs.File, dbs.FileConfig) {
 	algo := dbs.FileConfig{
 		ReleaseVersion:    testData.ReleaseVersion,
@@ -130,6 +134,43 @@ func generateBulkBlock(t *testing.T, factor int) dbs.BulkBlocks {
 	return bulkBlock
 }
 
+// submit a bulkblock to DBSWriter in a goroutine
+func submitBulkBlock(t *testing.T, wg *sync.WaitGroup, errs chan<- string, tries int, block dbs.BulkBlocks) {
+	retries := tries
+	defer wg.Done()
+	data, err := json.Marshal(block)
+	if err != nil {
+		errs <- err.Error()
+	}
+	reader := bytes.NewReader(data)
+	ht := http.DefaultTransport.(*http.Transport).Clone()
+	ht.CloseIdleConnections()
+	ht.DisableKeepAlives = true
+	c := http.Client{Transport: ht}
+
+	resp, err := c.Post("http://localhost:8990/dbs-one-writer/bulkblocks", "application/json", reader)
+	if err != nil {
+		errs <- err.Error()
+	}
+	defer resp.Body.Close()
+	t.Logf("Try #%d, Block: %s, response: %d\n", retries, block.Block.BlockName, resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		if retries < 3 {
+			wg.Add(1)
+			retries++
+			t.Logf("Re-Trying for Block: %s", block.Block.BlockName)
+			time.Sleep(10 * time.Second)
+			go submitBulkBlock(t, wg, errs, retries, block)
+		} else {
+			msg := fmt.Sprintf("Submit bulkblocks failed on try #%d for block %s", retries, block.Block.BlockName)
+			errs <- msg
+		}
+	}
+
+	//return resp.StatusCode
+}
+
+// TestRaceConditions tests for the racing conditions in the DBSWriter bulkblocks API
 func TestRaceConditions(t *testing.T) {
 	t.Log("Starting tests for race conditions")
 	// var BulkBlocksData dbs.BulkBlocks
@@ -152,7 +193,7 @@ func TestRaceConditions(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	numBlocks := 2
+	numBlocks := 3
 	var blocks []dbs.BulkBlocks
 
 	for i := 1; i < numBlocks+1; i++ {
@@ -163,38 +204,24 @@ func TestRaceConditions(t *testing.T) {
 	t.Log("Sleep for debugging")
 	// time.Sleep(30 * time.Second)
 
-	var wg sync.WaitGroup
-
 	t.Run("Insert blocks simultaneously", func(t *testing.T) {
-		start := make(chan struct{})
-		for i, block := range blocks {
+		var wg sync.WaitGroup
+		errs := make(chan string, 10)
+
+		for _, block := range blocks {
 			// time.Sleep(1 * time.Nanosecond)
 			wg.Add(1)
-			go func(t *testing.T, b dbs.BulkBlocks, i int) {
-				<-start
-				defer wg.Done()
-				data, err := json.Marshal(b)
-				if err != nil {
-					t.Error(err)
-				}
-				reader := bytes.NewReader(data)
-				ht := http.DefaultTransport.(*http.Transport).Clone()
-				ht.CloseIdleConnections()
-				ht.DisableKeepAlives = true
-				c := http.Client{Transport: ht}
-
-				resp, err := c.Post("http://localhost:8990/dbs-one-writer/bulkblocks", "application/json", reader)
-				if err != nil {
-					t.Error(err)
-				}
-				if resp.StatusCode != http.StatusOK {
-					t.Logf("%v\n", resp.StatusCode)
-				}
-			}(t, block, i)
+			go submitBulkBlock(t, &wg, errs, 1, block)
 		}
-		close(start)
-		wg.Wait()
-		fmt.Println("Done")
+
+		go func() {
+			wg.Wait()
+			close(errs)
+		}()
+
+		for err := range errs {
+			t.Fatal(err)
+		}
 	})
 
 }
