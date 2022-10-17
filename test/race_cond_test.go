@@ -2,6 +2,13 @@ package main
 
 // Race Condition Tests
 // This file contains code necessary to test for racing conditions in DBSWriter APIs
+// This test will insert 2 or more bulkblocks via the /bulkblocks POST API
+// To run this test, the DBSWriter server is needed
+// At least two blocks are needed to be injected to cause the error
+//
+// Relevant GitHub issues:
+// https://github.com/dmwm/dbs2go/issues/30
+// https://github.com/dmwm/dbs2go/issues/31
 
 import (
 	"bytes"
@@ -155,6 +162,9 @@ func submitBulkBlock(t *testing.T, wg *sync.WaitGroup, errs chan<- string, tries
 	defer resp.Body.Close()
 	t.Logf("Try #%d, Block: %s, response: %d\n", retries, block.Block.BlockName, resp.StatusCode)
 	if resp.StatusCode != http.StatusOK {
+		// On initial try, the request will fail due to database locking,
+		// which occurs when two or more bulkblock are submitted simultaneously
+		// Three tries were decided after testing
 		if retries < 3 {
 			wg.Add(1)
 			retries++
@@ -171,6 +181,9 @@ func submitBulkBlock(t *testing.T, wg *sync.WaitGroup, errs chan<- string, tries
 }
 
 // TestRaceConditions tests for the racing conditions in the DBSWriter bulkblocks API
+// Racing conditions are described below:
+// https://github.com/dmwm/dbs2go/issues/30
+// https://github.com/dmwm/dbs2go/issues/31
 func TestRaceConditions(t *testing.T) {
 	t.Log("Starting tests for race conditions")
 	// var BulkBlocksData dbs.BulkBlocks
