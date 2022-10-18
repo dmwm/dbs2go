@@ -17,7 +17,7 @@ func (a *API) FileParents() error {
 
 	if len(a.Params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparents.FielParents")
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparents.FileParents")
 	}
 
 	tmpl := make(Record)
@@ -31,7 +31,7 @@ func (a *API) FileParents() error {
 
 	stm, err := LoadTemplateSQL("fileparent", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.fileparents.FielParents")
+		return Error(err, LoadErrorCode, "", "dbs.fileparents.FileParents")
 	}
 
 	lfns := getValues(a.Params, "logical_file_name")
@@ -52,7 +52,7 @@ func (a *API) FileParents() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.fileparents.FielParents")
+		return Error(err, QueryErrorCode, "", "dbs.fileparents.FileParents")
 	}
 	return nil
 }

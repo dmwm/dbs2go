@@ -263,6 +263,13 @@ func dbInit(dbtype, dburi string) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(Config.MaxDBConnections)
 	db.SetMaxIdleConns(Config.MaxIdleConnections)
+	// Disables connection pool for sqlite3. This enables some concurrency with sqlite3 databases
+	// See https://stackoverflow.com/questions/57683132/turning-off-connection-pool-for-go-http-client
+	// and https://sqlite.org/wal.html
+	// This only will apply to sqlite3 databases
+	if dbtype == "sqlite3" {
+		db.Exec("PRAGMA journal_mode=WAL;")
+	}
 	return db, nil
 }
 
@@ -291,6 +298,7 @@ func dbMonitor(dbtype, dburi string, interval int) {
 }
 
 // Server represents main web server for DBS service
+//
 //gocyclo:ignore
 func Server(configFile string) {
 	StartTime = time.Now()

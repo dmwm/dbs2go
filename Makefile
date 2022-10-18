@@ -178,3 +178,11 @@ bench:
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -run Benchmark -bench=.
+test-race:
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
+	./bin/start_write_servers && \
+	cd test && \
+	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
+	MIGRATION_REQUESTS_PATH=./data/migration/requests \
+	INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
+	go test -v -failfast -timeout 10m -run RaceConditions

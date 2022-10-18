@@ -1553,7 +1553,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 					output:   []Response{errorResp4},
 					respCode: http.StatusBadRequest,
 				},
-				// TODO: Figure out logicl for DBSClientReader_t.test.034l
+				// TODO: Figure out logic for DBSClientReader_t.test.034l
 			},
 		},
 	}

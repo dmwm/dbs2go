@@ -1,0 +1,17 @@
+{
+    "base": "/dbs-one-writer",
+    "port": 8990,
+    "staticdir": "./static",
+    "dbfile": "./test/dbfile_1",
+    "lexicon_file": "./static/lexicon_writer.json",
+    "api_parameters_file": "./static/parameters.json",
+    "server_type": "DBSWriter",
+    "servercrt": "",
+    "serverkey": "",
+    "hkey": "",
+    "updateDNs": 60,
+    "log_file": "/tmp/dbs2go_writer_1_2.log",
+    "verbose": 2,
+    "limiter_rate": "10000-s",
+    "concurrent_bulkblocks": true
+}
