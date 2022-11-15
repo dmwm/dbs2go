@@ -88,7 +88,7 @@ func getPrimaryDatasetTypeID(primaryDSType, hash string) (int64, error) {
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find primary_ds_type_id for primary ds type='%s'", hash, primaryDSType)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetTypeID")
+		return 0, Error(err, PrimaryDatasetTypeDoesNotExist, msg, "dbs.bulkblocks.getPrimaryDatasetTypeID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -129,7 +129,7 @@ func getPrimaryDatasetID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find primary_ds_id for primary ds name='%s'", hash, primaryDSName)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetID")
+		return 0, Error(err, PrimaryDatasetDoesNotExist, msg, "dbs.bulkblocks.getPrimaryDatasetID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -169,7 +169,7 @@ func getProcessingEraID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find processing_era_id for processing version='%v'", hash, processingVersion)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getProcessingEraID")
+		return 0, Error(err, ProcessingEraDoesNotExist, msg, "dbs.bulkblocks.getProcessingEraID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -213,7 +213,7 @@ func getAcquisitionEraID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find acquisition_era_id for acq era name='%s'", hash, acquisitionEraName)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getAcquisitionEraID")
+		return 0, Error(err, AcquisitionEraDoesNotExist, msg, "dbs.bulkblocks.getAcquisitionEraID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -254,7 +254,7 @@ func getDataTierID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find data_tier_id for tier name='%s'", hash, tierName)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getDataTierID")
+		return 0, Error(err, DataTierDoesNotExist, msg, "dbs.bulkblocks.getDataTierID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -289,7 +289,7 @@ func getPhysicsGroupID(physName, hash string) (int64, error) {
 	if err != nil {
 		msg := fmt.Sprintf("%s, unable to find physics_group_id for physics group name='%s'", hash, physName)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getPhysicsGroupID")
+		return 0, Error(err, PhysicsGroupDoesNotExist, msg, "dbs.bulkblocks.getPhysicsGroupID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -326,7 +326,7 @@ func getDatasetAccessTypeID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find dataset_access_type_id for data access type='%s'", hash, datasetAccessType)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getDatasetAccesssTypeID")
+		return 0, Error(err, DatasetAccessTypeDoesNotExist, msg, "dbs.bulkblocks.getDatasetAccesssTypeID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -363,7 +363,7 @@ func getProcessedDatasetID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find processed_ds_id for procDS='%s'", hash, processedDSName)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getProcessedDSName")
+		return 0, Error(err, ProcessedDatasetDoesNotExist, msg, "dbs.bulkblocks.getProcessedDSName")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -434,7 +434,7 @@ func getDatasetID(
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to insert dataset='%v'", hash, dataset)
 		log.Println(msg)
-		return 0, Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.getDatasetID")
+		return 0, Error(err, DatasetDoesNotExist, msg, "dbs.bulkblocks.getDatasetID")
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -670,7 +670,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	if rid, err := GetID(tx, "BLOCKS", "block_id", "block_name", bName); err == nil && rid != 0 {
 		err := errors.New(fmt.Sprintf("Block %s already exists", bName))
 		msg := "Data already exist in DBS"
-		return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, BlockAlreadyExists, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// get blockID
@@ -703,7 +703,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to find file_type_id for %v, error %v", hash, ftype, err)
 			log.Println(msg)
-			return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, FileDataTypesDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 	// insert files
@@ -872,7 +872,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 			err := errors.New("unable to locate parent file id")
 			msg := fmt.Sprintf("no file id found for parent '%s'", lfn)
 			log.Println(msg)
-			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, FileParentDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		err = rrr.Insert(tx)
 		if err != nil {
@@ -914,7 +914,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to find dataset_id for %s, error %v", hash, ds, err)
 			log.Println(msg)
-			return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, DatasetParentDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		r := DatasetParents{THIS_DATASET_ID: datasetID, PARENT_DATASET_ID: pid}
 		err = r.Insert(tx)

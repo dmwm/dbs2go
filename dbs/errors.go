@@ -36,35 +36,48 @@ var InvalidRequestErr = errors.New("invalid request error")
 
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
-	GenericErrorCode        = iota + 100 // generic DBS error
-	DatabaseErrorCode                    // 101 database error
-	TransactionErrorCode                 // 102 transaction error
-	QueryErrorCode                       // 103 query error
-	RowsScanErrorCode                    // 104 row scan error
-	SessionErrorCode                     // 105 db session error
-	CommitErrorCode                      // 106 db commit error
-	ParseErrorCode                       // 107 parser error
-	LoadErrorCode                        // 108 loading error, e.g. load template
-	GetIDErrorCode                       // 109 get id db error
-	InsertErrorCode                      // 110 db insert error
-	UpdateErrorCode                      // 111 update error
-	LastInsertErrorCode                  // 112 db last insert error
-	ValidateErrorCode                    // 113 validation error
-	PatternErrorCode                     // 114 pattern error
-	DecodeErrorCode                      // 115 decode error
-	EncodeErrorCode                      // 116 encode error
-	ContentTypeErrorCode                 // 117 content type error
-	ParametersErrorCode                  // 118 parameters error
-	NotImplementedApiCode                // 119 not implemented API error
-	ReaderErrorCode                      // 120 io reader error
-	WriterErrorCode                      // 121 io writer error
-	UnmarshalErrorCode                   // 122 json unmarshal error
-	MarshalErrorCode                     // 123 marshal error
-	HttpRequestErrorCode                 // 124 HTTP request error
-	MigrationErrorCode                   // 125 Migration error
-	RemoveErrorCode                      // 126 remove error
-	InvalidRequestErrorCode              // 127 invalid request error
-	LastAvailableErrorCode               // last available DBS error code
+	GenericErrorCode               = iota + 100 // generic DBS error
+	DatabaseErrorCode                           // 101 database error
+	TransactionErrorCode                        // 102 transaction error
+	QueryErrorCode                              // 103 query error
+	RowsScanErrorCode                           // 104 row scan error
+	SessionErrorCode                            // 105 db session error
+	CommitErrorCode                             // 106 db commit error
+	ParseErrorCode                              // 107 parser error
+	LoadErrorCode                               // 108 loading error, e.g. load template
+	GetIDErrorCode                              // 109 get id db error
+	InsertErrorCode                             // 110 db insert error
+	UpdateErrorCode                             // 111 update error
+	LastInsertErrorCode                         // 112 db last insert error
+	ValidateErrorCode                           // 113 validation error
+	PatternErrorCode                            // 114 pattern error
+	DecodeErrorCode                             // 115 decode error
+	EncodeErrorCode                             // 116 encode error
+	ContentTypeErrorCode                        // 117 content type error
+	ParametersErrorCode                         // 118 parameters error
+	NotImplementedApiCode                       // 119 not implemented API error
+	ReaderErrorCode                             // 120 io reader error
+	WriterErrorCode                             // 121 io writer error
+	UnmarshalErrorCode                          // 122 json unmarshal error
+	MarshalErrorCode                            // 123 marshal error
+	HttpRequestErrorCode                        // 124 HTTP request error
+	MigrationErrorCode                          // 125 Migration error
+	RemoveErrorCode                             // 126 remove error
+	InvalidRequestErrorCode                     // 127 invalid request error
+	BlockAlreadyExists                          // 128 block xxx already exists in DBS
+	FileDataTypesDoesNotExist                   // 129 FileDataTypes does not exist in DBS
+	FileParentDoesNotExist                      // 130 FileParent does not exist in DBS
+	DatasetParentDoesNotExist                   // 131 DatasetParent does not exist in DBS
+	ProcessedDatasetDoesNotExist                // 132 ProcessedDataset does not exist in DBS
+	PrimaryDatasetTypeDoesNotExist              // 133 PrimaryDatasetType does not exist in DBS
+	PrimaryDatasetDoesNotExist                  // 134 PrimaryDataset does not exist in DBS
+	ProcessingEraDoesNotExist                   // 135 ProcessingEra does not exist in DBS
+	AcquisitionEraDoesNotExist                  // 136 AcquisitionEra does not exist in DBS
+	DataTierDoesNotExist                        // 137 DataTier does not exist in DBS
+	PhysicsGroupDoesNotExist                    // 138 PhysicsGroup does not exist in DBS
+	DatasetAccessTypeDoesNotExist               // 139 DatasetAccessType does not exist in DBS
+	DatasetDoesNotExist                         // 140 Dataset does not exist in DBS
+	LastAvailableErrorCode                      // last available DBS error code
 )
 
 // DBSError represents common structure for DBS errors
