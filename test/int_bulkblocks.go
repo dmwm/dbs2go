@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
 
+	"github.com/dmwm/dbs2go/dbs"
 	"github.com/dmwm/dbs2go/web"
 )
 
@@ -102,6 +104,41 @@ func getBulkBlocksLargeFileLumiInsertTestTable(t *testing.T) EndpointTestCase {
 				output:   []Response{},
 				handler:  web.FilesHandler,
 				respCode: http.StatusOK,
+			},
+		},
+	}
+}
+
+// test that we will get DBSError when use the same block with bulkblocks API
+func bulkblocksTheSameBlockInsertTestTable(t *testing.T) EndpointTestCase {
+	// there are multiple blocks to insert, but everything is started from parent blocks
+	bName := TestData.ParentStepchainBlock
+	reason := fmt.Sprintf("Block %s already exists", bName)
+	msg := "Data already exist in DBS"
+	dbsError := dbs.DBSError{
+		Function: "dbs.bulkblocks.checkBlockExist",
+		Code:     dbs.BlockAlreadyExists,
+		Reason:   reason,
+		Message:  msg,
+	}
+	hrec := createHTTPError("POST", "/dbs/bulkblocks")
+	errorResp := createServerErrorResponse(hrec, &dbsError)
+	return EndpointTestCase{
+		description:     "Test concurrent bulkblocks with the same block name twice",
+		defaultHandler:  web.BulkBlocksHandler,
+		defaultEndpoint: "/dbs/bulkblocks",
+		testCases: []testCase{
+			{
+				description:          "Test POST with the same block",
+				serverType:           "DBSWriter",
+				method:               "POST",
+				concurrentBulkBlocks: true,
+				input:                BulkBlocksData.ConcurrentParentData,
+				output: []Response{
+					errorResp,
+				},
+				handler:  web.BulkBlocksHandler,
+				respCode: http.StatusBadRequest,
 			},
 		},
 	}

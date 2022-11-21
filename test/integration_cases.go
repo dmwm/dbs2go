@@ -570,6 +570,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string, largeBu
 	fileParentsTestTable := getFileParentsTestTable(t)
 	largeFileLumiInsertTestTable := getBulkBlocksLargeFileLumiInsertTestTable(t)
 	filesReaderAfterChunkTestTable := getFileLumiChunkTestTable(t)
+	theSameBlockWithBulkblocks := bulkblocksTheSameBlockInsertTestTable(t)
 
 	endpointTestCases = append(
 		endpointTestCases,
@@ -599,6 +600,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string, largeBu
 		fileParentsTestTable,
 		largeFileLumiInsertTestTable,
 		filesReaderAfterChunkTestTable,
+		theSameBlockWithBulkblocks,
 	)
 	// endpointTestCases = append(endpointTestCases, largeFileLumiInsertTestTable)
 	// endpointTestCases = append(endpointTestCases, filesReaderAfterChunkTestTable)

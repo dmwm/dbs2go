@@ -94,7 +94,8 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				var d []dbs.Record
 				// decode and verify the GET request
 				// Also handles fileArray using POST to fetch data
-				if v.method == "GET" || (v.method == "POST" && strings.Contains(endpoint, "fileArray")) {
+				if v.method == "GET" || (v.method == "POST" && strings.Contains(endpoint, "fileArray")) || (v.method == "POST" && strings.Contains(endpoint, "bulkblocks")) {
+					//                 if v.method == "GET" || (v.method == "POST" && strings.Contains(endpoint, "fileArray")) {
 					err = json.NewDecoder(r.Body).Decode(&d)
 					if err != nil {
 						t.Fatalf("Failed to decode body, %v", err)
@@ -108,6 +109,9 @@ func runTestWorkflow(t *testing.T, c EndpointTestCase) {
 				} else if v.method == "POST" {
 					rURL := parseURL(t, server.URL, endpoint, v.params)
 					rr, err := respRecorder("GET", rURL.RequestURI(), nil, handler)
+					// VK: why we use respRecorder with GET method here?
+					//     I would expect something like:
+					//     rr, err := respRecorder("POST", endpoint, reader, handler)
 					if err != nil {
 						t.Error(err)
 					}
