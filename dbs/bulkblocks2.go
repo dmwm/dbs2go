@@ -445,6 +445,21 @@ func getDatasetID(
 	return datasetID, nil
 }
 
+// helper function to check if block exist in DBS database
+func checkBlockExist(bName, hash string) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		return Error(err, TransactionErrorCode, hash, "dbs.bulkblocks.checkBlockExist")
+	}
+	defer tx.Rollback()
+	if rid, err := GetID(tx, "BLOCKS", "block_id", "block_name", bName); err == nil && rid != 0 {
+		err := errors.New(fmt.Sprintf("Block %s already exists", bName))
+		msg := "Data already exist in DBS"
+		return Error(err, BlockAlreadyExists, msg, "dbs.bulkblocks.checkBlockExist")
+	}
+	return nil
+}
+
 // InsertBulkBlocksConcurrently DBS API provides concurrent bulk blocks
 // insertion. It inherits the same logic as BulkBlocks API but perform
 // Files and FileLumis injection concurrently via chunk of record.
@@ -506,6 +521,12 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	var primaryDatasetTypeID, primaryDatasetID, acquisitionEraID, processingEraID int64
 	var dataTierID, physicsGroupID, processedDatasetID, datasetAccessTypeID int64
 	creationDate := time.Now().Unix()
+
+	// check if give block name exist in DBS, if it does, we
+	// abort the entire process
+	if err = checkBlockExist(rec.Block.BlockName, hash); err != nil {
+		return err
+	}
 
 	// check if is_file_valid was present in request, if not set it to 1
 	if !strings.Contains(string(data), "is_file_valid") {
@@ -666,11 +687,8 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	}
 	// check if give block name exist in DBS, if it does, we
 	// abort the entire process
-	bName := rec.Block.BlockName
-	if rid, err := GetID(tx, "BLOCKS", "block_id", "block_name", bName); err == nil && rid != 0 {
-		err := errors.New(fmt.Sprintf("Block %s already exists", bName))
-		msg := "Data already exist in DBS"
-		return Error(err, BlockAlreadyExists, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+	if err = checkBlockExist(rec.Block.BlockName, hash); err != nil {
+		return err
 	}
 
 	// get blockID
