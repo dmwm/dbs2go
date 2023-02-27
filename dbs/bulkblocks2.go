@@ -453,8 +453,7 @@ func checkBlockExist(bName, hash string) error {
 	}
 	defer tx.Rollback()
 	if rid, err := GetID(tx, "BLOCKS", "block_id", "block_name", bName); err == nil && rid != 0 {
-		err := errors.New(fmt.Sprintf("Block %s already exists", bName))
-		msg := "Data already exist in DBS"
+		msg := fmt.Sprintf("Block %s already exists", bName)
 		return Error(err, BlockAlreadyExists, msg, "dbs.bulkblocks.checkBlockExist")
 	}
 	return nil
