@@ -113,12 +113,11 @@ func getBulkBlocksLargeFileLumiInsertTestTable(t *testing.T) EndpointTestCase {
 func bulkblocksTheSameBlockInsertTestTable(t *testing.T) EndpointTestCase {
 	// there are multiple blocks to insert, but everything is started from parent blocks
 	bName := TestData.ParentStepchainBlock
-	reason := fmt.Sprintf("Block %s already exists", bName)
-	msg := "Data already exist in DBS"
+	msg := fmt.Sprintf("Block %s already exists", bName)
 	dbsError := dbs.DBSError{
 		Function: "dbs.bulkblocks.checkBlockExist",
 		Code:     dbs.BlockAlreadyExists,
-		Reason:   reason,
+		Reason:   "nil",
 		Message:  msg,
 	}
 	hrec := createHTTPError("POST", "/dbs/bulkblocks")
