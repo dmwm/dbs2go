@@ -13,6 +13,7 @@ import (
 )
 
 // Datasets API
+//
 //gocyclo:ignore
 func (a *API) Datasets() error {
 	if utils.VERBOSE > 1 {
@@ -355,6 +356,7 @@ func (r *Datasets) Insert(tx *sql.Tx) error {
 }
 
 // Validate implementation of Datasets
+//
 //gocyclo:ignore
 func (r *Datasets) Validate() error {
 	if err := CheckPattern("dataset", r.DATASET); err != nil {
@@ -474,6 +476,7 @@ type DatasetRecord struct {
 // - processing era info
 // - output module config info
 // - insert dataset info
+//
 //gocyclo:ignore
 func (a *API) InsertDatasets() error {
 	// read given input
@@ -501,7 +504,7 @@ func (a *API) InsertDatasets() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get DB transaction")
+		msg := "unable to get DB transaction"
 		return Error(err, TransactionErrorCode, msg, "dbs.datasets.InsertDatasets")
 	}
 	defer tx.Rollback()
@@ -662,8 +665,16 @@ func (a *API) InsertDatasets() error {
 }
 
 // UpdateDatasets DBS API
+//
 //gocyclo:ignore
 func (a *API) UpdateDatasets() error {
+
+	var args []interface{}
+
+	tmpl := make(Record)
+	tmpl["Owner"] = DBOWNER
+	tmpl["PhysicsGroup"] = false
+	tmpl["DatasetAccessType"] = false
 
 	// get accessTypeID from Access dataset types table
 	var createBy string
@@ -675,9 +686,33 @@ func (a *API) UpdateDatasets() error {
 			createBy = t[0]
 		}
 	}
+
+	date := time.Now().Unix()
+
 	var isValidDataset int64
 	var dataset string
 	var datasetAccessType string
+	var physicsGroupName string
+	if v, ok := a.Params["dataset_access_type"]; ok {
+		tmpl["DatasetAccessType"] = true
+		switch t := v.(type) {
+		case string:
+			datasetAccessType = t
+		case []string:
+			datasetAccessType = t[0]
+		}
+	}
+
+	if v, ok := a.Params["physics_group_name"]; ok {
+		tmpl["PhysicsGroup"] = true
+		switch t := v.(type) {
+		case string:
+			physicsGroupName = t
+		case []string:
+			physicsGroupName = t[0]
+		}
+	}
+
 	if v, ok := a.Params["dataset"]; ok {
 		switch t := v.(type) {
 		case string:
@@ -686,35 +721,41 @@ func (a *API) UpdateDatasets() error {
 			dataset = t[0]
 		}
 	}
-	if v, ok := a.Params["dataset_access_type"]; ok {
-		switch t := v.(type) {
-		case string:
-			datasetAccessType = t
-		case []string:
-			datasetAccessType = t[0]
-		}
-	}
-	date := time.Now().Unix()
 
 	// validate input parameters
-	if dataset == "" {
-		msg := "invalid dataset parameter"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-	}
 	if createBy == "" {
 		msg := "invalid create_by parameter"
 		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
-	if datasetAccessType == "" {
-		msg := "invalid datasetAccessType parameter"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+
+	if tmpl["PhysicsGroup"].(bool) {
+		if physicsGroupName == "" {
+			msg := "invalid physics_group parameter"
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
 	}
-	if datasetAccessType == "VALID" {
-		isValidDataset = 1
+
+	if tmpl["DatasetAccessType"].(bool) {
+		if datasetAccessType == "" {
+			msg := "invalid datasetAccessType parameter"
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
+		if datasetAccessType == "VALID" {
+			isValidDataset = 1
+		}
+	}
+
+	if dataset == "" {
+		msg := "invalid dataset parameter"
+		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
 
 	// get SQL statement from static area
-	stm := getSQL("update_datasets")
+	// stm := getSQL("update_datasets")
+	stm, err := LoadTemplateSQL("update_datasets", tmpl)
+	if err != nil {
+		return Error(err, LoadErrorCode, "", "dbs.datasets.UpdateDatasets")
+	}
 	if utils.VERBOSE > 0 {
 		params := []string{dataset, datasetAccessType}
 		log.Printf("update Datasets\n%s\n%+v", stm, params)
@@ -727,19 +768,49 @@ func (a *API) UpdateDatasets() error {
 		return Error(err, TransactionErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
 	defer tx.Rollback()
-	accessTypeID, err := GetID(
-		tx,
-		"DATASET_ACCESS_TYPES",
-		"dataset_access_type_id",
-		"dataset_access_type",
-		datasetAccessType)
-	if err != nil {
-		if utils.VERBOSE > 0 {
-			log.Println("unable to find dataset_access_type_id for", datasetAccessType)
+
+	args = append(args, createBy)
+
+	var physicsGroupID int64
+	if tmpl["PhysicsGroup"].(bool) {
+		physicsGroupID, err = GetID(
+			tx,
+			"PHYSICS_GROUPS",
+			"physics_group_id",
+			"physics_group_name",
+			physicsGroupName)
+		if err != nil {
+			if utils.VERBOSE > 0 {
+				log.Println("unable to find physics_group_id for", physicsGroupName)
+			}
+			return Error(err, GetIDErrorCode, "", "dbs.datasets.UpdateDatasets")
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.datasets.UpdateDatasets")
+		args = append(args, physicsGroupID)
 	}
-	_, err = tx.Exec(stm, createBy, date, accessTypeID, isValidDataset, dataset)
+
+	if tmpl["DatasetAccessType"].(bool) {
+		accessTypeID, err := GetID(
+			tx,
+			"DATASET_ACCESS_TYPES",
+			"dataset_access_type_id",
+			"dataset_access_type",
+			datasetAccessType)
+		if err != nil {
+			if utils.VERBOSE > 0 {
+				log.Println("unable to find dataset_access_type_id for", datasetAccessType)
+			}
+			return Error(err, GetIDErrorCode, "", "dbs.datasets.UpdateDatasets")
+		}
+		args = append(args, accessTypeID)
+		args = append(args, isValidDataset)
+	}
+
+	args = append(args, date)
+	args = append(args, dataset)
+
+	// perform update
+	// _, err = tx.Exec(stm, createBy, date, accessTypeID, isValidDataset, physicsGroupID, dataset)
+	_, err = tx.Exec(stm, args...)
 	if err != nil {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to update %v", err)

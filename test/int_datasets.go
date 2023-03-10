@@ -74,9 +74,9 @@ type datasetsDetailVersionResponse struct {
 }
 
 // creates a dataset request
-func createDSRequest(dataset string, procdataset string, dsType string, outputConfs []dbs.OutputConfigRecord) dbs.DatasetRecord {
+func createDSRequest(dataset string, procdataset string, dsType string, physGroup string, outputConfs []dbs.OutputConfigRecord) dbs.DatasetRecord {
 	return dbs.DatasetRecord{
-		PHYSICS_GROUP_NAME:  TestData.PhysicsGroupName,
+		PHYSICS_GROUP_NAME:  physGroup,
 		DATASET:             dataset,
 		DATASET_ACCESS_TYPE: dsType,
 		PROCESSED_DS_NAME:   procdataset,
@@ -102,10 +102,10 @@ func createDSResponse(dataset string) datasetsResponse {
 }
 
 // creates a detailed datasets response
-func createDetailDSResponse(datasetID int64, dataset string, procdataset string, dsType string) datasetsDetailResponse {
+func createDetailDSResponse(datasetID int64, dataset string, procdataset string, dsType string, physicsGroupName string) datasetsDetailResponse {
 	return datasetsDetailResponse{
 		DATASET_ID:             datasetID,
-		PHYSICS_GROUP_NAME:     TestData.PhysicsGroupName,
+		PHYSICS_GROUP_NAME:     physicsGroupName,
 		DATASET:                dataset,
 		DATASET_ACCESS_TYPE:    dsType,
 		PROCESSED_DS_NAME:      procdataset,
@@ -151,7 +151,7 @@ func createDetailVersionDSResponse(datasetID int64, dataset string, procdataset 
 }
 
 // datasets endpoint tests
-//* Note: depends on above tests for their *_id
+// * Note: depends on above tests for their *_id
 // TODO: include prep_id in POST tests
 // TODO: DBSClientWriter_t.test11
 func getDatasetsTestTable(t *testing.T) EndpointTestCase {
@@ -164,14 +164,14 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 			GLOBAL_TAG:          TestData.GlobalTag,
 		},
 	}
-	dsReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, outputConfs)
-	dsParentReq := createDSRequest(TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType, outputConfs)
+	dsReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, TestData.PhysicsGroupName, outputConfs)
+	dsParentReq := createDSRequest(TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType, TestData.PhysicsGroupName, outputConfs)
 
 	// record without output_configs
-	noOMCReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, []dbs.OutputConfigRecord{})
+	noOMCReq := createDSRequest(TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, TestData.PhysicsGroupName, []dbs.OutputConfigRecord{})
 
 	// alternative access type request
-	dsAccessTypeReq := createDSRequest(TestData.Dataset2, TestData.ProcDataset, "PRODUCTION", outputConfs)
+	dsAccessTypeReq := createDSRequest(TestData.Dataset2, TestData.ProcDataset, "PRODUCTION", TestData.PhysicsGroupName, outputConfs)
 
 	// basic responses
 	dsResp := createDSResponse(TestData.Dataset)
@@ -179,7 +179,7 @@ func getDatasetsTestTable(t *testing.T) EndpointTestCase {
 	dsAccessTypeResp := createDSResponse(TestData.Dataset2)
 
 	// detail responses
-	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
+	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, TestData.PhysicsGroupName)
 
 	// detail responses for output_config parameters
 	dsDetailVersResp := createDetailVersionDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
@@ -575,8 +575,8 @@ func getDatasetsTestTable2(t *testing.T) EndpointTestCase {
 	}
 	dsResp := createDSResponse(TestData.Dataset)
 	dsParentResp := createDSResponse(TestData.ParentDataset)
-	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType)
-	dsDetailParentResp := createDetailDSResponse(2, TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType)
+	dsDetailResp := createDetailDSResponse(1, TestData.Dataset, TestData.ProcDataset, TestData.DatasetAccessType, TestData.PhysicsGroupName)
+	dsDetailParentResp := createDetailDSResponse(2, TestData.ParentDataset, TestData.ParentProcDataset, TestData.DatasetAccessType, TestData.PhysicsGroupName)
 	runs := strings.ReplaceAll(fmt.Sprint(TestData.Runs), " ", ",")
 
 	datasetsParamErr := dbs.CreateInvalidParamError("fnal", "datasets")
@@ -794,6 +794,12 @@ type datasetsUpdateRequest struct {
 	DATASET_ACCESS_TYPE string `json:"dataset_access_type"`
 }
 
+// struct for datasets update request physics_group
+type datasetsPhysicsGroupUpdateRequest struct {
+	DATASET            string `json:"dataset"`
+	PHYSICS_GROUP_NAME string `json:"physics_group_name"`
+}
+
 // third datasets endpoint tests for update datasets
 func getDatasetsTestTable3(t *testing.T) EndpointTestCase {
 	// basic responses
@@ -913,6 +919,131 @@ func getDatasetParentsTestTable(t *testing.T) EndpointTestCase {
 					errorResp,
 				},
 				respCode: http.StatusBadRequest,
+			},
+		},
+	}
+}
+
+// test updating physics group name
+func getDatasetPhysicsGroupUpdateTestTable(t *testing.T) EndpointTestCase {
+	physicsGroup1 := dbs.PhysicsGroups{
+		PHYSICS_GROUP_NAME: "PleaseChangeMe",
+	}
+	physicsGroup2 := dbs.PhysicsGroups{
+		PHYSICS_GROUP_NAME: "PickMe",
+	}
+	physicsGroup1Resp := physicsGroupsResponse{
+		PHYSICS_GROUP_NAME: "PleaseChangeMe",
+	}
+	physicsGroup2Resp := physicsGroupsResponse{
+		PHYSICS_GROUP_NAME: "PickMe",
+	}
+	datasetName := "/unittest_web_primary_ds_name_8268/acq_era_8268-v8268/GEN-SIM-UPDATE-RAW"
+	dsReq := createDSRequest(datasetName, TestData.ProcDataset, TestData.DatasetAccessType, physicsGroup1.PHYSICS_GROUP_NAME, []dbs.OutputConfigRecord{})
+	dsUpdateReq := datasetsPhysicsGroupUpdateRequest{
+		DATASET:            datasetName,
+		PHYSICS_GROUP_NAME: physicsGroup2.PHYSICS_GROUP_NAME,
+	}
+	dsResp1 := createDetailDSResponse(9, datasetName, TestData.ProcDataset, TestData.DatasetAccessType, physicsGroup1.PHYSICS_GROUP_NAME)
+	dsResp2 := createDetailDSResponse(9, datasetName, TestData.ProcDataset, TestData.DatasetAccessType, physicsGroup2.PHYSICS_GROUP_NAME)
+	dsResp2.LAST_MODIFIED_BY = "DBS-workflow"
+	return EndpointTestCase{
+		description:     "Test dataset with physics group renaming update",
+		defaultHandler:  web.DatasetsHandler,
+		defaultEndpoint: "/dbs/datasets",
+		testCases: []testCase{
+			{
+				description: "Add physics group",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				endpoint:    "/dbs/physicsgroups",
+				handler:     web.PhysicsGroupsHandler,
+				input:       physicsGroup1,
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Check if physics group was added",
+				method:      "GET",
+				serverType:  "DBSReader",
+				endpoint:    "/dbs/physicsgroups",
+				handler:     web.PhysicsGroupsHandler,
+				params: url.Values{
+					"physics_group_name": []string{physicsGroup1.PHYSICS_GROUP_NAME},
+				},
+				output: []Response{
+					physicsGroup1Resp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Add dataset",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				input:       dsReq,
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Verify dataset",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset": []string{datasetName},
+					"detail":  []string{"true"},
+				},
+				output: []Response{
+					dsResp1,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Update dataset without adding physics_group",
+				method:      "PUT",
+				serverType:  "DBSWriter",
+				input:       dsUpdateReq,
+				respCode:    http.StatusBadRequest,
+			},
+			{
+				description: "Add second physics group",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				endpoint:    "/dbs/physicsgroups",
+				handler:     web.PhysicsGroupsHandler,
+				input:       physicsGroup2,
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Check if physics group was added",
+				method:      "GET",
+				serverType:  "DBSReader",
+				endpoint:    "/dbs/physicsgroups",
+				handler:     web.PhysicsGroupsHandler,
+				params: url.Values{
+					"physics_group_name": []string{physicsGroup2.PHYSICS_GROUP_NAME},
+				},
+				output: []Response{
+					physicsGroup2Resp,
+				},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Update dataset with adding physics_group",
+				method:      "PUT",
+				serverType:  "DBSWriter",
+				input:       dsUpdateReq,
+				respCode:    http.StatusOK,
+			},
+			{
+				description: "Verify updated dataset",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"dataset": []string{datasetName},
+					"detail":  []string{"true"},
+				},
+				output: []Response{
+					dsResp2,
+				},
+				respCode: http.StatusOK,
 			},
 		},
 	}
