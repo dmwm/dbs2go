@@ -942,6 +942,10 @@ func getDatasetPhysicsGroupUpdateTestTable(t *testing.T) EndpointTestCase {
 	dsReq := createDSRequest(datasetName, TestData.ProcDataset, TestData.DatasetAccessType, physicsGroup1.PHYSICS_GROUP_NAME, []dbs.OutputConfigRecord{})
 	dsUpdateReq := datasetsPhysicsGroupUpdateRequest{
 		DATASET:            datasetName,
+		PHYSICS_GROUP_NAME: "BadN@me",
+	}
+	dsUpdateReq2 := datasetsPhysicsGroupUpdateRequest{
+		DATASET:            datasetName,
 		PHYSICS_GROUP_NAME: physicsGroup2.PHYSICS_GROUP_NAME,
 	}
 	dsResp1 := createDetailDSResponse(9, datasetName, TestData.ProcDataset, TestData.DatasetAccessType, physicsGroup1.PHYSICS_GROUP_NAME)
@@ -1026,10 +1030,17 @@ func getDatasetPhysicsGroupUpdateTestTable(t *testing.T) EndpointTestCase {
 				respCode: http.StatusOK,
 			},
 			{
-				description: "Update dataset with adding physics_group",
+				description: "Update dataset with an invalid physics_group",
 				method:      "PUT",
 				serverType:  "DBSWriter",
 				input:       dsUpdateReq,
+				respCode:    http.StatusBadRequest,
+			},
+			{
+				description: "Update dataset with new physics_group",
+				method:      "PUT",
+				serverType:  "DBSWriter",
+				input:       dsUpdateReq2,
 				respCode:    http.StatusOK,
 			},
 			{

@@ -149,7 +149,6 @@ test-integration:
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_READER_LEXICON_FILE=../static/lexicon_reader.json \
 	DBS_WRITER_LEXICON_FILE=../static/lexicon_writer.json \
-	DBS_DB_FILE=./dbfile \
 	DBS_DB_FILE=/tmp/dbs-test.db \
 	INTEGRATION_DATA_FILE=./data/integration/integration_data.json \
 	BULKBLOCKS_DATA_FILE=./data/integration/bulkblocks_data.json \

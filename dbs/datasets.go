@@ -664,6 +664,33 @@ func (a *API) InsertDatasets() error {
 	return nil
 }
 
+// Validate POST/PUT Parameters
+func (a *API) ValidateParameters() error {
+	for key := range a.Params {
+		var value string
+		if v, ok := a.Params[key]; ok {
+			switch t := v.(type) {
+			case string:
+				value = t
+			case []string:
+				value = t[0]
+			}
+		}
+		if value == "" {
+			msg := fmt.Sprintf("invalid %s parameter", key)
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
+		if key == "physics_group_name" {
+			key = "physics_group"
+		}
+		if err := CheckPattern(key, value); err != nil {
+			msg := fmt.Sprintf("%s parameter pattern invalid", key)
+			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
+	}
+	return nil
+}
+
 // UpdateDatasets DBS API
 //
 //gocyclo:ignore
@@ -676,7 +703,11 @@ func (a *API) UpdateDatasets() error {
 	tmpl["PhysicsGroup"] = false
 	tmpl["DatasetAccessType"] = false
 
-	// get accessTypeID from Access dataset types table
+	// validate parameteres
+	if err := a.ValidateParameters(); err != nil {
+		return Error(err, ValidateErrorCode, "", "dbs.datasets.UpdateDatasets")
+	}
+
 	var createBy string
 	if v, ok := a.Params["create_by"]; ok {
 		switch t := v.(type) {
@@ -701,6 +732,14 @@ func (a *API) UpdateDatasets() error {
 		case []string:
 			datasetAccessType = t[0]
 		}
+		if datasetAccessType == "" {
+			msg := "invalid datasetAccessType parameter"
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
+		if err := CheckPattern("dataset_access_type", datasetAccessType); err != nil {
+			msg := "datasetAccessType parameter pattern invalid"
+			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
 	}
 
 	if v, ok := a.Params["physics_group_name"]; ok {
@@ -711,6 +750,14 @@ func (a *API) UpdateDatasets() error {
 		case []string:
 			physicsGroupName = t[0]
 		}
+		if physicsGroupName == "" {
+			msg := "invalid physics_group parameter"
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
+		if err := CheckPattern("physics_group", physicsGroupName); err != nil {
+			msg := "physics_group_name parameter pattern invalid"
+			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
 	}
 
 	if v, ok := a.Params["dataset"]; ok {
@@ -720,6 +767,14 @@ func (a *API) UpdateDatasets() error {
 		case []string:
 			dataset = t[0]
 		}
+		if dataset == "" {
+			msg := "invalid dataset parameter"
+			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
+		if err := CheckPattern("dataset", dataset); err != nil {
+			msg := "dataset parameter pattern invalid"
+			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
+		}
 	}
 
 	// validate input parameters
@@ -728,26 +783,10 @@ func (a *API) UpdateDatasets() error {
 		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
 
-	if tmpl["PhysicsGroup"].(bool) {
-		if physicsGroupName == "" {
-			msg := "invalid physics_group parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
-	}
-
 	if tmpl["DatasetAccessType"].(bool) {
-		if datasetAccessType == "" {
-			msg := "invalid datasetAccessType parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
 		if datasetAccessType == "VALID" {
 			isValidDataset = 1
 		}
-	}
-
-	if dataset == "" {
-		msg := "invalid dataset parameter"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
 	}
 
 	// get SQL statement from static area
@@ -788,6 +827,7 @@ func (a *API) UpdateDatasets() error {
 		args = append(args, physicsGroupID)
 	}
 
+	// get accessTypeID from Access dataset types table
 	if tmpl["DatasetAccessType"].(bool) {
 		accessTypeID, err := GetID(
 			tx,
