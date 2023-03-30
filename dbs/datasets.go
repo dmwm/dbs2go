@@ -665,30 +665,21 @@ func (a *API) InsertDatasets() error {
 }
 
 // Validate POST/PUT Parameters
-func (a *API) ValidateParameters() error {
-	for key := range a.Params {
-		var value string
-		if v, ok := a.Params[key]; ok {
-			switch t := v.(type) {
-			case string:
-				value = t
-			case []string:
-				value = t[0]
-			}
-		}
-		if value == "" {
-			msg := fmt.Sprintf("invalid %s parameter", key)
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
-		if key == "physics_group_name" {
-			key = "physics_group"
-		}
-		if err := CheckPattern(key, value); err != nil {
-			msg := fmt.Sprintf("%s parameter pattern invalid", key)
-			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
+func ValidateParameter(params Record, key string) (string, error) {
+	var value string
+	value, err := getSingleValue(params, key)
+	if err != nil {
+		return "", Error(err, ParseErrorCode, "", "dbs.datasets.UpdateDatasets")
 	}
-	return nil
+	if value == "" {
+		msg := fmt.Sprintf("invalid %s parameter", key)
+		return "", Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
+	}
+	if err := CheckPattern(key, value); err != nil {
+		msg := fmt.Sprintf("%s parameter pattern invalid", key)
+		return "", Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
+	}
+	return value, nil
 }
 
 // UpdateDatasets DBS API
@@ -704,18 +695,13 @@ func (a *API) UpdateDatasets() error {
 	tmpl["DatasetAccessType"] = false
 
 	// validate parameteres
-	if err := a.ValidateParameters(); err != nil {
-		return Error(err, ValidateErrorCode, "", "dbs.datasets.UpdateDatasets")
-	}
-
 	var createBy string
-	if v, ok := a.Params["create_by"]; ok {
-		switch t := v.(type) {
-		case string:
-			createBy = t
-		case []string:
-			createBy = t[0]
+	if _, ok := a.Params["create_by"]; ok {
+		v, err := ValidateParameter(a.Params, "create_by")
+		if err != nil {
+			return Error(err, ValidateErrorCode, "", "dbs.datasets.UpdateDatasets")
 		}
+		createBy = v
 	}
 
 	date := time.Now().Unix()
@@ -724,66 +710,34 @@ func (a *API) UpdateDatasets() error {
 	var dataset string
 	var datasetAccessType string
 	var physicsGroupName string
-	if v, ok := a.Params["dataset_access_type"]; ok {
+	// validate dataset_access_type parameter
+	if _, ok := a.Params["dataset_access_type"]; ok {
 		tmpl["DatasetAccessType"] = true
-		switch t := v.(type) {
-		case string:
-			datasetAccessType = t
-		case []string:
-			datasetAccessType = t[0]
+		v, err := ValidateParameter(a.Params, "dataset_access_type")
+		if err != nil {
+			return Error(err, ValidateErrorCode, "", "dbs.datasets.UpdateDatasets")
 		}
-		if datasetAccessType == "" {
-			msg := "invalid datasetAccessType parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
-		if err := CheckPattern("dataset_access_type", datasetAccessType); err != nil {
-			msg := "datasetAccessType parameter pattern invalid"
-			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
+		datasetAccessType = v
 	}
 
-	if v, ok := a.Params["physics_group_name"]; ok {
+	// validate physics_group_name parameter
+	// ^[a-zA-Z0-9/][a-zA-Z0-9\\-_']*$
+	if _, ok := a.Params["physics_group_name"]; ok {
 		tmpl["PhysicsGroup"] = true
-		switch t := v.(type) {
-		case string:
-			physicsGroupName = t
-		case []string:
-			physicsGroupName = t[0]
+		v, err := ValidateParameter(a.Params, "physics_group_name")
+		if err != nil {
+			return Error(err, ValidateErrorCode, "", "dbs.datasets.UpdateDatasets")
 		}
-		if physicsGroupName == "" {
-			msg := "invalid physics_group parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
-		if err := CheckPattern("physics_group", physicsGroupName); err != nil {
-			msg := "physics_group_name parameter pattern invalid"
-			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
+		physicsGroupName = v
 	}
 
-	if v, ok := a.Params["dataset"]; ok {
-		switch t := v.(type) {
-		case string:
-			dataset = t
-		case []string:
-			dataset = t[0]
+	// validate dataset parameter
+	if _, ok := a.Params["dataset"]; ok {
+		v, err := ValidateParameter(a.Params, "dataset")
+		if err != nil {
+			return Error(err, ValidateErrorCode, "", "dbs.datasets.UpdateDatasets")
 		}
-		if dataset == "" {
-			msg := "invalid dataset parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
-		if err := CheckPattern("dataset", dataset); err != nil {
-			msg := "dataset parameter pattern invalid"
-			return Error(err, PatternErrorCode, msg, "dbs.datasets.UpdateDatasets")
-		}
-	}
-
-	// validate input parameters
-	if createBy == "" {
-		msg := "invalid create_by parameter"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.datasets.UpdateDatasets")
-	}
-
-	if tmpl["DatasetAccessType"].(bool) {
+		dataset = v
 		if datasetAccessType == "VALID" {
 			isValidDataset = 1
 		}
@@ -809,6 +763,7 @@ func (a *API) UpdateDatasets() error {
 	defer tx.Rollback()
 
 	args = append(args, createBy)
+	args = append(args, date)
 
 	var physicsGroupID int64
 	if tmpl["PhysicsGroup"].(bool) {
@@ -845,7 +800,6 @@ func (a *API) UpdateDatasets() error {
 		args = append(args, isValidDataset)
 	}
 
-	args = append(args, date)
 	args = append(args, dataset)
 
 	// perform update
