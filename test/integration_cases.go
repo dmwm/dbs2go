@@ -604,6 +604,7 @@ func LoadTestCases(t *testing.T, filepath string, bulkblockspath string, largeBu
 	)
 	// endpointTestCases = append(endpointTestCases, largeFileLumiInsertTestTable)
 	// endpointTestCases = append(endpointTestCases, filesReaderAfterChunkTestTable)
+	endpointTestCases = append(endpointTestCases, getDatasetPhysicsGroupUpdateTestTable(t))
 
 	return endpointTestCases
 }

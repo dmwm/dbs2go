@@ -95,7 +95,7 @@
   {
     "name": "physics_group",
     "patterns": [
-      "^([a-zA-Z0-9\\-_]+)$"
+      "^[a-zA-Z0-9][a-zA-Z0-9\\-_]*$"
     ],
     "length": -1
   },

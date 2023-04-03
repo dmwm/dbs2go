@@ -379,6 +379,7 @@ func parsePayload(r *http.Request) (dbs.Record, error) {
 }
 
 // DBSPutHandler is a generic Post Handler to call DBS Post APIs
+//
 //gocyclo:ignore
 func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 	atomic.AddUint64(&TotalPutRequests, 1)
@@ -442,12 +443,13 @@ func DBSPutHandler(w http.ResponseWriter, r *http.Request, a string) {
 		err = api.UpdateFiles()
 	}
 	if err != nil {
-		responseMsg(w, r, err, http.StatusInternalServerError)
+		responseMsg(w, r, err, http.StatusBadRequest)
 		return
 	}
 }
 
 // DBSPostHandler is a generic Post Handler to call DBS Post APIs
+//
 //gocyclo:ignore
 func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 	atomic.AddUint64(&TotalPostRequests, 1)
@@ -573,6 +575,7 @@ func DBSPostHandler(w http.ResponseWriter, r *http.Request, a string) {
 }
 
 // DBSGetHandler is a generic Get handler to call DBS Get APIs.
+//
 //gocyclo:ignore
 func DBSGetHandler(w http.ResponseWriter, r *http.Request, a string) {
 	atomic.AddUint64(&TotalGetRequests, 1)
@@ -813,7 +816,7 @@ func RunSummariesHandler(w http.ResponseWriter, r *http.Request) {
 	DBSGetHandler(w, r, "runsummaries")
 }
 
-//ProcessingErasHandler provices access to ProcessingEras DBS API.
+// ProcessingErasHandler provices access to ProcessingEras DBS API.
 // Takes the following arguments: processing_version
 func ProcessingErasHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
