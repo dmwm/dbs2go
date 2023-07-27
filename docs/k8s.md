@@ -35,7 +35,7 @@ dbs2go-phys03-w
 where we deploy multiple instance per service, i.e. five `dbs-global-r`
 instances, etc.
 
-### CMSWEB
+### CMSWEB k8s deployment
 To deploy DBS on CMSWEB k8s cluster we need few things in place:
 - deployment script from [CMSKubernetes](https://github.com/dmwm/CMSKubernetes) repository
 - DBS secret files

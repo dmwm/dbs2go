@@ -9,7 +9,7 @@ by CMS collaboration. Please refer to the appropriate section of `dbs2go`
 documentation:
 
 - [Installation instruction](docs/Installation.md)
-  - [DBS deployment on CMSWEB](docs/k8s.md) clusters
+  - [DBS deployment on CMSWEB k8s cluster](docs/k8s.md)
 - [DBS Server architecture](docs/DBSServer.md)
   - [DBS Reader](docs/DBSReader.md)
   - [DBS Writer](docs/DBSWriter.md)
