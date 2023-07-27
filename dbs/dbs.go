@@ -263,13 +263,13 @@ func getValues(params Record, key string) []string {
 			return v
 		case string:
 			return []string{v}
-		case interface{}:
-			return []string{fmt.Sprintf("%v", v)}
 		case []interface{}:
 			for _, val := range v {
 				out = append(out, fmt.Sprintf("%v", val))
 			}
 			return out
+		case interface{}:
+			return []string{fmt.Sprintf("%v", v)}
 		}
 	}
 	return out
@@ -281,7 +281,7 @@ func getSingleValue(params Record, key string) (string, error) {
 	if len(values) > 0 {
 		return values[0], nil
 	}
-	msg := fmt.Sprintf("no list is allowed for provided key: %s", key)
+	msg := fmt.Sprintf("list is not allowed for provided key: %s", key)
 	return "", Error(InvalidParamErr, ParseErrorCode, msg, "dbs.getSingleValue")
 }
 
@@ -348,6 +348,7 @@ func CleanStatement(stm string) string {
 // here we use http response writer in order to make encoder
 // then we literally stream data with our encoder (i.e. write records
 // to writer)
+//
 //gocyclo:ignore
 func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 	stm = CleanStatement(stm)
@@ -458,6 +459,7 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 }
 
 // similar to executeAll function but it takes explicit set of columns and values
+//
 //gocyclo:ignore
 func execute(
 	w io.Writer,
