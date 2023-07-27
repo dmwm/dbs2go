@@ -73,3 +73,20 @@ deploy-srv.sh <service> <tag> <env>
 # for example, to deploy dbs2go-global-r service in test environment (test3) we will use
 deploy-srv.sh dbs2go-global-r v0.0.0 test3
 ```
+
+### CMSWEB clusters
+We deploy DBS in different CMSWEB clusters, therefore you may choose the one
+for your concrete deployment:
+- [`test3`](https://gitlab.cern.ch/cmsweb-k8s-admin/k8s_admin_config/-/blob/master/config.test3/config.cmsweb-test3)
+  is dedicated DBS dev clusters
+- [`dbs-prod`](https://gitlab.cern.ch/cmsweb-k8s-admin/k8s_admin_config/-/blob/master/config.prod/config.dbs-prod)
+  is dedicated CMSWEB DBS production cluster
+- [`cmsweb-k8s-services-prod`](https://gitlab.cern.ch/cmsweb-k8s-admin/k8s_admin_config/-/blob/master/config.prod/config.cmsweb-k8s-services-prod)
+  is CMSWEB production cluster (which is different
+  from DBS production one)
+- [`cmsweb-testbed`](https://gitlab.cern.ch/cmsweb-k8s-admin/k8s_admin_config/-/blob/master/config.preprod/config.cmsweb-testbed)
+  is CMSWEB testbed cluster
+
+**PLEASE NOTE:** the provided link points to specific gitlab configuration
+file which you should set via `KUBECONFIG` environment variable. But they can
+change over time and you should check their location or name with CMSWEB operator.
