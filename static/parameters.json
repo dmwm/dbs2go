@@ -156,7 +156,7 @@
     {
         "api": "fileparents",
         "parameters": [
-            "logical_file_name", "block_name", "block_id"
+            "logical_file_name", "block_name", "block_id", "missing_files"
         ]
     },
     {
