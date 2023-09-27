@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -36,6 +37,61 @@ func getFileParentsTestTable(t *testing.T) EndpointTestCase {
 		Type:      "HTTPError",
 		Message:   dbsError.Error(),
 	}
+
+	// insert fileparent record requests
+	partialChildParentIDList := [][]int64{
+		{21, 25},
+		{22, -1},
+		{23, -1},
+		{24, -1},
+		{25, -1},
+	}
+	fpBlockPartialRecordGood := dbs.FileParentBlockRecord{
+		BlockName:         BulkBlocksData.SequentialParentData.Block.BlockName,
+		ChildParentIDList: partialChildParentIDList,
+		MissingFiles:      4,
+	}
+	fpBlockPartialRecordBad := dbs.FileParentBlockRecord{
+		BlockName:         BulkBlocksData.SequentialParentData.Block.BlockName,
+		ChildParentIDList: partialChildParentIDList,
+		MissingFiles:      3,
+	}
+
+	completeChildParentIDList := [][]int64{
+		{21, 1},
+		{22, 2},
+		{23, 3},
+		{24, 4},
+		{25, 5},
+	}
+	fpBlockCompleteRecordGood := dbs.FileParentBlockRecord{
+		BlockName:         BulkBlocksData.SequentialParentData.Block.BlockName,
+		ChildParentIDList: completeChildParentIDList,
+		MissingFiles:      0,
+	}
+
+	// responses for fileparents
+	// logical_file_name:/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_ptr/p8268/5.root
+	// parent_file_id:1
+	// parent_logical_file_name:/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p8268/1.root
+	var fpRespList []Response
+	for i := 1; i <= 5; i++ {
+		lfn := fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/IDEAL_/p%v/%v.root", TestData.UID, i)
+		fpR := fileParentResponse{
+			LOGICAL_FILE_NAME:        BulkBlocksData.SequentialChildData.Files[i-1].LogicalFileName,
+			PARENT_FILE_ID:           i,
+			PARENT_LOGICAL_FILE_NAME: lfn,
+		}
+		fpRespList = append(fpRespList, fpR)
+	}
+	fpR := fileParentResponse{
+		LOGICAL_FILE_NAME:        BulkBlocksData.SequentialChildData.Files[0].LogicalFileName,
+		PARENT_FILE_ID:           25,
+		PARENT_LOGICAL_FILE_NAME: BulkBlocksData.SequentialParentData.Files[4].LogicalFileName,
+	}
+	fpRespList = append(fpRespList[:2], fpRespList[1:]...)
+	fpRespList[1] = fpR
+
 	return EndpointTestCase{
 		description:     "Test fileparents",
 		defaultHandler:  web.FileParentsHandler,
@@ -68,6 +124,49 @@ func getFileParentsTestTable(t *testing.T) EndpointTestCase {
 				params:      url.Values{},
 				output:      []Response{errorResp},
 				respCode:    http.StatusBadRequest,
+			},
+			{
+				description: "Test fileparents insert with partial parentage and bad missingFiles",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				params: url.Values{
+					"block_name": []string{BulkBlocksData.SequentialChildData.Block.BlockName},
+				},
+				input:    fpBlockPartialRecordBad,
+				output:   []Response{},
+				respCode: http.StatusBadRequest,
+			},
+			{
+				description: "Test fileparents insert with partial parentage and good missingFiles",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				params: url.Values{
+					"block_name": []string{BulkBlocksData.SequentialChildData.Block.BlockName},
+				},
+				input:    fpBlockPartialRecordGood,
+				output:   []Response{},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test fileparents insert with complete parentage and good missingFiles",
+				method:      "POST",
+				serverType:  "DBSWriter",
+				params: url.Values{
+					"block_name": []string{BulkBlocksData.SequentialChildData.Block.BlockName},
+				},
+				input:    fpBlockCompleteRecordGood,
+				output:   []Response{},
+				respCode: http.StatusOK,
+			},
+			{
+				description: "Test GET fileparents with parent block name",
+				method:      "GET",
+				serverType:  "DBSReader",
+				params: url.Values{
+					"block_name": []string{BulkBlocksData.SequentialParentData.Block.BlockName},
+				},
+				output:   fpRespList,
+				respCode: http.StatusOK,
 			},
 		},
 	}

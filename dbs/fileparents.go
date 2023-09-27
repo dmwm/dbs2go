@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 
 	"github.com/dmwm/dbs2go/utils"
 )
@@ -363,31 +362,12 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		log.Println("block fids != file ids")
 		log.Println("block ids", bfids)
 		log.Println("file  ids", fids)
-
-		// return list of children with missing parents
-		missingFids := make([]int64, 0)
-		if rec.MissingFiles > 0 {
-			for _, v := range rec.ChildParentIDList {
-				parentFileID := v[1]
-				if parentFileID == 0 {
-					missingFids = append(missingFids, v[0])
-				}
-			}
-		}
-
-		// check if number missing files matches the given missingFiles. returns error if len does not match
-		if len(missingFids) != int(rec.MissingFiles) {
-			msg := fmt.Sprintf("not all files present in block")
-			log.Println("number of child fileIDs without parentage does not match the provided missingFiles")
-			return Error(RecordErr, ParametersErrorCode, msg, "dbs.fileparents.InsertFileParentsBlockTxt")
-			// return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
-		} else {
-			log.Println("number of child fileIDs without parentage matches given missingFiles")
-		}
+		msg := fmt.Sprintf("not all files present in block")
+		return Error(RecordErr, ParametersErrorCode, msg, "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 
 	// now we can loop over provided list and insert file parents
-	var missingFiles int64
+	var missingFiles []FileParents
 	var validatedChildParentIDList []FileParents
 	for _, v := range rec.ChildParentIDList {
 		var r FileParents
@@ -398,20 +378,24 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		}
 		err = r.Validate()
 		if err != nil {
-			if strings.Contains(err.(*DBSError).Message, "missing parent_file_id") {
-				log.Printf("record has missing parent_file_id: %v", r)
-				missingFiles = missingFiles + 1
-				continue
-			} else {
-				log.Println("unable to validate the record", r, "error", err)
-				return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
-			}
+			log.Println("unable to validate the record", r, "error", err)
+			return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
 		}
-		validatedChildParentIDList = append(validatedChildParentIDList, r)
+		// only provide list of child parent that have parentage
+		// otherwise, skip partial parentage and add to the missingFiles count
+		if r.PARENT_FILE_ID > 0 {
+			validatedChildParentIDList = append(validatedChildParentIDList, r)
+		} else {
+			missingFiles = append(missingFiles, r)
+		}
+	}
+
+	if len(missingFiles) > 0 {
+		log.Printf("files without parentage: %v", missingFiles)
 	}
 
 	// check if provided MissingFiles matches the amount of mising files found
-	if missingFiles != rec.MissingFiles {
+	if len(missingFiles) != int(rec.MissingFiles) {
 		log.Println("provided missingFiles does not match number of pairs with no parentage")
 		return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
