@@ -3,6 +3,7 @@ package dbs
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -60,10 +61,11 @@ func (a *API) FileParents() error {
 // FileParents represents file parents DBS DB table
 type FileParents struct {
 	THIS_FILE_ID   int64 `json:"this_file_id" validate:"required,number,gt=0"`
-	PARENT_FILE_ID int64 `json:"parent_file_id" validate:"required,number,gt=0"`
+	PARENT_FILE_ID int64 `json:"parent_file_id" validate:"required,number"` // TODO: may need to modify to handle `none` from python
 }
 
 // Insert implementation of FileParents
+//
 //gocyclo:ignore
 func (r *FileParents) Insert(tx *sql.Tx) error {
 	var tid int64
@@ -206,6 +208,7 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 }
 
 // Validate implementation of FileParents
+// TODO: handle this for partial parentage
 func (r *FileParents) Validate() error {
 	if err := RecordValidator.Struct(*r); err != nil {
 		return DecodeValidatorError(r, err)
@@ -239,6 +242,7 @@ func (r *FileParents) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
+		errors.Unwrap(err)
 		return Error(err, UnmarshalErrorCode, "", "dbs.fileparents.Decode")
 	}
 	return nil
@@ -274,12 +278,17 @@ func (a *API) InsertFileParents() error {
 }
 
 // FileParentBlockRecord represents file parent DBS record
+// BlockName: name of the block
+// ChildParentIDList: list of child and parent file ids
+// MissingFiles: Number of missing files in the child and parent file list
 type FileParentBlockRecord struct {
 	BlockName         string    `json:"block_name"`
 	ChildParentIDList [][]int64 `json:"child_parent_id_list"`
+	MissingFiles      int64     `json:"missing_files"`
 }
 
 // InsertFileParentsBlockTxt DBS API
+//
 //gocyclo:ignore
 func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	// read given input
@@ -358,6 +367,8 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	}
 
 	// now we can loop over provided list and insert file parents
+	var missingFiles []FileParents
+	var validatedChildParentIDList []FileParents
 	for _, v := range rec.ChildParentIDList {
 		var r FileParents
 		r.THIS_FILE_ID = v[0]
@@ -370,6 +381,27 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 			log.Println("unable to validate the record", r, "error", err)
 			return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
 		}
+		// only provide list of child parent that have parentage
+		// otherwise, skip partial parentage and add to the missingFiles count
+		if r.PARENT_FILE_ID > 0 {
+			validatedChildParentIDList = append(validatedChildParentIDList, r)
+		} else {
+			missingFiles = append(missingFiles, r)
+		}
+	}
+
+	if len(missingFiles) > 0 {
+		log.Printf("files without parentage: %v", missingFiles)
+	}
+
+	// check if provided MissingFiles matches the amount of mising files found
+	if len(missingFiles) != int(rec.MissingFiles) {
+		log.Println("provided missingFiles does not match number of pairs with no parentage")
+		return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+	}
+
+	// only insert valid child parent id lists
+	for _, r := range validatedChildParentIDList {
 		err = r.Insert(tx)
 		if err != nil {
 			if utils.VERBOSE > 1 {

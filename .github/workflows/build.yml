@@ -119,6 +119,7 @@ jobs:
 #     - run: docker push cmssw/dbs2go:${{steps.get-ref.outputs.tag}}
 
     - name: Push new image to k8s
+      if: "!contains(${{steps.get-ref.outputs.tag}}, 'dev')"
       run: |
         curl -ksLO https://raw.githubusercontent.com/vkuznet/imagebot/main/imagebot.sh
         sed -i -e "s,COMMIT,${{github.sha}},g" -e "s,REPOSITORY,${{github.repository}},g" -e "s,NAMESPACE,dbs,g" -e "s,TAG,${{steps.get-ref.outputs.tag}},g" -e "s,IMAGE,registry.cern.ch/cmsweb/dbs2go,g" -e "s,SERVICE,dbs2go,g" -e "s,HOST,${{secrets.IMAGEBOT_URL}},g" imagebot.sh

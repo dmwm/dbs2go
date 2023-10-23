@@ -209,7 +209,7 @@ func generateBaseData(t *testing.T, filepath string) {
 }
 
 // creates a file for bulkblocks
-func createFile(t *testing.T, i int) dbs.File {
+func createFile(t *testing.T, parent string, i int) dbs.File {
 	return dbs.File{
 		Adler32:          "NOTSET",
 		FileType:         "EDM",
@@ -234,7 +234,7 @@ func createFile(t *testing.T, i int) dbs.File {
 			},
 		},
 		EventCount:      201,
-		LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_/p%v/%v.root", TestData.UID, i),
+		LogicalFileName: fmt.Sprintf("/store/mc/Fall08/BBJets250to500-madgraph/GEN-SIM-RAW/StepChain_%v/p%v/%v.root", parent, TestData.UID, i),
 		IsFileValid:     1,
 	}
 }
@@ -330,7 +330,7 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 	var parentFileList2 []dbs.File
 	var childFileList2 []dbs.File
 	for i := 0; i < fileCount; i++ {
-		f := createFile(t, i)
+		f := createFile(t, "ptr", i)
 		parentFileList = append(parentFileList, f)
 
 		var parentAlgo dbs.FileConfig
@@ -353,7 +353,7 @@ func generateBulkBlocksData(t *testing.T, filepath string) {
 		childAlgo.LFN = childf.LogicalFileName
 		bulk.FileConfigList = append(bulk.FileConfigList, childAlgo)
 
-		f2 := createFile(t, i+fileCount)
+		f2 := createFile(t, "ptr", i+fileCount)
 		parentFileList2 = append(parentFileList2, f2)
 		childf2 := f2
 		childFileList2 = append(childFileList2, childf2)
@@ -456,7 +456,7 @@ func generateLargeBulkBlocksData(t *testing.T, fileLumiChunkSize int, filepath s
 	parentBulk.Dataset.ProcessedDSName = TestData.ParentProcDataset + "3"
 
 	var parentFileList []dbs.File
-	f := createFile(t, 1)
+	f := createFile(t, "ptr", 1)
 
 	var fileLumiList []dbs.FileLumi
 	for i := 0; i < fileLumiChunkSize; i++ {

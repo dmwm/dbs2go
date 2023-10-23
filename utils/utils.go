@@ -73,10 +73,11 @@ func ErrPropagate(api string) {
 
 // ErrPropagate2Channel helper function which can be used in goroutines as
 // ch := make(chan interface{})
-// go func() {
-//    defer ErrPropagate2Channel(api, ch)
-//    someFunction()
-// }()
+//
+//	go func() {
+//	   defer ErrPropagate2Channel(api, ch)
+//	   someFunction()
+//	}()
 func ErrPropagate2Channel(api string, ch chan interface{}) {
 	if err := recover(); err != nil {
 		log.Println("ERROR", api, "error", err, Stack())
@@ -155,6 +156,26 @@ func Equal[T ListEntry](a, b []T) bool {
 		}
 	}
 	return true
+}
+
+// Diff provides a slice of the different elements from a and b
+func Diff[T ListEntry](a, b []T) []T {
+	diff := make([]T, 0)
+	m := map[T]int{}
+	for _, aVal := range a {
+		m[aVal] = 1
+	}
+	for _, bVal := range b {
+		m[bVal] = m[bVal] + 1
+	}
+
+	for mKey, mVal := range m {
+		if mVal == 1 {
+			diff = append(diff, mKey)
+		}
+	}
+
+	return diff
 }
 
 // MapKeys returns string keys from a map
