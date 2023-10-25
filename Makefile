@@ -1,14 +1,22 @@
 VERSION=`git describe --tags`
 flags=-ldflags="-s -w -X main.gitVersion=${VERSION}"
 debug_flags=-ldflags="-X main.gitVersion=${VERSION}"
+
+# we'll acquire architecture of the node and disable ORACLE libs for arm so far
+# as there is no official ORACLE build on that architecture
 arch:=$(shell uname -p)
 ifeq ($(arch),arm)
-	odir=""
+odir=""
 else
 odir=`cat ${PKG_CONFIG_PATH}/oci8.pc | grep "libdir=" | sed -e "s,libdir=,,"`
 endif
 
+ifeq ($(arch),arm)
+.IGNORE:
+all: strip_oracle build restore_oracle
+else
 all: build
+endif
 
 vet:
 	go vet .
@@ -16,6 +24,7 @@ vet:
 ORAFILES =  web/server.go test/merge/main.go test/seq/seq.go test/http_test.go test/writer_test.go
 
 strip_oracle:
+	$(info ### on $(arch) platform there is no ORALCE libs, we will disable their drivers from the build)
 	for f in $(ORAFILES); do \
 		sed -i -e "s,_ \"github.com/mattn/go-oci8\",//_ \"github.com/mattn/go-oci8\",g" $$f; \
 		sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",//_ \"gopkg.in/rana/ora.v4\",g" $$f; \
@@ -23,6 +32,7 @@ strip_oracle:
 	done
 
 restore_oracle: $(ORAFILES)
+	$(info ### on $(arch) platform there is no ORALCE libs, we will restore them after the build)
 	for f in $(ORAFILES); do \
 		sed -i -e "s,//_ \"github.com/mattn/go-oci8\",_ \"github.com/mattn/go-oci8\",g" $$f; \
 		sed -i -e "s,//_ \"gopkg.in/rana/ora.v4\",_ \"gopkg.in/rana/ora.v4\",g" $$f; \
@@ -30,16 +40,25 @@ restore_oracle: $(ORAFILES)
 	done
 
 build:
+	$(info ### building dbs2go executable on $(arch))
 	go clean; rm -rf pkg dbs2go*; go build ${flags}
+	@echo
+
+.IGNORE:
+build_no_oracle: strip_oracle build restore_oracle
 
 build_debug:
 	go clean; rm -rf pkg dbs2go*; go build -gcflags=all="-N -l" ${debug_flags}
 
-build_all: build build_osx build_linux build_power8 build_arm64
+build_all: build build_osx build_osx_arm64 build_linux build_power8 build_arm64
 
 build_osx:
 	go clean; rm -rf pkg dbs2go_osx; GOOS=darwin go build ${flags}
-	mv dbs2go dbs2go_osx
+	mv dbs2go dbs2go_osx_x86
+
+build_osx_arm64:
+	go clean; rm -rf pkg dbs2go_osx; GOARCH=arm64 GOOS=darwin go build ${flags}
+	mv dbs2go dbs2go_osx_arm64
 
 build_linux:
 	go clean; rm -rf pkg dbs2go_linux; GOOS=linux go build ${flags}
@@ -59,7 +78,13 @@ install:
 clean:
 	go clean; rm -rf pkg
 
+ifeq ($(arch),arm)
+test_all: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
+.IGNORE:
+test: strip_oracle test_all restore_oracle
+else
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
+endif
 
 test-github: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-writer test-lexicon test-integration test-migration-requests test-migration bench
 
