@@ -11,14 +11,15 @@ package web
 //              http://golang.org/pkg/html/template/
 // Go examples: https://gobyexample.com/
 // for Go database API: http://go-database-sql.org/overview.html
-// Oracle drivers:
-//   _ "gopkg.in/rana/ora.v4"
-//   _ "github.com/mattn/go-oci8"
-// MySQL driver:
-//   _ "github.com/go-sql-driver/mysql"
-// SQLite driver:
-//  _ "github.com/mattn/go-sqlite3"
-//
+/*
+Oracle drivers:
+  _ "gopkg.in/rana/ora.v4"
+  _ "github.com/mattn/go-oci8"
+MySQL driver:
+  _ "github.com/go-sql-driver/mysql"
+SQLite driver:
+ _ "github.com/mattn/go-sqlite3"
+*/
 // Get profile's output
 // visit http://localhost:<port>/debug/pprof
 // or generate png plots
