@@ -1,12 +1,33 @@
 VERSION=`git describe --tags`
 flags=-ldflags="-s -w -X main.gitVersion=${VERSION}"
 debug_flags=-ldflags="-X main.gitVersion=${VERSION}"
+arch:=$(shell uname -p)
+ifeq ($(arch),arm)
+	odir=""
+else
 odir=`cat ${PKG_CONFIG_PATH}/oci8.pc | grep "libdir=" | sed -e "s,libdir=,,"`
+endif
 
 all: build
 
 vet:
 	go vet .
+
+ORAFILES =  web/server.go test/merge/main.go test/seq/seq.go test/http_test.go test/writer_test.go
+
+strip_oracle:
+	for f in $(ORAFILES); do \
+		sed -i -e "s,_ \"github.com/mattn/go-oci8\",//_ \"github.com/mattn/go-oci8\",g" $$f; \
+		sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",//_ \"gopkg.in/rana/ora.v4\",g" $$f; \
+		rm $$f-e; \
+	done
+
+restore_oracle: $(ORAFILES)
+	for f in $(ORAFILES); do \
+		sed -i -e "s,//_ \"github.com/mattn/go-oci8\",_ \"github.com/mattn/go-oci8\",g" $$f; \
+		sed -i -e "s,//_ \"gopkg.in/rana/ora.v4\",_ \"gopkg.in/rana/ora.v4\",g" $$f; \
+		rm $$f-e; \
+	done
 
 build:
 	go clean; rm -rf pkg dbs2go*; go build ${flags}
