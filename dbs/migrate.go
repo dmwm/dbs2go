@@ -578,6 +578,7 @@ func alreadyQueued(input string) error {
 		return err
 	}
 	if mid != 0 {
+		// ATTENTION! Changing following string will break CRAB Publisher
 		msg := fmt.Sprintf("migration request %s is already exist in DB with id=%d", input, mid)
 		return errors.New(msg)
 	}
