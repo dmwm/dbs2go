@@ -95,9 +95,27 @@ func responseMsg(w http.ResponseWriter, r *http.Request, err error, code int) in
 	// otherwise we'll use list of JSON records
 	var out []ServerError
 	out = append(out, rec)
-	data, _ := json.Marshal(out)
+	data, err := json.Marshal(out)
+	if err != nil {
+		log.Println("ERROR: unable to json.Marshal", err)
+	}
+
+	// properly define HTTP writer headers
+	w.Header().Del("Content-Encoding")
+	w.Header().Del("Accept-Encoding")
+	w.Header().Del("Content-Type")
 	w.Header().Add("Content-Type", "application/json")
+
+	// define HTTP writer as gzip one if it is requested in request
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Add("Content-Encoding", "gzip")
+		gw := gzip.NewWriter(w)
+		defer gw.Close()
+		w = utils.GzipWriter{GzipWriter: gw, Writer: w}
+	}
+	// write status code first (but after all headers)
 	w.WriteHeader(code)
+	// write body after status code
 	w.Write(data)
 	return int64(len(data))
 }
