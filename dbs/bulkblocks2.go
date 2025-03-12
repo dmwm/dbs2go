@@ -505,7 +505,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		pfid, err := QueryRow("FILES", "file_id", "logical_file_name", plfn)
 		if err != nil {
 			msg := fmt.Sprintf("unable to find parent lfn %s", plfn)
-			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, FileParentDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		parentFilesMap[plfn] = pfid
 	}
