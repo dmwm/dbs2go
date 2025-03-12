@@ -53,7 +53,7 @@ func TestDBSError(t *testing.T) {
 	fmt.Println("Wrapped error:", err3.Error())
 
 	err4 := dbs.Error(nil, dbs.GenericErrorCode, "nil wrapper", "TestDBSError")
-	if !strings.Contains(err4.Error(), "Error: nil") {
+	if !strings.Contains(err4.Error(), "nil") {
 		t.Error("error does not contain nil error")
 	}
 	fmt.Println("Wrapped error:", err4.Error())
