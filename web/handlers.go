@@ -266,6 +266,18 @@ func ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// TestErrorHandler provides basic functionality of status response
+func TestErrorHandler(w http.ResponseWriter, r *http.Request) {
+	err := dbs.Error(errors.New("original error"), dbs.GenericErrorCode, "test", "web.TestErrorHandler")
+	e := dbs.Error(err, dbs.LastAvailableErrorCode, "test", "web.TestErrorHandler")
+	if r.Header.Get("Accept") == "application/json" {
+		responseMsg(w, r, e, http.StatusInternalServerError)
+		return
+	}
+	http.Error(w, e.Error(), http.StatusInternalServerError)
+	w.WriteHeader(http.StatusInternalServerError)
+}
+
 // StatusHandler provides basic functionality of status response
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	// we will use DBS DatasetAccessTypes API to check status of DBS

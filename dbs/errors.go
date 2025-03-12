@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
-	"strings"
 )
 
 // GenericErr represents generic dbs error
@@ -91,24 +90,16 @@ type DBSError struct {
 
 // Error function implements details of DBS error message
 func (e *DBSError) Error() string {
-	sep := ": "
-	if strings.Contains(e.Reason, "DBSError") { // nested error
-		sep += "nested "
-	}
 	return fmt.Sprintf(
-		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v",
-		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason)
+		"\nDBSError\n   Code: %d\n   Description: %s\n   Function: %s\n   Message: %s\n   Reason: %v\n",
+		e.Code, e.Explain(), e.Function, e.Message, e.Reason)
 }
 
 // ErrorStacktrace function implements details of DBS error message and stacktrace
 func (e *DBSError) ErrorStacktrace() string {
-	sep := ": "
-	if strings.Contains(e.Reason, "DBSError") { // nested error
-		sep += "nested "
-	}
 	return fmt.Sprintf(
-		"DBSError Code:%d Description:%s Function:%s Message:%s Error%s%v Stacktrace: %v",
-		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason, e.Stacktrace)
+		"\nDBSError Stacktrace\n   Code: %d\n   Description: %s\n   Function: %s\n   Message: %s\n   Reason: %v\nStacktrace: %v\n\n",
+		e.Code, e.Explain(), e.Function, e.Message, e.Reason, e.Stacktrace)
 }
 
 func (e *DBSError) Explain() string {
