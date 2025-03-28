@@ -21,7 +21,7 @@ endif
 vet:
 	go vet .
 
-ORAFILES =  web/server.go test/merge/main.go test/seq/seq.go test/http_test.go test/writer_test.go
+ORAFILES =  web/server.go test/merge/main.go test/seq/seq.go test/http_test.go test/writer_test.go test/oracle_drivers_test.go test/seq/oracle_drivers_test.go test/merge/oracle_drivers_test.go cgotest/oracle_drivers.go
 
 strip_oracle:
 	$(info ### on $(arch) platform there is no ORALCE libs, we will disable their drivers from the build)
@@ -92,6 +92,7 @@ test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reade
 
 test-errors:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} go test -v -run TestDBSError
+test-errors-no-oracle: strip_oracle test-errors restore_oracle
 test-dbs:
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
