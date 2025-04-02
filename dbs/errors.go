@@ -36,48 +36,71 @@ var InvalidRequestErr = errors.New("invalid request error")
 
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
-	GenericErrorCode               = iota + 100 // generic DBS error
-	DatabaseErrorCode                           // 101 database error
-	TransactionErrorCode                        // 102 transaction error
-	QueryErrorCode                              // 103 query error
-	RowsScanErrorCode                           // 104 row scan error
-	SessionErrorCode                            // 105 db session error
-	CommitErrorCode                             // 106 db commit error
-	ParseErrorCode                              // 107 parser error
-	LoadErrorCode                               // 108 loading error, e.g. load template
-	GetIDErrorCode                              // 109 get id db error
-	InsertErrorCode                             // 110 db insert error
-	UpdateErrorCode                             // 111 update error
-	LastInsertErrorCode                         // 112 db last insert error
-	ValidateErrorCode                           // 113 validation error
-	PatternErrorCode                            // 114 pattern error
-	DecodeErrorCode                             // 115 decode error
-	EncodeErrorCode                             // 116 encode error
-	ContentTypeErrorCode                        // 117 content type error
-	ParametersErrorCode                         // 118 parameters error
-	NotImplementedApiCode                       // 119 not implemented API error
-	ReaderErrorCode                             // 120 io reader error
-	WriterErrorCode                             // 121 io writer error
-	UnmarshalErrorCode                          // 122 json unmarshal error
-	MarshalErrorCode                            // 123 marshal error
-	HttpRequestErrorCode                        // 124 HTTP request error
-	MigrationErrorCode                          // 125 Migration error
-	RemoveErrorCode                             // 126 remove error
-	InvalidRequestErrorCode                     // 127 invalid request error
-	BlockAlreadyExists                          // 128 block xxx already exists in DBS
-	FileDataTypesDoesNotExist                   // 129 FileDataTypes does not exist in DBS
-	FileParentDoesNotExist                      // 130 FileParent does not exist in DBS
-	DatasetParentDoesNotExist                   // 131 DatasetParent does not exist in DBS
-	ProcessedDatasetDoesNotExist                // 132 ProcessedDataset does not exist in DBS
-	PrimaryDatasetTypeDoesNotExist              // 133 PrimaryDatasetType does not exist in DBS
-	PrimaryDatasetDoesNotExist                  // 134 PrimaryDataset does not exist in DBS
-	ProcessingEraDoesNotExist                   // 135 ProcessingEra does not exist in DBS
-	AcquisitionEraDoesNotExist                  // 136 AcquisitionEra does not exist in DBS
-	DataTierDoesNotExist                        // 137 DataTier does not exist in DBS
-	PhysicsGroupDoesNotExist                    // 138 PhysicsGroup does not exist in DBS
-	DatasetAccessTypeDoesNotExist               // 139 DatasetAccessType does not exist in DBS
-	DatasetDoesNotExist                         // 140 Dataset does not exist in DBS
-	LastAvailableErrorCode                      // last available DBS error code
+	GenericErrorCode                           = iota + 100 // generic DBS error
+	DatabaseErrorCode                                       // 101 database error
+	TransactionErrorCode                                    // 102 transaction error
+	QueryErrorCode                                          // 103 query error
+	RowsScanErrorCode                                       // 104 row scan error
+	SessionErrorCode                                        // 105 db session error
+	CommitErrorCode                                         // 106 db commit error
+	ParseErrorCode                                          // 107 parser error
+	LoadErrorCode                                           // 108 loading error, e.g. load template
+	GetIDErrorCode                                          // 109 get id db error
+	InsertErrorCode                                         // 110 db insert error
+	UpdateErrorCode                                         // 111 update error
+	LastInsertErrorCode                                     // 112 db last insert error
+	ValidateErrorCode                                       // 113 validation error
+	PatternErrorCode                                        // 114 pattern error
+	DecodeErrorCode                                         // 115 decode error
+	EncodeErrorCode                                         // 116 encode error
+	ContentTypeErrorCode                                    // 117 content type error
+	ParametersErrorCode                                     // 118 parameters error
+	NotImplementedApiCode                                   // 119 not implemented API error
+	ReaderErrorCode                                         // 120 io reader error
+	WriterErrorCode                                         // 121 io writer error
+	UnmarshalErrorCode                                      // 122 json unmarshal error
+	MarshalErrorCode                                        // 123 marshal error
+	HttpRequestErrorCode                                    // 124 HTTP request error
+	MigrationErrorCode                                      // 125 Migration error
+	RemoveErrorCode                                         // 126 remove error
+	InvalidRequestErrorCode                                 // 127 invalid request error
+	BlockAlreadyExists                                      // 128 block xxx already exists in DBS
+	FileDataTypesDoesNotExist                               // 129 FileDataTypes does not exist in DBS
+	FileParentDoesNotExist                                  // 130 FileParent does not exist in DBS
+	DatasetParentDoesNotExist                               // 131 DatasetParent does not exist in DBS
+	ProcessedDatasetDoesNotExist                            // 132 ProcessedDataset does not exist in DBS
+	PrimaryDatasetTypeDoesNotExist                          // 133 PrimaryDatasetType does not exist in DBS
+	PrimaryDatasetDoesNotExist                              // 134 PrimaryDataset does not exist in DBS
+	ProcessingEraDoesNotExist                               // 135 ProcessingEra does not exist in DBS
+	AcquisitionEraDoesNotExist                              // 136 AcquisitionEra does not exist in DBS
+	DataTierDoesNotExist                                    // 137 DataTier does not exist in DBS
+	PhysicsGroupDoesNotExist                                // 138 PhysicsGroup does not exist in DBS
+	DatasetAccessTypeDoesNotExist                           // 139 DatasetAccessType does not exist in DBS
+	DatasetDoesNotExist                                     // 140 Dataset does not exist in DBS
+	InsertOutputConfigErrorCode                             // 141 output config insert error
+	UnableToReadBulkblockInput                              // 142 unable to read bulk block input payload
+	DatasetOutputModConfigsErrorCode                        // 143 DatasetOutputModConfigs insert error
+	GetBlockIDErrorCode                                     // 144 get block ID error
+	FileInsertErrorCode                                     // 145 file insert error code
+	UnableToFindFileIDErrorCode                             // 146 unable to find file id error code
+	InsertFileLumisErrorCode                                // 147 insert file lumis error code
+	InsertFileOutputModConfigsErrorCode                     // 148 insert fiel output mod config error code
+	InsertFileParentsErrorCode                              // 149 insert file parents error code
+	InsertDatasetParentsErrorCode                           // 150 insert dataset parents error code
+	IncrementSeqFLErrorCode                                 // 151 increment SQL_FL error code in file table
+	InsertFileErrorCode                                     // 152 insert file error code
+	FailToCommitDatasetConfigurationsErrorCode              // 153 fail to commit dataset configurations
+	FailToCommitPrimaryDatasetTypeIDErrorCode               // 154 fail to commit primary dataset type ID
+	FailToGetPrimaryDatasetIDErrorCode                      // 155 fail to get primary dataset ID
+	FailToGetProcessingEraIDErrorCode                       // 156 fail to get processing era ID
+	FailToGetAcquisitionEraIDErrorCode                      // 157 fail to get acquisition era ID
+	FailToGetDatatierIDErrorCode                            // 158 fail to get datatier ID
+	FailToGetPhysicsGroupIDErrorCode                        // 159 fail to get physics group ID
+	FailToGetDatasetAccessTypeIDErrorCode                   // 160 fail to get dataset access type ID
+	FailToGetProcessedDatasetIDErrorCode                    // 161 fail to get processed dataset ID
+	FailToGetDatasetIDErrorCode                             // 162 fail to get dataset ID
+	FailToInserBulkblocksErrorCode                          // 163 fail to insert bulkblocks transaction
+	LastAvailableErrorCode                                  // last available DBS error code
 )
 
 // DBSError represents common structure for DBS errors

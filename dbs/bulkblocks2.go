@@ -53,13 +53,13 @@ func insertDatasetConfigurations(api *API, datasetConfigList DatasetConfigList, 
 		api.Reader = bytes.NewReader(data)
 		err = api.InsertOutputConfigsTx(tx)
 		if err != nil {
-			return Error(err, InsertErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+			return Error(err, InsertOutputConfigErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
 		}
 	}
 	err = tx.Commit()
 	if err != nil {
 		log.Println(hash, "fail to commit transaction", err)
-		return Error(err, CommitErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
+		return Error(err, FailToCommitDatasetConfigurationsErrorCode, hash, "dbs.bulkblocks.insertDatasetConfigurations")
 	}
 	return nil
 }
@@ -94,7 +94,7 @@ func getPrimaryDatasetTypeID(primaryDSType, hash string) (int64, error) {
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetTypeID")
+		return 0, Error(err, FailToCommitPrimaryDatasetTypeIDErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetTypeID")
 	}
 	return primaryDatasetTypeID, nil
 }
@@ -135,7 +135,7 @@ func getPrimaryDatasetID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetID")
+		return 0, Error(err, FailToGetPrimaryDatasetIDErrorCode, msg, "dbs.bulkblocks.getPrimaryDatasetID")
 	}
 	return primaryDatasetID, nil
 }
@@ -175,7 +175,7 @@ func getProcessingEraID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getProcessingEraID")
+		return 0, Error(err, FailToGetProcessingEraIDErrorCode, msg, "dbs.bulkblocks.getProcessingEraID")
 	}
 	return processingEraID, nil
 }
@@ -219,7 +219,7 @@ func getAcquisitionEraID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getAcquisitionEraID")
+		return 0, Error(err, FailToGetAcquisitionEraIDErrorCode, msg, "dbs.bulkblocks.getAcquisitionEraID")
 	}
 	return acquisitionEraID, nil
 }
@@ -260,7 +260,7 @@ func getDataTierID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getDataTierID")
+		return 0, Error(err, FailToGetDatatierIDErrorCode, msg, "dbs.bulkblocks.getDataTierID")
 	}
 	return dataTierID, nil
 }
@@ -295,7 +295,7 @@ func getPhysicsGroupID(physName, hash string) (int64, error) {
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getPhysicsGroupID")
+		return 0, Error(err, FailToGetPhysicsGroupIDErrorCode, msg, "dbs.bulkblocks.getPhysicsGroupID")
 	}
 	return physicsGroupID, nil
 }
@@ -332,7 +332,7 @@ func getDatasetAccessTypeID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getDatasetAccessTypeID")
+		return 0, Error(err, FailToGetDatasetAccessTypeIDErrorCode, msg, "dbs.bulkblocks.getDatasetAccessTypeID")
 	}
 	return datasetAccessTypeID, nil
 }
@@ -369,7 +369,7 @@ func getProcessedDatasetID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getProcessedDatasetID")
+		return 0, Error(err, FailToGetProcessedDatasetIDErrorCode, msg, "dbs.bulkblocks.getProcessedDatasetID")
 	}
 	return processedDatasetID, nil
 }
@@ -440,7 +440,7 @@ func getDatasetID(
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return 0, Error(err, CommitErrorCode, msg, "dbs.bulkblocks.getDatasetID")
+		return 0, Error(err, FailToGetDatasetIDErrorCode, msg, "dbs.bulkblocks.getDatasetID")
 	}
 	return datasetID, nil
 }
@@ -480,7 +480,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("unable to read bulkblock input", err)
-		return Error(err, ReaderErrorCode, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, UnableToReadBulkblockInput, "", "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	// get our request hash ID to be able to trace concurrent requests
 	hash := utils.GetHash(data)
@@ -505,7 +505,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		pfid, err := QueryRow("FILES", "file_id", "logical_file_name", plfn)
 		if err != nil {
 			msg := fmt.Sprintf("unable to find parent lfn %s", plfn)
-			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, FileParentDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		parentFilesMap[plfn] = pfid
 	}
@@ -661,7 +661,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to insert dataset output mod configs record, error %v", hash, err)
 			log.Println(msg)
-			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, DatasetOutputModConfigsErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 
@@ -702,7 +702,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to find block_id for %s, error %v", hash, rec.Block.BlockName, err)
 		log.Println(msg)
-		return Error(err, GetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, GetBlockIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 
 	// insert all FileDataTypes fow all lfns
@@ -740,7 +740,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	if err != nil {
 		msg := fmt.Sprintf("%s unable to insert files, error %v", hash, err)
 		log.Println(msg)
-		return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, FileInsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	if utils.VERBOSE > 1 {
 		log.Printf("trec %+v", trec)
@@ -763,7 +763,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if !ok {
 			msg := fmt.Sprintf("%s unable to find fileID in FilesMap for %s", hash, lfn)
 			log.Println(msg)
-			return Error(RecordErr, QueryErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(RecordErr, UnableToFindFileIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		// there are three methods to insert FileLumi list
 		// - via temp table
@@ -799,7 +799,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 					"%s unable to insert FileLumis records for %s, fileID %d, error %v",
 					hash, lfn, fileID, err)
 				log.Println(msg)
-				return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+				return Error(err, InsertFileLumisErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 			}
 
 		} else {
@@ -835,7 +835,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 				if err != nil {
 					msg := fmt.Sprintf("%s unable to insert FileLumis record, error %v", hash, err)
 					log.Println(msg)
-					return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+					return Error(err, InsertFileLumisErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 				}
 			}
 		}
@@ -854,7 +854,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to insert file output mod config, error %v", hash, err)
 			log.Println(msg)
-			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, InsertFileOutputModConfigsErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 
@@ -895,7 +895,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to insert file parents record %+v, error %v", hash, rrr, err)
 			log.Println(msg)
-			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, InsertFileParentsErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 
@@ -938,7 +938,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to insert parent dataset record, error %v", hash, err)
 			log.Println(msg)
-			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, InsertDatasetParentsErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 
@@ -947,7 +947,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 	if err != nil {
 		msg := fmt.Sprintf("%s fail to commit transaction, error %v", hash, err)
 		log.Println(msg)
-		return Error(err, CommitErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+		return Error(err, FailToInserBulkblocksErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	if utils.VERBOSE > 1 {
 		log.Println(hash, "successfully finished bulkblocks.InsertBulkBlocksConcurrently")
@@ -971,7 +971,7 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	if err != nil {
 		msg := fmt.Sprintf("unable to get file ids, error %v", err)
 		log.Println(msg)
-		return Error(err, LastInsertErrorCode, "", "dbs.bulkblocks2.insertFilesViaChunks")
+		return Error(err, IncrementSeqFLErrorCode, "", "dbs.bulkblocks2.insertFilesViaChunks")
 	}
 	if utils.VERBOSE > 1 {
 		log.Println("get new file Ids", fileIds)
@@ -999,7 +999,7 @@ func insertFilesViaChunks(tx *sql.Tx, records []File, trec *TempFileRecord) erro
 	if trec.NErrors != 0 {
 		msg := fmt.Sprintf("fail to insert files chunks, trec %+v", trec)
 		log.Println(msg)
-		return Error(ConcurrencyErr, InsertErrorCode, "", "dbs.bulkblocks.insertFilesViaChunks")
+		return Error(ConcurrencyErr, InsertFileErrorCode, "", "dbs.bulkblocks.insertFilesViaChunks")
 	}
 	return nil
 }
