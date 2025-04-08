@@ -105,7 +105,7 @@ func DecodeValidatorError(r, err interface{}) error {
 				msg, err.Field(), err.Type(), err.Value(), err.ActualTag(), err.Param())
 		}
 		log.Println(msg)
-		return Error(ValidationErr, DecodeErrorCode, "", "dbs.DecodeValidatorError")
+		return Error(ValidationErr, ValidateErrorCode, msg, "dbs.DecodeValidatorError")
 	}
 	return nil
 }
