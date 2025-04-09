@@ -35,71 +35,109 @@ var InvalidRequestErr = errors.New("invalid request error")
 
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
-	GenericErrorCode                           = iota + 100 // generic DBS error
-	DatabaseErrorCode                                       // 101 database error
-	TransactionErrorCode                                    // 102 transaction error
-	QueryErrorCode                                          // 103 query error
-	RowsScanErrorCode                                       // 104 row scan error
-	SessionErrorCode                                        // 105 db session error
-	CommitErrorCode                                         // 106 db commit error
-	ParseErrorCode                                          // 107 parser error
-	LoadErrorCode                                           // 108 loading error, e.g. load template
-	GetIDErrorCode                                          // 109 get id db error
-	InsertErrorCode                                         // 110 db insert error
-	UpdateErrorCode                                         // 111 update error
-	LastInsertErrorCode                                     // 112 db last insert error
-	ValidateErrorCode                                       // 113 validation error
-	PatternErrorCode                                        // 114 pattern error
-	DecodeErrorCode                                         // 115 decode error
-	EncodeErrorCode                                         // 116 encode error
-	ContentTypeErrorCode                                    // 117 content type error
-	ParametersErrorCode                                     // 118 parameters error
-	NotImplementedApiCode                                   // 119 not implemented API error
-	ReaderErrorCode                                         // 120 io reader error
-	WriterErrorCode                                         // 121 io writer error
-	UnmarshalErrorCode                                      // 122 json unmarshal error
-	MarshalErrorCode                                        // 123 marshal error
-	HttpRequestErrorCode                                    // 124 HTTP request error
-	MigrationErrorCode                                      // 125 Migration error
-	RemoveErrorCode                                         // 126 remove error
-	InvalidRequestErrorCode                                 // 127 invalid request error
-	BlockAlreadyExists                                      // 128 block xxx already exists in DBS
-	FileDataTypesDoesNotExist                               // 129 FileDataTypes does not exist in DBS
-	FileParentDoesNotExist                                  // 130 FileParent does not exist in DBS
-	DatasetParentDoesNotExist                               // 131 DatasetParent does not exist in DBS
-	ProcessedDatasetDoesNotExist                            // 132 ProcessedDataset does not exist in DBS
-	PrimaryDatasetTypeDoesNotExist                          // 133 PrimaryDatasetType does not exist in DBS
-	PrimaryDatasetDoesNotExist                              // 134 PrimaryDataset does not exist in DBS
-	ProcessingEraDoesNotExist                               // 135 ProcessingEra does not exist in DBS
-	AcquisitionEraDoesNotExist                              // 136 AcquisitionEra does not exist in DBS
-	DataTierDoesNotExist                                    // 137 DataTier does not exist in DBS
-	PhysicsGroupDoesNotExist                                // 138 PhysicsGroup does not exist in DBS
-	DatasetAccessTypeDoesNotExist                           // 139 DatasetAccessType does not exist in DBS
-	DatasetDoesNotExist                                     // 140 Dataset does not exist in DBS
-	InsertOutputConfigErrorCode                             // 141 output config insert error
-	UnableToReadBulkblockInput                              // 142 unable to read bulk block input payload
-	DatasetOutputModConfigsErrorCode                        // 143 DatasetOutputModConfigs insert error
-	GetBlockIDErrorCode                                     // 144 get block ID error
-	FileInsertErrorCode                                     // 145 file insert error code
-	UnableToFindFileIDErrorCode                             // 146 unable to find file id error code
-	InsertFileLumisErrorCode                                // 147 insert file lumis error code
-	InsertFileOutputModConfigsErrorCode                     // 148 insert fiel output mod config error code
-	InsertFileParentsErrorCode                              // 149 insert file parents error code
-	InsertDatasetParentsErrorCode                           // 150 insert dataset parents error code
-	IncrementSeqFLErrorCode                                 // 151 increment SQL_FL error code in file table
-	InsertFileErrorCode                                     // 152 insert file error code
-	FailToCommitDatasetConfigurationsErrorCode              // 153 fail to commit dataset configurations
-	FailToCommitPrimaryDatasetTypeIDErrorCode               // 154 fail to commit primary dataset type ID
-	FailToGetPrimaryDatasetIDErrorCode                      // 155 fail to get primary dataset ID
-	FailToGetProcessingEraIDErrorCode                       // 156 fail to get processing era ID
-	FailToGetAcquisitionEraIDErrorCode                      // 157 fail to get acquisition era ID
-	FailToGetDatatierIDErrorCode                            // 158 fail to get datatier ID
-	FailToGetPhysicsGroupIDErrorCode                        // 159 fail to get physics group ID
-	FailToGetDatasetAccessTypeIDErrorCode                   // 160 fail to get dataset access type ID
-	FailToGetProcessedDatasetIDErrorCode                    // 161 fail to get processed dataset ID
-	FailToGetDatasetIDErrorCode                             // 162 fail to get dataset ID
-	FailToInserBulkblocksErrorCode                          // 163 fail to insert bulkblocks transaction
-	LastAvailableErrorCode                                  // last available DBS error code
+	GenericErrorCode          = iota + 100 // generic DBS error
+	DatabaseErrorCode                      // 101 database error
+	TransactionErrorCode                   // 102 transaction error
+	QueryErrorCode                         // 103 query error
+	RowsScanErrorCode                      // 104 row scan error
+	SessionErrorCode                       // 105 db session error
+	CommitErrorCode                        // 106 db commit error
+	ParseErrorCode                         // 107 parser error
+	LoadErrorCode                          // 108 loading template error
+	GetIDErrorCode                         // 109 get id db error
+	InsertErrorCode                        // 110 db insert error
+	UpdateErrorCode                        // 111 update error
+	LastInsertErrorCode                    // 112 db last insert error
+	ValidateErrorCode                      // 113 validation error
+	InvalidPatternErrorCode                // 114 invalid pattern error
+	DecodeErrorCode                        // 115 decode error
+	EncodeErrorCode                        // 116 encode error
+	ContentTypeErrorCode                   // 117 content type error
+	InvalidParameterErrorCode              // 118 invalid JSON payload parameters or validation error
+	NotImplementedApiCode                  // 119 not implemented API error
+	ReaderErrorCode                        // 120 io reader error
+	WriterErrorCode                        // 121 io writer error
+	UnmarshalErrorCode                     // 122 JSON unmarshal (deserialization) error
+	MarshalErrorCode                       // 123 JSON marshal (serialization) error
+	HttpRequestErrorCode                   // 124 HTTP request error
+	MigrationErrorCode                     // 125 Migration error
+	RemoveErrorCode                        // 126 remove error
+	X509ProxyErrorCode                     // 127 X509 proxy error code
+
+	BlockAlreadyExists             = iota + 200 // 200 block xxx already exists in DBS
+	FileDataTypesDoesNotExist                   // 201 FileDataTypes does not exist in DBS
+	FileParentDoesNotExist                      // 202 FileParent does not exist in DBS
+	DatasetParentDoesNotExist                   // 203 DatasetParent does not exist in DBS
+	ProcessedDatasetDoesNotExist                // 204 ProcessedDataset does not exist in DBS
+	PrimaryDatasetTypeDoesNotExist              // 205 PrimaryDatasetType does not exist in DBS
+	PrimaryDatasetDoesNotExist                  // 206 PrimaryDataset does not exist in DBS
+	ProcessingEraDoesNotExist                   // 207 ProcessingEra does not exist in DBS
+	AcquisitionEraDoesNotExist                  // 208 AcquisitionEra does not exist in DBS
+	DataTierDoesNotExist                        // 209 DataTier does not exist in DBS
+	PhysicsGroupDoesNotExist                    // 210 PhysicsGroup does not exist in DBS
+	DatasetAccessTypeDoesNotExist               // 211 DatasetAccessType does not exist in DBS
+	DatasetDoesNotExist                         // 212 Dataset does not exist in DBS
+
+	InsertDatasetErrorCode                = iota + 300 // 300 insert error for dataset
+	InsertDatasetParentErrorCode                       // 301 insert error for dataset parents
+	InsertDatasetOutputModConfigErrorCode              // 302 insert error for DatasetOutputModConfigs
+	InsertDatasetConfigurationsErrorCode               // 303 insert error for dataset configurations
+	InsertDatasetAccessTypeErrorCode                   // 304 insert error for dataset access types
+	InsertBlockErrorCode                               // 305 insert error for block
+	InsertBlockParentErrorCode                         // 306 insert error for block parents
+	InsertBlockStatsErrorCode                          // 307 insert error for block stats
+	InsertBulkblockErrorCode                           // 308 insert error for bulkblocks transaction
+	InsertBlockDumpErrorCode                           // 309 insert error for block dump
+	InsertFileErrorCode                                // 310 insert error for file
+	InsertFileLumiErrorCode                            // 311 insert error for file lumis
+	InsertFileOutputModConfigErrorCode                 // 312 insert error for file output mod config
+	InsertFileParentErrorCode                          // 313 insert error for file parents
+	InsertPrimaryDatasetErrorCode                      // 314 insert error for primary dataset
+	InsertPrimaryDatasetTypeErrorCode                  // 315 insert error for primary dataset type
+	InsertAcquisitionEraErrorCode                      // 316 insert error for acquisition eras
+	InsertOutputConfigErrorCode                        // 317 insert error for output config
+	InsertProcessedDatasetErrorCode                    // 318 insert error for processed dataset
+	InsertApplicationExecutableErrorCode               // 319 insert error for application executable
+	InsertFileDataTypeErrorCode                        // 320 insert error for file data type
+	InsertMigrationBlockErrorCode                      // 321 insert error for migration block
+	InsertMigrationRequestErrorCode                    // 322 insert error for migration request
+	InsertParameterSetHashErrorCode                    // 323 insert error for parameter set hash
+	InsertReleaseVersionErrorCode                      // 324 insert error for release version
+	InsertPhysicsGroupErrorCode                        // 325 insert error for physics group
+	InsertProcessingEraErrorCode                       // 326 insert error for processing era
+	InsertDataTierErrorCode                            // 327 insert error for data tier
+
+	// Missing data error codes, e.g. during insertion of specific error we do not find
+	// proper foreign key relationship (missing error)
+	GetBlockIDErrorCode              = iota + 400 // 400 fail to get block ID
+	GetFileIDErrorCode                            // 401 fail to get find file id
+	GetFileDataTypesIDErrorCode                   // 402 fail to get file data type id
+	GetPrimaryDatasetIDErrorCode                  // 403 fail to get primary dataset id
+	GetProcessingEraIDErrorCode                   // 404 fail to get processing era id
+	GetAcquisitionEraIDErrorCode                  // 405 fail to get acquisition era id
+	GetDatatierIDErrorCode                        // 406 fail to get datatier id
+	GetPhysicsGroupIDErrorCode                    // 407 fail to get physics group id
+	GetDatasetAccessTypeIDErrorCode               // 408 fail to get dataset access type id
+	GetProcessedDatasetIDErrorCode                // 409 fail to get processed dataset id
+	GetDatasetIDErrorCode                         // 410 fail to get dataset id
+	GetPrimaryDSIDErrorCode                       // 411 fail to get primary dataset id
+	GetDataTierIDErrorCode                        // 412 fail to get data tier id
+	GetOutputModConfigIDErrorCode                 // 413 fail to get output mod config id
+	GetPrimaryDatasetTypeIDErrorCode              // 414 fail to get primary dataset types id
+	GetFileDataTypeIDErrorCode                    // 415 fail to get file data type id
+	GetDatasetParentIDErrorCode                   // 416 fail to get dataset parent id
+
+	// update object errors
+	UpdateAcquisitionEraErrorCode = iota + 500 // 500 update acquisition era error
+	UpdateBlockErrorCode                       // 501 update block error
+	UpdateDatasetErrorCode                     // 502 update dataset error
+	UpdateFileErrorCode                        // 503 update file error
+	UpdateMigrationErrorCode                   // 504 update migration error
+	RemoveMigrationErrorCode                   // 505 remove migration error
+	CancelMigrationErrorCode                   // 506 cancel migration error
+	CleanupMigrationErrorCode                  // 507 cleanup migration error
+
+	LastAvailableErrorCode = iota + 900 // last available DBS error code
 )
 
 // DBSError represents common structure for DBS errors
@@ -134,7 +172,7 @@ func (e *DBSError) Explain() string {
 	case TransactionErrorCode:
 		return "DBS DB transaction error"
 	case QueryErrorCode:
-		return "DBS DB query error, e.g. mailformed SQL statement"
+		return "DBS DB query error, e.g. malformed SQL statement"
 	case RowsScanErrorCode:
 		return "DBS DB row scane error, e.g. fail to get DB record from a database"
 	case SessionErrorCode:
@@ -142,7 +180,7 @@ func (e *DBSError) Explain() string {
 	case CommitErrorCode:
 		return "DBS DB transaction commit error"
 	case ParseErrorCode:
-		return "DBS parser error, e.g. mailformed input parameter to the query"
+		return "DBS parser error, e.g. malformed input parameter to the query"
 	case LoadErrorCode:
 		return "DBS file load error, e.g. fail to load DB template"
 	case GetIDErrorCode:
@@ -155,16 +193,16 @@ func (e *DBSError) Explain() string {
 		return "DBS DB laster insert record error, e.g. fail to obtain last inserted ID"
 	case ValidateErrorCode:
 		return "DBS validation error, e.g. input parameter does not match lexicon rules"
-	case PatternErrorCode:
-		return "DBS validation error when wrong pattern is provided"
+	case InvalidParameterErrorCode:
+		return "DBS invalid parameter for the DBS API or validation error"
+	case InvalidPatternErrorCode:
+		return "invalid pattern is provided"
 	case DecodeErrorCode:
-		return "DBS decode record failure, e.g. mailformed JSON"
+		return "DBS decode record failure, e.g. malformed JSON"
 	case EncodeErrorCode:
 		return "DBS encode record failure, e.g. unable to convert structure to JSON"
 	case ContentTypeErrorCode:
 		return "Wrong Content-Type HTTP header in HTTP request"
-	case ParametersErrorCode:
-		return "DBS invalid parameter for the DBS API"
 	case NotImplementedApiCode:
 		return "DBS Not implemented API error"
 	case ReaderErrorCode:
@@ -181,8 +219,6 @@ func (e *DBSError) Explain() string {
 		return "DBS Migration error"
 	case RemoveErrorCode:
 		return "Unable to remove record from DB"
-	case InvalidRequestErrorCode:
-		return "Invalid HTTP request"
 	default:
 		return "Not defined"
 	}
