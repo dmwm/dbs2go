@@ -94,6 +94,7 @@ test-errors:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} go test -v -run TestDBSError
 test-errors-no-oracle: strip_oracle test-errors restore_oracle
 test-dbs:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
@@ -102,6 +103,7 @@ test-dbs:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run TestDBS
 test-bulk:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
@@ -110,6 +112,7 @@ test-bulk:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run Bulk
 test-sql:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	DBS_DB_FILE=/tmp/dbs-test.db \
@@ -118,12 +121,14 @@ test-sql:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run SQL
 test-validator:
+	@set -e; \
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	DBS_DB_FILE=/tmp/dbs-test.db \
 	go test -v -run Validator
 test-http:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	DBS_DB_FILE=/tmp/dbs-test.db \
@@ -132,6 +137,7 @@ test-http:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run HTTP
 test-writer:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	DBS_DB_FILE=/tmp/dbs-test.db \
@@ -140,11 +146,13 @@ test-writer:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run DBSWriter
 test-utils:
+	@set -e; \
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run Utils
 test-migrate:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	DBS_DB_FILE=/tmp/dbs-test.db \
@@ -153,6 +161,7 @@ test-migrate:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run Migrate
 test-filelumis:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	DBS_DB_FILE=/tmp/dbs-test.db \
@@ -161,6 +170,7 @@ test-filelumis:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -v -run FileLumisInjection
 test-lexicon-writer-pos:
+	@set -e; \
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_DB_FILE=/tmp/dbs-test.db \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
@@ -168,6 +178,7 @@ test-lexicon-writer-pos:
 	DBS_LEXICON_SAMPLE_FILE=../static/lexicon_writer_positive.json \
 	go test -v -run LexiconPositive
 test-lexicon-writer-neg:
+	@set -e; \
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_DB_FILE=/tmp/dbs-test.db \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
@@ -175,6 +186,7 @@ test-lexicon-writer-neg:
 	DBS_LEXICON_SAMPLE_FILE=../static/lexicon_writer_negative.json \
 	go test -v -run LexiconNegative
 test-lexicon-reader-pos:
+	@set -e; \
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_DB_FILE=/tmp/dbs-test.db \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
@@ -182,6 +194,7 @@ test-lexicon-reader-pos:
 	DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_positive.json \
 	go test -v -run LexiconPositive
 test-lexicon-reader-neg:
+	@set -e; \
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	DBS_DB_FILE=/tmp/dbs-test.db \
 	DBS_API_PARAMETERS_FILE=../static/parameters.json \
@@ -189,6 +202,7 @@ test-lexicon-reader-neg:
 	DBS_LEXICON_SAMPLE_FILE=../static/lexicon_reader_negative.json \
 	go test -v -run LexiconNegative
 test-integration:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	echo "\"sqlite3 /tmp/dbs-test.db sqlite\"" > ./dbfile && \
@@ -203,6 +217,7 @@ test-integration:
 	FILE_LUMI_LIST_LENGTH=30 \
 	go test -v -failfast -run Integration
 test-migration:
+	@set -e; \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_test_migration && \
 	cd test && \
@@ -210,6 +225,7 @@ test-migration:
 	BULKBLOCKS_DATA_FILE=./data/migration/bulkblocks_data.json \
 	go test -v -failfast -timeout 10m -run IntMigration
 test-migration-requests:
+	@set -e; \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_test_migration && \
 	cd test && \
@@ -217,6 +233,7 @@ test-migration-requests:
 	MIGRATION_REQUESTS_PATH=./data/migration/requests \
 	go test -v -failfast -timeout 10m -run MigrationRequests
 bench:
+	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
 	sqlite3 /tmp/dbs-test.db < ../static/schema/sqlite-schema.sql && \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
@@ -225,6 +242,7 @@ bench:
 	DBS_LEXICON_FILE=../static/lexicon_writer.json \
 	go test -run Benchmark -bench=.
 test-race:
+	@set -e; \
 	LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} \
 	./bin/start_write_servers && \
 	cd test && \
