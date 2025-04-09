@@ -18,7 +18,7 @@ func (a *API) FileParents() error {
 
 	if len(a.Params) == 0 {
 		msg := "logical_file_name, block_id or block_name is required for fileparents api"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparents.FileParents")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.fileparents.FileParents")
 	}
 
 	tmpl := make(Record)
@@ -32,7 +32,7 @@ func (a *API) FileParents() error {
 
 	stm, err := LoadTemplateSQL("fileparent", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.fileparents.FileParents")
+		return Error(err, LoadErrorCode, "unable to load fileparent sql template", "dbs.fileparents.FileParents")
 	}
 
 	lfns := getValues(a.Params, "logical_file_name")
@@ -53,7 +53,7 @@ func (a *API) FileParents() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.fileparents.FileParents")
+		return Error(err, QueryErrorCode, "unable to query file parent", "dbs.fileparents.FileParents")
 	}
 	return nil
 }
@@ -79,7 +79,7 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 			r.THIS_FILE_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.fileparents.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment file parent sequence number", "dbs.fileparents.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -87,7 +87,7 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.fileparents.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate file parent record", "dbs.fileparents.Insert")
 	}
 
 	// check if our data already exist in DB
@@ -201,7 +201,7 @@ func (r *FileParents) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to insert dataset parents %+v using input fileparents record %+v, error %v", datasetParents, r, err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.fileparents.Insert")
+		return Error(err, InsertFileParentErrorCode, "unable to insert file parent record", "dbs.fileparents.Insert")
 	}
 
 	return nil
@@ -215,11 +215,11 @@ func (r *FileParents) Validate() error {
 	}
 	if r.THIS_FILE_ID == 0 {
 		msg := "missing this_file_id"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparents.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.fileparents.Validate")
 	}
 	if r.PARENT_FILE_ID == 0 {
 		msg := "missing parent_file_id"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparents.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.fileparents.Validate")
 	}
 	return nil
 }
@@ -234,7 +234,7 @@ func (r *FileParents) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.fileparents.Decode")
+		return Error(err, ReaderErrorCode, "unable to read file parent record", "dbs.fileparents.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -243,7 +243,7 @@ func (r *FileParents) Decode(reader io.Reader) error {
 	if err != nil {
 		log.Println("fail to decode data", err)
 		errors.Unwrap(err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.fileparents.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode file parent record", "dbs.fileparents.Decode")
 	}
 	return nil
 }
@@ -254,7 +254,7 @@ func (a *API) InsertFileParents() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.fileparents.InsertFileParents")
+		return Error(err, TransactionErrorCode, "transaction error", "dbs.fileparents.InsertFileParents")
 	}
 	defer tx.Rollback()
 	err = a.InsertFileParentsBlockTxt(tx)
@@ -262,14 +262,14 @@ func (a *API) InsertFileParents() error {
 		if utils.VERBOSE > 1 {
 			log.Println("unable to insert file parents", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.fileparents.InsertFileParents")
+		return Error(err, InsertFileParentErrorCode, "unable to insert file parent record", "dbs.fileparents.InsertFileParents")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("fail to commit transaction", err)
-		return Error(err, CommitErrorCode, "", "dbs.fileparents.InsertFileParents")
+		return Error(err, InsertFileParentErrorCode, "unable to commit insert of file parent record", "dbs.fileparents.InsertFileParents")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
@@ -295,7 +295,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+		return Error(err, ReaderErrorCode, "unable to read file parent block record", "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 
 	var args []interface{}
@@ -305,7 +305,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data as FileParentBlockRecord", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+		return Error(err, UnmarshalErrorCode, "unable to decode file parent block record", "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 	if utils.VERBOSE > 1 {
 		log.Printf("Insert FileParentsBlock record %+v", rec)
@@ -316,7 +316,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		log.Println(msg)
 		return Error(
 			InvalidParamErr,
-			ParametersErrorCode,
+			InvalidParameterErrorCode,
 			msg,
 			"dbs.fileparents.InsertFileParentsBlockTxt")
 	}
@@ -337,7 +337,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement:\n%v\nerror=%v", stm, err)
 		log.Println(msg)
-		return Error(err, QueryErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+		return Error(err, QueryErrorCode, "unable to query file parent block", "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 	defer rows.Close()
 	var bfids []int64
@@ -345,7 +345,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		var fid int64
 		if err := rows.Scan(&fid); err != nil {
 			log.Println("fail to get row.Scan, error", err)
-			return Error(err, RowsScanErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+			return Error(err, RowsScanErrorCode, "unable to find file id", "dbs.fileparents.InsertFileParentsBlockTxt")
 		}
 		bfids = append(bfids, fid)
 	}
@@ -363,7 +363,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		log.Println("block ids", bfids)
 		log.Println("file  ids", fids)
 		msg := fmt.Sprintf("not all files present in block")
-		return Error(RecordErr, ParametersErrorCode, msg, "dbs.fileparents.InsertFileParentsBlockTxt")
+		return Error(RecordErr, InvalidParameterErrorCode, msg, "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 
 	// now we can loop over provided list and insert file parents
@@ -379,7 +379,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 		err = r.Validate()
 		if err != nil {
 			log.Println("unable to validate the record", r, "error", err)
-			return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+			return Error(err, ValidateErrorCode, "fail to validate fileparent record", "dbs.fileparents.InsertFileParentsBlockTxt")
 		}
 		// only provide list of child parent that have parentage
 		// otherwise, skip partial parentage and add to the missingFiles count
@@ -396,8 +396,9 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 
 	// check if provided MissingFiles matches the amount of mising files found
 	if len(missingFiles) != int(rec.MissingFiles) {
-		log.Println("provided missingFiles does not match number of pairs with no parentage")
-		return Error(err, ValidateErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+		msg := "provided missingFiles does not match number of pairs with no parentage"
+		log.Println(msg)
+		return Error(err, ValidateErrorCode, msg, "dbs.fileparents.InsertFileParentsBlockTxt")
 	}
 
 	// only insert valid child parent id lists
@@ -407,7 +408,7 @@ func (a *API) InsertFileParentsBlockTxt(tx *sql.Tx) error {
 			if utils.VERBOSE > 1 {
 				log.Println("unable to insert FileParentsBlock record, error", err)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.fileparents.InsertFileParentsBlockTxt")
+			return Error(err, InsertFileParentErrorCode, "unable to insert file parent block record", "dbs.fileparents.InsertFileParentsBlockTxt")
 		}
 	}
 	return nil

@@ -24,7 +24,7 @@ func (a *API) DataTiers() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.tiers.DataTiers")
+		return Error(err, QueryErrorCode, "unable to query data tiers", "dbs.tiers.DataTiers")
 	}
 	return nil
 }
@@ -50,7 +50,7 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 			r.DATA_TIER_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.tiers.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment data tier sequence number", "dbs.tiers.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -58,7 +58,7 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.tiers.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate data tier record", "dbs.tiers.Insert")
 	}
 	// check if our data already exist in DB
 	if IfExist(tx, "DATA_TIERS", "data_tier_id", "data_tier_name", r.DATA_TIER_NAME) {
@@ -72,7 +72,7 @@ func (r *DataTiers) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.DATA_TIER_ID, r.DATA_TIER_NAME, r.CREATION_DATE, r.CREATE_BY)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.tiers.Insert")
+		return Error(err, InsertDataTierErrorCode, "unable to insert data tier record", "dbs.tiers.Insert")
 	}
 	return nil
 }
@@ -83,11 +83,11 @@ func (r *DataTiers) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if err := CheckPattern("data_tier_name", r.DATA_TIER_NAME); err != nil {
-		return Error(err, PatternErrorCode, "", "dbs.tiers.Validate")
+		return Error(err, InvalidParameterErrorCode, "invalid data tier name", "dbs.tiers.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		msg := "invalid pattern for creation date"
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.tiers.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.tiers.Validate")
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ func (r *DataTiers) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.tiers.Decode")
+		return Error(err, ReaderErrorCode, "unable to read data tier record", "dbs.tiers.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -113,7 +113,7 @@ func (r *DataTiers) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.tiers.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode data tier record", "dbs.tiers.Decode")
 	}
 	return nil
 }
@@ -122,7 +122,7 @@ func (r *DataTiers) Decode(reader io.Reader) error {
 func (a *API) InsertDataTiers() error {
 	err := insertRecord(&DataTiers{CREATE_BY: a.CreateBy}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.tiers.InsertDataTiers")
+		return Error(err, InsertDataTierErrorCode, "unable to insert data tier record", "dbs.tiers.InsertDataTiers")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))

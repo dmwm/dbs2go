@@ -15,7 +15,7 @@ func (a *API) BlockChildren() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.blockchildren.BlockChildren")
+		return Error(err, QueryErrorCode, "unable to get block children", "dbs.blockchildren.BlockChildren")
 	}
 	return nil
 }

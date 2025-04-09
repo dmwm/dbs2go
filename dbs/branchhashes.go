@@ -25,7 +25,7 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 		tid, err = LastInsertID(tx, "BRANCH_HASHES", "branch_hash_id")
 		r.BRANCH_HASH_ID = tid + 1
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.branchhashes.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment Branch Hanshes id sequence", "dbs.branchhashes.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -33,7 +33,7 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.branchhashes.Insert")
+		return Error(err, ValidateErrorCode, "unable to validate BranchHashes record", "dbs.branchhashes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_branch_hashes")
@@ -42,7 +42,7 @@ func (r *BranchHashes) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.BRANCH_HASH_ID, r.BRANCH_HASH, r.CONTENT)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.branchhashes.Insert")
+		return Error(err, InsertErrorCode, "unable to insert BranchHashes record", "dbs.branchhashes.Insert")
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (r *BranchHashes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.branchhashes.Decode")
+		return Error(err, ReaderErrorCode, "unable to read branch hash record", "dbs.branchhashes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -80,7 +80,7 @@ func (r *BranchHashes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.branchhashes.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode branch hash record", "dbs.branchhashes.Decode")
 	}
 	return nil
 }
@@ -89,7 +89,7 @@ func (r *BranchHashes) Decode(reader io.Reader) error {
 func (a *API) InsertBranchHashes() error {
 	err := insertRecord(&BranchHashes{}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.branchhashes.InsertBranchHashes")
+		return Error(err, InsertErrorCode, "unable to insert BranchHashes record", "dbs.branchhashes.InsertBranchHashes")
 	}
 	return nil
 }

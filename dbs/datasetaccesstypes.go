@@ -23,7 +23,7 @@ func (a *API) DatasetAccessTypes() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.datasetaccesstypes.DatasetAccessTypes")
+		return Error(err, QueryErrorCode, "unable to query dataset access types table", "dbs.datasetaccesstypes.DatasetAccessTypes")
 	}
 	return nil
 }
@@ -57,7 +57,7 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 			r.DATASET_ACCESS_TYPE_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.datasetaccesstypes.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment dataset access types sequence number", "dbs.datasetaccesstypes.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -65,7 +65,7 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.datasetaccesstypes.Insert")
+		return Error(err, ValidateErrorCode, "unable to validate dataset access types record", "dbs.datasetaccesstypes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_access_types")
@@ -77,7 +77,7 @@ func (r *DatasetAccessTypes) Insert(tx *sql.Tx) error {
 		log.Printf("unable to insert DatasetAccessTypes %+v", err)
 	}
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.datasetaccesstypes.Insert")
+		return Error(err, InsertDatasetAccessTypeErrorCode, "unable to insert dataset access types record", "dbs.datasetaccesstypes.Insert")
 	}
 	return nil
 }
@@ -100,7 +100,7 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.datasetaccesstypes.Decode")
+		return Error(err, ReaderErrorCode, "unable to read dataset access types record", "dbs.datasetaccesstypes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -108,7 +108,7 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.datasetaccesstypes.Insert")
+		return Error(err, UnmarshalErrorCode, "unable to decode dataset access types record", "dbs.datasetaccesstypes.Insert")
 	}
 	return nil
 }
@@ -117,7 +117,7 @@ func (r *DatasetAccessTypes) Decode(reader io.Reader) error {
 func (a *API) InsertDatasetAccessTypes() error {
 	err := insertRecord(&DatasetAccessTypes{}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.datasetaccesstypes.InsertDatasetAccessTypes")
+		return Error(err, InsertDatasetAccessTypeErrorCode, "unable to insert dataset access types record", "dbs.datasetaccesstypes.InsertDatasetAccessTypes")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))

@@ -19,7 +19,7 @@ func (a *API) Runs() error {
 	dataset := getValues(a.Params, "dataset")
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return Error(err, ParseErrorCode, "", "dbs.runs.Runs")
+		return Error(err, ParseErrorCode, "unable to parse run_num value", "dbs.runs.Runs")
 	}
 	if len(lfn) == 1 {
 		tmpl["Lfn"] = true
@@ -31,7 +31,7 @@ func (a *API) Runs() error {
 
 	stm, err := LoadTemplateSQL("runs", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.runs.Runs")
+		return Error(err, LoadErrorCode, "unable to load runs sql template", "dbs.runs.Runs")
 	}
 
 	if len(runs) > 1 {
@@ -70,7 +70,7 @@ func (a *API) Runs() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.runs.Runs")
+		return Error(err, QueryErrorCode, "unable to query runs", "dbs.runs.Runs")
 	}
 	return nil
 }

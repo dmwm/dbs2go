@@ -35,14 +35,14 @@ func (a *API) BlockParents() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("blockparent", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.blockparents.BlockParents")
+		return Error(err, LoadErrorCode, "unable to load block parent template", "dbs.blockparents.BlockParents")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.blockparents.BlockParents")
+		return Error(err, QueryErrorCode, "unable to query block parents", "dbs.blockparents.BlockParents")
 	}
 	return nil
 }
@@ -59,7 +59,7 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", r, err)
-		return Error(err, ValidateErrorCode, "", "dbs.blockparents.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate block parents record", "dbs.blockparents.Insert")
 	}
 	// we first need to check if provided hlock ids exist in DB
 	pbid, err := QueryRow("BLOCK_PARENTS", "PARENT_BLOCK_ID", "THIS_BLOCK_ID", r.THIS_BLOCK_ID)
@@ -75,7 +75,7 @@ func (r *BlockParents) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.THIS_BLOCK_ID, r.PARENT_BLOCK_ID)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.blockparents.Insert")
+		return Error(err, InsertBlockParentErrorCode, "fail to insert block parents", "dbs.blockparents.Insert")
 	}
 	return nil
 }
@@ -87,11 +87,11 @@ func (r *BlockParents) Validate() error {
 	}
 	if r.THIS_BLOCK_ID == 0 {
 		msg := "missing this_block_id"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockparents.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blockparents.Validate")
 	}
 	if r.PARENT_BLOCK_ID == 0 {
 		msg := "missing parent_block_id"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blockparents.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blockparents.Validate")
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func (r *BlockParents) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.blockparents.Decode")
+		return Error(err, ReaderErrorCode, "unable to read block parents record", "dbs.blockparents.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -114,7 +114,7 @@ func (r *BlockParents) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.blockparents.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode block parents record", "dbs.blockparents.Decode")
 	}
 	return nil
 }

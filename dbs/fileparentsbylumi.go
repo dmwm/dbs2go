@@ -18,7 +18,7 @@ func (a *API) FileParentsByLumi() error {
 	blockNames := getValues(a.Params, "block_name")
 	if len(blockNames) == 0 {
 		msg := "Missing block_name for listFileParentssByLumi"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.fileparentsbylumi.FileParentsByLumi")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.fileparentsbylumi.FileParentsByLumi")
 	}
 	blk := blockNames[0]
 	dataset := strings.Split(blk, "#")[0]
@@ -38,7 +38,7 @@ func (a *API) FileParentsByLumi() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("fileparentsbylumi", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.fileparentsbylumi.FileParentsByLumi")
+		return Error(err, LoadErrorCode, "unable to load fileparentsbylumi sql template", "dbs.fileparentsbylumi.FileParentsByLumi")
 	}
 	stm = WhereClause(stm, conds)
 
@@ -54,7 +54,7 @@ func (a *API) FileParentsByLumi() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.fileparentsbylumi.FileParentsByLumi")
+		return Error(err, QueryErrorCode, "unable to query file parents by lumi", "dbs.fileparentsbylumi.FileParentsByLumi")
 	}
 	return nil
 }

@@ -10,7 +10,7 @@ func (a *API) ParentDSTrio() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.parentdstrio.ParentDSTrio")
+		return Error(err, QueryErrorCode, "unable to query parent dataset trio", "dbs.parentdstrio.ParentDSTrio")
 	}
 	return nil
 }

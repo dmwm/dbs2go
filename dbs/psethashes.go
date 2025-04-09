@@ -29,7 +29,7 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 			r.PARAMETER_SET_HASH_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.psethashes.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment parameter set hash sequence number", "dbs.psethashes.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -37,7 +37,7 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.psethashes.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate parameter set hash record", "dbs.psethashes.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_psethashes")
@@ -46,7 +46,7 @@ func (r *ParameterSetHashes) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.PARAMETER_SET_HASH_ID, r.PSET_NAME, r.PSET_HASH)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.psethashes.Insert")
+		return Error(err, InsertParameterSetHashErrorCode, "unable to insert parameter set hash record", "dbs.psethashes.Insert")
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (r *ParameterSetHashes) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.psethashes.Decode")
+		return Error(err, ReaderErrorCode, "unable to read parameter set hash record", "dbs.psethashes.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -77,7 +77,7 @@ func (r *ParameterSetHashes) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.psethashes.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode parameter set hash record", "dbs.psethashes.Decode")
 	}
 	return nil
 }

@@ -28,15 +28,15 @@ func (a *API) AcquisitionErasCi() error {
 	}
 	defer tx.Rollback()
 	if err := executeSessions(tx, preSession); err != nil {
-		return Error(err, SessionErrorCode, "", "dbs.acquisitionerasci.AcquisitionErasCi")
+		return Error(err, SessionErrorCode, "ORACLE session error", "dbs.acquisitionerasci.AcquisitionErasCi")
 	}
 
 	e := executeAll(a.Writer, a.Separator, stm, args...)
 	if err := executeSessions(tx, postSession); err != nil {
-		return Error(err, SessionErrorCode, "", "dbs.acquisitionerasci.AcquisitionErasCi")
+		return Error(err, SessionErrorCode, "ORACLE session error", "dbs.acquisitionerasci.AcquisitionErasCi")
 	}
 	if e != nil {
-		return Error(e, QueryErrorCode, "", "dbs.acquisitionerasci.AcquisitionErasCi")
+		return Error(e, QueryErrorCode, "unable to get Acquisition Era", "dbs.acquisitionerasci.AcquisitionErasCi")
 	}
 	return nil
 }

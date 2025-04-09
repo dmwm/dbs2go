@@ -15,6 +15,7 @@ import (
 )
 
 // Blocks DBS API
+//
 //gocyclo:ignore
 func (a *API) Blocks() error {
 	var args []interface{}
@@ -36,7 +37,7 @@ func (a *API) Blocks() error {
 	match := re.MatchString(fmt.Sprintf("%v", a.Params))
 	if !match {
 		msg := fmt.Sprintf("Blocks API requires one of the following: %v", required)
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocks.Blocks")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocks.Blocks")
 	}
 
 	// parse detail argument
@@ -52,7 +53,7 @@ func (a *API) Blocks() error {
 	// which should contain bind variables
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return Error(err, ParseErrorCode, "", "dbs.blocks.Blocks")
+		return Error(err, ParseErrorCode, "unable to parse provided run number value", "dbs.blocks.Blocks")
 	}
 	if len(runs) > 0 {
 		tmpl["Runs"] = true
@@ -125,14 +126,14 @@ func (a *API) Blocks() error {
 	}
 	stm, err := LoadTemplateSQL("blocks", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.blocks.Blocks")
+		return Error(err, LoadErrorCode, "unable to load blocks query template", "dbs.blocks.Blocks")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.blocks.Blocks")
+		return Error(err, QueryErrorCode, "unable to query blocks table", "dbs.blocks.Blocks")
 	}
 	return nil
 }
@@ -165,7 +166,7 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 			r.BLOCK_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.blocks.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment blocks id sequence", "dbs.blocks.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -173,7 +174,7 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.blocks.Insert")
+		return Error(err, ValidateErrorCode, "unable to validate blocks record", "dbs.blocks.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_blocks")
@@ -197,7 +198,7 @@ func (r *Blocks) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("fail to insert block", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.blocks.Insert")
+		return Error(err, InsertErrorCode, "unable to insert block record", "dbs.blocks.Insert")
 	}
 	return nil
 }
@@ -208,19 +209,19 @@ func (r *Blocks) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if err := CheckPattern("block", r.BLOCK_NAME); err != nil {
-		return Error(err, PatternErrorCode, "", "dbs.blocks.Validate")
+		return Error(err, InvalidParameterErrorCode, "fail to validate block name", "dbs.blocks.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		return Error(
 			InvalidParamErr,
-			PatternErrorCode,
+			InvalidParameterErrorCode,
 			"invalid pattern for creation date",
 			"dbs.blocks.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.LAST_MODIFICATION_DATE)); !matched {
 		return Error(
 			InvalidParamErr,
-			PatternErrorCode,
+			InvalidParameterErrorCode,
 			"invalid pattern for last modification date",
 			"dbs.blocks.Validate")
 	}
@@ -243,7 +244,7 @@ func (r *Blocks) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.blocks.Decode")
+		return Error(err, ReaderErrorCode, "unable to read block record", "dbs.blocks.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -256,7 +257,7 @@ func (r *Blocks) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.blocks.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode block record", "dbs.blocks.Decode")
 	}
 	return nil
 }
@@ -289,13 +290,13 @@ func (a *API) InsertBlocks() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.blocks.InsertBlocks")
+		return Error(err, ReaderErrorCode, "unable to read block record", "dbs.blocks.InsertBlocks")
 	}
 	rec := BlockRecord{CREATE_BY: a.CreateBy, LAST_MODIFIED_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.blocks.InsertBlocks")
+		return Error(err, UnmarshalErrorCode, "unable to decode block record", "dbs.blocks.InsertBlocks")
 	}
 
 	// check if open_for_writing was present in request, if not set it to 1
@@ -318,7 +319,7 @@ func (a *API) InsertBlocks() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.blocks.InsertBlocks")
+		return Error(err, TransactionErrorCode, "unable to start transaction", "dbs.blocks.InsertBlocks")
 	}
 	defer tx.Rollback()
 
@@ -337,21 +338,22 @@ func (a *API) InsertBlocks() error {
 		if utils.VERBOSE > 1 {
 			log.Println("unable to find dataset_id for", dataset)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.blocks.InsertBlocks")
+		return Error(err, GetDatasetIDErrorCode, "unable to get dataset id for given block", "dbs.blocks.InsertBlocks")
+
 	}
 
 	// assign all Id's in dataset DB record
 	brec.DATASET_ID = dsId
 	err = brec.Insert(tx)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.blocks.InsertBlocks")
+		return Error(err, InsertBlockErrorCode, "unable to insert block record", "dbs.blocks.InsertBlocks")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("fail to commit transaction", err)
-		return Error(err, CommitErrorCode, "", "dbs.blocks.InsertBlocks")
+		return Error(err, InsertBlockErrorCode, "unable to commit block record transaction", "dbs.blocks.InsertBlocks")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
@@ -360,6 +362,7 @@ func (a *API) InsertBlocks() error {
 }
 
 // UpdateBlocks DBS API
+//
 //gocyclo:ignore
 func (a *API) UpdateBlocks() error {
 	// get input parameters
@@ -391,21 +394,21 @@ func (a *API) UpdateBlocks() error {
 	// validate input parameters
 	if blockName == "" {
 		msg := "invalid block_name parameter"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocks.UpdateBlocks")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocks.UpdateBlocks")
 	}
 	if createBy == "" {
 		msg := "invalid create_by parameter"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocks.UpdateBlocks")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocks.UpdateBlocks")
 	}
 	if site {
 		if origSiteName == "" {
 			msg := "invalid origin_site_name parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocks.UpdateBlocks")
+			return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocks.UpdateBlocks")
 		}
 	} else {
 		if openForWriting < 0 || openForWriting > 1 {
 			msg := "invalid open_for_writing parameter"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocks.UpdateBlocks")
+			return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocks.UpdateBlocks")
 		}
 	}
 
@@ -418,7 +421,7 @@ func (a *API) UpdateBlocks() error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load update_blocks template", err)
 		}
-		return Error(err, LoadErrorCode, "", "dbs.blocks.UpdateBlocks")
+		return Error(err, LoadErrorCode, "unable to load update blocks template", "dbs.blocks.UpdateBlocks")
 	}
 
 	if utils.VERBOSE > 0 {
@@ -429,7 +432,7 @@ func (a *API) UpdateBlocks() error {
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return Error(err, TransactionErrorCode, "", "dbs.blocks.UpdateBlocks")
+		return Error(err, TransactionErrorCode, "unable to start transaction", "dbs.blocks.UpdateBlocks")
 	}
 	defer tx.Rollback()
 
@@ -442,14 +445,14 @@ func (a *API) UpdateBlocks() error {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to update %v", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.blocks.UpdateBlocks")
+		return Error(err, UpdateBlockErrorCode, "unable to update block record", "dbs.blocks.UpdateBlocks")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return Error(err, CommitErrorCode, "", "dbs.blocks.UpdateBlocks")
+		return Error(err, UpdateBlockErrorCode, "unable to commit block record transaction", "dbs.blocks.UpdateBlocks")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
@@ -466,7 +469,7 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load update_block_stats template", err)
 		}
-		return Error(err, LoadErrorCode, "", "dbs.blocks.UpdateBlockStats")
+		return Error(err, LoadErrorCode, "unable to load block stats template", "dbs.blocks.UpdateBlockStats")
 	}
 	var fileCount, bid int64
 	var blkSize float64
@@ -475,7 +478,7 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load block_stats template", err)
 		}
-		return Error(err, QueryErrorCode, "", "dbs.blocks.UpdateBlockStats")
+		return Error(err, QueryErrorCode, "unable to query block statistics", "dbs.blocks.UpdateBlockStats")
 	}
 
 	stm, err = LoadTemplateSQL("update_block_stats", tmplData)
@@ -483,7 +486,7 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to load update_block_stats template", err)
 		}
-		return Error(err, LoadErrorCode, "", "dbs.blocks.UpdateBlockStats")
+		return Error(err, LoadErrorCode, "unable to load block stats template", "dbs.blocks.UpdateBlockStats")
 	}
 
 	if utils.VERBOSE > 0 {
@@ -494,7 +497,7 @@ func (a *API) UpdateBlockStats(tx *sql.Tx, blockID int64) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to update block stats", stm, "error", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.blocks.UpdateBlockStats")
+		return Error(err, InsertBlockStatsErrorCode, "unable to update block stats record with file count block size", "dbs.blocks.UpdateBlockStats")
 	}
 	return nil
 }

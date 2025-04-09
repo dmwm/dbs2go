@@ -36,7 +36,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 			r.MIGRATION_BLOCK_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.migration_blocks.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment migration block sequence number", "dbs.migration_blocks.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -44,7 +44,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.migration_blocks.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate migratino block record", "dbs.migration_blocks.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_migration_blocks")
@@ -81,7 +81,7 @@ func (r *MigrationBlocks) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert migration block", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.migration_blocks.Insert")
+		return Error(err, InsertMigrationBlockErrorCode, "unable to insert migration block record", "dbs.migration_blocks.Insert")
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ func (r *MigrationBlocks) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.migration_blocks.Decode")
+		return Error(err, ReaderErrorCode, "unable to read migration block record", "dbs.migration_blocks.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -113,7 +113,7 @@ func (r *MigrationBlocks) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.migration_blocks.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode migration block record", "dbs.migration_blocks.Decode")
 	}
 	return nil
 }

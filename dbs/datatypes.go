@@ -18,14 +18,14 @@ func (a *API) DataTypes() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("datatypes", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.datatypes.DataTypes")
+		return Error(err, LoadErrorCode, "fail to load datatypes template", "dbs.datatypes.DataTypes")
 	}
 	stm = WhereClause(stm, conds)
 
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.datatypes.DataTypes")
+		return Error(err, QueryErrorCode, "unable to query data types", "dbs.datatypes.DataTypes")
 	}
 	return nil
 }

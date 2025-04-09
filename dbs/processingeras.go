@@ -24,7 +24,7 @@ func (a *API) ProcessingEras() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.processingeras.ProcessingEras")
+		return Error(err, QueryErrorCode, "unable to query processing era", "dbs.processingeras.ProcessingEras")
 	}
 	return nil
 }
@@ -51,7 +51,7 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 			r.PROCESSING_ERA_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.processingeras.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment processing era sequence number", "dbs.processingeras.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -59,7 +59,7 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.processingeras.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate processing era record", "dbs.processingeras.Insert")
 	}
 
 	// check if our data already exist in DB
@@ -85,7 +85,7 @@ func (r *ProcessingEras) Insert(tx *sql.Tx) error {
 		r.CREATE_BY,
 		r.DESCRIPTION)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.processingeras.Insert")
+		return Error(err, InsertProcessingEraErrorCode, "unable to insert processing era record", "dbs.processingeras.Insert")
 	}
 	return nil
 }
@@ -97,7 +97,7 @@ func (r *ProcessingEras) Validate() error {
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		msg := "invalid pattern for creation date"
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.processingeras.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.processingeras.Validate")
 	}
 	return nil
 }
@@ -115,7 +115,7 @@ func (r *ProcessingEras) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.processingeras.Decode")
+		return Error(err, ReaderErrorCode, "unable to read processing era record", "dbs.processingeras.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -123,7 +123,7 @@ func (r *ProcessingEras) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.processingeras.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode processing era record", "dbs.processingeras.Decode")
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func (r *ProcessingEras) Decode(reader io.Reader) error {
 func (a *API) InsertProcessingEras() error {
 	err := insertRecord(&ProcessingEras{CREATE_BY: a.CreateBy}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.processingeras.InsertProcessingEras")
+		return Error(err, InsertProcessingEraErrorCode, "unable to insert processing era record", "dbs.processingeras.InsertProcessingEras")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))

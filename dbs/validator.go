@@ -137,7 +137,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 		msg := fmt.Sprintf(
 			"invalid type of input parameter '%s' for value '%+v' type '%T'",
 			key, val, val)
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.validator.Check")
 	}
 	if len(o.Patterns) == 0 {
 		// nothing to match in patterns
@@ -155,12 +155,12 @@ func (o StrPattern) Check(key string, val interface{}) error {
 			for _, lfn := range lfnList(v) {
 				if len(lfn) > o.Len {
 					msg := fmt.Sprintf("length of LFN %s exceed %d characters", lfn, o.Len)
-					return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+					return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.validator.Check")
 				}
 			}
 		} else {
 			msg := fmt.Sprintf("length of %s exceed %d characters", v, o.Len)
-			return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+			return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.validator.Check")
 		}
 	}
 	if key == "logical_file_name" {
@@ -175,7 +175,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 				}
 			}
 			if !pass {
-				return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+				return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.validator.Check")
 			}
 		}
 		return nil
@@ -187,7 +187,7 @@ func (o StrPattern) Check(key string, val interface{}) error {
 			return nil
 		}
 	}
-	return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.Check")
+	return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.validator.Check")
 }
 
 // helper function to convert input value into list of list
@@ -204,8 +204,9 @@ func lfnList(v string) []string {
 	return lfns
 }
 
-//gocyclo:ignore
 // helper function to validate string parameters
+//
+//gocyclo:ignore
 func strType(key string, val interface{}) error {
 	var v string
 	switch vvv := val.(type) {
@@ -215,7 +216,7 @@ func strType(key string, val interface{}) error {
 		msg := fmt.Sprintf(
 			"invalid type of input parameter '%s' for value '%+v' type '%T'",
 			key, val, val)
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.validator.strType")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.validator.strType")
 	}
 	mapKeys := make(map[string]string)
 	mapKeys["dataset"] = "dataset"
@@ -255,6 +256,7 @@ func strType(key string, val interface{}) error {
 			}
 		}
 		if key == "logical_file_name" {
+			msg := fmt.Sprintf("unable to extract logical file name from '%s'", v)
 			if strings.Contains(v, "[") {
 				if strings.Contains(v, "'") { // Python bad json, e.g. ['bla']
 					v = strings.Replace(v, "'", "\"", -1)
@@ -262,12 +264,12 @@ func strType(key string, val interface{}) error {
 				var records []string
 				err := json.Unmarshal([]byte(v), &records)
 				if err != nil {
-					return Error(err, UnmarshalErrorCode, "", "dbs.validator.strType")
+					return Error(err, UnmarshalErrorCode, msg, "dbs.validator.strType")
 				}
 				for _, r := range records {
 					err := StrPattern{Patterns: patterns, Len: length}.Check(key, r)
 					if err != nil {
-						return Error(err, PatternErrorCode, "", "dbs.validator.strType")
+						return Error(err, InvalidParameterErrorCode, msg, "dbs.validator.strType")
 					}
 				}
 			}
@@ -302,11 +304,11 @@ func checkBlockHash(blk string) error {
 	arr := strings.Split(blk, "#")
 	if len(arr) != 2 {
 		msg := fmt.Sprintf("wrong parts in block name %s", blk)
-		return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.checkBlockHash")
+		return Error(ValidationErr, InvalidParameterErrorCode, msg, "dbs.validator.checkBlockHash")
 	}
 	if len(arr[1]) > 36 {
 		msg := fmt.Sprintf("wrong length of block hash %s", blk)
-		return Error(ValidationErr, PatternErrorCode, msg, "dbs.validator.checkBlockHash")
+		return Error(ValidationErr, InvalidParameterErrorCode, msg, "dbs.validator.checkBlockHash")
 	}
 	return nil
 }
@@ -369,7 +371,7 @@ func CheckPattern(key, value string) error {
 			}
 		}
 		msg := fmt.Sprintf("invalid pattern for key=%s", key)
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.CheckPattern")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.CheckPattern")
 	}
 	return nil
 }
@@ -381,15 +383,15 @@ func ValidatePostPayload(rec Record) error {
 		if key == "data_tier_name" {
 			if vvv, ok := val.(string); ok {
 				if err := CheckPattern("data_tier_name", vvv); err != nil {
-					return Error(err, PatternErrorCode, "wrong data_tier_name pattern", "dbs.ValidaatePostPayload")
+					return Error(err, InvalidParameterErrorCode, "wrong data_tier_name pattern", "dbs.ValidaatePostPayload")
 				}
 			}
 		} else if key == "creation_date" || key == "last_modification_date" {
 			v, err := utils.CastInt(val)
 			if err != nil {
-				return Error(err, PatternErrorCode, errMsg, "dbs.ValidaatePostPayload")
+				return Error(err, InvalidParameterErrorCode, errMsg, "dbs.ValidaatePostPayload")
 			} else if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", v)); !matched {
-				return Error(InvalidParamErr, PatternErrorCode, errMsg, "dbs.ValidaatePostPayload")
+				return Error(InvalidParamErr, InvalidParameterErrorCode, errMsg, "dbs.ValidaatePostPayload")
 			}
 		}
 	}
