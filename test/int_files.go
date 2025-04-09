@@ -633,14 +633,14 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 	dbsErrorNest := dbs.DBSError{
 		Reason:   "near \"AS\": syntax error",
 		Code:     dbs.QueryErrorCode,
-		Message:  "",
+		Message:  "query error",
 		Function: "dbs.executeAll",
 	}
 	dbsError := dbs.DBSError{
 		Function: "dbs.files.Files",
 		Code:     dbs.QueryErrorCode,
 		Reason:   dbsErrorNest.Error(),
-		Message:  "",
+		Message:  "query error",
 	}
 	hrec := web.HTTPError{
 		Method:    "GET",
@@ -659,7 +659,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError2 := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Message:  "When sumOverLumi=1, no run_num list is allowed",
 		Function: "dbs.files.Files",
 	}
@@ -692,7 +692,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError3 := dbs.DBSError{
 		Function: "dbs.files.Files",
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Reason:   dbs.InvalidParamErr.Error(),
 		Message:  "cannot supply more than one list (lfn, run_num or lumi) at one query",
 	}
@@ -701,7 +701,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError4 := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Message:  "When sumOverLumi=1, no run_num list is allowed",
 		Function: "dbs.files.Files",
 	}
@@ -970,7 +970,7 @@ func getFilesLumiListRangeTestTable(t *testing.T) []EndpointTestCase {
 					respCode: http.StatusBadRequest,
 				},
 				{
-					description: "Test bad GET with block_name, sumOverLumi, single run_num, detail", // DBSClientReader_t.test033q
+					description: "Test bad2 GET with block_name, sumOverLumi, single run_num, detail", // DBSClientReader_t.test033q
 					method:      "GET",
 					serverType:  "DBSReader",
 					params: url.Values{

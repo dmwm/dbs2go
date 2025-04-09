@@ -88,7 +88,7 @@ func getBlocksTestTable(t *testing.T) EndpointTestCase {
 	}
 	dbsError := dbs.DBSError{
 		Function: "dbs.blocks.Blocks",
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Reason:   dbs.InvalidParamErr.Error(),
 		Message:  "Blocks API requires one of the following: [dataset block_name data_tier_name logical_file_name]",
 	}

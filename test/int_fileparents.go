@@ -26,7 +26,7 @@ func getFileParentsTestTable(t *testing.T) EndpointTestCase {
 	dbsError := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
 		Message:  "logical_file_name, block_id or block_name is required for fileparents api",
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Function: "dbs.fileparents.FileParents",
 	}
 	hrec := createHTTPError("GET", "/dbs/primarydstypes?dataset=fnal")
