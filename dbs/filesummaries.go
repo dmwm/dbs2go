@@ -24,7 +24,7 @@ func (a *API) FileSummaries() error {
 	}
 	runs, err := ParseRuns(getValues(a.Params, "run_num"))
 	if err != nil {
-		return Error(err, ParseErrorCode, "", "dbs.filesummaries.FileSummaries")
+		return Error(err, ParseErrorCode, "unable to parse run_num values", "dbs.filesummaries.FileSummaries")
 	}
 	if len(runs) > 0 {
 		token, runsCond, runsBinds := runsClause("fl", runs)
@@ -43,13 +43,13 @@ func (a *API) FileSummaries() error {
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4block_run", tmpl)
 			if e != nil {
-				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
+				return Error(e, LoadErrorCode, "unable to load filesummaries4block_run sql template", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4block_norun", tmpl)
 			if e != nil {
-				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
+				return Error(e, LoadErrorCode, "fail to load filesummaries4block_norun sql template", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 		}
@@ -62,13 +62,13 @@ func (a *API) FileSummaries() error {
 		if len(runs) > 0 {
 			s, e := LoadTemplateSQL("filesummaries4dataset_run", tmpl)
 			if e != nil {
-				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
+				return Error(e, LoadErrorCode, "fail to load filesummaries4dataset_run sql template", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 		} else {
 			s, e := LoadTemplateSQL("filesummaries4dataset_norun", tmpl)
 			if e != nil {
-				return Error(e, LoadErrorCode, "", "dbs.filesummaries.FileSummaries")
+				return Error(e, LoadErrorCode, "fail to load filesummaries4dataset_norun sql template", "dbs.filesummaries.FileSummaries")
 			}
 			stm += s
 		}
@@ -80,7 +80,7 @@ func (a *API) FileSummaries() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.filesummaries.FileSummaries")
+		return Error(err, QueryErrorCode, "fail to query file summaries", "dbs.filesummaries.FileSummaries")
 	}
 	return nil
 }

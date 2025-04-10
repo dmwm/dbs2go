@@ -417,7 +417,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Message:  "cannot supply more than one list (lfn, run_num or lumi) at one query",
 		Function: "dbs.files.Files",
 	}
@@ -426,7 +426,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError2 := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Message:  "When sumOverLumi=1, no run_num list is allowed",
 		Function: "dbs.files.Files",
 	}
@@ -449,7 +449,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError3 := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Message:  "When sumOverLumi=1, no lfn list is allowed",
 		Function: "dbs.files.Files",
 	}
@@ -457,7 +457,7 @@ func getFileArrayTestTable(t *testing.T) []EndpointTestCase {
 
 	dbsError4 := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
-		Code:     dbs.ParametersErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Message:  "files API does not support run_num=1 when no lumi and lfns list provided",
 		Function: "dbs.files.Files",
 	}

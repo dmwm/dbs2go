@@ -5,6 +5,7 @@ import (
 )
 
 // BlockSummaries DBS API
+//
 //gocyclo:ignore
 func (a *API) BlockSummaries() error {
 	var stm string
@@ -16,7 +17,7 @@ func (a *API) BlockSummaries() error {
 
 	if len(a.Params) == 0 {
 		msg := "block_name or dataset is required for blocksummaries api"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 	}
 
 	// parse arguments
@@ -27,7 +28,7 @@ func (a *API) BlockSummaries() error {
 		blk := block[0]
 		if strings.Contains(blk, "*") {
 			msg := "wild-card block value is not allowed"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
+			return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 		}
 		var blocks []string
 		if len(block) > 1 {
@@ -56,17 +57,17 @@ func (a *API) BlockSummaries() error {
 			stm, err = LoadTemplateSQL("blocksummaries4block_detail", tmpl)
 		}
 		if err != nil {
-			return Error(err, LoadErrorCode, "", "dbs.blocksummaries.BlockSummaries")
+			return Error(err, LoadErrorCode, "unable to load block summaries template", "dbs.blocksummaries.BlockSummaries")
 		}
 	}
 	dataset := getValues(a.Params, "dataset")
 	if len(dataset) > 1 {
 		msg := "Unsupported list of dataset"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 	} else if len(dataset) == 1 {
 		if strings.Contains(dataset[0], "*") {
 			msg := "wild-card dataset value is not allowed"
-			return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
+			return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.blocksummaries.BlockSummaries")
 		}
 		_, val := OperatorValue(dataset[0])
 		if detailErr != nil {
@@ -80,13 +81,13 @@ func (a *API) BlockSummaries() error {
 			args = append(args, val)
 		}
 		if err != nil {
-			return Error(err, LoadErrorCode, "", "dbs.blocksummaries.BlockSummaries")
+			return Error(err, LoadErrorCode, "unable to load block summaries template", "dbs.blocksummaries.BlockSummaries")
 		}
 	}
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, genSQL+stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.blocksummaries.BlockSummaries")
+		return Error(err, QueryErrorCode, "fail to query block summaries", "dbs.blocksummaries.BlockSummaries")
 	}
 	return nil
 }

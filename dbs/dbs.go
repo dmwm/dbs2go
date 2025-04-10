@@ -105,7 +105,7 @@ func DecodeValidatorError(r, err interface{}) error {
 				msg, err.Field(), err.Type(), err.Value(), err.ActualTag(), err.Param())
 		}
 		log.Println(msg)
-		return Error(ValidationErr, DecodeErrorCode, "", "dbs.DecodeValidatorError")
+		return Error(ValidationErr, ValidateErrorCode, msg, "dbs.DecodeValidatorError")
 	}
 	return nil
 }
@@ -130,7 +130,7 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.insertRecord")
+		return Error(err, TransactionErrorCode, "transaction error", "dbs.insertRecord")
 	}
 	defer tx.Rollback()
 
@@ -142,7 +142,7 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	if err != nil {
 		msg := fmt.Sprintf("unable to insert %+v", rec)
 		log.Println(msg)
-		return Error(err, InsertErrorCode, "", "dbs.insertRecord")
+		return Error(err, InsertErrorCode, msg, "dbs.insertRecord")
 	}
 
 	// commit transaction
@@ -151,7 +151,7 @@ func insertRecord(rec DBRecord, r io.Reader) error {
 	}
 	err = tx.Commit()
 	if err != nil {
-		return Error(err, CommitErrorCode, "", "dbs.insertRecord")
+		return Error(err, CommitErrorCode, "unable to commit transaction", "dbs.insertRecord")
 	}
 	return nil
 }
@@ -211,14 +211,14 @@ func GetTestData() error {
 	args = append(args, "VALID")
 	stm, err := LoadTemplateSQL("test_db", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.GetTestData")
+		return Error(err, LoadErrorCode, "unable to load test_db sql template", "dbs.GetTestData")
 	}
 	if utils.VERBOSE > 1 {
 		utils.PrintSQL(stm, args, "execute")
 	}
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.GetTestData")
+		return Error(err, TransactionErrorCode, "transaction error", "dbs.GetTestData")
 	}
 	defer tx.Rollback()
 	var dtype string
@@ -229,11 +229,11 @@ func GetTestData() error {
 		if !strings.Contains(err.Error(), "no rows in result set") {
 			msg := fmt.Sprintf("unable to GetID from DATASET_ACCESS_TYPES table")
 			log.Println(msg)
-			return Error(err, GetIDErrorCode, "", "dbs.GetTestData")
+			return Error(err, GetIDErrorCode, msg, "dbs.GetTestData")
 		}
 	}
 	if dtype != "VALID" {
-		return Error(err, GenericErrorCode, "invalid dataset access type", "dbs.GetTestData")
+		return Error(err, InvalidParameterErrorCode, "invalid dataset access type", "dbs.GetTestData")
 	}
 	return nil
 }
@@ -367,14 +367,14 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 	// execute transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.executeAll")
+		return Error(err, TransactionErrorCode, "transaction error", "dbs.executeAll")
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("unable to query statement: %v", stm)
 		log.Println(msg)
-		return Error(err, QueryErrorCode, "", "dbs.executeAll")
+		return Error(err, QueryErrorCode, "query error", "dbs.executeAll")
 	}
 	defer rows.Close()
 
@@ -395,7 +395,7 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 		}
 		err := rows.Scan(valuePtrs...)
 		if err != nil {
-			return Error(err, RowsScanErrorCode, "", "dbs.executeAll")
+			return Error(err, RowsScanErrorCode, "unable to obtain rows values", "dbs.executeAll")
 		}
 		if rowCount != 0 && w != nil {
 			// add separator line to our output
@@ -443,13 +443,13 @@ func executeAll(w io.Writer, sep, stm string, args ...interface{}) error {
 			}
 			err = enc.Encode(rec)
 			if err != nil {
-				return Error(err, EncodeErrorCode, "", "dbs.executeAll")
+				return Error(err, EncodeErrorCode, "unable to encode data record", "dbs.executeAll")
 			}
 		}
 		rowCount += 1
 	}
 	if err = rows.Err(); err != nil {
-		return Error(err, RowsScanErrorCode, "", "dbs.executeAll")
+		return Error(err, RowsScanErrorCode, "unable to get rows values", "dbs.executeAll")
 	}
 	// make sure we write proper response if no result written
 	if sep != "" && !writtenResults {
@@ -483,14 +483,14 @@ func execute(
 	// execute transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.execute")
+		return Error(err, TransactionErrorCode, "transaction error", "dbs.execute")
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(stm, args...)
 	if err != nil {
 		msg := fmt.Sprintf("DB.Query, query='%s' args='%v'", stm, args)
 		log.Println(msg)
-		return Error(err, QueryErrorCode, "", "dbs.execute")
+		return Error(err, QueryErrorCode, msg, "dbs.execute")
 	}
 	defer rows.Close()
 
@@ -502,7 +502,7 @@ func execute(
 		if err != nil {
 			msg := fmt.Sprintf("rows.Scan, vals='%v'", vals)
 			log.Println(msg)
-			return Error(err, RowsScanErrorCode, "", "dbs.execute")
+			return Error(err, RowsScanErrorCode, "unable to get rows values", "dbs.execute")
 		}
 		if rowCount != 0 && w != nil {
 			// add separator line to our output
@@ -546,13 +546,13 @@ func execute(
 			}
 			err = enc.Encode(rec)
 			if err != nil {
-				return Error(err, EncodeErrorCode, "", "dbs.execute")
+				return Error(err, EncodeErrorCode, "unable to encode data record", "dbs.execute")
 			}
 		}
 		rowCount += 1
 	}
 	if err = rows.Err(); err != nil {
-		return Error(err, RowsScanErrorCode, "", "dbs.execute")
+		return Error(err, RowsScanErrorCode, "unable to get rows values", "dbs.execute")
 	}
 	// make sure we write proper response if no result written
 	if sep != "" && !writtenResults {
@@ -572,7 +572,7 @@ func executeSessions(tx *sql.Tx, sessions []string) error {
 		if err != nil {
 			msg := fmt.Sprintf("DB session statement")
 			log.Println(msg, "\n###", s)
-			return Error(err, SessionErrorCode, "", "dbs.executeSession")
+			return Error(err, SessionErrorCode, "ORACLE session error", "dbs.executeSession")
 		}
 	}
 	return nil

@@ -25,7 +25,7 @@ func (a *API) PrimaryDatasets() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.primarydatasets.PrimaryDataset")
+		return Error(err, QueryErrorCode, "unable to query primary dataset", "dbs.primarydatasets.PrimaryDataset")
 	}
 	return nil
 }
@@ -52,7 +52,7 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 			r.PRIMARY_DS_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.primarydatasets.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment primary dataset sequence number", "dbs.primarydatasets.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -60,7 +60,7 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.primarydatasets.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate primary dataset record", "dbs.primarydatasets.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_primary_datasets")
@@ -78,7 +78,7 @@ func (r *PrimaryDatasets) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unablt to insert PrimaryDatasets", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.primarydatasets.Insert")
+		return Error(err, InsertPrimaryDatasetErrorCode, "unable to insert primary dataset record", "dbs.primarydatasets.Insert")
 	}
 	return nil
 }
@@ -90,7 +90,7 @@ func (r *PrimaryDatasets) Validate() error {
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		msg := "invalid pattern for creation date"
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.primarydatasets.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.primarydatasets.Validate")
 	}
 	return nil
 }
@@ -108,7 +108,7 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.primarydatasets.Decode")
+		return Error(err, ReaderErrorCode, "unable to read primary dataset record", "dbs.primarydatasets.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -116,7 +116,7 @@ func (r *PrimaryDatasets) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.primarydatasets.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode primary dataset record", "dbs.primarydatasets.Decode")
 	}
 	return nil
 }
@@ -135,13 +135,13 @@ func (a *API) InsertPrimaryDatasets() error {
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
+		return Error(err, ReaderErrorCode, "unable to read primary dataset record", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	rec := PrimaryDatasetRecord{CREATE_BY: a.CreateBy}
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
+		return Error(err, UnmarshalErrorCode, "unable to decode primary dataset record", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	pdst := rec.PRIMARY_DS_TYPE
 	pdsname := rec.PRIMARY_DS_NAME
@@ -155,7 +155,7 @@ func (a *API) InsertPrimaryDatasets() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
+		return Error(err, TransactionErrorCode, "transaction error", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	defer tx.Rollback()
 
@@ -176,7 +176,7 @@ func (a *API) InsertPrimaryDatasets() error {
 		// insert PrimaryDSType record
 		err = trec.Insert(tx)
 		if err != nil {
-			return Error(err, InsertErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
+			return Error(err, InsertPrimaryDatasetTypeErrorCode, "unable to insert primary dataset type record", "dbs.primarydatasets.InsertPrimaryDatasets")
 		}
 		pdstID = trec.PRIMARY_DS_TYPE_ID
 	}
@@ -185,14 +185,14 @@ func (a *API) InsertPrimaryDatasets() error {
 	prec.PRIMARY_DS_TYPE_ID = pdstID
 	err = prec.Insert(tx)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
+		return Error(err, InsertPrimaryDatasetErrorCode, "unable to insert primary dataset record", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("fail to insert primarydatasets", err)
-		return Error(err, CommitErrorCode, "", "dbs.primarydatasets.InsertPrimaryDatasets")
+		return Error(err, InsertPrimaryDatasetErrorCode, "unable to commit insert primary dataset record", "dbs.primarydatasets.InsertPrimaryDatasets")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))

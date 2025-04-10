@@ -60,7 +60,7 @@ func getPrimaryDatasetTestTable(t *testing.T) EndpointTestCase {
 	dbsError1 := dbs.DBSError{
 		Reason:   dbs.InvalidParamErr.Error(),
 		Message:  "unable to match 'dataset' value 'fnal'",
-		Code:     dbs.PatternErrorCode,
+		Code:     dbs.InvalidParameterErrorCode,
 		Function: "dbs.validator.Check",
 	}
 	dbsError := dbs.DBSError{

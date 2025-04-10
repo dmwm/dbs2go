@@ -16,6 +16,7 @@ import (
 )
 
 // Files DBS API
+//
 //gocyclo:ignore
 func (a *API) Files() error {
 	var args []interface{}
@@ -26,7 +27,7 @@ func (a *API) Files() error {
 
 	if len(a.Params) == 0 {
 		msg := "Files API with empty parameter map"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Files")
 	}
 
 	tmpl := make(Record)
@@ -50,14 +51,14 @@ func (a *API) Files() error {
 	if _, ok := a.Params["sumOverLumi"]; ok {
 		sumOverLumi, err = getSingleValue(a.Params, "sumOverLumi")
 		if err != nil {
-			return Error(err, ParametersErrorCode, "", "dbs.files.Files")
+			return Error(err, InvalidParameterErrorCode, "invalid sum over lumi parameter", "dbs.files.Files")
 		}
 	}
 
 	lumiList := getValues(a.Params, "lumi_list")
 	lumis, err = FlatLumis(lumiList)
 	if err != nil {
-		return Error(err, ParametersErrorCode, "", "dbs.files.Files")
+		return Error(err, InvalidParameterErrorCode, "invalid lumi_list parameter", "dbs.files.Files")
 	}
 	runs := getValues(a.Params, "run_num")
 	if len(runs) > 0 {
@@ -108,7 +109,7 @@ func (a *API) Files() error {
 	// load our SQL statement
 	stm, err := LoadTemplateSQL("files", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.files.Files")
+		return Error(err, LoadErrorCode, "unable to load files sql template", "dbs.files.Files")
 	}
 
 	// add lfns conditions
@@ -137,13 +138,13 @@ func (a *API) Files() error {
 	// files API does not support run_num=1 when no lumi and lfns
 	if len(runs) == 1 && len(lumis) == 0 && runs[0] == "1" && len(lfns) == 0 {
 		msg := "files API does not support run_num=1 when no lumi and lfns list provided"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Files")
 	}
 
 	// add run conditions
 	t, c, na, e := RunsConditions(runs, "FL")
 	if e != nil {
-		return Error(e, ParametersErrorCode, "", "dbs.files.Files")
+		return Error(e, InvalidParameterErrorCode, "invalid runs conditions parameter", "dbs.files.Files")
 	}
 	if t != "" {
 		stm = fmt.Sprintf("%s %s", t, stm)
@@ -196,17 +197,17 @@ func (a *API) Files() error {
 
 	if (rungen && lfngen) || (lumigen && lfngen) || (rungen && lumigen) {
 		msg := "cannot supply more than one list (lfn, run_num or lumi) at one query"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Files")
 	}
 
 	// check sumOverLumi conditions
 	if sumOverLumi == "1" && runList {
 		msg := "When sumOverLumi=1, no run_num list is allowed"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Files")
 	}
 	if sumOverLumi == "1" && lfnList {
 		msg := "When sumOverLumi=1, no lfn list is allowed"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.files.Files")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Files")
 	}
 	if len(runs) > 0 && sumOverLumi == "1" {
 		stm = strings.Replace(stm, "F.EVENT_COUNT,", "", -1)
@@ -214,7 +215,7 @@ func (a *API) Files() error {
 		tmpl["Statement"] = stm
 		stm, err = LoadTemplateSQL("files_sumoverlumi", tmpl)
 		if err != nil {
-			return Error(err, LoadErrorCode, "", "dbs.files.Files")
+			return Error(err, LoadErrorCode, "fail to load files_sumoverlumi sql template", "dbs.files.Files")
 		}
 	} else {
 		stm = WhereClause(stm, conds)
@@ -223,7 +224,7 @@ func (a *API) Files() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.files.Files")
+		return Error(err, QueryErrorCode, "query error", "dbs.files.Files")
 	}
 	return nil
 }
@@ -271,7 +272,7 @@ func (r *Files) Insert(tx *sql.Tx) error {
 		fileID, err := getFileID(tx)
 		if err != nil {
 			log.Println("unable to get fileID", err)
-			return Error(err, ParametersErrorCode, "", "dbs.files.Insert")
+			return Error(err, GetFileIDErrorCode, "unable to get file id", "dbs.files.Insert")
 		}
 		r.FILE_ID = fileID
 	}
@@ -280,7 +281,7 @@ func (r *Files) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.files.Insert")
+		return Error(err, ValidateErrorCode, "fail to validate file record", "dbs.files.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_files")
@@ -311,7 +312,7 @@ func (r *Files) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert files, error", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.files.Insert")
+		return Error(err, InsertFileErrorCode, "unable to insert file record", "dbs.files.Insert")
 	}
 	return nil
 }
@@ -322,15 +323,15 @@ func (r *Files) Validate() error {
 		return DecodeValidatorError(r, err)
 	}
 	if err := CheckPattern("logical_file_name", r.LOGICAL_FILE_NAME); err != nil {
-		return Error(err, PatternErrorCode, "", "dbs.files.Validate")
+		return Error(err, InvalidParameterErrorCode, "invalid lfn", "dbs.files.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		msg := "invalid pattern for creation date"
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.files.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Validate")
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.LAST_MODIFICATION_DATE)); !matched {
 		msg := "invalid pattern for last modification date"
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.files.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.files.Validate")
 	}
 	return nil
 }
@@ -351,7 +352,7 @@ func (r *Files) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.files.Decode")
+		return Error(err, ReaderErrorCode, "unable to read file record", "dbs.files.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -364,7 +365,7 @@ func (r *Files) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.files.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode file record", "dbs.files.Decode")
 	}
 	return nil
 }
@@ -416,13 +417,14 @@ type PyFileRecord struct {
 // - insert block parentage info
 // - insert dataset parentage info
 // - update block's info
+//
 //gocyclo:ignore
 func (a *API) InsertFiles() error {
 	// read given input
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.files.InsertFiles")
+		return Error(err, ReaderErrorCode, "unable to read file record", "dbs.files.InsertFiles")
 	}
 	var records []FileRecord
 	var pyrec PyFileRecord
@@ -433,7 +435,7 @@ func (a *API) InsertFiles() error {
 		err = json.Unmarshal(data, &records)
 		if err != nil {
 			log.Println("fail to decode data", err)
-			return Error(err, UnmarshalErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, UnmarshalErrorCode, "unable to decode file record", "dbs.files.InsertFiles")
 		}
 	} else {
 		records = pyrec.Records
@@ -472,7 +474,7 @@ func (a *API) InsertFiles() error {
 		// start transaction
 		tx, err := DB.Begin()
 		if err != nil {
-			return Error(err, TransactionErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, TransactionErrorCode, "unable to start transaction", "dbs.files.InsertFiles")
 		}
 		defer tx.Rollback()
 
@@ -487,17 +489,19 @@ func (a *API) InsertFiles() error {
 		// get all necessary IDs from different tables
 		blkId, err := GetID(tx, "BLOCKS", "block_id", "block_name", rec.BLOCK_NAME)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find block_id for %s", rec.BLOCK_NAME)
 			if utils.VERBOSE > 0 {
-				log.Println("unable to find block_id for", rec.BLOCK_NAME)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, GetBlockIDErrorCode, msg, "dbs.files.InsertFiles")
 		}
 		dsId, err := GetID(tx, "DATASETS", "dataset_id", "dataset", rec.DATASET)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find dataset_id for %s", rec.DATASET)
 			if utils.VERBOSE > 0 {
-				log.Println("unable to find dataset_id for", rec.DATASET)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, GetDatasetIDErrorCode, msg, "dbs.files.InsertFiles")
 		}
 		ftId, err := GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
 		if err != nil {
@@ -508,11 +512,11 @@ func (a *API) InsertFiles() error {
 			ftrec := FileDataTypes{FILE_TYPE: rec.FILE_TYPE}
 			err = ftrec.Insert(tx)
 			if err != nil {
-				return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+				return Error(err, InsertFileDataTypeErrorCode, "unable to insert file data types record", "dbs.files.InsertFiles")
 			}
 			ftId, err = GetID(tx, "FILE_DATA_TYPES", "file_type_id", "file_type", rec.FILE_TYPE)
 			if err != nil {
-				return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+				return Error(err, GetFileDataTypeIDErrorCode, "unable to get file data type id", "dbs.files.InsertFiles")
 			}
 		}
 
@@ -522,13 +526,13 @@ func (a *API) InsertFiles() error {
 		frec.FILE_TYPE_ID = ftId
 		err = frec.Insert(tx)
 		if err != nil {
-			return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, InsertFileErrorCode, "unable to insert file record", "dbs.files.InsertFiles")
 		}
 
 		// get current file ID
 		fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME)
 		if err != nil {
-			return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, GetFileIDErrorCode, "unable to get file id", "dbs.files.InsertFiles")
 		}
 
 		// * from dbs/bulkblocks.go line 546
@@ -548,18 +552,20 @@ func (a *API) InsertFiles() error {
 			// get current file ID
 			fid, err := GetID(tx, "FILES", "file_id", "logical_file_name", rec.LOGICAL_FILE_NAME)
 			if err != nil {
-				return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+				msg := fmt.Sprintf("unable to get file id for %s", rec.LOGICAL_FILE_NAME)
+				return Error(err, GetFileIDErrorCode, msg, "dbs.files.InsertFiles")
 			}
 			// get parent file ID
 			pid, err := GetID(tx, "FILES", "file_id", "logical_file_name", p.FILE_PARENT_LFN)
 			if err != nil {
-				return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+				msg := fmt.Sprintf("unable to get file id for %s", p.FILE_PARENT_LFN)
+				return Error(err, GetFileIDErrorCode, msg, "dbs.files.InsertFiles")
 			}
 			// inject file parents record
 			r := FileParents{THIS_FILE_ID: fid, PARENT_FILE_ID: pid}
 			err = r.Insert(tx)
 			if err != nil {
-				return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+				return Error(err, InsertFileParentErrorCode, "unable to insert file parent record", "dbs.files.InsertFiles")
 			}
 		}
 
@@ -567,7 +573,8 @@ func (a *API) InsertFiles() error {
 		for _, oc := range rec.FILE_OUTPUT_CONFIG_LIST {
 			ocid, err := GetID(tx, "OUTPUT_MODULE_CONFIGS", "output_mod_config_id", "output_module_label", oc.OUTPUT_MODULE_LABEL)
 			if err != nil {
-				return Error(err, GetIDErrorCode, "", "dbs.files.InsertFiles")
+				msg := fmt.Sprintf("unable to get output_module_config for %s", oc.OUTPUT_MODULE_LABEL)
+				return Error(err, GetOutputModConfigIDErrorCode, msg, "dbs.files.InsertFiles")
 			}
 			r := FileOutputModConfigs{
 				OUTPUT_MOD_CONFIG_ID: ocid,
@@ -575,7 +582,7 @@ func (a *API) InsertFiles() error {
 			}
 			err = r.Insert(tx)
 			if err != nil {
-				return Error(err, InsertErrorCode, "", "dbs.files.InsertFiles")
+				return Error(err, InsertFileOutputModConfigErrorCode, "unable to insert file output mod config record", "dbs.files.InsertFiles")
 			}
 		}
 
@@ -586,7 +593,7 @@ func (a *API) InsertFiles() error {
 		err = tx.Commit()
 		if err != nil {
 			log.Println("fail to commit transaction", err)
-			return Error(err, CommitErrorCode, "", "dbs.files.InsertFiles")
+			return Error(err, InsertFileErrorCode, "unable to commit insert file record", "dbs.files.InsertFiles")
 		}
 	}
 	if a.Writer != nil {
@@ -596,6 +603,7 @@ func (a *API) InsertFiles() error {
 }
 
 // UpdateFiles DBS API
+//
 //gocyclo:ignore
 func (a *API) UpdateFiles() error {
 
@@ -657,7 +665,7 @@ func (a *API) UpdateFiles() error {
 	// get SQL statement from static area
 	stm, err := LoadTemplateSQL("update_files", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.files.UpdateFiles")
+		return Error(err, LoadErrorCode, "fail to load update_files sql template", "dbs.files.UpdateFiles")
 	}
 	if len(lfns) == 1 {
 		// we only add where clause if lfns are present
@@ -674,7 +682,7 @@ func (a *API) UpdateFiles() error {
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println("unable to get DB transaction", err)
-		return Error(err, TransactionErrorCode, "", "dbs.files.UpdateFiles")
+		return Error(err, TransactionErrorCode, "unable to start transaction", "dbs.files.UpdateFiles")
 	}
 	defer tx.Rollback()
 	_, err = tx.Exec(stm, args...)
@@ -682,14 +690,14 @@ func (a *API) UpdateFiles() error {
 		if utils.VERBOSE > 0 {
 			log.Printf("unable to update %v", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.files.UpdateFiles")
+		return Error(err, UpdateFileErrorCode, "unable to update file record", "dbs.files.UpdateFiles")
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
 		log.Println("unable to commit transaction", err)
-		return Error(err, CommitErrorCode, "", "dbs.files.UpdateFiles")
+		return Error(err, UpdateFileErrorCode, "unable to commit update file record", "dbs.files.UpdateFiles")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))

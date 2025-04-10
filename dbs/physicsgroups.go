@@ -24,7 +24,7 @@ func (a *API) PhysicsGroups() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.physicsgroups.PhysicsGroups")
+		return Error(err, QueryErrorCode, "unable to query physics group", "dbs.physicsgroups.PhysicsGroups")
 	}
 	return nil
 }
@@ -52,7 +52,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 			r.PHYSICS_GROUP_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.physicsgroups.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment physics group sequence number", "dbs.physicsgroups.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -60,7 +60,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.physicsgroups.Insert")
+		return Error(err, ValidateErrorCode, "unable to validate physics group record", "dbs.physicsgroups.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_physics_groups")
@@ -69,7 +69,7 @@ func (r *PhysicsGroups) Insert(tx *sql.Tx) error {
 	}
 	_, err = tx.Exec(stm, r.PHYSICS_GROUP_ID, r.PHYSICS_GROUP_NAME)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.physicsgroups.Insert")
+		return Error(err, InsertPhysicsGroupErrorCode, "unable to insert physics group record", "dbs.physicsgroups.Insert")
 	}
 	return nil
 }
@@ -92,7 +92,7 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.physicsgroups.Decode")
+		return Error(err, ReaderErrorCode, "unable to read physics group record", "dbs.physicsgroups.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -105,7 +105,7 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 		if utils.VERBOSE > 0 {
 			log.Printf("fail to decode data %v, error %v", string(data), err)
 		}
-		return Error(err, UnmarshalErrorCode, "", "dbs.physicsgroups.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode physics group record", "dbs.physicsgroups.Decode")
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func (r *PhysicsGroups) Decode(reader io.Reader) error {
 func (a *API) InsertPhysicsGroups() error {
 	err := insertRecord(&PhysicsGroups{}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.physicsgroups.InsertPhysicsGroups")
+		return Error(err, InsertPhysicsGroupErrorCode, "unable to insert physics group record", "dbs.physicsgroups.InsertPhysicsGroups")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))

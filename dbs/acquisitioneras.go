@@ -26,7 +26,7 @@ func (a *API) AcquisitionEras() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.acquisitioners.AcquisitionEras")
+		return Error(err, QueryErrorCode, "unable to execute acquisition era query", "dbs.acquisitioners.AcquisitionEras")
 	}
 	return nil
 }
@@ -66,16 +66,16 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 			r.ACQUISITION_ERA_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.acquisitioneras.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment AcquisitionEras sequence id", "dbs.acquisitioneras.Insert")
 		}
 	}
 	// set defaults and validate the record
 	r.SetDefaults()
 	err = r.Validate()
 	if err != nil {
-		msg := "unable to validate record"
+		msg := "unable to validate acquisition era record"
 		log.Println(msg, err)
-		return Error(err, ValidateErrorCode, "", "dbs.acquisitioneras.Insert")
+		return Error(err, ValidateErrorCode, msg, "dbs.acquisitioneras.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_acquisition_eras")
@@ -95,7 +95,7 @@ func (r *AcquisitionEras) Insert(tx *sql.Tx) error {
 		log.Printf("unable to insert AcquisitionEras %s error %+v", stm, err)
 	}
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.acquisitioneras.Insert")
+		return Error(err, InsertAcquisitionEraErrorCode, "unable to insert Acquisition Era record", "dbs.acquisitioneras.Insert")
 	}
 	return nil
 }
@@ -107,7 +107,7 @@ func (r *AcquisitionEras) Validate() error {
 	}
 	if matched := unixTimePattern.MatchString(fmt.Sprintf("%d", r.CREATION_DATE)); !matched {
 		msg := "invalid pattern for creation date"
-		return Error(InvalidParamErr, PatternErrorCode, msg, "dbs.acquisitioneras.Validate")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.acquisitioneras.Validate")
 	}
 	return nil
 }
@@ -131,7 +131,7 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.acquisitioneras.Decode")
+		return Error(err, ReaderErrorCode, "unable to read acquisition eras record", "dbs.acquisitioneras.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -139,7 +139,7 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.acquisitioneras.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode acquisition eras record", "dbs.acquisitioneras.Decode")
 	}
 	return nil
 }
@@ -148,7 +148,7 @@ func (r *AcquisitionEras) Decode(reader io.Reader) error {
 func (a *API) InsertAcquisitionEras() error {
 	err := insertRecord(&AcquisitionEras{CREATE_BY: a.CreateBy}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.acquisitioneras.InsertAcquisitionEras")
+		return Error(err, InsertAcquisitionEraErrorCode, "unable to insert Acquisition Era record", "dbs.acquisitioneras.InsertAcquisitionEras")
 	}
 	if a.Writer != nil {
 		a.Writer.Write([]byte(`[]`))
@@ -175,12 +175,12 @@ func (a *API) UpdateAcquisitionEras() error {
 	// validate input params
 	if endDate == 0 {
 		msg := "invalid end_date parameter"
-		e := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.UpdateAckquisitionEras")
+		e := Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.UpdateAckquisitionEras")
 		return e
 	}
 	if aera == "" {
 		msg := "invalid ackquisition_era_name parameter"
-		e := Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.UpdateAckquisitionEras")
+		e := Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.UpdateAckquisitionEras")
 		return e
 	}
 
@@ -193,7 +193,7 @@ func (a *API) UpdateAcquisitionEras() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		e := Error(err, TransactionErrorCode, "", "dbs.UpdateAckquisitionEras")
+		e := Error(err, TransactionErrorCode, "transaction error", "dbs.UpdateAckquisitionEras")
 		log.Println(e)
 		return e
 	}
@@ -201,7 +201,7 @@ func (a *API) UpdateAcquisitionEras() error {
 
 	_, err = tx.Exec(stm, endDate, aera)
 	if err != nil {
-		e := Error(err, InsertErrorCode, "", "dbs.UpdateAckquisitionEras")
+		e := Error(err, UpdateAcquisitionEraErrorCode, "unable to update acquisition era record", "dbs.UpdateAckquisitionEras")
 		log.Println(e)
 		return e
 	}
@@ -209,7 +209,7 @@ func (a *API) UpdateAcquisitionEras() error {
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
-		e := Error(err, CommitErrorCode, "", "dbs.UpdateAckquisitionEras")
+		e := Error(err, UpdateAcquisitionEraErrorCode, "unable to commit update of acquisition era record", "dbs.UpdateAckquisitionEras")
 		log.Println(e)
 		return e
 	}

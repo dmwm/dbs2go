@@ -54,7 +54,7 @@ func tlsCerts(key, cert string) ([]tls.Certificate, error) {
 		x509cert, err := x509proxy.LoadX509Proxy(uproxy)
 		if err != nil {
 			msg := "failed to parse X509 proxy"
-			return nil, Error(err, InvalidRequestErrorCode, msg, "dbs.utils.tlsCerts")
+			return nil, Error(err, X509ProxyErrorCode, msg, "dbs.utils.tlsCerts")
 		}
 		certs := []tls.Certificate{x509cert}
 		return certs, nil

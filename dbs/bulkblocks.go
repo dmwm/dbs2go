@@ -153,13 +153,15 @@ type DatasetParent struct {
 // then we insert recursively PrimaryDSTypes, PrimaryDataset, ProcessingEras,
 // AcquisitionEras, ..., Datasets, Blocks, Files, FileLumis, FileCofig list,
 // and dataset parent lists.
+//
 //gocyclo:ignore
 func (a *API) InsertBulkBlocks() error {
 	// read input data
 	data, err := io.ReadAll(a.Reader)
 	if err != nil {
-		log.Println("unable to read bulkblock input", err)
-		return Error(err, ReaderErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		msg := "unable to read bulkblock input"
+		log.Println(msg, err)
+		return Error(err, ReaderErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 	// get our request hash ID to be able to trace concurrent requests
 	hash := utils.GetHash(data)
@@ -169,7 +171,7 @@ func (a *API) InsertBulkBlocks() error {
 	err = json.Unmarshal(data, &rec)
 	if err != nil {
 		log.Printf("unable to unmarshal bulkblock record %s, error %v", string(data), err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, UnmarshalErrorCode, "unable to decode bulk blocks record", "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	// prepare file parentage map, i.e. find out file ids we need for FileParentList
@@ -180,7 +182,7 @@ func (a *API) InsertBulkBlocks() error {
 		pfid, err := QueryRow("FILES", "file_id", "logical_file_name", plfn)
 		if err != nil {
 			msg := fmt.Sprintf("unable to find parent lfn %s", plfn)
-			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, FileParentDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		parentFilesMap[plfn] = pfid
 	}
@@ -188,7 +190,7 @@ func (a *API) InsertBulkBlocks() error {
 	// start transaction
 	tx, err := DB.Begin()
 	if err != nil {
-		return Error(err, TransactionErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, TransactionErrorCode, "unable to start transaction", "dbs.bulkblocks.InsertBulkBlocks")
 	}
 	defer tx.Rollback()
 
@@ -215,12 +217,12 @@ func (a *API) InsertBulkBlocks() error {
 		data, err = json.Marshal(rrr)
 		if err != nil {
 			log.Println("unable to marshal dataset config list", err)
-			return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, MarshalErrorCode, "unable to marshal dataset config list", "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		api.Reader = bytes.NewReader(data)
 		err = api.InsertOutputConfigsTx(tx)
 		if err != nil {
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertOutputConfigErrorCode, "unable to insert output configs", "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 
@@ -240,10 +242,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.PrimaryDataset.PrimaryDSType,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find primary_ds_type_id for %s", rec.PrimaryDataset.PrimaryDSType)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find primary_ds_type_id for", rec.PrimaryDataset.PrimaryDSType)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetPrimaryDatasetTypeIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	// get primarayDatasetID and insert record if it does not exists
@@ -268,10 +271,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.PrimaryDataset.PrimaryDSName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find primary_ds_id for %s", rec.PrimaryDataset.PrimaryDSName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find primary_ds_id for", rec.PrimaryDataset.PrimaryDSName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetPrimaryDatasetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	// get processing era ID and insert record if it does not exists
@@ -296,10 +300,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.ProcessingEra.ProcessingVersion,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find processing_era_id for %s", rec.ProcessingEra.ProcessingVersion)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find processing_era_id for", rec.ProcessingEra.ProcessingVersion)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetProcessingEraIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	// insert acquisition era if it does not exists
@@ -330,10 +335,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.AcquisitionEra.AcquisitionEraName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find acquisition_era_id for %s", rec.AcquisitionEra.AcquisitionEraName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find acquisition_era_id for", rec.AcquisitionEra.AcquisitionEraName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetAcquisitionEraIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	// get dataTierID
@@ -354,10 +360,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.DataTierName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find data_tier_id for %s", rec.Dataset.DataTierName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find data_tier_id for", rec.Dataset.DataTierName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetDataTierIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 	// get physicsGroupID
 	if utils.VERBOSE > 1 {
@@ -375,10 +382,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.PhysicsGroupName,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find physics_group_id for %s", rec.Dataset.PhysicsGroupName)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find physics_group_id for", rec.Dataset.PhysicsGroupName)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetPhysicsGroupIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 	// get datasetAccessTypeID
 	if utils.VERBOSE > 1 {
@@ -396,10 +404,11 @@ func (a *API) InsertBulkBlocks() error {
 		rec.Dataset.DatasetAccessType,
 	)
 	if err != nil {
+		msg := fmt.Sprintf("unable to find dataset_access_type_id for %s", rec.Dataset.DatasetAccessType)
 		if utils.VERBOSE > 1 {
-			log.Println("unable to find dataset_access_type_id for", rec.Dataset.DatasetAccessType)
+			log.Println(msg)
 		}
-		return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, GetDatasetAccessTypeIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 	if utils.VERBOSE > 1 {
 		log.Println("get processed dataset ID")
@@ -421,10 +430,11 @@ func (a *API) InsertBulkBlocks() error {
 		}
 		err := procDS.Insert(tx)
 		if err != nil {
+			msg := fmt.Sprintf("unable to insert processed dataset name record %s", rec.Dataset.ProcessedDSName)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert processed dataset name record", err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertProcessedDatasetErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		processedDatasetID, err = GetID(
 			tx,
@@ -434,10 +444,11 @@ func (a *API) InsertBulkBlocks() error {
 			rec.Dataset.ProcessedDSName,
 		)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find processed_ds_id %s", rec.Dataset.ProcessedDSName)
 			if utils.VERBOSE > 1 {
-				log.Printf("unable to find processed_ds_id %s error %v", rec.Dataset.ProcessedDSName, err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, GetProcessedDatasetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 
@@ -476,17 +487,19 @@ func (a *API) InsertBulkBlocks() error {
 		}
 		err = dataset.Insert(tx)
 		if err != nil {
+			msg := fmt.Sprintf("unable to insert dataset record %s", rec.Dataset.Dataset)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert dataset record", err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertDatasetErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		datasetID, err = GetID(tx, "DATASETS", "dataset_id", "dataset", rec.Dataset.Dataset)
 		if err != nil {
+			msg := fmt.Sprintf("unable to get dataset_id for dataset %s", rec.Dataset.Dataset)
 			if utils.VERBOSE > 1 {
-				log.Printf("unable to get dataset_id for dataset %s error %v", rec.Dataset.Dataset, err)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, GetDatasetIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 	// get outputModConfigID using datasetID
@@ -513,10 +526,11 @@ func (a *API) InsertBulkBlocks() error {
 		}
 		err = dsoRec.Insert(tx)
 		if err != nil {
+			msg := fmt.Sprintf("unable to insert dataset output mod configs record")
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert dataset output mod configs record", err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertDatasetOutputModConfigErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 
@@ -547,17 +561,19 @@ func (a *API) InsertBulkBlocks() error {
 		}
 		err = blk.Insert(tx)
 		if err != nil {
+			msg := fmt.Sprintf("unable to insert block record %s", rec.Block.BlockName)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert block record", err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertBlockErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		blockID, err = GetID(tx, "BLOCKS", "block_id", "block_name", rec.Block.BlockName)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find block_id for %s", rec.Block.BlockName)
 			if utils.VERBOSE > 1 {
-				log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, GetBlockIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 
@@ -582,10 +598,11 @@ func (a *API) InsertBulkBlocks() error {
 			rrr.FileType,
 		)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find file_type_id for %s", rrr.FileType)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find file_type_id for", rrr.FileType)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, GetFileDataTypesIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		// get branch hash ID and insert record if it does not exists
 		//         if rrr.BranchHash == "" {
@@ -604,7 +621,7 @@ func (a *API) InsertBulkBlocks() error {
 		if isFileValid == 0 {
 			if rrr.IsFileValid != 0 && rrr.IsFileValid != 1 {
 				msg := "wrong is_file_valid value"
-				return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
+				return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 			}
 			isFileValid = rrr.IsFileValid
 		}
@@ -633,17 +650,19 @@ func (a *API) InsertBulkBlocks() error {
 			}
 			err = r.Insert(tx)
 			if err != nil {
+				msg := fmt.Sprintf("unable to insert File record %s", rrr.LogicalFileName)
 				if utils.VERBOSE > 1 {
-					log.Println("unable to insert File record", err)
+					log.Println(msg)
 				}
-				return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+				return Error(err, InsertFileErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 			}
 			fileID, err = GetID(tx, "FILES", "file_id", "logical_file_name", rrr.LogicalFileName)
 			if err != nil {
+				msg := fmt.Sprintf("unable to find block_id for %s", rec.Block.BlockName)
 				if utils.VERBOSE > 1 {
-					log.Printf("unable to find block_id for %s, error %v", rec.Block.BlockName, err)
+					log.Println(msg)
 				}
-				return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+				return Error(err, GetFileIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 			}
 		}
 		filesMap[rrr.LogicalFileName] = fileID
@@ -661,15 +680,16 @@ func (a *API) InsertBulkBlocks() error {
 			if utils.VERBOSE > 1 {
 				log.Println("unable to marshal file config list", err)
 			}
-			return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, MarshalErrorCode, "unable to marshal file config list", "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		api.Reader = bytes.NewReader(data)
 		err = api.InsertFileOutputModConfigs(tx)
 		if err != nil {
+			msg := fmt.Sprintf("unable to insert file output mod config: %v", err)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert file output mod config", err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertFileOutputModConfigErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 
@@ -681,10 +701,10 @@ func (a *API) InsertBulkBlocks() error {
 			lfn = r.ThisLogicalFileName
 		}
 		if lfn == "" {
-			err := errors.New("mailformed file parent record")
+			err := errors.New("malformed file parent record")
 			msg := fmt.Sprintf("file parent record %+v does not contain LFN", r)
 			log.Println(msg)
-			return Error(err, NotImplementedApiCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, InvalidParameterErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		if fileID, ok := filesMap[lfn]; ok {
 			rrr.THIS_FILE_ID = fileID
@@ -692,7 +712,7 @@ func (a *API) InsertBulkBlocks() error {
 			err := errors.New("unable to locate LFN file id")
 			msg := fmt.Sprintf("no file id found for '%s'", lfn)
 			log.Println(msg)
-			return Error(err, SessionErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, GetFileIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		// parent lfn should be already in DB
 		plfn := r.ParentLogicalFileName
@@ -703,13 +723,13 @@ func (a *API) InsertBulkBlocks() error {
 			err := errors.New("unable to locate parent file id")
 			msg := fmt.Sprintf("no file id found for parent '%s'", lfn)
 			log.Println(msg)
-			return Error(err, DatabaseErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, FileParentDoesNotExist, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 		err := rrr.Insert(tx)
 		if err != nil {
 			msg := fmt.Sprintf("%s unable to insert file parents record %+v, error %v", hash, rrr, err)
 			log.Println(msg)
-			return Error(err, InsertErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
+			return Error(err, InsertFileErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 		}
 	}
 
@@ -720,7 +740,7 @@ func (a *API) InsertBulkBlocks() error {
 			if utils.VERBOSE > 1 {
 				log.Println("unable to marshal file parent list", err)
 			}
-			return Error(err, MarshalErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, MarshalErrorCode, "unable to encode file parent list record", "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		api.Reader = bytes.NewReader(data)
 		api.Params = make(Record)
@@ -746,28 +766,31 @@ func (a *API) InsertBulkBlocks() error {
 		// get file id for parent dataset
 		pid, err := GetID(tx, "DATASETS", "dataset_id", "dataset", ds)
 		if err != nil {
+			msg := fmt.Sprintf("unable to find dataset_id for %s", ds)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to find dataset_id for", ds)
+				log.Println(msg)
 			}
-			return Error(err, GetIDErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, GetDatasetParentIDErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 		r := DatasetParents{THIS_DATASET_ID: datasetID, PARENT_DATASET_ID: pid}
 		err = r.Insert(tx)
 		if err != nil {
+			msg := fmt.Sprintf("unable to insert parent dataset record, error %s", err)
 			if utils.VERBOSE > 1 {
-				log.Println("unable to insert parent dataset record", err)
+				log.Println(msg)
 			}
-			return Error(err, InsertErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+			return Error(err, InsertDatasetParentErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 		}
 	}
 
 	// commit transaction
 	err = tx.Commit()
 	if err != nil {
+		msg := fmt.Sprintf("fail to commit transaction, error %v", err)
 		if utils.VERBOSE > 1 {
 			log.Println("fail to commit transaction", err)
 		}
-		return Error(err, CommitErrorCode, "", "dbs.bulkblocks.InsertBulkBlocks")
+		return Error(err, InsertBulkblockErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 
 	if a.Writer != nil {

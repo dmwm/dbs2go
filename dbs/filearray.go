@@ -59,13 +59,13 @@ func (a *API) FileArray() error {
 	if lumis, ok := a.Params["lumi_list"]; ok {
 		lumiList, err := FlatLumis(lumis)
 		if err != nil {
-			return Error(err, ParametersErrorCode, "", "dbs.filearray.FileArray")
+			return Error(err, InvalidParameterErrorCode, "invalid lumi_list parameter", "dbs.filearray.FileArray")
 		}
 		a.Params["lumi_list"] = lumiList
 	}
 	if len(a.Params) == 0 {
 		msg := "filearray api requires input parameters"
-		return Error(InvalidParamErr, ParametersErrorCode, msg, "dbs.filearray.FileArray")
+		return Error(InvalidParamErr, InvalidParameterErrorCode, msg, "dbs.filearray.FileArray")
 	}
 	return a.Files()
 }

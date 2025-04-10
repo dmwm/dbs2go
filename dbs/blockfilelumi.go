@@ -15,7 +15,7 @@ func (a *API) BlockFileLumiIds() error {
 	// create our SQL statement
 	stm, err := LoadTemplateSQL("blockfilelumiids", tmpl)
 	if err != nil {
-		return Error(err, LoadErrorCode, "", "dbs.blockfilelumi.BlockFileLumiIds")
+		return Error(err, LoadErrorCode, "unable to load block filelumis template", "dbs.blockfilelumi.BlockFileLumiIds")
 	}
 
 	// add block condition
@@ -41,7 +41,7 @@ func (a *API) BlockFileLumiIds() error {
 	// use generic query API to fetch the results from DB
 	err = executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.blockfilelumi.BlockFileLumiIds")
+		return Error(err, QueryErrorCode, "unable to query block filelumis", "dbs.blockfilelumi.BlockFileLumiIds")
 	}
 	return nil
 }

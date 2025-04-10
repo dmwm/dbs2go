@@ -19,7 +19,7 @@ func (a *API) DatasetOutputModConfigs() error {
 	// use generic query API to fetch the results from DB
 	err := executeAll(a.Writer, a.Separator, stm, args...)
 	if err != nil {
-		return Error(err, QueryErrorCode, "", "dbs.dataset_output_configs.DatasetOutputModConfigs")
+		return Error(err, QueryErrorCode, "unable to query dataset output mod configs", "dbs.dataset_output_configs.DatasetOutputModConfigs")
 	}
 	return nil
 }
@@ -44,7 +44,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 			r.DS_OUTPUT_MOD_CONF_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.dataset_output_configs.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment datasets output mod config sequence number", "dbs.dataset_output_configs.Insert")
 		}
 	}
 	// check if our data already exist in DB
@@ -60,7 +60,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.dataset_output_configs.Insert")
+		return Error(err, ValidateErrorCode, "unable to validate dataset output mod config record", "dbs.dataset_output_configs.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_dataset_output_mod_configs")
@@ -72,7 +72,7 @@ func (r *DatasetOutputModConfigs) Insert(tx *sql.Tx) error {
 		log.Printf("unable to insert DatasetOutputModConfigs %+v", err)
 	}
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.dataset_output_configs.Insert")
+		return Error(err, InsertDatasetOutputModConfigErrorCode, "unable to insert dataset output mod config record", "dbs.dataset_output_configs.Insert")
 	}
 	return nil
 }
@@ -95,7 +95,7 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.dataset_output_configs.Decode")
+		return Error(err, ReaderErrorCode, "unable to read dataset output mod config record", "dbs.dataset_output_configs.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -103,7 +103,7 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.dataset_output_configs.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to desirialize dataset output mod config record", "dbs.dataset_output_configs.Decode")
 	}
 	return nil
 }
@@ -112,7 +112,7 @@ func (r *DatasetOutputModConfigs) Decode(reader io.Reader) error {
 func (a *API) InsertDatasetOutputModConfigs() error {
 	err := insertRecord(&DatasetOutputModConfigs{}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.dataset_output_configs.InsertDatasetOutputModConfigs")
+		return Error(err, InsertDatasetOutputModConfigErrorCode, "unable to insert dataset output mod config record", "dbs.dataset_output_configs.InsertDatasetOutputModConfigs")
 	}
 	return nil
 }

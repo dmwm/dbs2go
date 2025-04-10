@@ -50,7 +50,7 @@ func CreateInvalidParamError(param string, api string) error {
 	msg := fmt.Sprintf("parameter '%s' is not accepted by '%s' API", param, api)
 	return Error(
 		InvalidParamErr,
-		ParametersErrorCode,
+		InvalidParameterErrorCode,
 		msg,
 		"dbs.parameters.CheckQueryParameters")
 }
@@ -62,7 +62,7 @@ func CheckQueryParameters(r *http.Request, api string) error {
 		log.Println("loading", ApiParametersFile)
 		ApiParamMap, err = LoadApiParameters(ApiParametersFile)
 		if err != nil {
-			return Error(GenericErr, LoadErrorCode, "", "dbs.parameters.CheckQueryParameters")
+			return Error(GenericErr, LoadErrorCode, "unable to load api parameters file", "dbs.parameters.CheckQueryParameters")
 		}
 	}
 	for k, _ := range r.URL.Query() {

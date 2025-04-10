@@ -28,7 +28,7 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 			r.APP_EXEC_ID = tid
 		}
 		if err != nil {
-			return Error(err, LastInsertErrorCode, "", "dbs.appexec.Insert")
+			return Error(err, LastInsertErrorCode, "unable to increment application executables sequence number", "dbs.appexec.Insert")
 		}
 	}
 	// set defaults and validate the record
@@ -36,7 +36,7 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 	err = r.Validate()
 	if err != nil {
 		log.Println("unable to validate record", err)
-		return Error(err, ValidateErrorCode, "", "dbs.appexec.Insert")
+		return Error(err, ValidateErrorCode, "unable to validate application executable record", "dbs.appexec.Insert")
 	}
 	// get SQL statement from static area
 	stm := getSQL("insert_appexec")
@@ -48,7 +48,7 @@ func (r *ApplicationExecutables) Insert(tx *sql.Tx) error {
 		if utils.VERBOSE > 0 {
 			log.Println("unable to insert ApplicationExecutables record, error", err)
 		}
-		return Error(err, InsertErrorCode, "", "dbs.appexec.Insert")
+		return Error(err, InsertApplicationExecutableErrorCode, "unable to insert application executable record", "dbs.appexec.Insert")
 	}
 	return nil
 }
@@ -71,7 +71,7 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) error {
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		log.Println("fail to read data", err)
-		return Error(err, ReaderErrorCode, "", "dbs.appexec.Decode")
+		return Error(err, ReaderErrorCode, "unable to read application executable record", "dbs.appexec.Decode")
 	}
 	err = json.Unmarshal(data, &r)
 
@@ -79,7 +79,7 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) error {
 	//     err := decoder.Decode(&rec)
 	if err != nil {
 		log.Println("fail to decode data", err)
-		return Error(err, UnmarshalErrorCode, "", "dbs.appexec.Decode")
+		return Error(err, UnmarshalErrorCode, "unable to decode application executable record", "dbs.appexec.Decode")
 	}
 	return nil
 }
@@ -88,7 +88,7 @@ func (r *ApplicationExecutables) Decode(reader io.Reader) error {
 func (a *API) InsertApplicationExecutables() error {
 	err := insertRecord(&ApplicationExecutables{}, a.Reader)
 	if err != nil {
-		return Error(err, InsertErrorCode, "", "dbs.appexec.InsertApplicationExecutables")
+		return Error(err, InsertApplicationExecutableErrorCode, "unable to insert application executable record", "dbs.appexec.InsertApplicationExecutables")
 	}
 	return nil
 }
