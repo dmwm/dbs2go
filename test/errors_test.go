@@ -58,3 +58,33 @@ func TestDBSError(t *testing.T) {
 	}
 	fmt.Println("Wrapped error:", err4.Error())
 }
+
+// TestDBSErrorIntegration test DBSError integration
+func TestDBSErrorIntegration(t *testing.T) {
+	dbsErr := helper()
+	var e *dbs.DBSError
+	if !errors.As(dbsErr, &e) {
+		t.Error("dbsErr did not trigger errors.As")
+	}
+	err1 := dbs.Error(dbsErr, dbs.BlockAlreadyExists, "message", "func.TestDBSErrorIntegration")
+	if !strings.Contains(err1.Error(), "block already exists") {
+		t.Error("fail to match explanation for: block already exists")
+	}
+	err2 := dbs.Error(dbsErr, dbs.InsertBlockErrorCode, "message", "func.TestDBSErrorIntegration")
+	if !strings.Contains(err2.Error(), "insert block error") {
+		t.Error("fail to match explanation for: insert block error")
+	}
+
+	// create nested error
+	err1 = dbs.Error(errors.New("lower deep level"), dbs.GetDataTierIDErrorCode, "message", "func.TestDBSErrorIntegration")
+	err2 = dbs.Error(err1, dbs.InsertBlockErrorCode, "message", "func.TestDBSErrorIntegration")
+	if !strings.Contains(err2.Error(), fmt.Sprintf("%d", dbs.GetDataTierIDErrorCode)) {
+		t.Error("DBSError does not contain GetDataTierIDErrorCode")
+	}
+	if !strings.Contains(err2.Error(), fmt.Sprintf("%d", dbs.InsertBlockErrorCode)) {
+		t.Error("DBSError does not contain InsertBlockErrorCode")
+	}
+	t.Log("example of nested error")
+	t.Log(err2.Error())
+
+}
