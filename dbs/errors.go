@@ -35,6 +35,7 @@ var InvalidRequestErr = errors.New("invalid request error")
 
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
+	// generic errors
 	GenericErrorCode          = iota + 100 // generic DBS error
 	DatabaseErrorCode                      // 101 database error
 	TransactionErrorCode                   // 102 transaction error
@@ -60,10 +61,9 @@ const (
 	UnmarshalErrorCode                     // 122 JSON unmarshal (deserialization) error
 	MarshalErrorCode                       // 123 JSON marshal (serialization) error
 	HttpRequestErrorCode                   // 124 HTTP request error
-	MigrationErrorCode                     // 125 Migration error
-	RemoveErrorCode                        // 126 remove error
 	X509ProxyErrorCode                     // 127 X509 proxy error code
 
+	// logical errors
 	BlockAlreadyExists             = iota + 200 // 200 block xxx already exists in DBS
 	FileDataTypesDoesNotExist                   // 201 FileDataTypes does not exist in DBS
 	FileParentDoesNotExist                      // 202 FileParent does not exist in DBS
@@ -78,6 +78,7 @@ const (
 	DatasetAccessTypeDoesNotExist               // 211 DatasetAccessType does not exist in DBS
 	DatasetDoesNotExist                         // 212 Dataset does not exist in DBS
 
+	// insert errors
 	InsertDatasetErrorCode                = iota + 300 // 300 insert error for dataset
 	InsertDatasetParentErrorCode                       // 301 insert error for dataset parents
 	InsertDatasetOutputModConfigErrorCode              // 302 insert error for DatasetOutputModConfigs
@@ -127,15 +128,19 @@ const (
 	GetFileDataTypeIDErrorCode                    // 415 fail to get file data type id
 	GetDatasetParentIDErrorCode                   // 416 fail to get dataset parent id
 
-	// update object errors
+	// update operation errors
 	UpdateAcquisitionEraErrorCode = iota + 500 // 500 update acquisition era error
 	UpdateBlockErrorCode                       // 501 update block error
 	UpdateDatasetErrorCode                     // 502 update dataset error
 	UpdateFileErrorCode                        // 503 update file error
-	UpdateMigrationErrorCode                   // 504 update migration error
-	RemoveMigrationErrorCode                   // 505 remove migration error
-	CancelMigrationErrorCode                   // 506 cancel migration error
-	CleanupMigrationErrorCode                  // 507 cleanup migration error
+
+	// migration errors
+	UpdateMigrationErrorCode  = iota + 600 // 600 update migration error
+	RemoveMigrationErrorCode               // 601 remove migration error
+	CancelMigrationErrorCode               // 602 cancel migration error
+	CleanupMigrationErrorCode              // 603 cleanup migration error
+	MigrationErrorCode                     // 604 Migration error
+	RemoveErrorCode                        // 605 remove error
 
 	LastAvailableErrorCode = iota + 900 // last available DBS error code
 )
@@ -182,7 +187,7 @@ func (e *DBSError) Explain() string {
 	case ParseErrorCode:
 		return "DBS parser error, e.g. malformed input parameter to the query"
 	case LoadErrorCode:
-		return "DBS file load error, e.g. fail to load DB template"
+		return "DBS file load error, e.g. fail to load SQL template"
 	case GetIDErrorCode:
 		return "DBS DB ID error for provided entity, e.g. there is no record in DB for provided value"
 	case InsertErrorCode:
@@ -215,10 +220,152 @@ func (e *DBSError) Explain() string {
 		return "DBS unable to convert record to JSON"
 	case HttpRequestErrorCode:
 		return "invalid HTTP request"
+	case X509ProxyErrorCode:
+		return "X509 proxy error, e.g. expired certificate"
+
+	case BlockAlreadyExists:
+		return "block already exists"
+	case FileDataTypesDoesNotExist:
+		return "file data type does not exit"
+	case FileParentDoesNotExist:
+		return "file parent does not exist"
+	case DatasetParentDoesNotExist:
+		return "dataset parent does not exist"
+	case ProcessedDatasetDoesNotExist:
+		return "processed dataset does not exist"
+	case PrimaryDatasetTypeDoesNotExist:
+		return "primary dataset type does not exist"
+	case PrimaryDatasetDoesNotExist:
+		return "primary dataset does not exist"
+	case ProcessingEraDoesNotExist:
+		return "processing era does not exist"
+	case AcquisitionEraDoesNotExist:
+		return "acquisition era does not exist"
+	case DataTierDoesNotExist:
+		return "data tier does not exist"
+	case PhysicsGroupDoesNotExist:
+		return "physics group does not exist"
+	case DatasetAccessTypeDoesNotExist:
+		return "dataset access type does not exist"
+	case DatasetDoesNotExist:
+		return "dataset does not exist"
+
+	// insert error codes
+	case InsertDatasetErrorCode:
+		return "insert dataset error"
+	case InsertDatasetParentErrorCode:
+		return "insert dataset parent error"
+	case InsertDatasetOutputModConfigErrorCode:
+		return "insert dataset output mod config error"
+	case InsertDatasetConfigurationsErrorCode:
+		return "insert dataset config error"
+	case InsertDatasetAccessTypeErrorCode:
+		return "insert dataset access type error"
+	case InsertBlockErrorCode:
+		return "insert block error"
+	case InsertBlockParentErrorCode:
+		return "insert block parent error"
+	case InsertBlockStatsErrorCode:
+		return "insert block stats error"
+	case InsertBulkblockErrorCode:
+		return "insert bulkblock error"
+	case InsertBlockDumpErrorCode:
+		return "insert block dump error"
+	case InsertFileErrorCode:
+		return "insert file error"
+	case InsertFileLumiErrorCode:
+		return "insert file lumi error"
+	case InsertFileOutputModConfigErrorCode:
+		return "insert file output mod config error"
+	case InsertFileParentErrorCode:
+		return "insert file parent error"
+	case InsertPrimaryDatasetErrorCode:
+		return "insert primary dataset error"
+	case InsertPrimaryDatasetTypeErrorCode:
+		return "insert primary dataset type error"
+	case InsertAcquisitionEraErrorCode:
+		return "insert acquisition era error"
+	case InsertOutputConfigErrorCode:
+		return "insert output config error"
+	case InsertApplicationExecutableErrorCode:
+		return "insert application executable error"
+	case InsertFileDataTypeErrorCode:
+		return "insert file data type error"
+	case InsertMigrationBlockErrorCode:
+		return "insert migration block error"
+	case InsertMigrationRequestErrorCode:
+		return "insert migration request error"
+	case InsertParameterSetHashErrorCode:
+		return "insert parameter set hash error"
+	case InsertReleaseVersionErrorCode:
+		return "insert release version error"
+	case InsertPhysicsGroupErrorCode:
+		return "insert physics group error"
+	case InsertProcessingEraErrorCode:
+		return "insert processing era error"
+	case InsertDataTierErrorCode:
+		return "insert data tier error"
+
+	// transient errors at DB level
+	case GetBlockIDErrorCode:
+		return "unable to get block id"
+	case GetFileIDErrorCode:
+		return "unable to get file id"
+	case GetFileDataTypesIDErrorCode:
+		return "unable to get file data type id"
+	case GetPrimaryDatasetIDErrorCode:
+		return "unable to get primary dataset id"
+	case GetProcessingEraIDErrorCode:
+		return "unable to get processing era id"
+	case GetAcquisitionEraIDErrorCode:
+		return "unable to get acquisition era id"
+	case GetDatatierIDErrorCode:
+		return "unable to get data tier id"
+	case GetPhysicsGroupIDErrorCode:
+		return "unable to get physics group id"
+	case GetDatasetAccessTypeIDErrorCode:
+		return "unable to get dataset access type id"
+	case GetProcessedDatasetIDErrorCode:
+		return "unable to get processed dataset id"
+	case GetDatasetIDErrorCode:
+		return "unable to get dataset id"
+	case GetPrimaryDSIDErrorCode:
+		return "unable to get primary dataset id"
+	case GetDataTierIDErrorCode:
+		return "unable to get data tier id"
+	case GetOutputModConfigIDErrorCode:
+		return "unable to get output mod config id"
+	case GetPrimaryDatasetTypeIDErrorCode:
+		return "unable to get primary dataset type id"
+	case GetFileDataTypeIDErrorCode:
+		return "unable to get file data type id"
+	case GetDatasetParentIDErrorCode:
+		return "unable to get dataset parent id"
+
+	// update operation codes
+	case UpdateAcquisitionEraErrorCode:
+		return "fail to update acquisition era table"
+	case UpdateBlockErrorCode:
+		return "fail to update block table"
+	case UpdateDatasetErrorCode:
+		return "fail to update dataset table"
+	case UpdateFileErrorCode:
+		return "fail to update file table"
+
+	// migration errors
 	case MigrationErrorCode:
-		return "DBS Migration error"
+		return "migration error"
 	case RemoveErrorCode:
-		return "Unable to remove record from DB"
+		return "remove record error"
+	case UpdateMigrationErrorCode:
+		return "update migration error"
+	case RemoveMigrationErrorCode:
+		return "remove migration error"
+	case CancelMigrationErrorCode:
+		return "cancel migration error"
+	case CleanupMigrationErrorCode:
+		return "cleanup migration error"
+
 	default:
 		return "Not defined"
 	}
