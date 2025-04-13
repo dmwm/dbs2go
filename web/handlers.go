@@ -256,7 +256,22 @@ func ErrorsHandler(w http.ResponseWriter, r *http.Request) {
 		errors = append(errors, e)
 	}
 
-	// marhsal the data to return back to caller
+	// marshal data to return back to caller
+	data, err := json.Marshal(errors)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
+}
+
+// DBSErrorsHandler provides basic functionality of status response
+func DBSErrorsHandler(w http.ResponseWriter, r *http.Request) {
+	errors := dbs.GetDBSErrors()
+	// note: even though we define errors as map[int]string the json.Marshal
+	// will return dict of keys:values where keys are string. This is because
+	// JSON spec defines: an object is a collection of name/value pairs where the names are strings.
 	data, err := json.Marshal(errors)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

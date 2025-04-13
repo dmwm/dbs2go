@@ -388,3 +388,16 @@ func Error(err error, code int, msg, function string) error {
 		Stacktrace: fmt.Sprintf("\n%s", stackSlice[0:s]),
 	}
 }
+
+// GetDBSErrors returns map of DBS errors
+func GetDBSErrors() map[int]string {
+	errors := make(map[int]string)
+	for i := GenericErrorCode; i < LastAvailableErrorCode; i++ {
+		err := &DBSError{Code: i}
+		explain := err.Explain()
+		if explain != "Not defined" {
+			errors[i] = explain
+		}
+	}
+	return errors
+}
