@@ -484,7 +484,7 @@ func (a *API) InsertBulkBlocksConcurrently() error {
 		return Error(err, ReaderErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocksConcurrently")
 	}
 	// get our request hash ID to be able to trace concurrent requests
-	hash := utils.GetHash(data)
+	hash := fmt.Sprintf("request %s", utils.GetHash(data, ConcurrentHashSize))
 
 	if utils.VERBOSE > 1 {
 		log.Println(hash, "start bulkblocks.InsertBulkBlocksConcurrently")

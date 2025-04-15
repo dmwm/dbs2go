@@ -164,7 +164,7 @@ func (a *API) InsertBulkBlocks() error {
 		return Error(err, ReaderErrorCode, msg, "dbs.bulkblocks.InsertBulkBlocks")
 	}
 	// get our request hash ID to be able to trace concurrent requests
-	hash := utils.GetHash(data)
+	hash := utils.GetHash(data, ConcurrentHashSize)
 
 	// unmarshal the data into BulkBlocks record
 	var rec BulkBlocks

@@ -432,6 +432,7 @@ func Server(configFile string) {
 
 	// DBS bulkblocks API
 	dbs.ConcurrentBulkBlocks = Config.ConcurrentBulkBlocks
+	dbs.ConcurrentHashSize = Config.ConcurrentHashSize
 
 	// init graphql
 	if Config.GraphQLSchema != "" {
