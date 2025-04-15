@@ -249,7 +249,7 @@ func blocksInDB(blocks []string) ([]string, error) {
 		return blocks, nil
 	}
 	srcBlocks := []string{}
-	hash := utils.GetHash([]byte(blocks[0]))
+	hash := utils.GetHash([]byte(blocks[0]), ConcurrentHashSize)
 	tx, err := DB.Begin()
 	if err != nil {
 		return srcBlocks, Error(err, TransactionErrorCode, hash, "dbs.migrate.blocksInDB")

@@ -78,6 +78,9 @@ var FileLumiInsertMethod string
 // ConcurrentBulkBlocks defines if code should use concurrent bulkblocks API
 var ConcurrentBulkBlocks bool
 
+// ConcurrentHashSize defines size of hash to use to encode concurrent requests
+var ConcurrentHashSize int
+
 // DBRecord interface represents general DB record used by DBS APIs.
 // Each DBS API represents specific Table in back-end DB. And, each individual
 // DBS API implements logic for its own DB records

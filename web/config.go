@@ -54,6 +54,7 @@ type Configuration struct {
 	FileLumiMaxSize      int    `json:"file_lumi_max_size"`      // max size for []FileLumi insertion
 	FileLumiInsertMethod string `json:"file_lumi_insert_method"` // insert method for FileLumi list
 	ConcurrentBulkBlocks bool   `json:"concurrent_bulkblocks"`   // use concurrent BulkBlocks API
+	ConcurrentHashSize   int    `json:"concurrent_hash_size"`    // size of hash to use to encode concurrent request
 
 	// server static parts
 	Templates string `json:"templates"` // location of server templates
