@@ -153,6 +153,7 @@ func Handlers() *mux.Router {
 
 		router.HandleFunc(basePath("/dbstats"), DBStatsHandler).Methods("GET")
 		router.HandleFunc(basePath("/status"), StatusHandler).Methods("GET")
+		router.HandleFunc(basePath("/errors"), DBSErrorsHandler).Methods("GET")
 		router.HandleFunc(basePath("/error"), TestErrorHandler).Methods("GET")
 
 		// load graphql

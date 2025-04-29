@@ -147,11 +147,12 @@ const (
 
 // DBSError represents common structure for DBS errors
 type DBSError struct {
-	Reason     string `json:"reason"`     // error string
-	Message    string `json:"message"`    // additional message describing the issue
-	Function   string `json:"function"`   // DBS function
-	Code       int    `json:"code"`       // DBS error code
-	Stacktrace string `json:"stacktrace"` // Go stack trace
+	Reason     string `json:"reason,omitempty"`     // error string
+	Message    string `json:"message,omitempty"`    // additional message describing the issue
+	Function   string `json:"function,omitempty"`   // DBS function
+	Code       int    `json:"code"`                 // DBS error code
+	Stacktrace string `json:"stacktrace,omitempty"` // Go stack trace
+	Meaning    string `json:"meaning,omitempty"`
 }
 
 // Error function implements details of DBS error message
@@ -387,4 +388,18 @@ func Error(err error, code int, msg, function string) error {
 		Function:   function,
 		Stacktrace: fmt.Sprintf("\n%s", stackSlice[0:s]),
 	}
+}
+
+// GetDBSErrors returns map of DBS errors
+func GetDBSErrors() []DBSError {
+	var errors []DBSError
+	for i := GenericErrorCode; i < LastAvailableErrorCode; i++ {
+		err := DBSError{Code: i}
+		explain := err.Explain()
+		if explain != "Not defined" {
+			err.Meaning = explain
+			errors = append(errors, err)
+		}
+	}
+	return errors
 }
