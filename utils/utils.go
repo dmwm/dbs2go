@@ -331,7 +331,10 @@ func UpdateOrderedDict(omap, nmap map[int][]string) map[int][]string {
 }
 
 // GetHash generates SHA256 hash for given data blob
-func GetHash(data []byte) string {
+func GetHash(data []byte, size int) string {
 	hash := sha256.Sum256(data)
-	return hex.EncodeToString(hash[:])
+	if size == 0 {
+		return hex.EncodeToString(hash[:])
+	}
+	return hex.EncodeToString(hash[:size])
 }
