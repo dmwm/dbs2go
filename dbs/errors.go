@@ -36,113 +36,113 @@ var InvalidRequestErr = errors.New("invalid request error")
 // DBS Error codes provides static representation of DBS errors, they cover 1xx range
 const (
 	// generic errors
-	GenericErrorCode          = iota + 100 // generic DBS error
-	DatabaseErrorCode                      // 101 database error
-	TransactionErrorCode                   // 102 transaction error
-	QueryErrorCode                         // 103 query error
-	RowsScanErrorCode                      // 104 row scan error
-	SessionErrorCode                       // 105 db session error
-	CommitErrorCode                        // 106 db commit error
-	ParseErrorCode                         // 107 parser error
-	LoadErrorCode                          // 108 loading template error
-	GetIDErrorCode                         // 109 get id db error
-	InsertErrorCode                        // 110 db insert error
-	UpdateErrorCode                        // 111 update error
-	LastInsertErrorCode                    // 112 db last insert error
-	ValidateErrorCode                      // 113 validation error
-	InvalidPatternErrorCode                // 114 invalid pattern error
-	DecodeErrorCode                        // 115 decode error
-	EncodeErrorCode                        // 116 encode error
-	ContentTypeErrorCode                   // 117 content type error
-	InvalidParameterErrorCode              // 118 invalid JSON payload parameters or validation error
-	NotImplementedApiCode                  // 119 not implemented API error
-	ReaderErrorCode                        // 120 io reader error
-	WriterErrorCode                        // 121 io writer error
-	UnmarshalErrorCode                     // 122 JSON unmarshal (deserialization) error
-	MarshalErrorCode                       // 123 JSON marshal (serialization) error
-	HttpRequestErrorCode                   // 124 HTTP request error
-	X509ProxyErrorCode                     // 127 X509 proxy error code
+	GenericErrorCode          = 100 // generic DBS error
+	DatabaseErrorCode         = 101 // database error
+	TransactionErrorCode      = 102 // transaction error
+	QueryErrorCode            = 103 // query error
+	RowsScanErrorCode         = 104 // row scan error
+	SessionErrorCode          = 105 // db session error
+	CommitErrorCode           = 106 // db commit error
+	ParseErrorCode            = 107 // parser error
+	LoadErrorCode             = 108 // loading template error
+	GetIDErrorCode            = 109 // get id db error
+	InsertErrorCode           = 110 // db insert error
+	UpdateErrorCode           = 111 // update error
+	LastInsertErrorCode       = 112 // db last insert error
+	ValidateErrorCode         = 113 // validation error
+	InvalidPatternErrorCode   = 114 // invalid pattern error
+	DecodeErrorCode           = 115 // decode error
+	EncodeErrorCode           = 116 // encode error
+	ContentTypeErrorCode      = 117 // content type error
+	InvalidParameterErrorCode = 118 // invalid JSON payload parameters or validation error
+	NotImplementedApiCode     = 119 // not implemented API error
+	ReaderErrorCode           = 120 // io reader error
+	WriterErrorCode           = 121 // io writer error
+	UnmarshalErrorCode        = 122 // JSON unmarshal (deserialization) error
+	MarshalErrorCode          = 123 // JSON marshal (serialization) error
+	HttpRequestErrorCode      = 124 // HTTP request error
+	X509ProxyErrorCode        = 127 // X509 proxy error code
 
 	// logical errors
-	BlockAlreadyExists             = iota + 200 // 200 block xxx already exists in DBS
-	FileDataTypesDoesNotExist                   // 201 FileDataTypes does not exist in DBS
-	FileParentDoesNotExist                      // 202 FileParent does not exist in DBS
-	DatasetParentDoesNotExist                   // 203 DatasetParent does not exist in DBS
-	ProcessedDatasetDoesNotExist                // 204 ProcessedDataset does not exist in DBS
-	PrimaryDatasetTypeDoesNotExist              // 205 PrimaryDatasetType does not exist in DBS
-	PrimaryDatasetDoesNotExist                  // 206 PrimaryDataset does not exist in DBS
-	ProcessingEraDoesNotExist                   // 207 ProcessingEra does not exist in DBS
-	AcquisitionEraDoesNotExist                  // 208 AcquisitionEra does not exist in DBS
-	DataTierDoesNotExist                        // 209 DataTier does not exist in DBS
-	PhysicsGroupDoesNotExist                    // 210 PhysicsGroup does not exist in DBS
-	DatasetAccessTypeDoesNotExist               // 211 DatasetAccessType does not exist in DBS
-	DatasetDoesNotExist                         // 212 Dataset does not exist in DBS
+	BlockAlreadyExists             = 200 // block xxx already exists in DBS
+	FileDataTypesDoesNotExist      = 201 // FileDataTypes does not exist in DBS
+	FileParentDoesNotExist         = 202 // FileParent does not exist in DBS
+	DatasetParentDoesNotExist      = 203 // DatasetParent does not exist in DBS
+	ProcessedDatasetDoesNotExist   = 204 // ProcessedDataset does not exist in DBS
+	PrimaryDatasetTypeDoesNotExist = 205 // PrimaryDatasetType does not exist in DBS
+	PrimaryDatasetDoesNotExist     = 206 // PrimaryDataset does not exist in DBS
+	ProcessingEraDoesNotExist      = 207 // ProcessingEra does not exist in DBS
+	AcquisitionEraDoesNotExist     = 208 // AcquisitionEra does not exist in DBS
+	DataTierDoesNotExist           = 209 // DataTier does not exist in DBS
+	PhysicsGroupDoesNotExist       = 210 // PhysicsGroup does not exist in DBS
+	DatasetAccessTypeDoesNotExist  = 211 // DatasetAccessType does not exist in DBS
+	DatasetDoesNotExist            = 212 // Dataset does not exist in DBS
 
 	// insert errors
-	InsertDatasetErrorCode                = iota + 300 // 300 insert error for dataset
-	InsertDatasetParentErrorCode                       // 301 insert error for dataset parents
-	InsertDatasetOutputModConfigErrorCode              // 302 insert error for DatasetOutputModConfigs
-	InsertDatasetConfigurationsErrorCode               // 303 insert error for dataset configurations
-	InsertDatasetAccessTypeErrorCode                   // 304 insert error for dataset access types
-	InsertBlockErrorCode                               // 305 insert error for block
-	InsertBlockParentErrorCode                         // 306 insert error for block parents
-	InsertBlockStatsErrorCode                          // 307 insert error for block stats
-	InsertBulkblockErrorCode                           // 308 insert error for bulkblocks transaction
-	InsertBlockDumpErrorCode                           // 309 insert error for block dump
-	InsertFileErrorCode                                // 310 insert error for file
-	InsertFileLumiErrorCode                            // 311 insert error for file lumis
-	InsertFileOutputModConfigErrorCode                 // 312 insert error for file output mod config
-	InsertFileParentErrorCode                          // 313 insert error for file parents
-	InsertPrimaryDatasetErrorCode                      // 314 insert error for primary dataset
-	InsertPrimaryDatasetTypeErrorCode                  // 315 insert error for primary dataset type
-	InsertAcquisitionEraErrorCode                      // 316 insert error for acquisition eras
-	InsertOutputConfigErrorCode                        // 317 insert error for output config
-	InsertProcessedDatasetErrorCode                    // 318 insert error for processed dataset
-	InsertApplicationExecutableErrorCode               // 319 insert error for application executable
-	InsertFileDataTypeErrorCode                        // 320 insert error for file data type
-	InsertMigrationBlockErrorCode                      // 321 insert error for migration block
-	InsertMigrationRequestErrorCode                    // 322 insert error for migration request
-	InsertParameterSetHashErrorCode                    // 323 insert error for parameter set hash
-	InsertReleaseVersionErrorCode                      // 324 insert error for release version
-	InsertPhysicsGroupErrorCode                        // 325 insert error for physics group
-	InsertProcessingEraErrorCode                       // 326 insert error for processing era
-	InsertDataTierErrorCode                            // 327 insert error for data tier
+	InsertDatasetErrorCode                = 300 // insert error for dataset
+	InsertDatasetParentErrorCode          = 301 // insert error for dataset parents
+	InsertDatasetOutputModConfigErrorCode = 302 // insert error for DatasetOutputModConfigs
+	InsertDatasetConfigurationsErrorCode  = 303 // insert error for dataset configurations
+	InsertDatasetAccessTypeErrorCode      = 304 // insert error for dataset access types
+	InsertBlockErrorCode                  = 305 // insert error for block
+	InsertBlockParentErrorCode            = 306 // insert error for block parents
+	InsertBlockStatsErrorCode             = 307 // insert error for block stats
+	InsertBulkblockErrorCode              = 308 // insert error for bulkblocks transaction
+	InsertBlockDumpErrorCode              = 309 // insert error for block dump
+	InsertFileErrorCode                   = 310 // insert error for file
+	InsertFileLumiErrorCode               = 311 // insert error for file lumis
+	InsertFileOutputModConfigErrorCode    = 312 // insert error for file output mod config
+	InsertFileParentErrorCode             = 313 // insert error for file parents
+	InsertPrimaryDatasetErrorCode         = 314 // insert error for primary dataset
+	InsertPrimaryDatasetTypeErrorCode     = 315 // insert error for primary dataset type
+	InsertAcquisitionEraErrorCode         = 316 // insert error for acquisition eras
+	InsertOutputConfigErrorCode           = 317 // insert error for output config
+	InsertProcessedDatasetErrorCode       = 318 // insert error for processed dataset
+	InsertApplicationExecutableErrorCode  = 319 // insert error for application executable
+	InsertFileDataTypeErrorCode           = 320 // insert error for file data type
+	InsertMigrationBlockErrorCode         = 321 // insert error for migration block
+	InsertMigrationRequestErrorCode       = 322 // insert error for migration request
+	InsertParameterSetHashErrorCode       = 323 // insert error for parameter set hash
+	InsertReleaseVersionErrorCode         = 324 // insert error for release version
+	InsertPhysicsGroupErrorCode           = 325 // insert error for physics group
+	InsertProcessingEraErrorCode          = 326 // insert error for processing era
+	InsertDataTierErrorCode               = 327 // insert error for data tier
 
 	// Missing data error codes, e.g. during insertion of specific error we do not find
 	// proper foreign key relationship (missing error)
-	GetBlockIDErrorCode              = iota + 400 // 400 fail to get block ID
-	GetFileIDErrorCode                            // 401 fail to get find file id
-	GetFileDataTypesIDErrorCode                   // 402 fail to get file data type id
-	GetPrimaryDatasetIDErrorCode                  // 403 fail to get primary dataset id
-	GetProcessingEraIDErrorCode                   // 404 fail to get processing era id
-	GetAcquisitionEraIDErrorCode                  // 405 fail to get acquisition era id
-	GetDatatierIDErrorCode                        // 406 fail to get datatier id
-	GetPhysicsGroupIDErrorCode                    // 407 fail to get physics group id
-	GetDatasetAccessTypeIDErrorCode               // 408 fail to get dataset access type id
-	GetProcessedDatasetIDErrorCode                // 409 fail to get processed dataset id
-	GetDatasetIDErrorCode                         // 410 fail to get dataset id
-	GetPrimaryDSIDErrorCode                       // 411 fail to get primary dataset id
-	GetDataTierIDErrorCode                        // 412 fail to get data tier id
-	GetOutputModConfigIDErrorCode                 // 413 fail to get output mod config id
-	GetPrimaryDatasetTypeIDErrorCode              // 414 fail to get primary dataset types id
-	GetFileDataTypeIDErrorCode                    // 415 fail to get file data type id
-	GetDatasetParentIDErrorCode                   // 416 fail to get dataset parent id
+	GetBlockIDErrorCode              = 400 // fail to get block ID
+	GetFileIDErrorCode               = 401 // fail to get find file id
+	GetFileDataTypesIDErrorCode      = 402 // fail to get file data type id
+	GetPrimaryDatasetIDErrorCode     = 403 // fail to get primary dataset id
+	GetProcessingEraIDErrorCode      = 404 // fail to get processing era id
+	GetAcquisitionEraIDErrorCode     = 405 // fail to get acquisition era id
+	GetDatatierIDErrorCode           = 406 // fail to get datatier id
+	GetPhysicsGroupIDErrorCode       = 407 // fail to get physics group id
+	GetDatasetAccessTypeIDErrorCode  = 408 // fail to get dataset access type id
+	GetProcessedDatasetIDErrorCode   = 409 // fail to get processed dataset id
+	GetDatasetIDErrorCode            = 410 // fail to get dataset id
+	GetPrimaryDSIDErrorCode          = 411 // fail to get primary dataset id
+	GetDataTierIDErrorCode           = 412 // fail to get data tier id
+	GetOutputModConfigIDErrorCode    = 413 // fail to get output mod config id
+	GetPrimaryDatasetTypeIDErrorCode = 414 // fail to get primary dataset types id
+	GetFileDataTypeIDErrorCode       = 415 // fail to get file data type id
+	GetDatasetParentIDErrorCode      = 416 // fail to get dataset parent id
 
 	// update operation errors
-	UpdateAcquisitionEraErrorCode = iota + 500 // 500 update acquisition era error
-	UpdateBlockErrorCode                       // 501 update block error
-	UpdateDatasetErrorCode                     // 502 update dataset error
-	UpdateFileErrorCode                        // 503 update file error
+	UpdateAcquisitionEraErrorCode = 500 // update acquisition era error
+	UpdateBlockErrorCode          = 501 // update block error
+	UpdateDatasetErrorCode        = 502 // update dataset error
+	UpdateFileErrorCode           = 503 // update file error
 
 	// migration errors
-	UpdateMigrationErrorCode  = iota + 600 // 600 update migration error
-	RemoveMigrationErrorCode               // 601 remove migration error
-	CancelMigrationErrorCode               // 602 cancel migration error
-	CleanupMigrationErrorCode              // 603 cleanup migration error
-	MigrationErrorCode                     // 604 Migration error
-	RemoveErrorCode                        // 605 remove error
+	UpdateMigrationErrorCode  = 600 // update migration error
+	RemoveMigrationErrorCode  = 601 // remove migration error
+	CancelMigrationErrorCode  = 602 // cancel migration error
+	CleanupMigrationErrorCode = 603 // cleanup migration error
+	MigrationErrorCode        = 604 // Migration error
+	RemoveErrorCode           = 605 // remove error
 
-	LastAvailableErrorCode = iota + 900 // last available DBS error code
+	LastAvailableErrorCode = 900 // last available DBS error code
 )
 
 // DBSError represents common structure for DBS errors

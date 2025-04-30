@@ -88,3 +88,13 @@ func TestDBSErrorIntegration(t *testing.T) {
 	t.Log(err2.Error())
 
 }
+
+// TestDBSErrorCodesValues test DBSError code values
+func TestDBSErrorCodesValues(t *testing.T) {
+	if dbs.FileDataTypesDoesNotExist != 201 { // hard-coded value in dbs/errors.go
+		t.Log("Wrong code value for FileDataTypesDoesNotExist")
+	}
+	if dbs.InsertOutputConfigErrorCode != 317 { // hard-coded value in dbs/errors.go
+		t.Log("Wrong code value for InsertOutputConfigErrorCode")
+	}
+}
