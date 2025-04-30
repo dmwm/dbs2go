@@ -3,6 +3,9 @@
 *.a
 *.so
 
+# Editor's cache buffers
+*~
+
 # Folders
 _obj
 _test
