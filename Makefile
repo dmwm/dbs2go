@@ -18,6 +18,16 @@ else
 all: build
 endif
 
+# If the target is `release`, consider the second argument as the release version
+ifeq (release,$(firstword $(MAKECMDGOALS)))
+  RELEASE := $(word 2, $(MAKECMDGOALS) )
+  $(eval $(RELEASE):;@true)
+endif
+
+.PHONY: release
+release: ./buildRelease.sh
+	./buildRelease.sh -t $(RELEASE)
+
 vet:
 	go vet .
 
