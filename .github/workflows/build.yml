@@ -1,9 +1,12 @@
 name: Build
-
+env:
+  tag_regex_st: '^v?[0-9]+\.[0-9]+\.[0-9]+$'
+  tag_regex_rc: '^v?[0-9]+\.[0-9]+\.[0-9]+rc[0-9]+$'
 on:
   push:
     tags:
-      - '*.*.*'
+      - 'v?[0-9]+.[0-9]+.[0-9]+'
+      - 'v?[0-9]+.[0-9]+.[0-9]+rc[0-9]+'
 
 jobs:
 
@@ -11,6 +14,26 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+
+    - name: Get the Ref
+      id: get-ref
+      uses: ankitvgupta/ref-to-tag-action@master
+      with:
+        ref: ${{ github.ref }}
+        head_ref: ${{ github.head_ref }}
+
+    - name: Set Release Flags
+      id: rel-flags
+      run: |
+        echo "is-stable=false" >> $GITHUB_OUTPUT
+        echo "is-rc=false" >> $GITHUB_OUTPUT
+        if [[ ${{ steps.get-ref.outputs.tag }} =~ ${{ env.tag_regex_st }} ]]; then
+            echo "is-stable=true" >> $GITHUB_OUTPUT
+            echo "Build triggered on stable release"
+        elif [[ ${{ steps.get-ref.outputs.tag }} =~ ${{ env.tag_regex_rc }} ]]; then
+            echo "is-rc=true" >> $GITHUB_OUTPUT
+            echo "Build triggered on release candidate"
+        fi
 
     - name: Set up Go
       uses: actions/setup-go@v2
@@ -24,6 +47,8 @@ jobs:
       env:
         GOPATH: /home/runner/go
       run: |
+        ${{ steps.rel-flags.outputs.is-rc }} && echo "Building a release candidate ..." || true
+        ${{ steps.rel-flags.outputs.is-stable }} && echo "Building a stable release ..." || true
         sed -i -e "s,_ \"github.com/mattn/go-oci8\",,g" web/server.go
         sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",,g" web/server.go
         mkdir -p $GOPATH/src/github.com/vkuznet
@@ -32,6 +57,7 @@ jobs:
 
     - name: Create Release
       id: create_release
+      if: fromJSON(steps.rel-flags.outputs.is-stable)
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,23 +67,28 @@ jobs:
         draft: false
         prerelease: false
 
+    - name: Create PreRelease
+      id: create_prerelease
+      if: fromJSON(steps.rel-flags.outputs.is-rc)
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: true
+
     - name: Upload binaries
       id: upload-dbs2go
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ fromJSON(steps.rel-flags.outputs.is-stable) && steps.create_release.outputs.upload_url || steps.create_prerelease.outputs.upload_url }}
         asset_path: ./dbs2go
         asset_name: dbs2go
         asset_content_type: application/octet-stream
-
-    - name: Get the Ref
-      id: get-ref
-      uses: ankitvgupta/ref-to-tag-action@master
-      with:
-        ref: ${{ github.ref }}
-        head_ref: ${{ github.head_ref }}
 
     - name: Build image
       run: |
@@ -86,6 +117,7 @@ jobs:
         registry: registry.cern.ch
         repository: cmsweb/dbs2go
         tag_with_ref: true
+        tags: ${{ fromJSON(steps.rel-flags.outputs.is-stable) && format('{0}, {0}-stable', steps.get-ref.outputs.tag) || steps.get-ref.outputs.tag }}
 
 #     - name: Login to docker github registry
 #       uses: docker/login-action@v1.6.0
