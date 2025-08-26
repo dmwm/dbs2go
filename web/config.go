@@ -46,6 +46,7 @@ type Configuration struct {
 	DBFile               string `json:"dbfile"`                  // dbs db file with secrets
 	MaxDBConnections     int    `json:"max_db_connections"`      // maximum number of DB connections
 	MaxIdleConnections   int    `json:"max_idle_connections"`    // maximum number of idle connections
+	SetConnMaxLifetime   int    `json:"setConnMaxLifetime"`      // set max lifetime of DB connection
 	DBMonitoringInterval int    `json:"db_monitoring_interval"`  // db mon interval in seconds
 	ApiParametersFile    string `json:"api_parameters_file"`     // api parameters json file
 	LexiconFile          string `json:"lexicon_file"`            // lexicon json file
@@ -104,6 +105,9 @@ func ParseConfig(configFile string) error {
 	}
 	if Config.MaxIdleConnections == 0 {
 		Config.MaxIdleConnections = 100
+	}
+	if Config.SetConnMaxLifetime == 0 {
+		Config.SetConnMaxLifetime = 3600 // in seconds
 	}
 	if Config.LimiterPeriod == "" {
 		Config.LimiterPeriod = "100-S"

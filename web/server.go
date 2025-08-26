@@ -266,6 +266,7 @@ func dbInit(dbtype, dburi string) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(Config.MaxDBConnections)
 	db.SetMaxIdleConns(Config.MaxIdleConnections)
+	db.SetConnMaxLifetime(Config.SetConnMaxLifetime * Time.Second)
 	// Disables connection pool for sqlite3. This enables some concurrency with sqlite3 databases
 	// See https://stackoverflow.com/questions/57683132/turning-off-connection-pool-for-go-http-client
 	// and https://sqlite.org/wal.html
