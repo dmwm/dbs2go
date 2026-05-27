@@ -95,10 +95,10 @@ Do not execute anything from the checkout.
 
 Prefer object-level Git inspection whenever possible:
 
-    git show BAD:path/to/file
-    git diff PRE_BAD BAD
-    git ls-tree -r BAD
-    git grep PATTERN BAD
+    git show $BAD:path/to/file
+    git diff $PRE_BAD $BAD
+    git ls-tree -r $BAD
+    git grep <PATTERN> $BAD
 
 Concrete examples:
 
