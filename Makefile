@@ -28,10 +28,69 @@ endif
 release: ./buildRelease.sh
 	./buildRelease.sh -t $(RELEASE)
 
+TAG ?= $(shell git describe --tags --exact-match 2>/dev/null || git describe --tags)
+REPO_FALLBACK ?= dmwm/dbs2go
+REPO_URL ?= $(shell git remote get-url upstream 2>/dev/null || git remote get-url origin 2>/dev/null || echo https://github.com/$(REPO_FALLBACK).git)
+REPO ?= $(shell echo $(REPO_URL) | sed -e 's,.*github.com[:/],,' -e 's,.git$$,,')
+IMAGE ?= registry.cern.ch/cmsweb/dbs2go
+IMAGEBOT_NAMESPACE ?= dbs
+IMAGEBOT_SERVICE ?= dbs2go
+UPLOAD_BUILD_TARGET ?= build
+
+ifneq (,$(filter upload k8deploy,$(firstword $(MAKECMDGOALS))))
+  ifeq (no-oracle,$(word 2,$(MAKECMDGOALS)))
+    UPLOAD_BUILD_TARGET := build-no-oracle
+    $(eval no-oracle:;@true)
+  endif
+endif
+
+.PHONY: upload upload-no-oracle k8deploy k8deploy-no-oracle
+upload: $(UPLOAD_BUILD_TARGET)
+	@set -e; \
+	case "$(TAG)" in \
+		v*.*.*rc*) stable="false" ;; \
+		v*.*.*|*.*.*) stable="true" ;; \
+		*) echo "TAG=$(TAG) is not a release or rc tag"; exit 1 ;; \
+	esac; \
+	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile; \
+	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc; \
+	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json; \
+	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh; \
+	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh; \
+	chmod +x run.sh; \
+	sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" Dockerfile; \
+	docker build . --tag "$(IMAGE):$(TAG)"; \
+	docker push "$(IMAGE):$(TAG)"; \
+	if [ "$$stable" = "true" ]; then \
+		docker tag "$(IMAGE):$(TAG)" "$(IMAGE):$(TAG)-stable"; \
+		docker push "$(IMAGE):$(TAG)-stable"; \
+	fi
+
+upload-no-oracle:
+	$(MAKE) upload no-oracle
+
+k8deploy:
+	@set -e; \
+	[ -n "$${IMAGEBOT_URL}" ] || { echo "ERROR: IMAGEBOT_URL is not set"; exit 1; }; \
+	curl -ksLO https://raw.githubusercontent.com/vkuznet/imagebot/main/imagebot.sh; \
+	sed -i -e "s,COMMIT,$$(git rev-parse HEAD),g" \
+		-e "s,REPOSITORY,$(REPO),g" \
+		-e "s,NAMESPACE,$(IMAGEBOT_NAMESPACE),g" \
+		-e "s,TAG,$(TAG),g" \
+		-e "s,IMAGE,$(IMAGE),g" \
+		-e "s,SERVICE,$(IMAGEBOT_SERVICE),g" \
+		-e "s,HOST,$${IMAGEBOT_URL},g" imagebot.sh; \
+	chmod +x imagebot.sh; \
+	sh ./imagebot.sh
+
+k8deploy-no-oracle: k8deploy
+
+
 vet:
 	go vet .
 
-ORAFILES =  web/server.go test/merge/main.go test/seq/seq.go test/http_test.go test/writer_test.go test/oracle_drivers_test.go test/seq/oracle_drivers_test.go test/merge/oracle_drivers_test.go cgotest/oracle_drivers.go
+ORAFILES_ALL = web/server.go test/merge/main.go test/seq/seq.go test/http_test.go test/writer_test.go test/oracle_drivers_test.go test/seq/oracle_drivers_test.go test/merge/oracle_drivers_test.go cgotest/oracle_drivers.go
+ORAFILES = $(wildcard $(ORAFILES_ALL))
 
 strip_oracle:
 	$(info ### on $(arch) platform there is no ORALCE libs, we will disable their drivers from the build)
@@ -56,6 +115,8 @@ build:
 
 .IGNORE:
 build_no_oracle: strip_oracle build restore_oracle
+
+build-no-oracle: build_no_oracle
 
 build_debug:
 	go clean; rm -rf pkg dbs2go*; go build -gcflags=all="-N -l" ${debug_flags}
