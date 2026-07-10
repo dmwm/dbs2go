@@ -32,26 +32,62 @@ TAG ?= $(shell git describe --tags --exact-match 2>/dev/null || git describe --t
 REPO_FALLBACK ?= dmwm/dbs2go
 REPO_URL ?= $(shell git remote get-url upstream 2>/dev/null || git remote get-url origin 2>/dev/null || echo https://github.com/$(REPO_FALLBACK).git)
 REPO ?= $(shell echo $(REPO_URL) | sed -e 's,.*github.com[:/],,' -e 's,.git$$,,')
-IMAGE ?= registry.cern.ch/cmsweb/dbs2go
+REGISTRY ?= registry.cern.ch
+PROJECT ?= cmsweb
+REPOSITORY ?= dbs2go
+IMAGE ?= $(REGISTRY)/$(PROJECT)/$(REPOSITORY)
 IMAGEBOT_NAMESPACE ?= dbs
 IMAGEBOT_SERVICE ?= dbs2go
 UPLOAD_BUILD_TARGET ?= build
+DOCKER_ACTION := $(word 2,$(MAKECMDGOALS))
+DOCKER_REF := $(word 3,$(MAKECMDGOALS))
+DOCKER_TAG_ARG := $(if $(DOCKER_REF),TAG=$(DOCKER_REF),)
 
-ifneq (,$(filter upload k8deploy,$(firstword $(MAKECMDGOALS))))
+ifneq (,$(filter upload docker k8deploy,$(firstword $(MAKECMDGOALS))))
   ifeq (no-oracle,$(word 2,$(MAKECMDGOALS)))
     UPLOAD_BUILD_TARGET := build-no-oracle
     $(eval no-oracle:;@true)
   endif
 endif
 
-.PHONY: upload upload-no-oracle k8deploy k8deploy-no-oracle
-upload: $(UPLOAD_BUILD_TARGET)
+.PHONY: upload upload-no-oracle docker docker-build docker-push push k8deploy k8deploy-no-oracle
+upload:
+	$(MAKE) docker-build UPLOAD_BUILD_TARGET=$(UPLOAD_BUILD_TARGET)
+	$(MAKE) docker-push
+
+docker:
+	@case "$(DOCKER_ACTION)" in \
+		build) $(MAKE) docker-build $(DOCKER_TAG_ARG) ;; \
+		push) $(MAKE) docker-push $(DOCKER_TAG_ARG) ;; \
+		*) echo "Usage: make docker {build|push} [<tag-or-commit>]"; exit 1 ;; \
+	esac
+
+# The second word in `make docker build` or `make docker push` is also parsed
+# by make as a goal. These targets prevent it from running a second action.
+ifeq (docker,$(firstword $(MAKECMDGOALS)))
+push:
+	@true
+%:
+	@true
+endif
+
+docker-build:
 	@set -e; \
 	case "$(TAG)" in \
-		v*.*.*rc*) stable="false" ;; \
-		v*.*.*|*.*.*) stable="true" ;; \
-		*) echo "TAG=$(TAG) is not a release or rc tag"; exit 1 ;; \
+		v*.*.*rc*|v*.*.*|*.*.*) ;; \
+		*) \
+			echo "$(TAG)" | grep -Eq '^[[:xdigit:]]{7,40}$$' || { \
+				echo "TAG=$(TAG) is not a release tag or commit ID"; exit 1; \
+			}; \
+			commit=$$(git rev-parse --verify "$(TAG)^{commit}" 2>/dev/null) || { \
+				echo "Commit $(TAG) does not exist locally"; exit 1; \
+			}; \
+			head=$$(git rev-parse HEAD); \
+			[ "$$commit" = "$$head" ] || { \
+				echo "Commit $(TAG) is not currently checked out (HEAD=$$head)"; exit 1; \
+			} ;; \
 	esac; \
+	$(MAKE) $(UPLOAD_BUILD_TARGET); \
 	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile; \
 	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc; \
 	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json; \
@@ -60,6 +96,20 @@ upload: $(UPLOAD_BUILD_TARGET)
 	chmod +x run.sh; \
 	sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" Dockerfile; \
 	docker build . --tag "$(IMAGE):$(TAG)"; \
+	docker image inspect "$(IMAGE):$(TAG)" >/dev/null
+
+docker-push:
+	@set -e; \
+	case "$(TAG)" in \
+		v*.*.*rc*) stable="false" ;; \
+		v*.*.*|*.*.*) stable="true" ;; \
+		*) echo "TAG=$(TAG) is not a release or rc tag"; exit 1 ;; \
+	esac; \
+	docker image inspect "$(IMAGE):$(TAG)" >/dev/null || { \
+		echo "Docker image $(IMAGE):$(TAG) does not exist locally; run 'make docker build TAG=$(TAG)' first"; \
+		exit 1; \
+	}; \
+	docker login "$(REGISTRY)"; \
 	docker push "$(IMAGE):$(TAG)"; \
 	if [ "$$stable" = "true" ]; then \
 		docker tag "$(IMAGE):$(TAG)" "$(IMAGE):$(TAG)-stable"; \
@@ -108,10 +158,15 @@ restore_oracle: $(ORAFILES)
 		rm $$f-e; \
 	done
 
+ifeq (docker,$(firstword $(MAKECMDGOALS)))
+build:
+	@true
+else
 build:
 	$(info ### building dbs2go executable on $(arch))
 	go clean; rm -rf pkg dbs2go*; go build ${flags}
 	@echo
+endif
 
 .IGNORE:
 build_no_oracle: strip_oracle build restore_oracle

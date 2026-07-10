@@ -28,17 +28,33 @@ The release flow can be executed manually in three steps:
 
 ```
 make release v1.2.3
-make upload TAG=v1.2.3
+make docker build v1.2.3
+make docker push v1.2.3
 make k8deploy TAG=v1.2.3 IMAGEBOT_URL=<imagebot-url>
 ```
 
 `make release <tag>` calls `buildRelease.sh`, updates the changelog, creates
 the release commit and tag, and pushes them to the configured git remote.
 
-`make upload` builds the local `dbs2go` binary with Oracle support enabled by
-default, builds the Docker image, and pushes it to
-`registry.cern.ch/cmsweb/dbs2go`. Stable release tags also push a
-`<tag>-stable` image tag.
+`make docker build` builds the local `dbs2go` binary with Oracle support
+enabled by default, builds the Docker image, and verifies that the tagged image
+exists locally. `make docker push` verifies the image, logs in to the configured
+registry, and pushes it to `registry.cern.ch/cmsweb/dbs2go`. Stable release
+tags also push a `<tag>-stable` image tag. The existing
+`make upload TAG=<tag>` command remains
+available as a wrapper that performs both actions in sequence. The image URL is
+assembled from `REGISTRY=registry.cern.ch`, `PROJECT=cmsweb`, and
+`REPOSITORY=dbs2go`; each component can be overridden on the make command line.
+
+The Docker build also accepts the hexadecimal ID of the currently checked-out
+local commit:
+
+```
+make docker build <commit-id>
+```
+
+The commit must exist locally and resolve to `HEAD`; the build does not change
+the working tree or check out a different revision.
 
 `make k8deploy` runs the imagebot deployment step. The repository passed to
 imagebot is resolved from the `upstream` git remote, then `origin`, and finally
