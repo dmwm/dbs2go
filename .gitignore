@@ -52,3 +52,6 @@ test-pids
 .globus
 instantclient*
 .DS_Store
+
+# Local AI working context
+.ai/

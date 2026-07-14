@@ -41,7 +41,7 @@ IMAGEBOT_SERVICE ?= dbs2go
 UPLOAD_BUILD_TARGET ?= build
 DOCKER_ACTION := $(word 2,$(MAKECMDGOALS))
 DOCKER_REF := $(word 3,$(MAKECMDGOALS))
-DOCKER_TAG_ARG := $(if $(DOCKER_REF),TAG=$(DOCKER_REF),)
+DOCKER_TAG_ARG := TAG=$(if $(DOCKER_REF),$(DOCKER_REF),current)
 
 ifneq (,$(filter upload docker k8deploy,$(firstword $(MAKECMDGOALS))))
   ifeq (no-oracle,$(word 2,$(MAKECMDGOALS)))
@@ -74,20 +74,20 @@ endif
 docker-build:
 	@set -e; \
 	case "$(TAG)" in \
-		v*.*.*rc*|v*.*.*|*.*.*) ;; \
+		current|v*.*.*rc*|v*.*.*|*.*.*) ;; \
 		*) \
-			echo "$(TAG)" | grep -Eq '^[[:xdigit:]]{7,40}$$' || { \
+			echo "$(TAG)" | grep -Eq '^[[:xdigit:]]+$$' || { \
 				echo "TAG=$(TAG) is not a release tag or commit ID"; exit 1; \
 			}; \
 			commit=$$(git rev-parse --verify "$(TAG)^{commit}" 2>/dev/null) || { \
-				echo "Commit $(TAG) does not exist locally"; exit 1; \
+				echo "Commit abbreviation $(TAG) is missing or ambiguous"; exit 1; \
 			}; \
 			head=$$(git rev-parse HEAD); \
 			[ "$$commit" = "$$head" ] || { \
 				echo "Commit $(TAG) is not currently checked out (HEAD=$$head)"; exit 1; \
 			} ;; \
 	esac; \
-	$(MAKE) $(UPLOAD_BUILD_TARGET); \
+	$(MAKE) $(UPLOAD_BUILD_TARGET) VERSION="$(TAG)"; \
 	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile; \
 	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc; \
 	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json; \
@@ -103,7 +103,12 @@ docker-push:
 	case "$(TAG)" in \
 		v*.*.*rc*) stable="false" ;; \
 		v*.*.*|*.*.*) stable="true" ;; \
-		*) echo "TAG=$(TAG) is not a release or rc tag"; exit 1 ;; \
+		current) stable="false" ;; \
+		*) \
+			echo "$(TAG)" | grep -Eq '^[[:xdigit:]]+$$' || { \
+				echo "TAG=$(TAG) is not a release tag or commit ID"; exit 1; \
+			}; \
+			stable="false" ;; \
 	esac; \
 	docker image inspect "$(IMAGE):$(TAG)" >/dev/null || { \
 		echo "Docker image $(IMAGE):$(TAG) does not exist locally; run 'make docker build TAG=$(TAG)' first"; \

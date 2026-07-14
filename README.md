@@ -53,8 +53,11 @@ local commit:
 make docker build <commit-id>
 ```
 
-The commit must exist locally and resolve to `HEAD`; the build does not change
-the working tree or check out a different revision.
+The ID may be abbreviated to any unambiguous hexadecimal prefix accepted by
+Git. The commit must exist locally and resolve to `HEAD`; the build does not
+change the working tree or check out a different revision. Running
+`make docker build` without a tag or commit builds the current local tree and
+tags the image as `current`.
 
 `make k8deploy` runs the imagebot deployment step. The repository passed to
 imagebot is resolved from the `upstream` git remote, then `origin`, and finally
