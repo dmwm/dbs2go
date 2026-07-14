@@ -39,6 +39,7 @@ IMAGE ?= $(REGISTRY)/$(PROJECT)/$(REPOSITORY)
 IMAGEBOT_NAMESPACE ?= dbs
 IMAGEBOT_SERVICE ?= dbs2go
 UPLOAD_BUILD_TARGET ?= build
+DOCKER_BUILD_DIR ?= .docker.build
 DOCKER_ACTION := $(word 2,$(MAKECMDGOALS))
 DOCKER_REF := $(word 3,$(MAKECMDGOALS))
 DOCKER_TAG_ARG := TAG=$(if $(DOCKER_REF),$(DOCKER_REF),current)
@@ -88,14 +89,15 @@ docker-build:
 			} ;; \
 	esac; \
 	$(MAKE) $(UPLOAD_BUILD_TARGET) VERSION="$(TAG)"; \
-	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile; \
-	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc; \
-	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json; \
-	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh; \
-	curl -ksLO https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh; \
-	chmod +x run.sh; \
-	sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" Dockerfile; \
-	docker build . --tag "$(IMAGE):$(TAG)"; \
+	mkdir -p "$(DOCKER_BUILD_DIR)"; \
+	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile -o "$(DOCKER_BUILD_DIR)/Dockerfile"; \
+	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$(DOCKER_BUILD_DIR)/oci8.pc"; \
+	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json -o "$(DOCKER_BUILD_DIR)/config.json"; \
+	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh -o "$(DOCKER_BUILD_DIR)/monitor.sh"; \
+	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
+	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
+	sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
+	docker build "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \
 	docker image inspect "$(IMAGE):$(TAG)" >/dev/null
 
 docker-push:

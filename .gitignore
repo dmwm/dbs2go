@@ -55,3 +55,6 @@ instantclient*
 
 # Local AI working context
 .ai/
+
+# Temporary Docker build assets
+.docker.build/
