@@ -103,14 +103,14 @@ docker-build:
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
 	if [ "$$build_mode" = "localtree" ]; then \
-		[ -f "$(DOCKER_BUILD_DIR)/Dcokerfile.localtree" ] || { echo "Missing $(DOCKER_BUILD_DIR)/Dcokerfile.localtree"; exit 1; }; \
+		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.localtree -o "$(DOCKER_BUILD_DIR)/Dockerfile.localtree"; \
 		$(MAKE) oracle-env DOCKER_STRICT=1; \
 		$(ORACLE_ENV) $(MAKE) build VERSION=localtree; \
 		[ -x dbs2go ] || { echo "Local dbs2go binary was not created"; exit 1; }; \
 		cp dbs2go "$(DOCKER_BUILD_DIR)/dbs2go"; \
 		rm -rf "$(DOCKER_BUILD_DIR)/static"; \
 		cp -R static "$(DOCKER_BUILD_DIR)/static"; \
-		docker build -f "$(DOCKER_BUILD_DIR)/Dcokerfile.localtree" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
+		docker build -f "$(DOCKER_BUILD_DIR)/Dockerfile.localtree" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
 	else \
 		sed -i -e "s|ADD oci8.pc|ADD oracle-env/oci8.docker.pc|" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
 		sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
@@ -198,7 +198,7 @@ ORAFILES_ALL = web/server.go test/merge/main.go test/seq/seq.go test/http_test.g
 ORAFILES = $(wildcard $(ORAFILES_ALL))
 
 strip_oracle:
-	$(info ### on $(arch) platform there is no ORALCE libs, we will disable their drivers from the build)
+	$(info ### on $(arch) platform there is no ORACLE libs, we will disable their drivers from the build)
 	for f in $(ORAFILES); do \
 		sed -i -e "s,_ \"github.com/mattn/go-oci8\",//_ \"github.com/mattn/go-oci8\",g" $$f; \
 		sed -i -e "s,_ \"gopkg.in/rana/ora.v4\",//_ \"gopkg.in/rana/ora.v4\",g" $$f; \
@@ -206,7 +206,7 @@ strip_oracle:
 	done
 
 restore_oracle: $(ORAFILES)
-	$(info ### on $(arch) platform there is no ORALCE libs, we will restore them after the build)
+	$(info ### on $(arch) platform there is no ORACLE libs, we will restore them after the build)
 	for f in $(ORAFILES); do \
 		sed -i -e "s,//_ \"github.com/mattn/go-oci8\",_ \"github.com/mattn/go-oci8\",g" $$f; \
 		sed -i -e "s,//_ \"gopkg.in/rana/ora.v4\",_ \"gopkg.in/rana/ora.v4\",g" $$f; \
