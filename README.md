@@ -36,9 +36,11 @@ make k8deploy TAG=v1.2.3 IMAGEBOT_URL=<imagebot-url>
 `make release <tag>` calls `buildRelease.sh`, updates the changelog, creates
 the release commit and tag, and pushes them to the configured git remote.
 
-`make docker build` builds the local `dbs2go` binary with Oracle support
-enabled by default, builds the Docker image, and verifies that the tagged image
-exists locally. `make docker push` verifies the image, logs in to the configured
+`make docker build <release-tag>` builds the tagged source inside the Docker
+builder. `make docker build localtree` builds the current working tree on the
+host, packages that binary with `.docker.build/Dcokerfile.localtree`, and tags
+the image as `localtree`. In both modes the resulting image is verified locally.
+The third argument is mandatory. `make docker push` verifies the image, logs in to the configured
 registry, and pushes it to `registry.cern.ch/cmsweb/dbs2go`. Stable release
 tags also push a `<tag>-stable` image tag. The existing
 `make upload TAG=<tag>` command remains
@@ -46,18 +48,14 @@ available as a wrapper that performs both actions in sequence. The image URL is
 assembled from `REGISTRY=registry.cern.ch`, `PROJECT=cmsweb`, and
 `REPOSITORY=dbs2go`; each component can be overridden on the make command line.
 
-The Docker build also accepts the hexadecimal ID of the currently checked-out
-local commit:
+To build the current working tree, including uncommitted changes, use:
 
 ```
-make docker build <commit-id>
+make docker build localtree
 ```
 
-The ID may be abbreviated to any unambiguous hexadecimal prefix accepted by
-Git. The commit must exist locally and resolve to `HEAD`; the build does not
-change the working tree or check out a different revision. Running
-`make docker build` without a tag or commit builds the current local tree and
-tags the image as `current`.
+Release tags use the existing CMSKubernetes Dockerfile and continue to compile
+inside the Docker builder. Omitted references and commit IDs are not accepted.
 
 `make k8deploy` runs the imagebot deployment step. The repository passed to
 imagebot is resolved from the `upstream` git remote, then `origin`, and finally

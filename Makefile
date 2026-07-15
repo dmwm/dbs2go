@@ -5,6 +5,7 @@ debug_flags=-ldflags="-X main.gitVersion=${VERSION}"
 # we'll acquire architecture of the node and disable ORACLE libs for arm so far
 # as there is no official ORACLE build on that architecture
 arch:=$(shell uname -p)
+DOCKER_STRICT := $(if $(filter docker,$(firstword $(MAKECMDGOALS))),1,0)
 ifeq ($(arch),arm)
 odir=""
 else
@@ -12,8 +13,10 @@ odir=`cat ${PKG_CONFIG_PATH}/oci8.pc | grep "libdir=" | sed -e "s,libdir=,,"`
 endif
 
 ifeq ($(arch),arm)
-.IGNORE:
 all: strip_oracle build restore_oracle
+ifneq ($(DOCKER_STRICT),1)
+.IGNORE:
+endif
 else
 all: build
 endif
@@ -42,7 +45,7 @@ UPLOAD_BUILD_TARGET ?= build
 DOCKER_BUILD_DIR ?= .docker.build
 DOCKER_ACTION := $(word 2,$(MAKECMDGOALS))
 DOCKER_REF := $(word 3,$(MAKECMDGOALS))
-DOCKER_TAG_ARG := TAG=$(if $(DOCKER_REF),$(DOCKER_REF),current)
+DOCKER_TAG_ARG := $(if $(DOCKER_REF),TAG=$(DOCKER_REF),)
 
 ifneq (,$(filter upload docker k8deploy,$(firstword $(MAKECMDGOALS))))
   ifeq (no-oracle,$(word 2,$(MAKECMDGOALS)))
@@ -58,9 +61,13 @@ upload:
 
 docker:
 	@case "$(DOCKER_ACTION)" in \
-		build) $(MAKE) docker-build $(DOCKER_TAG_ARG) ;; \
-		push) $(MAKE) docker-push $(DOCKER_TAG_ARG) ;; \
-		*) echo "Usage: make docker {build|push} [<tag-or-commit>]"; exit 1 ;; \
+		build) \
+			[ -n "$(DOCKER_REF)" ] || { echo "Usage: make docker build {localtree|<release-tag>}"; exit 1; }; \
+			$(MAKE) docker-build DOCKER_STRICT=1 $(DOCKER_TAG_ARG) ;; \
+		push) \
+			[ -n "$(DOCKER_REF)" ] || { echo "Usage: make docker push {localtree|<release-tag>}"; exit 1; }; \
+			$(MAKE) docker-push DOCKER_STRICT=1 $(DOCKER_TAG_ARG) ;; \
+		*) echo "Usage: make docker {build|push} {localtree|<release-tag>}"; exit 1 ;; \
 	esac
 
 # The second word in `make docker build` or `make docker push` is also parsed
@@ -74,30 +81,34 @@ endif
 
 docker-build:
 	@set -e; \
+	[ -n "$(TAG)" ] || { echo "TAG is required; use localtree or a release tag"; exit 1; }; \
 	case "$(TAG)" in \
-		current|v*.*.*rc*|v*.*.*|*.*.*) ;; \
+		localtree) build_mode="localtree" ;; \
 		*) \
-			echo "$(TAG)" | grep -Eq '^[[:xdigit:]]+$$' || { \
-				echo "TAG=$(TAG) is not a release tag or commit ID"; exit 1; \
+			echo "$(TAG)" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(rc[0-9]+)?$$' || { \
+				echo "TAG=$(TAG) is not localtree or a release tag"; exit 1; \
 			}; \
-			commit=$$(git rev-parse --verify "$(TAG)^{commit}" 2>/dev/null) || { \
-				echo "Commit abbreviation $(TAG) is missing or ambiguous"; exit 1; \
-			}; \
-			head=$$(git rev-parse HEAD); \
-			[ "$$commit" = "$$head" ] || { \
-				echo "Commit $(TAG) is not currently checked out (HEAD=$$head)"; exit 1; \
-			} ;; \
+			build_mode="tag" ;; \
 	esac; \
-	$(MAKE) $(UPLOAD_BUILD_TARGET) VERSION="$(TAG)"; \
 	mkdir -p "$(DOCKER_BUILD_DIR)"; \
-	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile -o "$(DOCKER_BUILD_DIR)/Dockerfile"; \
-	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$(DOCKER_BUILD_DIR)/oci8.pc"; \
-	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json -o "$(DOCKER_BUILD_DIR)/config.json"; \
-	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh -o "$(DOCKER_BUILD_DIR)/monitor.sh"; \
-	curl -ksL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
+	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile -o "$(DOCKER_BUILD_DIR)/Dockerfile"; \
+	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$(DOCKER_BUILD_DIR)/oci8.pc"; \
+	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json -o "$(DOCKER_BUILD_DIR)/config.json"; \
+	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh -o "$(DOCKER_BUILD_DIR)/monitor.sh"; \
+	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
-	sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
-	docker build "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \
+	if [ "$$build_mode" = "localtree" ]; then \
+		[ -f "$(DOCKER_BUILD_DIR)/Dcokerfile.localtree" ] || { echo "Missing $(DOCKER_BUILD_DIR)/Dcokerfile.localtree"; exit 1; }; \
+		$(MAKE) build VERSION=localtree; \
+		[ -x dbs2go ] || { echo "Local dbs2go binary was not created"; exit 1; }; \
+		cp dbs2go "$(DOCKER_BUILD_DIR)/dbs2go"; \
+		rm -rf "$(DOCKER_BUILD_DIR)/static"; \
+		cp -R static "$(DOCKER_BUILD_DIR)/static"; \
+		docker build -f "$(DOCKER_BUILD_DIR)/Dcokerfile.localtree" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
+	else \
+		sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
+		docker build "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \
+	fi; \
 	docker image inspect "$(IMAGE):$(TAG)" >/dev/null
 
 docker-push:
@@ -105,12 +116,8 @@ docker-push:
 	case "$(TAG)" in \
 		v*.*.*rc*) stable="false" ;; \
 		v*.*.*|*.*.*) stable="true" ;; \
-		current) stable="false" ;; \
-		*) \
-			echo "$(TAG)" | grep -Eq '^[[:xdigit:]]+$$' || { \
-				echo "TAG=$(TAG) is not a release tag or commit ID"; exit 1; \
-			}; \
-			stable="false" ;; \
+		localtree) stable="false" ;; \
+		*) echo "TAG=$(TAG) is not localtree or a release tag"; exit 1 ;; \
 	esac; \
 	docker image inspect "$(IMAGE):$(TAG)" >/dev/null || { \
 		echo "Docker image $(IMAGE):$(TAG) does not exist locally; run 'make docker build TAG=$(TAG)' first"; \
@@ -175,8 +182,10 @@ build:
 	@echo
 endif
 
-.IGNORE:
 build_no_oracle: strip_oracle build restore_oracle
+ifneq ($(DOCKER_STRICT),1)
+.IGNORE:
+endif
 
 build-no-oracle: build_no_oracle
 
@@ -213,8 +222,10 @@ clean:
 
 ifeq ($(arch),arm)
 test_all: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
-.IGNORE:
 test: strip_oracle test_all restore_oracle
+ifneq ($(DOCKER_STRICT),1)
+.IGNORE:
+endif
 else
 test: test-dbs test-sql test-errors test-validator test-bulk test-http test-utils test-migrate test-writer test-integration test-lexicon bench
 endif
@@ -226,6 +237,9 @@ test-lexicon: test-lexicon-writer-pos test-lexicon-writer-neg test-lexicon-reade
 test-errors:
 	cd test && LD_LIBRARY_PATH=${odir} DYLD_LIBRARY_PATH=${odir} go test -v -run TestDBSError
 test-errors-no-oracle: strip_oracle test-errors restore_oracle
+ifneq ($(DOCKER_STRICT),1)
+.IGNORE:
+endif
 test-dbs:
 	@set -e; \
 	cd test && rm -f /tmp/dbs-test.db && \
