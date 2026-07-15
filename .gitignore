@@ -54,7 +54,7 @@ instantclient*
 .DS_Store
 
 # Local AI working context
-.ai/
+.codex/
 
 # Temporary Docker build assets
 .docker.build/
