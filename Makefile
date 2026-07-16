@@ -5,7 +5,7 @@ debug_flags=-ldflags="-X main.gitVersion=${VERSION}"
 # we'll acquire architecture of the node and disable ORACLE libs for arm so far
 # as there is no official ORACLE build on that architecture
 arch:=$(shell uname -p)
-DOCKER_STRICT := $(if $(filter docker oracle-env,$(firstword $(MAKECMDGOALS))),1,0)
+DOCKER_STRICT := $(if $(filter docker oracle-env oracle-arch-check build-ora build_ora,$(firstword $(MAKECMDGOALS))),1,0)
 ifeq ($(arch),arm)
 odir=""
 else
@@ -47,6 +47,24 @@ ORACLE_IMAGE ?= registry.cern.ch/cmsweb/oracle:21_5-stable
 ORACLE_ENV_DIR := $(abspath $(DOCKER_BUILD_DIR)/oracle-env)
 ORACLE_DIR := $(ORACLE_ENV_DIR)/oracle
 ORACLE_ENV = PKG_CONFIG_PATH="$(ORACLE_ENV_DIR)" LD_LIBRARY_PATH="$(ORACLE_DIR)$${LD_LIBRARY_PATH:+:$${LD_LIBRARY_PATH}}" PATH="$(ORACLE_DIR):$${PATH}"
+define check_oracle_arch
+	host_os=$$(uname -s); \
+	[ "$$host_os" = "Linux" ] || { \
+		echo "Oracle host builds require Linux; detected $$host_os"; \
+		exit 1; \
+	}; \
+	case "$$(uname -m)" in \
+		x86_64|amd64) host_arch=amd64 ;; \
+		aarch64|arm64) host_arch=arm64 ;; \
+		ppc64le) host_arch=ppc64le ;; \
+		*) echo "Unsupported host architecture: $$(uname -m)"; exit 1 ;; \
+	esac; \
+	oracle_arch=$$(docker image inspect --format '{{.Architecture}}' "$(ORACLE_IMAGE)"); \
+	[ "$$host_arch" = "$$oracle_arch" ] || { \
+		echo "Oracle architecture mismatch: host=$$host_arch image=$$oracle_arch ($(ORACLE_IMAGE))"; \
+		exit 1; \
+	}
+endef
 DOCKER_ACTION := $(word 2,$(MAKECMDGOALS))
 DOCKER_REF := $(word 3,$(MAKECMDGOALS))
 DOCKER_TAG_ARG := $(if $(DOCKER_REF),TAG=$(DOCKER_REF),)
@@ -58,7 +76,7 @@ ifneq (,$(filter upload docker k8deploy,$(firstword $(MAKECMDGOALS))))
   endif
 endif
 
-.PHONY: upload upload-no-oracle docker docker-build docker-push push k8deploy k8deploy-no-oracle oracle-env
+.PHONY: upload upload-no-oracle docker docker-build docker-push push k8deploy k8deploy-no-oracle oracle-env oracle-arch-check build-ora build_ora
 upload:
 	$(MAKE) docker-build UPLOAD_BUILD_TARGET=$(UPLOAD_BUILD_TARGET)
 	$(MAKE) docker-push
@@ -96,23 +114,27 @@ docker-build:
 	esac; \
 	mkdir -p "$(DOCKER_BUILD_DIR)"; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile -o "$(DOCKER_BUILD_DIR)/Dockerfile"; \
-	mkdir -p "$(ORACLE_ENV_DIR)"; \
-	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$(ORACLE_ENV_DIR)/oci8.docker.pc"; \
+	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$(DOCKER_BUILD_DIR)/oci8.pc"; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/config.json -o "$(DOCKER_BUILD_DIR)/config.json"; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh -o "$(DOCKER_BUILD_DIR)/monitor.sh"; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
 	if [ "$$build_mode" = "localtree" ]; then \
 		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.localtree -o "$(DOCKER_BUILD_DIR)/Dockerfile.localtree"; \
-		$(MAKE) oracle-env DOCKER_STRICT=1; \
-		$(ORACLE_ENV) $(MAKE) build VERSION=localtree; \
-		[ -x dbs2go ] || { echo "Local dbs2go binary was not created"; exit 1; }; \
-		cp dbs2go "$(DOCKER_BUILD_DIR)/dbs2go"; \
-		rm -rf "$(DOCKER_BUILD_DIR)/static"; \
-		cp -R static "$(DOCKER_BUILD_DIR)/static"; \
+		source_dir="$(DOCKER_BUILD_DIR)/src"; \
+		source_tmp="$(DOCKER_BUILD_DIR)/src.tmp"; \
+		source_archive="$(DOCKER_BUILD_DIR)/src.tar"; \
+		rm -rf "$$source_dir" "$$source_tmp"; \
+		rm -f "$$source_archive"; \
+		mkdir -p "$$source_tmp"; \
+		tar --exclude='./.git' --exclude='./.agents' --exclude='./.codex' --exclude='./.docker.build' \
+			--exclude='./tmp' --exclude='./dbs2go' --exclude='./dbs2go_*' --exclude='./pkg' \
+			-cf "$$source_archive" .; \
+		tar -xf "$$source_archive" -C "$$source_tmp"; \
+		rm -f "$$source_archive"; \
+		mv "$$source_tmp" "$$source_dir"; \
 		docker build -f "$(DOCKER_BUILD_DIR)/Dockerfile.localtree" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
 	else \
-		sed -i -e "s|ADD oci8.pc|ADD oracle-env/oci8.docker.pc|" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
 		sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
 		docker build "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \
 	fi; \
@@ -136,6 +158,7 @@ oracle-env:
 	trap cleanup EXIT HUP INT TERM; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$$oci8_source"; \
 	docker pull "$(ORACLE_IMAGE)"; \
+	$(check_oracle_arch); \
 	cid=$$(docker create "$(ORACLE_IMAGE)"); \
 	rm -rf "$$oracle_tmp"; \
 	docker cp "$$cid:/usr/lib/oracle" "$$oracle_tmp"; \
@@ -151,6 +174,16 @@ oracle-env:
 	PKG_CONFIG_PATH="$(ORACLE_ENV_DIR)" pkg-config --libs oci8 >/dev/null; \
 	trap - EXIT HUP INT TERM; \
 	rm -f "$$oci8_source"
+
+oracle-arch-check:
+	@set -eu; \
+	$(check_oracle_arch)
+
+build-ora: oracle-env
+	@$(MAKE) oracle-arch-check DOCKER_STRICT=1
+	@$(ORACLE_ENV) $(MAKE) build DOCKER_STRICT=1
+
+build_ora: build-ora
 
 docker-push:
 	@set -e; \
