@@ -138,25 +138,27 @@ The public Docker dispatcher requires an explicit third argument:
 
 ```console
 make docker build localtree
+make docker build dev
 make docker build v1.2.3
 make docker push localtree
+make docker push dev
 make docker push v1.2.3
 ```
 
-`make docker build localtree` recreates `.docker.build/src` from the current
-working tree, including uncommitted source changes. It excludes repository
+`make docker build localtree` and its alias `make docker build dev` recreate
+`.docker.build/src` from the current working tree, including uncommitted source changes. They exclude repository
 metadata, Codex state, temporary trees, and generated build artifacts. The
 source is compiled inside the CMSKubernetes `Dockerfile.dev` builder and
-the image is tagged `registry.cern.ch/cmsweb/dbs2go:localtree`.
+the image is tagged according to the supplied mode: `:localtree` or `:dev`.
 
 `make docker build <release-tag>` downloads the regular CMSKubernetes Docker
 assets and builds the requested tag inside the container. Accepted tags match
 `v1.2.3`, `1.2.3`, and optional `rcN` suffixes. Omitted references and commit
-IDs are rejected. Both modes verify that the resulting image exists locally.
+IDs are rejected. All modes verify that the resulting image exists locally.
 
 `make docker push <tag>` verifies the local image, logs in to the configured
 registry, and pushes it. Stable release tags also produce and push
-`<tag>-stable`; release candidates and `localtree` do not.
+`<tag>-stable`; release candidates, `localtree`, and `dev` do not.
 
 The image location defaults to:
 

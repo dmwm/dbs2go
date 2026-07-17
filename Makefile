@@ -84,12 +84,12 @@ upload:
 docker:
 	@case "$(DOCKER_ACTION)" in \
 		build) \
-			[ -n "$(DOCKER_REF)" ] || { echo "Usage: make docker build {localtree|<release-tag>}"; exit 1; }; \
+			[ -n "$(DOCKER_REF)" ] || { echo "Usage: make docker build {localtree|dev|<release-tag>}"; exit 1; }; \
 			$(MAKE) docker-build DOCKER_STRICT=1 $(DOCKER_TAG_ARG) ;; \
 		push) \
-			[ -n "$(DOCKER_REF)" ] || { echo "Usage: make docker push {localtree|<release-tag>}"; exit 1; }; \
+			[ -n "$(DOCKER_REF)" ] || { echo "Usage: make docker push {localtree|dev|<release-tag>}"; exit 1; }; \
 			$(MAKE) docker-push DOCKER_STRICT=1 $(DOCKER_TAG_ARG) ;; \
-		*) echo "Usage: make docker {build|push} {localtree|<release-tag>}"; exit 1 ;; \
+		*) echo "Usage: make docker {build|push} {localtree|dev|<release-tag>}"; exit 1 ;; \
 	esac
 
 # The second word in `make docker build` or `make docker push` is also parsed
@@ -103,12 +103,12 @@ endif
 
 docker-build:
 	@set -e; \
-	[ -n "$(TAG)" ] || { echo "TAG is required; use localtree or a release tag"; exit 1; }; \
+	[ -n "$(TAG)" ] || { echo "TAG is required; use localtree, dev, or a release tag"; exit 1; }; \
 	case "$(TAG)" in \
-		localtree) build_mode="localtree" ;; \
+		localtree|dev) build_mode="dev" ;; \
 		*) \
 			echo "$(TAG)" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(rc[0-9]+)?$$' || { \
-				echo "TAG=$(TAG) is not localtree or a release tag"; exit 1; \
+				echo "TAG=$(TAG) is not localtree, dev, or a release tag"; exit 1; \
 			}; \
 			build_mode="tag" ;; \
 	esac; \
@@ -119,8 +119,9 @@ docker-build:
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/monitor.sh -o "$(DOCKER_BUILD_DIR)/monitor.sh"; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
-	if [ "$$build_mode" = "localtree" ]; then \
-		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.dev -o "$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
+	if [ "$$build_mode" = "dev" ]; then \
+		# TODO: switch back to dmwm/CMSKubernetes master after Dockerfile.dev is merged. \
+		curl -kfsSL https://raw.githubusercontent.com/todor-ivanov/CMSKubernetes/refs/heads/feature_dbs2goAddBuildsFromLocaltree_fix-153/docker/dbs2go/Dockerfile.dev -o "$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
 		source_dir="$(DOCKER_BUILD_DIR)/src"; \
 		source_tmp="$(DOCKER_BUILD_DIR)/src.tmp"; \
 		source_archive="$(DOCKER_BUILD_DIR)/src.tar"; \
@@ -133,7 +134,7 @@ docker-build:
 		tar -xf "$$source_archive" -C "$$source_tmp"; \
 		rm -f "$$source_archive"; \
 		mv "$$source_tmp" "$$source_dir"; \
-		docker build -f "$(DOCKER_BUILD_DIR)/Dockerfile.dev" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
+		docker build -f "$(DOCKER_BUILD_DIR)/Dockerfile.dev" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \
 	else \
 		sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
 		docker build "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \
@@ -190,8 +191,8 @@ docker-push:
 	case "$(TAG)" in \
 		v*.*.*rc*) stable="false" ;; \
 		v*.*.*|*.*.*) stable="true" ;; \
-		localtree) stable="false" ;; \
-		*) echo "TAG=$(TAG) is not localtree or a release tag"; exit 1 ;; \
+		localtree|dev) stable="false" ;; \
+		*) echo "TAG=$(TAG) is not localtree, dev, or a release tag"; exit 1 ;; \
 	esac; \
 	docker image inspect "$(IMAGE):$(TAG)" >/dev/null || { \
 		echo "Docker image $(IMAGE):$(TAG) does not exist locally; run 'make docker build TAG=$(TAG)' first"; \
