@@ -120,8 +120,7 @@ docker-build:
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
 	if [ "$$build_mode" = "dev" ]; then \
-		# TODO: switch back to dmwm/CMSKubernetes master after Dockerfile.dev is merged. \
-		curl -kfsSL https://raw.githubusercontent.com/todor-ivanov/CMSKubernetes/refs/heads/feature_dbs2goAddBuildsFromLocaltree_fix-153/docker/dbs2go/Dockerfile.dev -o "$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
+		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.dev -o "$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
 		source_dir="$(DOCKER_BUILD_DIR)/src"; \
 		source_tmp="$(DOCKER_BUILD_DIR)/src.tmp"; \
 		source_archive="$(DOCKER_BUILD_DIR)/src.tar"; \
