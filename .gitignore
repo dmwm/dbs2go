@@ -52,3 +52,9 @@ test-pids
 .globus
 instantclient*
 .DS_Store
+
+# Local AI working context
+.codex/
+
+# Temporary Docker build assets
+.docker.build/
