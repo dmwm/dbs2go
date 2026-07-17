@@ -120,7 +120,7 @@ docker-build:
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/run.sh -o "$(DOCKER_BUILD_DIR)/run.sh"; \
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
 	if [ "$$build_mode" = "localtree" ]; then \
-		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.localtree -o "$(DOCKER_BUILD_DIR)/Dockerfile.localtree"; \
+		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.dev -o "$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
 		source_dir="$(DOCKER_BUILD_DIR)/src"; \
 		source_tmp="$(DOCKER_BUILD_DIR)/src.tmp"; \
 		source_archive="$(DOCKER_BUILD_DIR)/src.tar"; \
@@ -133,7 +133,7 @@ docker-build:
 		tar -xf "$$source_archive" -C "$$source_tmp"; \
 		rm -f "$$source_archive"; \
 		mv "$$source_tmp" "$$source_dir"; \
-		docker build -f "$(DOCKER_BUILD_DIR)/Dockerfile.localtree" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
+		docker build -f "$(DOCKER_BUILD_DIR)/Dockerfile.dev" "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):localtree"; \
 	else \
 		sed -i -e "s,ENV TAG=.*,ENV TAG=$(TAG),g" "$(DOCKER_BUILD_DIR)/Dockerfile"; \
 		docker build "$(DOCKER_BUILD_DIR)" --tag "$(IMAGE):$(TAG)"; \

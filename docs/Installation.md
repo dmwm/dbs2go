@@ -146,7 +146,7 @@ make docker push v1.2.3
 `make docker build localtree` recreates `.docker.build/src` from the current
 working tree, including uncommitted source changes. It excludes repository
 metadata, Codex state, temporary trees, and generated build artifacts. The
-source is compiled inside the CMSKubernetes `Dockerfile.localtree` builder and
+source is compiled inside the CMSKubernetes `Dockerfile.dev` builder and
 the image is tagged `registry.cern.ch/cmsweb/dbs2go:localtree`.
 
 `make docker build <release-tag>` downloads the regular CMSKubernetes Docker
