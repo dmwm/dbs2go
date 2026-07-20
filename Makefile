@@ -121,6 +121,14 @@ docker-build:
 	chmod +x "$(DOCKER_BUILD_DIR)/run.sh"; \
 	if [ "$$build_mode" = "dev" ]; then \
 		curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/Dockerfile.dev -o "$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
+		# TEMPORARY: allow APT to run under the rootless Podman environment used for dev testing. \
+		sed -i -e 's|^RUN apt-get update && apt-get -y install |RUN apt-get -o APT::Sandbox::User=root update \&\& apt-get -o APT::Sandbox::User=root -y install |' \
+			"$(DOCKER_BUILD_DIR)/Dockerfile.dev"; \
+		grep -F 'RUN apt-get -o APT::Sandbox::User=root update && apt-get -o APT::Sandbox::User=root -y install' \
+			"$(DOCKER_BUILD_DIR)/Dockerfile.dev" >/dev/null || { \
+			echo "Failed to apply the temporary rootless-Podman APT workaround to Dockerfile.dev"; \
+			exit 1; \
+		}; \
 		source_dir="$(DOCKER_BUILD_DIR)/src"; \
 		source_tmp="$(DOCKER_BUILD_DIR)/src.tmp"; \
 		source_archive="$(DOCKER_BUILD_DIR)/src.tar"; \
