@@ -45,7 +45,7 @@ confirm_deploy:
 	@echo " Kubernetes cluster: [ $(CLUSTER) ]"
 	@echo " DBS pilot service: [ $(DBS_SERVER) ]"
 	@echo "========================================================================"
-	@if [ -z "$(ENV)" ] || [ -z "$(CLUSTER)" ]; then \
+	@if [ -z "$(ENV)" ]; then \
 		echo "ERROR: Could not detect a pre-configured Kubernetes environment."; \
 		exit 1; \
 	fi
@@ -53,10 +53,11 @@ confirm_deploy:
 		echo "ERROR: Expected exactly one configured Kubernetes context, found: [ $(ENV) ]"; \
 		exit 1; \
 	fi
-	@if [ "$(CLUSTER)" != "cmsweb-testbed-backend" ] && [ "$(CLUSTER)" != "cmsweb-test1" ]; then \
-		echo "ERROR: Cluster [ $(CLUSTER) ] is not allowed for this development workflow."; \
+	@{ [ "$(ENV)" = "cmsweb-testbed-backend" ] || \
+		[[ "$(ENV)" =~ ^cmsweb-test[0-9]+[0-9]*$$ ]]; } || { \
+		echo "ERROR: Environment [ $(ENV) ] is not allowed for this development workflow."; \
 		exit 1; \
-	fi
+	}
 	@printf "Are you sure you want to proceed? [y/N]: " && read ans < /dev/tty; \
 	if [ "$$ans" != "y" ] && [ "$$ans" != "Y" ]; then \
 		echo "Deployment aborted by user."; \

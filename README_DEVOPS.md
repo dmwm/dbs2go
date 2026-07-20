@@ -18,9 +18,10 @@ with:
 kubectl config get-contexts -o name
 ```
 
-The intended pre-configured aliases and clusters are:
+The intended aliases and the environment names reported by
+`kubectl config get-contexts -o name` are:
 
-| Alias | Cluster |
+| Alias | Environment name |
 |---|---|
 | `testbed` | `cmsweb-testbed-backend` |
 | `preprod` | `cmsweb-testbed-backend` |
@@ -28,9 +29,10 @@ The intended pre-configured aliases and clusters are:
 | `test1` | `cmsweb-test1` |
 
 The Makefile does not receive an environment argument. It requires exactly one
-detected context and cross-checks that the configured cluster is either
-`cmsweb-testbed-backend` or `cmsweb-test1`. Every cluster-changing top-level
-target requires interactive confirmation through `/dev/tty`.
+detected context and accepts `cmsweb-testbed-backend` or development test
+environments matching `cmsweb-test[0-9]+[0-9]*`. The underlying kubeconfig
+cluster name is displayed for information only. Every cluster-changing
+top-level target requires interactive confirmation through `/dev/tty`.
 
 For the duration of the CMSKubernetes development work, `setup_config` uses:
 
