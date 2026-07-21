@@ -218,17 +218,34 @@ endif
 run_dev_status:
 	@echo ">>> Environment [ $(ENV) ], cluster [ $(CLUSTER) ]"
 ifeq ($(DBS_SERVER_WAS_SET),1)
-	@echo ">>> $(DBS_SERVER) Service selector:"
-	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER) -o jsonpath='{.spec.selector}'; echo
+	@set -e; \
+	selector=$$(kubectl -n $(NAMESPACE) get service $(DBS_SERVER) -o jsonpath='{.spec.selector.app}'); \
+	case "$$selector" in \
+		$(DBS_SERVER_DEV)) routing=REDIRECTED ;; \
+		$(DBS_SERVER)) routing=REGULAR ;; \
+		*) routing=UNKNOWN ;; \
+	esac; \
+	echo ">>> $(DBS_SERVER) routing status: $$routing"; \
+	echo ">>> Current selector: app=$$selector"; \
+	echo ">>> Regular selector: app=$(DBS_SERVER)"; \
+	echo ">>> Development selector: app=$(DBS_SERVER_DEV)"
 	@kubectl -n $(NAMESPACE) get deployment,pod -l app=$(DBS_SERVER_DEV) -o wide
 	@kubectl -n $(NAMESPACE) get service,endpoints $(DBS_SERVER_DEV) -o wide
 else
 	@for server in $(DBS_SERVERS); do \
 		dev_server="$$server-dev"; \
+		selector=$$(kubectl -n $(NAMESPACE) get service "$$server" -o jsonpath='{.spec.selector.app}' 2>/dev/null || true); \
+		case "$$selector" in \
+			"$$dev_server") routing=REDIRECTED ;; \
+			"$$server") routing=REGULAR ;; \
+			"") routing=UNAVAILABLE ;; \
+			*) routing=UNKNOWN ;; \
+		esac; \
 		echo "========================================================================"; \
-		echo ">>> $$server Service selector:"; \
-		kubectl -n $(NAMESPACE) get service "$$server" -o jsonpath='{.spec.selector}' || true; \
-		echo; \
+		echo ">>> $$server routing status: $$routing"; \
+		echo ">>> Current selector: app=$$selector"; \
+		echo ">>> Regular selector: app=$$server"; \
+		echo ">>> Development selector: app=$$dev_server"; \
 		kubectl -n $(NAMESPACE) get deployment,pod -l "app=$$dev_server" -o wide || true; \
 		kubectl -n $(NAMESPACE) get service,endpoints "$$dev_server" -o wide || true; \
 	done
