@@ -292,7 +292,7 @@ run_dev_status:
 			if [ "$$regular_ready" -gt 0 ] && [ "$$dev_processes" -gt 0 ]; then \
 				routing=CONFLICT; active_deployment=MULTIPLE; ready_status="-"; \
 			elif [ "$$dev_processes" -gt 0 ]; then \
-				routing=DEVELOPMENT; active_deployment="$$dev_server"; ready_status="$$dev_ready/$$dev_desired"; \
+				routing=DEV-RUNNING; active_deployment="$$dev_server"; ready_status="$$dev_ready/$$dev_desired"; \
 			elif [ "$$regular_ready" -gt 0 ]; then \
 				routing=REGULAR; active_deployment="$$server"; ready_status="$$regular_ready/$$regular_desired"; \
 			elif [ "$$dev_desired" -gt 0 ]; then \
