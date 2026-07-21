@@ -106,7 +106,13 @@ make oracle-env
 This target pulls `registry.cern.ch/cmsweb/oracle:21_5-stable`, checks that its
 architecture matches the host, extracts the client under
 `.docker.build/oracle-env/oracle`, creates a host-specific `oci8.pc`, and
-validates it with `pkg-config`. It does not install files system-wide.
+validates it with `pkg-config`. It does not install files system-wide. A
+successfully prepared environment is cached using the Oracle image ID and host
+and image architectures. Later calls reuse it when the metadata, required
+Oracle files, and `pkg-config` validation still match; otherwise the target
+automatically extracts and validates a fresh environment. The downloaded
+CMSKubernetes template is preserved as `oci8.source.pc`, its host-specific
+form as `oci8.host.pc`, and the active copy as `oci8.pc`.
 
 To prepare that environment and build in one command, use:
 
