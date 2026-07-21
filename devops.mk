@@ -146,7 +146,7 @@ run_dev_push:
 	@echo ">>> Restarting $(EXECUTABLE) at pod $(DBS_SERVER_DEV_POD)..."
 	@kubectl -n $(NAMESPACE) exec $(DBS_SERVER_DEV_POD) -c dev -- sh -c "cd /data/ && \
 		echo exec: $(EXECUTABLE) -config /etc/secrets/dbsconfig.json && \
-		pkill -e $(EXECUTABLE) && \
+		{ pkill -e $(EXECUTABLE) || true; } && \
 		exec /data/dbs2go -config /etc/secrets/dbsconfig.json < /dev/null > /dev/null 2>&1 &"
 
 run_dev_redirect:
