@@ -88,6 +88,15 @@ the standard `app=<DBS_SERVER>` Service selector. Always run it after testing.
 `devstatus` reports the detected environment, current Service selector, and
 selected development resources.
 
+The `dbs2go-global-migration` and `dbs2go-phys03-migration` workers are
+database-triggered and use a separate switchover path. `devinit` scales the
+regular migration Deployment to zero before starting one idle development pod.
+`devpush` refuses to start the development executable unless the regular
+Deployment is fully stopped. `devrevert` scales the development Deployment to
+zero before restoring the regular replica count from its CMSKubernetes
+manifest. Migration status reports `REGULAR`, `DEVELOPMENT`, `DEV-IDLE`,
+`CONFLICT`, or `INACTIVE` based on regular replicas and development processes.
+
 To use another service after its corresponding manifest has been provided:
 
 ```bash

@@ -21,10 +21,12 @@ DBS_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-global-m \
 	dbs2go-global-migration dbs2go-phys03-r dbs2go-phys03-w \
 	dbs2go-phys03-m dbs2go-phys03-migration
 DBS_HPA_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-phys03-r dbs2go-phys03-w
+DBS_MIGRATION_SERVERS = dbs2go-global-migration dbs2go-phys03-migration
 DBS_SERVER_WAS_SET := $(if $(filter undefined,$(origin DBS_SERVER)),,1)
 DBS_SERVER ?= dbs2go-global-r
 DBS_STATUS_SERVERS = $(if $(DBS_SERVER_WAS_SET),$(DBS_SERVER),$(DBS_SERVERS))
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
+DBS_SERVER_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER).yaml
 DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_DEV).yaml
 DBS_SERVER_HPA = $(DBS_SERVER)-hpa
 DBS_HPA_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/hpa/dbs-hpa.yaml
@@ -124,22 +126,32 @@ run_deploy:
 	@echo ">>> TODO: Deploying $(EXECUTABLE) to $(ENV)..."
 
 run_dev_init:
-	@echo ">>> Deploying $(DBS_SERVER_DEV) to $(ENV)..." && \
-		kubectl -n $(NAMESPACE) get service $(DBS_SERVER) && \
+	@echo ">>> Deploying $(DBS_SERVER_DEV) to $(ENV)..."
+	@kubectl -n $(NAMESPACE) get deployment $(DBS_SERVER)
+ifneq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
+	@kubectl -n $(NAMESPACE) get secret $(DBS_SERVER)-secrets \
+		proxy-secrets robot-secrets hmac-secrets token-secrets && \
+		kubectl -n $(NAMESPACE) get configmap tnsnames-config
+else
+	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER) && \
 		kubectl -n $(NAMESPACE) get secret $(DBS_SERVER)-secrets \
 			proxy-secrets robot-secrets hmac-secrets token-secrets && \
 		kubectl -n $(NAMESPACE) get configmap tnsnames-config
+endif
 
 	# Constrain HPA-managed deployments through their HPA; scale other deployments directly.
 ifneq (,$(filter $(DBS_SERVER),$(DBS_HPA_SERVERS)))
 	@echo ">>> Constraining hpa/$(DBS_SERVER_HPA) to a single pod:"
 	@kubectl -n $(NAMESPACE) patch hpa $(DBS_SERVER_HPA) \
 		-p '{"spec":{"minReplicas":1,"maxReplicas":1}}'
+else ifneq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
+	@echo ">>> Stopping the regular migration deployment/$(DBS_SERVER):"
+	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER) --replicas=0
 else
 	@echo ">>> Scaling deployment/$(DBS_SERVER) to a single pod:"
 	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER) --replicas=1
 endif
-	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER)
+	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER) --timeout=180s
 
 	@echo ">>> Bringing up $(DBS_SERVER_DEV) empty container..."
 	@test -f $(DBS_SERVER_DEV_MANIFEST) || { \
@@ -150,20 +162,37 @@ endif
 	@kubectl -n $(NAMESPACE) get deployment $(DBS_SERVER_DEV) >/dev/null 2>&1 && \
 		echo ">>> OK: deployment/$(DBS_SERVER_DEV) exists" || \
 		kubectl -n $(NAMESPACE) apply -f $(DBS_SERVER_DEV_MANIFEST)
+ifneq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
+	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER_DEV) --replicas=1
+endif
+ifeq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
 	@echo ">>> Checking service/$(DBS_SERVER_DEV)"
 	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER_DEV) >/dev/null 2>&1 && \
 		echo ">>> OK: service/$(DBS_SERVER_DEV) exists" || \
 		kubectl -n $(NAMESPACE) apply -f $(DBS_SERVER_DEV_MANIFEST)
+endif
 	@kubectl -n $(NAMESPACE) wait --for=jsonpath='{.status.phase}'=Running \
 		pod -l app=$(DBS_SERVER_DEV) --timeout=180s
 	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER_DEV)
 	@kubectl -n $(NAMESPACE) get deployment $(DBS_SERVER_DEV)
+ifeq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
 	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER_DEV)
+endif
 	@kubectl -n $(NAMESPACE) get pods -l app=$(DBS_SERVER_DEV) -o wide
 	@echo ">>> Development pod initialized successfully."
 
 run_dev_push:
 	@echo ">>> Pushing locally built $(EXECUTABLE) payload to all $(DBS_SERVER_DEV) pods..."
+ifneq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
+	@set -eu; \
+	regular_replicas=$$(kubectl -n $(NAMESPACE) get deployment $(DBS_SERVER) -o jsonpath='{.spec.replicas}'); \
+	regular_ready=$$(kubectl -n $(NAMESPACE) get deployment $(DBS_SERVER) -o jsonpath='{.status.readyReplicas}'); \
+	regular_ready=$${regular_ready:-0}; \
+	[ "$$regular_replicas" -eq 0 ] && [ "$$regular_ready" -eq 0 ] || { \
+		echo "ERROR: Refusing to start $(DBS_SERVER_DEV) while $(DBS_SERVER) is active ($$regular_ready/$$regular_replicas ready)."; \
+		exit 1; \
+	}
+endif
 	@set -eu; \
 	pods=$$(kubectl -n $(NAMESPACE) get pods -l app=$(DBS_SERVER_DEV) \
 		-o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'); \
@@ -191,14 +220,31 @@ run_dev_scale:
 	@kubectl -n $(NAMESPACE) get pods -l app=$(DBS_SERVER_DEV) -o wide
 
 run_dev_redirect:
+ifneq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
+	@echo ">>> $(DBS_SERVER) is database-triggered; no Service redirect is required."
+else
 	@echo ">>> Preserving the current $(DBS_SERVER) Service manifest from $(ENV) to $(BACKUP_DIR):"
 	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER) -o yaml > \
 		$(BACKUP_DIR)/$(DBS_SERVER).$(ENV).$(MAKETIME).yaml
 	@echo ">>> Redirecting $(DBS_SERVER) traffic to $(DBS_SERVER_DEV) for $(ENV)..."
 	@kubectl -n $(NAMESPACE) patch service $(DBS_SERVER) \
 		-p '{"spec":{"selector":{"app":"$(DBS_SERVER_DEV)"}}}'
+endif
 
 run_dev_revert:
+ifneq (,$(filter $(DBS_SERVER),$(DBS_MIGRATION_SERVERS)))
+	@echo ">>> Stopping development migration deployment/$(DBS_SERVER_DEV)..."
+	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER_DEV) --replicas=0
+	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER_DEV) --timeout=180s
+	@set -eu; \
+	replicas=$$(awk -v target="$(DBS_SERVER)" ' \
+		$$1 == "name:" && $$2 == target { selected=1 } \
+		selected && $$1 == "replicas:" { print $$2; exit } \
+		' $(DBS_SERVER_MANIFEST)); \
+	echo ">>> Restoring deployment/$(DBS_SERVER) to $$replicas replica(s)..."; \
+	kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER) --replicas="$$replicas"
+	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER)
+else
 ifneq (,$(filter $(DBS_SERVER),$(DBS_HPA_SERVERS)))
 	@echo ">>> Restoring hpa/$(DBS_SERVER_HPA) from $(DBS_HPA_MANIFEST)..."
 	@set -eu; \
@@ -215,21 +261,53 @@ endif
 	@echo ">>> Reverting $(DBS_SERVER) traffic for $(ENV):"
 	@kubectl -n $(NAMESPACE) patch service $(DBS_SERVER) \
 		-p '{"spec":{"selector":{"app":"$(DBS_SERVER)"}}}'
+endif
 
 run_dev_status:
 	@echo ">>> Environment [ $(ENV) ], cluster [ $(CLUSTER) ]"
-	@printf '%-29s %-10s %-31s %-31s %-7s %s\n' \
+	@printf '%-29s %-11s %-31s %-31s %-7s %s\n' \
 		"SERVICE" "ROUTING" "SELECTOR" "ACTIVE DEPLOYMENT" "READY" "ENDPOINTS"; \
 	for server in $(DBS_STATUS_SERVERS); do \
 		dev_server="$$server-dev"; \
-		selector=$$(kubectl -n $(NAMESPACE) get service "$$server" -o jsonpath='{.spec.selector.app}' 2>/dev/null || true); \
-		case "$$selector" in \
-			"$$dev_server") routing=REDIRECTED ;; \
-			"$$server") routing=REGULAR ;; \
-			"") routing=UNAVAILABLE ;; \
-			*) routing=UNKNOWN ;; \
+		case " $(DBS_MIGRATION_SERVERS) " in \
+			*" $$server "*) migration=true ;; \
+			*) migration=false ;; \
 		esac; \
-		if [ -n "$$selector" ]; then \
+		if $$migration; then \
+			selector="-"; endpoint_count="-"; \
+			regular_desired=$$(kubectl -n $(NAMESPACE) get deployment "$$server" -o jsonpath='{.spec.replicas}' 2>/dev/null || true); \
+			regular_ready=$$(kubectl -n $(NAMESPACE) get deployment "$$server" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || true); \
+			dev_desired=$$(kubectl -n $(NAMESPACE) get deployment "$$dev_server" -o jsonpath='{.spec.replicas}' 2>/dev/null || true); \
+			dev_ready=$$(kubectl -n $(NAMESPACE) get deployment "$$dev_server" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || true); \
+			regular_desired=$${regular_desired:-0}; regular_ready=$${regular_ready:-0}; \
+			dev_desired=$${dev_desired:-0}; dev_ready=$${dev_ready:-0}; dev_processes=0; \
+			dev_pods=$$(kubectl -n $(NAMESPACE) get pods -l "app=$$dev_server" \
+				-o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true); \
+			while IFS= read -r pod; do \
+				[ -n "$$pod" ] || continue; \
+				if kubectl -n $(NAMESPACE) exec "$$pod" -c dev -- pgrep -x $(EXECUTABLE) >/dev/null 2>&1; then \
+					dev_processes=$$((dev_processes + 1)); \
+				fi; \
+			done <<< "$$dev_pods"; \
+			if [ "$$regular_ready" -gt 0 ] && [ "$$dev_processes" -gt 0 ]; then \
+				routing=CONFLICT; active_deployment=MULTIPLE; ready_status="-"; \
+			elif [ "$$dev_processes" -gt 0 ]; then \
+				routing=DEVELOPMENT; active_deployment="$$dev_server"; ready_status="$$dev_ready/$$dev_desired"; \
+			elif [ "$$regular_ready" -gt 0 ]; then \
+				routing=REGULAR; active_deployment="$$server"; ready_status="$$regular_ready/$$regular_desired"; \
+			elif [ "$$dev_desired" -gt 0 ]; then \
+				routing=DEV-IDLE; active_deployment="$$dev_server"; ready_status="$$dev_ready/$$dev_desired"; \
+			else \
+				routing=INACTIVE; active_deployment="-"; ready_status="-"; \
+			fi; \
+		else \
+			selector=$$(kubectl -n $(NAMESPACE) get service "$$server" -o jsonpath='{.spec.selector.app}' 2>/dev/null || true); \
+			case "$$selector" in \
+				"$$dev_server") routing=REDIRECTED ;; \
+				"$$server") routing=REGULAR ;; \
+				"") routing=UNAVAILABLE ;; \
+				*) routing=UNKNOWN ;; \
+			esac; \
 			desired=$$(kubectl -n $(NAMESPACE) get deployment "$$selector" -o jsonpath='{.spec.replicas}' 2>/dev/null || true); \
 			ready=$$(kubectl -n $(NAMESPACE) get deployment "$$selector" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || true); \
 			if [ -n "$$desired" ]; then \
@@ -237,12 +315,11 @@ run_dev_status:
 			else \
 				ready_status="-"; \
 			fi; \
+			active_deployment="$$selector"; \
 			endpoint_ips=$$(kubectl -n $(NAMESPACE) get endpoints "$$server" \
 				-o jsonpath='{range .subsets[*].addresses[*]}{.ip}{"\n"}{end}' 2>/dev/null || true); \
 			set -- $$endpoint_ips; endpoint_count=$$#; \
-		else \
-			selector="-"; ready_status="-"; endpoint_count="-"; \
 		fi; \
-		printf '%-29s %-10s %-31s %-31s %-7s %s\n' \
-			"$$server" "$$routing" "$$selector" "$$selector" "$$ready_status" "$$endpoint_count"; \
+		printf '%-29s %-11s %-31s %-31s %-7s %s\n' \
+			"$$server" "$$routing" "$$selector" "$$active_deployment" "$$ready_status" "$$endpoint_count"; \
 	done
