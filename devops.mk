@@ -23,6 +23,14 @@ DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_
 DBS_SERVER_HPA = $(DBS_SERVER)-hpa
 DBS_HPA_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/hpa/dbs-hpa.yaml
 
+# If the target is `devscale`, consider the second argument the desired replica count.
+ifeq (devscale,$(firstword $(MAKECMDGOALS)))
+  DEV_REPLICAS := $(word 2,$(MAKECMDGOALS))
+  ifneq (,$(DEV_REPLICAS))
+    $(eval $(DEV_REPLICAS):;@true)
+  endif
+endif
+
 # Local backup state:
 BACKUP_DIR = $(TMP_DIR)/backup.d
 
@@ -34,7 +42,7 @@ DBS_SERVER_DEV_POD = $(shell kubectl -n $(NAMESPACE) get pod -l app=$(DBS_SERVER
 DBS_SERVER_POD = $(shell kubectl -n $(NAMESPACE) get pod -l app=$(DBS_SERVER) -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
 
 .PHONY: deploy clean build push_image run_deploy confirm_deploy setup_config \
-	devinit devpush devrevert devstatus run_dev_init run_dev_push \
+	devinit devpush devscale devrevert devstatus run_dev_init run_dev_push run_dev_scale \
 	run_dev_redirect run_dev_revert run_dev_status
 
 # Confirmation step: require interactive confirmation based on the detected environment.
@@ -84,6 +92,8 @@ deploy: confirm_deploy clean build push_image run_deploy
 devinit: confirm_deploy setup_config run_dev_init run_dev_redirect
 
 devpush: confirm_deploy build run_dev_push
+
+devscale: confirm_deploy run_dev_scale
 
 devrevert: confirm_deploy setup_config run_dev_revert
 
@@ -142,16 +152,32 @@ run_dev_init:
 	@echo ">>> Development pod initialized successfully."
 
 run_dev_push:
-	@echo ">>> Pushing locally built $(EXECUTABLE) payload to pod $(DBS_SERVER_DEV_POD)..."
-	@test -n "$(DBS_SERVER_DEV_POD)" || { echo "ERROR: Development pod was not found. Run devinit first."; exit 1; }
-	@kubectl -n $(NAMESPACE) cp ./dbs2go $(DBS_SERVER_DEV_POD):/data/dbs2go -c dev
-	@kubectl -n $(NAMESPACE) cp ./static $(DBS_SERVER_DEV_POD):/data/ -c dev
-	@kubectl -n $(NAMESPACE) exec $(DBS_SERVER_DEV_POD) -c dev -- chmod +x /data/dbs2go
-	@echo ">>> Restarting $(EXECUTABLE) at pod $(DBS_SERVER_DEV_POD)..."
-	@kubectl -n $(NAMESPACE) exec $(DBS_SERVER_DEV_POD) -c dev -- sh -c "cd /data/ && \
-		echo exec: $(EXECUTABLE) -config /etc/secrets/dbsconfig.json && \
-		{ pkill -e $(EXECUTABLE) || true; } && \
-		exec /data/dbs2go -config /etc/secrets/dbsconfig.json < /dev/null > /dev/null 2>&1 &"
+	@echo ">>> Pushing locally built $(EXECUTABLE) payload to all $(DBS_SERVER_DEV) pods..."
+	@set -eu; \
+	pods=$$(kubectl -n $(NAMESPACE) get pods -l app=$(DBS_SERVER_DEV) \
+		-o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'); \
+	[ -n "$$pods" ] || { echo "ERROR: Development pods were not found. Run devinit first."; exit 1; }; \
+	while IFS= read -r pod; do \
+		echo ">>> Updating $$pod..."; \
+		kubectl -n $(NAMESPACE) cp ./dbs2go "$$pod:/data/dbs2go" -c dev; \
+		kubectl -n $(NAMESPACE) cp ./static "$$pod:/data/" -c dev; \
+		kubectl -n $(NAMESPACE) exec "$$pod" -c dev -- chmod +x /data/dbs2go; \
+		echo ">>> Restarting $(EXECUTABLE) at pod $$pod..."; \
+		kubectl -n $(NAMESPACE) exec "$$pod" -c dev -- sh -c "cd /data/ && \
+			echo exec: $(EXECUTABLE) -config /etc/secrets/dbsconfig.json && \
+			{ pkill -e $(EXECUTABLE) || true; } && \
+			exec /data/dbs2go -config /etc/secrets/dbsconfig.json < /dev/null > /dev/null 2>&1 &"; \
+	done <<< "$$pods"
+
+run_dev_scale:
+	@[ "$(words $(MAKECMDGOALS))" -eq 2 ] && [[ "$(DEV_REPLICAS)" =~ ^[1-9][0-9]*$$ ]] || { \
+		echo "ERROR: Usage: make -f devops.mk devscale <positive-replica-count>"; \
+		exit 1; \
+	}
+	@echo ">>> Scaling deployment/$(DBS_SERVER_DEV) to $(DEV_REPLICAS) pods..."
+	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER_DEV) --replicas=$(DEV_REPLICAS)
+	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER_DEV)
+	@kubectl -n $(NAMESPACE) get pods -l app=$(DBS_SERVER_DEV) -o wide
 
 run_dev_redirect:
 	@echo ">>> Preserving the current $(DBS_SERVER) Service manifest from $(ENV) to $(BACKUP_DIR):"

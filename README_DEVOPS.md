@@ -49,6 +49,7 @@ after the corresponding changes are merged.
 
 ```bash
 make -f devops.mk devinit
+make -f devops.mk devscale 5
 make -f devops.mk devpush
 make -f devops.mk devstatus
 make -f devops.mk devrevert
@@ -58,11 +59,13 @@ make -f devops.mk devrevert
 development resources, preserves the current Service selector, and redirects
 the selected Service to its development pod.
 
-`devpush` runs the established `make build-ora` native Oracle build, copies the
-resulting `dbs2go` executable and the local `static` directory into the
-development pod, and restarts the process. It does not rebuild the development
-container image. The image referenced by the selected development manifest must
-already be available from the registry.
+`devscale <count>` manually scales the selected development Deployment to the
+requested positive number of pods and waits for its rollout. `devpush` runs the
+established `make build-ora` native Oracle build, then copies the resulting
+`dbs2go` executable and the local `static` directory into every selected
+development pod and restarts the process in each one. It does not rebuild the
+development container image. The image referenced by the selected development
+manifest must already be available from the registry.
 
 `devinit` preserves the complete current Service manifest in `tmp/backup.d`
 before redirecting. `devrevert` restores the standard `app=<DBS_SERVER>` Service
