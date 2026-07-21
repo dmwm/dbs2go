@@ -23,6 +23,7 @@ DBS_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-global-m \
 DBS_HPA_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-phys03-r dbs2go-phys03-w
 DBS_SERVER_WAS_SET := $(if $(filter undefined,$(origin DBS_SERVER)),,1)
 DBS_SERVER ?= dbs2go-global-r
+DBS_STATUS_SERVERS = $(if $(DBS_SERVER_WAS_SET),$(DBS_SERVER),$(DBS_SERVERS))
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
 DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_DEV).yaml
 DBS_SERVER_HPA = $(DBS_SERVER)-hpa
@@ -217,22 +218,9 @@ endif
 
 run_dev_status:
 	@echo ">>> Environment [ $(ENV) ], cluster [ $(CLUSTER) ]"
-ifeq ($(DBS_SERVER_WAS_SET),1)
-	@set -e; \
-	selector=$$(kubectl -n $(NAMESPACE) get service $(DBS_SERVER) -o jsonpath='{.spec.selector.app}'); \
-	case "$$selector" in \
-		$(DBS_SERVER_DEV)) routing=REDIRECTED ;; \
-		$(DBS_SERVER)) routing=REGULAR ;; \
-		*) routing=UNKNOWN ;; \
-	esac; \
-	echo ">>> $(DBS_SERVER) routing status: $$routing"; \
-	echo ">>> Current selector: app=$$selector"; \
-	echo ">>> Regular selector: app=$(DBS_SERVER)"; \
-	echo ">>> Development selector: app=$(DBS_SERVER_DEV)"
-	@kubectl -n $(NAMESPACE) get deployment,pod -l app=$(DBS_SERVER_DEV) -o wide
-	@kubectl -n $(NAMESPACE) get service,endpoints $(DBS_SERVER_DEV) -o wide
-else
-	@for server in $(DBS_SERVERS); do \
+	@printf '%-29s %-10s %-31s %-31s %-7s %s\n' \
+		"SERVICE" "ROUTING" "SELECTOR" "ACTIVE DEPLOYMENT" "READY" "ENDPOINTS"; \
+	for server in $(DBS_STATUS_SERVERS); do \
 		dev_server="$$server-dev"; \
 		selector=$$(kubectl -n $(NAMESPACE) get service "$$server" -o jsonpath='{.spec.selector.app}' 2>/dev/null || true); \
 		case "$$selector" in \
@@ -241,12 +229,20 @@ else
 			"") routing=UNAVAILABLE ;; \
 			*) routing=UNKNOWN ;; \
 		esac; \
-		echo "========================================================================"; \
-		echo ">>> $$server routing status: $$routing"; \
-		echo ">>> Current selector: app=$$selector"; \
-		echo ">>> Regular selector: app=$$server"; \
-		echo ">>> Development selector: app=$$dev_server"; \
-		kubectl -n $(NAMESPACE) get deployment,pod -l "app=$$dev_server" -o wide || true; \
-		kubectl -n $(NAMESPACE) get service,endpoints "$$dev_server" -o wide || true; \
+		if [ -n "$$selector" ]; then \
+			desired=$$(kubectl -n $(NAMESPACE) get deployment "$$selector" -o jsonpath='{.spec.replicas}' 2>/dev/null || true); \
+			ready=$$(kubectl -n $(NAMESPACE) get deployment "$$selector" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || true); \
+			if [ -n "$$desired" ]; then \
+				ready=$${ready:-0}; ready_status="$$ready/$$desired"; \
+			else \
+				ready_status="-"; \
+			fi; \
+			endpoint_ips=$$(kubectl -n $(NAMESPACE) get endpoints "$$server" \
+				-o jsonpath='{range .subsets[*].addresses[*]}{.ip}{"\n"}{end}' 2>/dev/null || true); \
+			set -- $$endpoint_ips; endpoint_count=$$#; \
+		else \
+			selector="-"; ready_status="-"; endpoint_count="-"; \
+		fi; \
+		printf '%-29s %-10s %-31s %-31s %-7s %s\n' \
+			"$$server" "$$routing" "$$selector" "$$selector" "$$ready_status" "$$endpoint_count"; \
 	done
-endif
