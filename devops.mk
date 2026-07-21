@@ -20,6 +20,8 @@ NAMESPACE = dbs
 DBS_SERVER ?= dbs2go-global-r
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
 DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_DEV).yaml
+DBS_SERVER_HPA = $(DBS_SERVER)-hpa
+DBS_HPA_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/hpa/dbs-hpa.yaml
 
 # Local backup state:
 BACKUP_DIR = $(TMP_DIR)/backup.d
@@ -83,7 +85,7 @@ devinit: confirm_deploy setup_config run_dev_init run_dev_redirect
 
 devpush: confirm_deploy build run_dev_push
 
-devrevert: confirm_deploy run_dev_revert
+devrevert: confirm_deploy setup_config run_dev_revert
 
 devstatus: run_dev_status
 
@@ -111,9 +113,11 @@ run_dev_init:
 			proxy-secrets robot-secrets hmac-secrets token-secrets && \
 		kubectl -n $(NAMESPACE) get configmap tnsnames-config
 
-	# For facilitating debugging we must scale down the currently running service to a single instance
-	@echo ">>> Scaling down the current deployment to a single pod:"
-	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER) --replicas=1
+	# For facilitating debugging we must constrain the HPA-managed deployment to a single instance.
+	@echo ">>> Constraining hpa/$(DBS_SERVER_HPA) to a single pod:"
+	@kubectl -n $(NAMESPACE) get hpa $(DBS_SERVER_HPA) >/dev/null
+	@kubectl -n $(NAMESPACE) patch hpa $(DBS_SERVER_HPA) \
+		-p '{"spec":{"minReplicas":1,"maxReplicas":1}}'
 	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER)
 
 	@echo ">>> Bringing up $(DBS_SERVER_DEV) empty container..."
@@ -158,6 +162,22 @@ run_dev_redirect:
 		-p '{"spec":{"selector":{"app":"$(DBS_SERVER_DEV)"}}}'
 
 run_dev_revert:
+	@echo ">>> Restoring hpa/$(DBS_SERVER_HPA) from $(DBS_HPA_MANIFEST)..."
+	@set -eu; \
+	limits=$$(awk -v target="$(DBS_SERVER_HPA)" ' \
+		$$1 == "name:" && $$2 == target { selected=1 } \
+		selected && $$1 == "minReplicas:" { min_replicas=$$2 } \
+		selected && $$1 == "maxReplicas:" { print min_replicas, $$2; exit } \
+		' $(DBS_HPA_MANIFEST)); \
+	read -r min_replicas max_replicas extra <<< "$$limits"; \
+	[[ "$$min_replicas" =~ ^[0-9]+$$ && "$$max_replicas" =~ ^[0-9]+$$ && \
+		-z "$$extra" && "$$min_replicas" -le "$$max_replicas" ]] || { \
+		echo "ERROR: Invalid replica limits for hpa/$(DBS_SERVER_HPA) in $(DBS_HPA_MANIFEST): [ $$limits ]"; \
+		exit 1; \
+	}; \
+	echo ">>> Restoring hpa/$(DBS_SERVER_HPA) replica limits to $$min_replicas/$$max_replicas..."; \
+	kubectl -n $(NAMESPACE) patch hpa $(DBS_SERVER_HPA) \
+		-p "{\"spec\":{\"minReplicas\":$$min_replicas,\"maxReplicas\":$$max_replicas}}"
 	@echo ">>> Reverting $(DBS_SERVER) traffic to $(DBS_SERVER_POD) for $(ENV):"
 	@kubectl -n $(NAMESPACE) patch service $(DBS_SERVER) \
 		-p '{"spec":{"selector":{"app":"$(DBS_SERVER)"}}}'
