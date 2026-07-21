@@ -21,6 +21,7 @@ DBS_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-global-m \
 	dbs2go-global-migration dbs2go-phys03-r dbs2go-phys03-w \
 	dbs2go-phys03-m dbs2go-phys03-migration
 DBS_HPA_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-phys03-r dbs2go-phys03-w
+DBS_SERVER_WAS_SET := $(if $(filter undefined,$(origin DBS_SERVER)),,1)
 DBS_SERVER ?= dbs2go-global-r
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
 DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_DEV).yaml
@@ -216,7 +217,19 @@ endif
 
 run_dev_status:
 	@echo ">>> Environment [ $(ENV) ], cluster [ $(CLUSTER) ]"
+ifeq ($(DBS_SERVER_WAS_SET),1)
 	@echo ">>> $(DBS_SERVER) Service selector:"
 	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER) -o jsonpath='{.spec.selector}'; echo
 	@kubectl -n $(NAMESPACE) get deployment,pod -l app=$(DBS_SERVER_DEV) -o wide
 	@kubectl -n $(NAMESPACE) get service,endpoints $(DBS_SERVER_DEV) -o wide
+else
+	@for server in $(DBS_SERVERS); do \
+		dev_server="$$server-dev"; \
+		echo "========================================================================"; \
+		echo ">>> $$server Service selector:"; \
+		kubectl -n $(NAMESPACE) get service "$$server" -o jsonpath='{.spec.selector}' || true; \
+		echo; \
+		kubectl -n $(NAMESPACE) get deployment,pod -l "app=$$dev_server" -o wide || true; \
+		kubectl -n $(NAMESPACE) get service,endpoints "$$dev_server" -o wide || true; \
+	done
+endif
