@@ -22,7 +22,26 @@ DBS_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-global-m \
 	dbs2go-phys03-m dbs2go-phys03-migration
 DBS_HPA_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-phys03-r dbs2go-phys03-w
 DBS_MIGRATION_SERVERS = dbs2go-global-migration dbs2go-phys03-migration
+DEVOPS_TARGETS = devinit devpush devscale devrevert devstatus
+DEVOPS_TARGET := $(firstword $(MAKECMDGOALS))
 DBS_SERVER_WAS_SET := $(if $(filter undefined,$(origin DBS_SERVER)),,1)
+
+# Accept the pilot service as a positional argument while preserving DBS_SERVER=...
+ifeq (devscale,$(DEVOPS_TARGET))
+  ifneq (,$(word 3,$(MAKECMDGOALS)))
+    override DBS_SERVER := $(word 2,$(MAKECMDGOALS))
+    DEV_REPLICAS := $(word 3,$(MAKECMDGOALS))
+    DBS_SERVER_WAS_SET := 1
+  else
+    DEV_REPLICAS := $(word 2,$(MAKECMDGOALS))
+  endif
+else ifneq (,$(filter $(DEVOPS_TARGET),$(DEVOPS_TARGETS)))
+  ifneq (,$(word 2,$(MAKECMDGOALS)))
+    override DBS_SERVER := $(word 2,$(MAKECMDGOALS))
+    DBS_SERVER_WAS_SET := 1
+  endif
+endif
+
 DBS_SERVER ?= dbs2go-global-r
 DBS_STATUS_SERVERS = $(if $(DBS_SERVER_WAS_SET),$(DBS_SERVER),$(DBS_SERVERS))
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
@@ -31,12 +50,9 @@ DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_
 DBS_SERVER_HPA = $(DBS_SERVER)-hpa
 DBS_HPA_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/hpa/dbs-hpa.yaml
 
-# If the target is `devscale`, consider the second argument the desired replica count.
-ifeq (devscale,$(firstword $(MAKECMDGOALS)))
-  DEV_REPLICAS := $(word 2,$(MAKECMDGOALS))
-  ifneq (,$(DEV_REPLICAS))
-    $(eval $(DEV_REPLICAS):;@true)
-  endif
+# Positional arguments appear to Make as additional goals; define inert targets for them.
+ifneq (,$(filter $(DEVOPS_TARGET),$(DEVOPS_TARGETS)))
+  $(foreach arg,$(wordlist 2,99,$(MAKECMDGOALS)),$(eval $(arg):;@true))
 endif
 
 # Local backup state:
@@ -45,17 +61,30 @@ BACKUP_DIR = $(TMP_DIR)/backup.d
 # Setting up all needed ops directories
 _dummy := $(shell mkdir -p $(TMP_DIR) $(BACKUP_DIR))
 
-.PHONY: deploy clean build push_image run_deploy confirm_deploy setup_config \
+.PHONY: deploy clean build push_image run_deploy validate_dev_args confirm_deploy setup_config \
 	devinit devpush devscale devrevert devstatus run_dev_init run_dev_push run_dev_scale \
 	run_dev_redirect run_dev_revert run_dev_status
 
-# Confirmation step: require interactive confirmation based on the detected environment.
-confirm_deploy:
+validate_dev_args:
+	@if [ "$(DEVOPS_TARGET)" = "devscale" ]; then \
+		[ "$(words $(MAKECMDGOALS))" -eq 2 ] || [ "$(words $(MAKECMDGOALS))" -eq 3 ] || { \
+			echo "ERROR: Usage: make -f devops.mk devscale [DBS_SERVER] <positive-replica-count>"; \
+			exit 1; \
+		}; \
+	else \
+		[ "$(words $(MAKECMDGOALS))" -le 2 ] || { \
+			echo "ERROR: Usage: make -f devops.mk $(DEVOPS_TARGET) [DBS_SERVER]"; \
+			exit 1; \
+		}; \
+	fi
 	@[ "$(filter $(DBS_SERVER),$(DBS_SERVERS))" = "$(DBS_SERVER)" ] || { \
 		echo "ERROR: Unsupported DBS pilot service [ $(DBS_SERVER) ]."; \
 		echo "Allowed services: $(DBS_SERVERS)"; \
 		exit 1; \
 	}
+
+# Confirmation step: require interactive confirmation based on the detected environment.
+confirm_deploy:
 	@echo "========================================================================"
 	@echo " WARNING: You are deploying at K8 environment: [ $(ENV) ]"
 	@echo " Kubernetes cluster: [ $(CLUSTER) ]"
@@ -98,15 +127,15 @@ setup_config:
 # Default DevOps flow.
 deploy: confirm_deploy clean build push_image run_deploy
 
-devinit: confirm_deploy setup_config run_dev_init run_dev_redirect
+devinit: validate_dev_args confirm_deploy setup_config run_dev_init run_dev_redirect
 
-devpush: confirm_deploy build run_dev_push
+devpush: validate_dev_args confirm_deploy build run_dev_push
 
-devscale: confirm_deploy run_dev_scale
+devscale: validate_dev_args confirm_deploy run_dev_scale
 
-devrevert: confirm_deploy setup_config run_dev_revert
+devrevert: validate_dev_args confirm_deploy setup_config run_dev_revert
 
-devstatus: run_dev_status
+devstatus: validate_dev_args run_dev_status
 
 # 1. Force a regular clean using the standard Makefile.
 clean:
@@ -210,8 +239,8 @@ endif
 	done <<< "$$pods"
 
 run_dev_scale:
-	@[ "$(words $(MAKECMDGOALS))" -eq 2 ] && [[ "$(DEV_REPLICAS)" =~ ^[1-9][0-9]*$$ ]] || { \
-		echo "ERROR: Usage: make -f devops.mk devscale <positive-replica-count>"; \
+	@[[ "$(DEV_REPLICAS)" =~ ^[1-9][0-9]*$$ ]] || { \
+		echo "ERROR: Usage: make -f devops.mk devscale [DBS_SERVER] <positive-replica-count>"; \
 		exit 1; \
 	}
 	@echo ">>> Scaling deployment/$(DBS_SERVER_DEV) to $(DEV_REPLICAS) pods..."

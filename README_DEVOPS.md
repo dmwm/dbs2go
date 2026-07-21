@@ -62,7 +62,7 @@ after the corresponding changes are merged.
 
 ```bash
 make -f devops.mk devinit
-make -f devops.mk devscale 5
+make -f devops.mk devscale dbs2go-global-r 5
 make -f devops.mk devpush
 make -f devops.mk devstatus
 make -f devops.mk devrevert
@@ -100,10 +100,16 @@ manifest. Migration status reports `REGULAR`, `DEV-RUNNING`, `DEV-IDLE`,
 To use another service after its corresponding manifest has been provided:
 
 ```bash
-make -f devops.mk devinit DBS_SERVER=dbs2go-phys03-r
-make -f devops.mk devpush DBS_SERVER=dbs2go-phys03-r
-make -f devops.mk devrevert DBS_SERVER=dbs2go-phys03-r
+make -f devops.mk devinit dbs2go-phys03-r
+make -f devops.mk devpush dbs2go-phys03-r
+make -f devops.mk devscale dbs2go-phys03-r 3
+make -f devops.mk devrevert dbs2go-phys03-r
 ```
+
+The existing variable form remains supported, for example
+`make -f devops.mk devpush DBS_SERVER=dbs2go-phys03-r`. With that form,
+`devscale` remains `make -f devops.mk devscale 3
+DBS_SERVER=dbs2go-phys03-r`.
 
 The DAS-style `deploy`, `push_image`, and `run_deploy` targets remain generic
 placeholders for future deployment development. They are separate from the
