@@ -17,6 +17,10 @@ CONFIG_DIR = $(TMP_DIR)/CMSKubernetes
 
 # Pilot service variables:
 NAMESPACE = dbs
+DBS_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-global-m \
+	dbs2go-global-migration dbs2go-phys03-r dbs2go-phys03-w \
+	dbs2go-phys03-m dbs2go-phys03-migration
+DBS_HPA_SERVERS = dbs2go-global-r dbs2go-global-w dbs2go-phys03-r dbs2go-phys03-w
 DBS_SERVER ?= dbs2go-global-r
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
 DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_DEV).yaml
@@ -37,16 +41,17 @@ BACKUP_DIR = $(TMP_DIR)/backup.d
 # Setting up all needed ops directories
 _dummy := $(shell mkdir -p $(TMP_DIR) $(BACKUP_DIR))
 
-# Using lazy assignment to refresh the pod name whenever it is referenced.
-DBS_SERVER_DEV_POD = $(shell kubectl -n $(NAMESPACE) get pod -l app=$(DBS_SERVER_DEV) -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-DBS_SERVER_POD = $(shell kubectl -n $(NAMESPACE) get pod -l app=$(DBS_SERVER) -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-
 .PHONY: deploy clean build push_image run_deploy confirm_deploy setup_config \
 	devinit devpush devscale devrevert devstatus run_dev_init run_dev_push run_dev_scale \
 	run_dev_redirect run_dev_revert run_dev_status
 
 # Confirmation step: require interactive confirmation based on the detected environment.
 confirm_deploy:
+	@[ "$(filter $(DBS_SERVER),$(DBS_SERVERS))" = "$(DBS_SERVER)" ] || { \
+		echo "ERROR: Unsupported DBS pilot service [ $(DBS_SERVER) ]."; \
+		echo "Allowed services: $(DBS_SERVERS)"; \
+		exit 1; \
+	}
 	@echo "========================================================================"
 	@echo " WARNING: You are deploying at K8 environment: [ $(ENV) ]"
 	@echo " Kubernetes cluster: [ $(CLUSTER) ]"
@@ -123,11 +128,15 @@ run_dev_init:
 			proxy-secrets robot-secrets hmac-secrets token-secrets && \
 		kubectl -n $(NAMESPACE) get configmap tnsnames-config
 
-	# For facilitating debugging we must constrain the HPA-managed deployment to a single instance.
+	# Constrain HPA-managed deployments through their HPA; scale other deployments directly.
+ifneq (,$(filter $(DBS_SERVER),$(DBS_HPA_SERVERS)))
 	@echo ">>> Constraining hpa/$(DBS_SERVER_HPA) to a single pod:"
-	@kubectl -n $(NAMESPACE) get hpa $(DBS_SERVER_HPA) >/dev/null
 	@kubectl -n $(NAMESPACE) patch hpa $(DBS_SERVER_HPA) \
 		-p '{"spec":{"minReplicas":1,"maxReplicas":1}}'
+else
+	@echo ">>> Scaling deployment/$(DBS_SERVER) to a single pod:"
+	@kubectl -n $(NAMESPACE) scale deployment/$(DBS_SERVER) --replicas=1
+endif
 	@kubectl -n $(NAMESPACE) rollout status deployment/$(DBS_SERVER)
 
 	@echo ">>> Bringing up $(DBS_SERVER_DEV) empty container..."
@@ -183,11 +192,12 @@ run_dev_redirect:
 	@echo ">>> Preserving the current $(DBS_SERVER) Service manifest from $(ENV) to $(BACKUP_DIR):"
 	@kubectl -n $(NAMESPACE) get service $(DBS_SERVER) -o yaml > \
 		$(BACKUP_DIR)/$(DBS_SERVER).$(ENV).$(MAKETIME).yaml
-	@echo ">>> Redirecting $(DBS_SERVER) traffic to $(DBS_SERVER_DEV_POD) for $(ENV)..."
+	@echo ">>> Redirecting $(DBS_SERVER) traffic to $(DBS_SERVER_DEV) for $(ENV)..."
 	@kubectl -n $(NAMESPACE) patch service $(DBS_SERVER) \
 		-p '{"spec":{"selector":{"app":"$(DBS_SERVER_DEV)"}}}'
 
 run_dev_revert:
+ifneq (,$(filter $(DBS_SERVER),$(DBS_HPA_SERVERS)))
 	@echo ">>> Restoring hpa/$(DBS_SERVER_HPA) from $(DBS_HPA_MANIFEST)..."
 	@set -eu; \
 	limits=$$(awk -v target="$(DBS_SERVER_HPA)" ' \
@@ -195,16 +205,12 @@ run_dev_revert:
 		selected && $$1 == "minReplicas:" { min_replicas=$$2 } \
 		selected && $$1 == "maxReplicas:" { print min_replicas, $$2; exit } \
 		' $(DBS_HPA_MANIFEST)); \
-	read -r min_replicas max_replicas extra <<< "$$limits"; \
-	[[ "$$min_replicas" =~ ^[0-9]+$$ && "$$max_replicas" =~ ^[0-9]+$$ && \
-		-z "$$extra" && "$$min_replicas" -le "$$max_replicas" ]] || { \
-		echo "ERROR: Invalid replica limits for hpa/$(DBS_SERVER_HPA) in $(DBS_HPA_MANIFEST): [ $$limits ]"; \
-		exit 1; \
-	}; \
+	read -r min_replicas max_replicas <<< "$$limits"; \
 	echo ">>> Restoring hpa/$(DBS_SERVER_HPA) replica limits to $$min_replicas/$$max_replicas..."; \
 	kubectl -n $(NAMESPACE) patch hpa $(DBS_SERVER_HPA) \
 		-p "{\"spec\":{\"minReplicas\":$$min_replicas,\"maxReplicas\":$$max_replicas}}"
-	@echo ">>> Reverting $(DBS_SERVER) traffic to $(DBS_SERVER_POD) for $(ENV):"
+endif
+	@echo ">>> Reverting $(DBS_SERVER) traffic for $(ENV):"
 	@kubectl -n $(NAMESPACE) patch service $(DBS_SERVER) \
 		-p '{"spec":{"selector":{"app":"$(DBS_SERVER)"}}}'
 

@@ -3,8 +3,21 @@
 This optional workflow follows the `das2go` development flow while accounting
 for DBS Oracle runtime requirements. It tests the current local source in the
 real DBS Kubernetes runtime without publishing the locally built development
-image. The default pilot service is the read-only `dbs2go-global-r`. Override
-it with `DBS_SERVER=<service>` when another pilot manifest becomes available.
+image. The default pilot service is the read-only `dbs2go-global-r`. Select any
+supported pilot with `DBS_SERVER=<service>`.
+
+Supported pilots are:
+
+```text
+dbs2go-global-r
+dbs2go-global-w
+dbs2go-global-m
+dbs2go-global-migration
+dbs2go-phys03-r
+dbs2go-phys03-w
+dbs2go-phys03-m
+dbs2go-phys03-migration
+```
 The development resource and manifest names are derived as `<service>-dev` and
 `kubernetes/cmsweb/services/<service>-dev.yaml`.
 
@@ -67,10 +80,13 @@ development pod and restarts the process in each one. It does not rebuild the
 development container image. The image referenced by the selected development
 manifest must already be available from the registry.
 
-`devinit` preserves the complete current Service manifest in `tmp/backup.d`
-before redirecting. `devrevert` restores the standard `app=<DBS_SERVER>` Service
-selector. Always run it after testing. `devstatus` reports the detected
-environment, current Service selector, and selected development resources.
+For an HPA-managed pilot, `devinit` constrains its regular HPA to one replica;
+otherwise it scales the regular Deployment directly. `devinit` preserves the
+selected Service in `tmp/backup.d` before redirecting it. `devrevert` restores
+HPA limits from the CMSKubernetes DBS HPA manifest when applicable and restores
+the standard `app=<DBS_SERVER>` Service selector. Always run it after testing.
+`devstatus` reports the detected environment, current Service selector, and
+selected development resources.
 
 To use another service after its corresponding manifest has been provided:
 
