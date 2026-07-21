@@ -20,15 +20,12 @@ NAMESPACE = dbs
 DBS_SERVER ?= dbs2go-global-r
 DBS_SERVER_DEV = $(DBS_SERVER)-dev
 DBS_SERVER_DEV_MANIFEST = $(CONFIG_DIR)/kubernetes/cmsweb/services/$(DBS_SERVER_DEV).yaml
-LOCAL_DEV_IMAGE = registry.cern.ch/cmsweb/dbs2go:dev
 
-# Local build and backup state:
-DEVOPS_DIR = $(DBS2GO_SRC)/.docker.build/devops/$(ENV)/$(DBS_SERVER)
-PAYLOAD_DIR = $(DEVOPS_DIR)/payload
+# Local backup state:
 BACKUP_DIR = $(TMP_DIR)/backup.d
 
 # Setting up all needed ops directories
-_dummy := $(shell mkdir -p $(TMP_DIR) $(PAYLOAD_DIR) $(BACKUP_DIR))
+_dummy := $(shell mkdir -p $(TMP_DIR) $(BACKUP_DIR))
 
 # Using lazy assignment to refresh the pod name whenever it is referenced.
 DBS_SERVER_DEV_POD = $(shell kubectl -n $(NAMESPACE) get pod -l app=$(DBS_SERVER_DEV) -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
@@ -94,23 +91,10 @@ devstatus: run_dev_status
 clean:
 	$(MAKE) -f Makefile clean
 
-# 2. Build the current source through Dockerfile.dev and extract its runtime payload.
+# 2. Build the current source locally with the prepared Oracle environment.
 build:
-	@echo ">>> Building $(EXECUTABLE) from the local source through Dockerfile.dev..."
-	$(MAKE) -f Makefile docker build dev
-	@echo ">>> Extracting $(EXECUTABLE) and static files from $(LOCAL_DEV_IMAGE)..."
-	@set -eu; \
-		rm -rf $(PAYLOAD_DIR); \
-		mkdir -p $(PAYLOAD_DIR); \
-		cid=$$(docker create $(LOCAL_DEV_IMAGE)); \
-		cleanup() { docker rm -f "$$cid" >/dev/null 2>&1 || true; }; \
-		trap cleanup EXIT HUP INT TERM; \
-		docker cp "$$cid:/data/dbs2go" $(PAYLOAD_DIR)/dbs2go; \
-		docker cp "$$cid:/data/static" $(PAYLOAD_DIR)/static; \
-		test -x $(PAYLOAD_DIR)/dbs2go; \
-		test -d $(PAYLOAD_DIR)/static; \
-		trap - EXIT HUP INT TERM; \
-		cleanup
+	@echo ">>> Building $(EXECUTABLE) locally with Oracle support..."
+	$(MAKE) -f Makefile build-ora
 
 # 3. Package and push placeholder retained for future deployment development.
 push_image:
@@ -156,8 +140,8 @@ run_dev_init:
 run_dev_push:
 	@echo ">>> Pushing locally built $(EXECUTABLE) payload to pod $(DBS_SERVER_DEV_POD)..."
 	@test -n "$(DBS_SERVER_DEV_POD)" || { echo "ERROR: Development pod was not found. Run devinit first."; exit 1; }
-	@kubectl -n $(NAMESPACE) cp $(PAYLOAD_DIR)/dbs2go $(DBS_SERVER_DEV_POD):/data/dbs2go -c dev
-	@kubectl -n $(NAMESPACE) cp $(PAYLOAD_DIR)/static $(DBS_SERVER_DEV_POD):/data/ -c dev
+	@kubectl -n $(NAMESPACE) cp ./dbs2go $(DBS_SERVER_DEV_POD):/data/dbs2go -c dev
+	@kubectl -n $(NAMESPACE) cp ./static $(DBS_SERVER_DEV_POD):/data/ -c dev
 	@kubectl -n $(NAMESPACE) exec $(DBS_SERVER_DEV_POD) -c dev -- chmod +x /data/dbs2go
 	@echo ">>> Restarting $(EXECUTABLE) at pod $(DBS_SERVER_DEV_POD)..."
 	@kubectl -n $(NAMESPACE) exec $(DBS_SERVER_DEV_POD) -c dev -- sh -c "cd /data/ && \

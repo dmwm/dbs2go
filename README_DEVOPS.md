@@ -58,9 +58,11 @@ make -f devops.mk devrevert
 development resources, preserves the current Service selector, and redirects
 the selected Service to its development pod.
 
-`devpush` runs `make docker build dev`, which compiles the current source through
-CMSKubernetes `Dockerfile.dev`. It extracts `dbs2go` and `static` from the local
-image, copies the payload into the development pod, and restarts the process.
+`devpush` runs the established `make build-ora` native Oracle build, copies the
+resulting `dbs2go` executable and the local `static` directory into the
+development pod, and restarts the process. It does not rebuild the development
+container image. The image referenced by the selected development manifest must
+already be available from the registry.
 
 `devinit` preserves the complete current Service manifest in `tmp/backup.d`
 before redirecting. `devrevert` restores the standard `app=<DBS_SERVER>` Service
