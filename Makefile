@@ -46,6 +46,7 @@ DOCKER_BUILD_DIR ?= .docker.build
 ORACLE_IMAGE ?= registry.cern.ch/cmsweb/oracle:21_5-stable
 ORACLE_ENV_DIR := $(abspath $(DOCKER_BUILD_DIR)/oracle-env)
 ORACLE_DIR := $(ORACLE_ENV_DIR)/oracle
+ORACLE_ENV_STAMP := $(ORACLE_ENV_DIR)/.prepared
 ORACLE_ENV = PKG_CONFIG_PATH="$(ORACLE_ENV_DIR)" LD_LIBRARY_PATH="$(ORACLE_DIR)$${LD_LIBRARY_PATH:+:$${LD_LIBRARY_PATH}}" PATH="$(ORACLE_DIR):$${PATH}"
 define check_oracle_arch
 	host_os=$$(uname -s); \
@@ -143,22 +144,38 @@ docker-build:
 oracle-env:
 	@set -eu; \
 	mkdir -p "$(ORACLE_ENV_DIR)"; \
+	docker pull "$(ORACLE_IMAGE)"; \
+	$(check_oracle_arch); \
+	oracle_image_id=$$(docker image inspect --format '{{.Id}}' "$(ORACLE_IMAGE)"); \
+	cache_key=$$(printf '%s\n' \
+		"oracle_image=$(ORACLE_IMAGE)" \
+		"oracle_image_id=$$oracle_image_id" \
+		"host_arch=$$host_arch" \
+		"oracle_arch=$$oracle_arch"); \
+	if [ -f "$(ORACLE_ENV_STAMP)" ] && \
+		[ "$$(cat "$(ORACLE_ENV_STAMP)")" = "$$cache_key" ] && \
+		[ -f "$(ORACLE_ENV_DIR)/oci8.pc" ] && \
+		[ -e "$(ORACLE_DIR)/libclntsh.so" ] && \
+		[ -f "$(ORACLE_DIR)/sdk/include/oci.h" ] && \
+		PKG_CONFIG_PATH="$(ORACLE_ENV_DIR)" pkg-config --exists oci8; then \
+		echo "Oracle environment is current; reusing $(ORACLE_ENV_DIR)"; \
+		exit 0; \
+	fi; \
 	cid=""; \
 	oracle_tmp="$(ORACLE_ENV_DIR)/oracle.tmp"; \
 	oci8_source="$(ORACLE_ENV_DIR)/oci8.source.pc"; \
 	oci8_tmp="$(ORACLE_ENV_DIR)/oci8.host.pc"; \
+	stamp_tmp="$(ORACLE_ENV_STAMP).tmp"; \
 	cleanup() { \
 		status=$$?; \
 		trap - EXIT HUP INT TERM; \
 		if [ -n "$$cid" ]; then docker rm -f "$$cid" >/dev/null 2>&1 || true; fi; \
 		rm -rf "$$oracle_tmp"; \
-		rm -f "$$oci8_source" "$$oci8_tmp"; \
+		rm -f "$$oci8_source" "$$oci8_tmp" "$$stamp_tmp"; \
 		exit $$status; \
 	}; \
 	trap cleanup EXIT HUP INT TERM; \
 	curl -kfsSL https://raw.githubusercontent.com/dmwm/CMSKubernetes/master/docker/dbs2go/oci8.pc -o "$$oci8_source"; \
-	docker pull "$(ORACLE_IMAGE)"; \
-	$(check_oracle_arch); \
 	cid=$$(docker create "$(ORACLE_IMAGE)"); \
 	rm -rf "$$oracle_tmp"; \
 	docker cp "$$cid:/usr/lib/oracle" "$$oracle_tmp"; \
@@ -169,11 +186,12 @@ oracle-env:
 	sed -e "s|^libdir=.*|libdir=$(ORACLE_DIR)|" \
 		-e "s|^includedir=.*|includedir=$(ORACLE_DIR)/sdk/include|" \
 		"$$oci8_source" > "$$oci8_tmp"; \
-	mv "$$oci8_tmp" "$(ORACLE_ENV_DIR)/oci8.pc"; \
+	cp "$$oci8_tmp" "$(ORACLE_ENV_DIR)/oci8.pc"; \
 	PKG_CONFIG_PATH="$(ORACLE_ENV_DIR)" pkg-config --cflags oci8 >/dev/null; \
 	PKG_CONFIG_PATH="$(ORACLE_ENV_DIR)" pkg-config --libs oci8 >/dev/null; \
-	trap - EXIT HUP INT TERM; \
-	rm -f "$$oci8_source"
+	printf '%s\n' "$$cache_key" > "$$stamp_tmp"; \
+	mv "$$stamp_tmp" "$(ORACLE_ENV_STAMP)"; \
+	trap - EXIT HUP INT TERM
 
 oracle-arch-check:
 	@set -eu; \
