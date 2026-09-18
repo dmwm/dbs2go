@@ -1,0 +1,4051 @@
+{
+  "format_version": 2,
+  "source": {
+    "file": "create-oracle-schema.sql",
+    "dialect": "oracle",
+    "sha256": "3bdef0b189d61348317c9bb5cad254f833e6b2cbb4fa6002acff40c6a6b45163"
+  },
+  "parser": {
+    "name": "GoSQLX",
+    "version": "v1.14.0",
+    "compatibility_adapters": [
+      "expression_index",
+      "oracle_named_not_null",
+      "oracle_organization_index"
+    ]
+  },
+  "tables": [
+    {
+      "name": "ACQUISITION_ERAS",
+      "columns": [
+        {
+          "name": "ACQUISITION_ERA_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AQE_ACQUISITION_ERA_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "ACQUISITION_ERA_NAME",
+          "type": "VARCHAR2(120)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AQE_ACQUISITION_ERA_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "START_DATE",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AQE_START_DATE",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "END_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "DESCRIPTION",
+          "type": "VARCHAR2(40)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_AQE",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "ACQUISITION_ERA_ID"
+          ],
+          "source_line": 539
+        },
+        {
+          "name": "TUC_AQE_ACQUISITION_ERA_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "ACQUISITION_ERA_NAME"
+          ],
+          "source_line": 539
+        }
+      ],
+      "indexes": [
+        {
+          "name": "TUC_AQE_ACQUISITION_ERA_NAME2",
+          "unique": true,
+          "parts": [
+            {
+              "expression": "NLSSORT(\"ACQUISITION_ERA_NAME\",'nls_sort=''BINARY_CI''')"
+            }
+          ],
+          "source_line": 550
+        }
+      ],
+      "source_line": 539
+    },
+    {
+      "name": "APPLICATION_EXECUTABLES",
+      "columns": [
+        {
+          "name": "APP_EXEC_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AE_APP_EXEC_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "APP_NAME",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AE_APP_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_AE",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "APP_EXEC_ID"
+          ],
+          "source_line": 328
+        },
+        {
+          "name": "TUC_AE_APP_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "APP_NAME"
+          ],
+          "source_line": 328
+        }
+      ],
+      "source_line": 328
+    },
+    {
+      "name": "ASSOCIATED_FILES",
+      "columns": [
+        {
+          "name": "ASSOCATED_FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AF_ASSOCATED_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "THIS_FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AF_THIS_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "ASSOCATED_FILE",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_AF_ASSOCATED_FILE",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_AF",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "ASSOCATED_FILE_ID"
+          ],
+          "source_line": 847
+        },
+        {
+          "name": "TUC_AF_1",
+          "type": "UNIQUE",
+          "columns": [
+            "THIS_FILE_ID",
+            "ASSOCATED_FILE"
+          ],
+          "source_line": 847
+        },
+        {
+          "name": "FL_AF",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "THIS_FILE_ID"
+          ],
+          "referenced_table": "FILES",
+          "referenced_columns": [
+            "FILE_ID"
+          ],
+          "referenced_constraint": "PK_FL",
+          "on_delete": "CASCADE",
+          "source_line": 976
+        },
+        {
+          "name": "FL_AF2",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "ASSOCATED_FILE"
+          ],
+          "referenced_table": "FILES",
+          "referenced_columns": [
+            "FILE_ID"
+          ],
+          "referenced_constraint": "PK_FL",
+          "on_delete": "CASCADE",
+          "source_line": 979
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_AF_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "THIS_FILE_ID"
+            }
+          ],
+          "source_line": 858
+        },
+        {
+          "name": "IDX_AF_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "ASSOCATED_FILE"
+            }
+          ],
+          "source_line": 860
+        }
+      ],
+      "source_line": 847
+    },
+    {
+      "name": "BLOCKS",
+      "columns": [
+        {
+          "name": "BLOCK_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BK_BLOCK_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "BLOCK_NAME",
+          "type": "VARCHAR2(500)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BK_BLOCK_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BK_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "OPEN_FOR_WRITING",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "1",
+          "constraints": [
+            {
+              "type": "DEFAULT"
+            },
+            {
+              "name": "NN_BK_OPEN_FOR_WRITING",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "ORIGIN_SITE_NAME",
+          "type": "VARCHAR2(200)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BK_ORIGIN_SITE_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "BLOCK_SIZE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "FILE_COUNT",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFICATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFIED_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_BK",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "BLOCK_ID"
+          ],
+          "source_line": 669
+        },
+        {
+          "name": "TUC_BK_BLOCK_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "BLOCK_NAME"
+          ],
+          "source_line": 669
+        },
+        {
+          "name": "CC_BK_OPEN_FOR_WRITING",
+          "type": "CHECK",
+          "expression": "OPEN_FOR_WRITING IN (1, 0)",
+          "source_line": 698
+        },
+        {
+          "name": "DS_BK",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "DATASET_ID"
+          ],
+          "referenced_table": "DATASETS",
+          "referenced_columns": [
+            "DATASET_ID"
+          ],
+          "referenced_constraint": "PK_DS",
+          "on_delete": "CASCADE",
+          "source_line": 934
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_BK_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "DATASET_ID"
+            }
+          ],
+          "source_line": 688
+        },
+        {
+          "name": "ID_BK_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "BLOCK_SIZE"
+            }
+          ],
+          "source_line": 690
+        },
+        {
+          "name": "ID_BK_3",
+          "unique": false,
+          "parts": [
+            {
+              "column": "FILE_COUNT"
+            }
+          ],
+          "source_line": 692
+        },
+        {
+          "name": "ID_BK_4",
+          "unique": false,
+          "parts": [
+            {
+              "column": "CREATION_DATE"
+            }
+          ],
+          "source_line": 694
+        },
+        {
+          "name": "ID_BK_5",
+          "unique": false,
+          "parts": [
+            {
+              "column": "CREATE_BY"
+            }
+          ],
+          "source_line": 696
+        }
+      ],
+      "source_line": 669
+    },
+    {
+      "name": "BLOCK_PARENTS",
+      "columns": [
+        {
+          "name": "THIS_BLOCK_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BP_THIS_BLOCK_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PARENT_BLOCK_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BP_PARENT_BLOCK_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_BP",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "THIS_BLOCK_ID",
+            "PARENT_BLOCK_ID"
+          ],
+          "source_line": 705
+        },
+        {
+          "name": "BK_BP",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "THIS_BLOCK_ID"
+          ],
+          "referenced_table": "BLOCKS",
+          "referenced_columns": [
+            "BLOCK_ID"
+          ],
+          "referenced_constraint": "PK_BK",
+          "on_delete": "CASCADE",
+          "source_line": 937
+        },
+        {
+          "name": "BK_BP2",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PARENT_BLOCK_ID"
+          ],
+          "referenced_table": "BLOCKS",
+          "referenced_columns": [
+            "BLOCK_ID"
+          ],
+          "referenced_constraint": "PK_BK",
+          "on_delete": "CASCADE",
+          "source_line": 940
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_BP_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PARENT_BLOCK_ID"
+            }
+          ],
+          "source_line": 715
+        }
+      ],
+      "organization": "INDEX",
+      "source_line": 705
+    },
+    {
+      "name": "BRANCH_HASHES",
+      "columns": [
+        {
+          "name": "BRANCH_HASH_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BH_BRANCH_HASH_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "BRANCH_HASH",
+          "type": "VARCHAR2(700)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_BH_BRANCH_HASH",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "CONTENT",
+          "type": "CLOB",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_BH",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "BRANCH_HASH_ID"
+          ],
+          "source_line": 370
+        }
+      ],
+      "source_line": 370
+    },
+    {
+      "name": "DATASETS",
+      "columns": [
+        {
+          "name": "DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DS_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET",
+          "type": "VARCHAR2(700)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DS_DATASET",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "IS_DATASET_VALID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "1",
+          "constraints": [
+            {
+              "type": "DEFAULT"
+            },
+            {
+              "name": "NN_DS_IS_DATASET_VALID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PRIMARY_DS_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DS_PRIMARY_DS_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PROCESSED_DS_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DS_PROCESSED_DS_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATA_TIER_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DS_DATA_TIER_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET_ACCESS_TYPE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DS_DATASET_ACCESS_TYPE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "ACQUISITION_ERA_ID",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "PROCESSING_ERA_ID",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "PHYSICS_GROUP_ID",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "XTCROSSSECTION",
+          "type": "FLOAT(126)",
+          "nullable": true
+        },
+        {
+          "name": "PREP_ID",
+          "type": "VARCHAR2(256)",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFICATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFIED_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DS",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "DATASET_ID"
+          ],
+          "source_line": 620
+        },
+        {
+          "name": "TUC_DS_DATASET",
+          "type": "UNIQUE",
+          "columns": [
+            "DATASET"
+          ],
+          "source_line": 620
+        },
+        {
+          "name": "CC_DS_IS_DATASET_VALID",
+          "type": "CHECK",
+          "expression": "IS_DATASET_VALID IN (1, 0)",
+          "source_line": 662
+        },
+        {
+          "name": "PDS_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PRIMARY_DS_ID"
+          ],
+          "referenced_table": "PRIMARY_DATASETS",
+          "referenced_columns": [
+            "PRIMARY_DS_ID"
+          ],
+          "referenced_constraint": "PK_PDS",
+          "on_delete": "CASCADE",
+          "source_line": 913
+        },
+        {
+          "name": "DT_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "DATA_TIER_ID"
+          ],
+          "referenced_table": "DATA_TIERS",
+          "referenced_columns": [
+            "DATA_TIER_ID"
+          ],
+          "referenced_constraint": "PK_DT",
+          "on_delete": "CASCADE",
+          "source_line": 916
+        },
+        {
+          "name": "PSDS_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PROCESSED_DS_ID"
+          ],
+          "referenced_table": "PROCESSED_DATASETS",
+          "referenced_columns": [
+            "PROCESSED_DS_ID"
+          ],
+          "referenced_constraint": "PK_PSDS",
+          "on_delete": "CASCADE",
+          "source_line": 919
+        },
+        {
+          "name": "DTP_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "DATASET_ACCESS_TYPE_ID"
+          ],
+          "referenced_table": "DATASET_ACCESS_TYPES",
+          "referenced_columns": [
+            "DATASET_ACCESS_TYPE_ID"
+          ],
+          "referenced_constraint": "PK_DTP",
+          "source_line": 922
+        },
+        {
+          "name": "PG_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PHYSICS_GROUP_ID"
+          ],
+          "referenced_table": "PHYSICS_GROUPS",
+          "referenced_columns": [
+            "PHYSICS_GROUP_ID"
+          ],
+          "referenced_constraint": "PK_PG",
+          "on_delete": "SET NULL",
+          "source_line": 925
+        },
+        {
+          "name": "AQE_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "ACQUISITION_ERA_ID"
+          ],
+          "referenced_table": "ACQUISITION_ERAS",
+          "referenced_columns": [
+            "ACQUISITION_ERA_ID"
+          ],
+          "referenced_constraint": "PK_AQE",
+          "on_delete": "SET NULL",
+          "source_line": 928
+        },
+        {
+          "name": "PE_DS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PROCESSING_ERA_ID"
+          ],
+          "referenced_table": "PROCESSING_ERAS",
+          "referenced_columns": [
+            "PROCESSING_ERA_ID"
+          ],
+          "referenced_constraint": "PK_PE",
+          "on_delete": "SET NULL",
+          "source_line": 931
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_DS_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PRIMARY_DS_ID"
+            }
+          ],
+          "source_line": 644
+        },
+        {
+          "name": "IDX_DS_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "DATA_TIER_ID"
+            }
+          ],
+          "source_line": 646
+        },
+        {
+          "name": "IDX_DS_3",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PROCESSED_DS_ID"
+            }
+          ],
+          "source_line": 648
+        },
+        {
+          "name": "IDX_DS_4",
+          "unique": false,
+          "parts": [
+            {
+              "column": "DATASET_ACCESS_TYPE_ID"
+            }
+          ],
+          "source_line": 650
+        },
+        {
+          "name": "IDX_DS_5",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PHYSICS_GROUP_ID"
+            }
+          ],
+          "source_line": 652
+        },
+        {
+          "name": "IDX_DS_6",
+          "unique": false,
+          "parts": [
+            {
+              "column": "ACQUISITION_ERA_ID"
+            }
+          ],
+          "source_line": 654
+        },
+        {
+          "name": "IDX_DS_7",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PROCESSING_ERA_ID"
+            }
+          ],
+          "source_line": 656
+        },
+        {
+          "name": "ID_DS_8",
+          "unique": false,
+          "parts": [
+            {
+              "column": "CREATION_DATE"
+            }
+          ],
+          "source_line": 658
+        },
+        {
+          "name": "ID_DS_9",
+          "unique": false,
+          "parts": [
+            {
+              "column": "CREATE_BY"
+            }
+          ],
+          "source_line": 660
+        }
+      ],
+      "source_line": 620
+    },
+    {
+      "name": "DATASET_ACCESS_TYPES",
+      "columns": [
+        {
+          "name": "DATASET_ACCESS_TYPE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DTP_DATASET_ACCESS_TYPE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET_ACCESS_TYPE",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DTP_DATASET_ACCESS_TYPE",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DTP",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "DATASET_ACCESS_TYPE_ID"
+          ],
+          "source_line": 426
+        },
+        {
+          "name": "TUC_DTP_DATASET_ACCESS_TYPE",
+          "type": "UNIQUE",
+          "columns": [
+            "DATASET_ACCESS_TYPE"
+          ],
+          "source_line": 426
+        }
+      ],
+      "source_line": 426
+    },
+    {
+      "name": "DATASET_OUTPUT_MOD_CONFIGS",
+      "columns": [
+        {
+          "name": "DS_OUTPUT_MOD_CONF_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DC_DS_OUTPUT_MOD_CONF_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DC_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "OUTPUT_MOD_CONFIG_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DC_OUTPUT_MOD_CONFIG_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DC",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "DS_OUTPUT_MOD_CONF_ID"
+          ],
+          "source_line": 769
+        },
+        {
+          "name": "TUC_DC_1",
+          "type": "UNIQUE",
+          "columns": [
+            "DATASET_ID",
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "source_line": 769
+        },
+        {
+          "name": "DS_DC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "DATASET_ID"
+          ],
+          "referenced_table": "DATASETS",
+          "referenced_columns": [
+            "DATASET_ID"
+          ],
+          "referenced_constraint": "PK_DS",
+          "on_delete": "CASCADE",
+          "source_line": 955
+        },
+        {
+          "name": "OMC_DC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "referenced_table": "OUTPUT_MODULE_CONFIGS",
+          "referenced_columns": [
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "referenced_constraint": "PK_OMC",
+          "on_delete": "CASCADE",
+          "source_line": 958
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_DC_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "DATASET_ID"
+            }
+          ],
+          "source_line": 780
+        },
+        {
+          "name": "IDX_DC_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "OUTPUT_MOD_CONFIG_ID"
+            }
+          ],
+          "source_line": 782
+        }
+      ],
+      "source_line": 769
+    },
+    {
+      "name": "DATASET_PARENTS",
+      "columns": [
+        {
+          "name": "THIS_DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DP_THIS_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PARENT_DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DP_PARENT_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DP",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "THIS_DATASET_ID",
+            "PARENT_DATASET_ID"
+          ],
+          "source_line": 788
+        },
+        {
+          "name": "DS_DP",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "THIS_DATASET_ID"
+          ],
+          "referenced_table": "DATASETS",
+          "referenced_columns": [
+            "DATASET_ID"
+          ],
+          "referenced_constraint": "PK_DS",
+          "on_delete": "CASCADE",
+          "source_line": 961
+        },
+        {
+          "name": "DS_DP2",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PARENT_DATASET_ID"
+          ],
+          "referenced_table": "DATASETS",
+          "referenced_columns": [
+            "DATASET_ID"
+          ],
+          "referenced_constraint": "PK_DS",
+          "on_delete": "CASCADE",
+          "source_line": 964
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_DP_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PARENT_DATASET_ID"
+            }
+          ],
+          "source_line": 798
+        }
+      ],
+      "organization": "INDEX",
+      "source_line": 788
+    },
+    {
+      "name": "DATASET_RUNS",
+      "columns": [
+        {
+          "name": "DATASET_RUN_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DR_DATASET_RUN_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DR_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "RUN_NUMBER",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "COMPLETE",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": "0",
+          "constraints": [
+            {
+              "type": "DEFAULT"
+            }
+          ]
+        },
+        {
+          "name": "LUMI_SECTION_COUNT",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DR",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "DATASET_RUN_ID"
+          ],
+          "source_line": 804
+        },
+        {
+          "name": "DS_DR",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "DATASET_ID"
+          ],
+          "referenced_table": "DATASETS",
+          "referenced_columns": [
+            "DATASET_ID"
+          ],
+          "referenced_constraint": "PK_DS",
+          "on_delete": "CASCADE",
+          "source_line": 967
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_DR_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "DATASET_ID"
+            }
+          ],
+          "source_line": 818
+        },
+        {
+          "name": "IDX_DR_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "RUN_NUMBER"
+            }
+          ],
+          "source_line": 820
+        },
+        {
+          "name": "IDX_DR_3",
+          "unique": false,
+          "parts": [
+            {
+              "column": "LUMI_SECTION_COUNT"
+            }
+          ],
+          "source_line": 822
+        }
+      ],
+      "source_line": 804
+    },
+    {
+      "name": "DATA_TIERS",
+      "columns": [
+        {
+          "name": "DATA_TIER_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DT_DATA_TIER_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATA_TIER_NAME",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DT_DATA_TIER_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DT",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "DATA_TIER_ID"
+          ],
+          "source_line": 504
+        },
+        {
+          "name": "TUC_DT_DATA_TIER_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "DATA_TIER_NAME"
+          ],
+          "source_line": 504
+        }
+      ],
+      "source_line": 504
+    },
+    {
+      "name": "DBS_VERSIONS",
+      "columns": [
+        {
+          "name": "DBS_VERSION_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DV_DBS_VERSION_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "SCHEMA_VERSION",
+          "type": "VARCHAR2(40)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DV_SCHEMA_VERSION",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DBS_RELEASE_VERSION",
+          "type": "VARCHAR2(40)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DV_DBS_RELEASE_VERSION",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "INSTANCE_NAME",
+          "type": "VARCHAR2(40)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DV_INSTANCE_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "INSTANCE_TYPE",
+          "type": "VARCHAR2(40)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_DV_INSTANCE_TYPE",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFICATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_DV",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "DBS_VERSION_ID"
+          ],
+          "source_line": 457
+        }
+      ],
+      "source_line": 457
+    },
+    {
+      "name": "FILES",
+      "columns": [
+        {
+          "name": "FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "LOGICAL_FILE_NAME",
+          "type": "VARCHAR2(500)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_LOGICAL_FILE_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "IS_FILE_VALID",
+          "type": "INTEGER",
+          "nullable": false,
+          "default": "1",
+          "constraints": [
+            {
+              "type": "DEFAULT"
+            },
+            {
+              "name": "NN_FL_IS_FILE_VALID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "DATASET_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_DATASET_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "BLOCK_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_BLOCK_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "FILE_TYPE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_FILE_TYPE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "CHECK_SUM",
+          "type": "VARCHAR2(100)",
+          "nullable": true
+        },
+        {
+          "name": "EVENT_COUNT",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_EVENT_COUNT",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "FILE_SIZE",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FL_FILE_SIZE",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "BRANCH_HASH_ID",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "ADLER32",
+          "type": "VARCHAR2(100)",
+          "nullable": true
+        },
+        {
+          "name": "MD5",
+          "type": "VARCHAR2(100)",
+          "nullable": true
+        },
+        {
+          "name": "AUTO_CROSS_SECTION",
+          "type": "FLOAT(126)",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFICATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFIED_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_FL",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "FILE_ID"
+          ],
+          "source_line": 721
+        },
+        {
+          "name": "TUC_FL_LOGICAL_FILE_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "LOGICAL_FILE_NAME"
+          ],
+          "source_line": 721
+        },
+        {
+          "name": "CC_FL_IS_FILE_VALID",
+          "type": "CHECK",
+          "expression": "IS_FILE_VALID IN (1, 0)",
+          "source_line": 762
+        },
+        {
+          "name": "DS_FL",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "DATASET_ID"
+          ],
+          "referenced_table": "DATASETS",
+          "referenced_columns": [
+            "DATASET_ID"
+          ],
+          "referenced_constraint": "PK_DS",
+          "on_delete": "CASCADE",
+          "source_line": 943
+        },
+        {
+          "name": "BK_FL",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "BLOCK_ID"
+          ],
+          "referenced_table": "BLOCKS",
+          "referenced_columns": [
+            "BLOCK_ID"
+          ],
+          "referenced_constraint": "PK_BK",
+          "on_delete": "CASCADE",
+          "source_line": 946
+        },
+        {
+          "name": "FT_FL",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "FILE_TYPE_ID"
+          ],
+          "referenced_table": "FILE_DATA_TYPES",
+          "referenced_columns": [
+            "FILE_TYPE_ID"
+          ],
+          "referenced_constraint": "PK_FT",
+          "source_line": 949
+        },
+        {
+          "name": "BH_FL",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "BRANCH_HASH_ID"
+          ],
+          "referenced_table": "BRANCH_HASHES",
+          "referenced_columns": [
+            "BRANCH_HASH_ID"
+          ],
+          "referenced_constraint": "PK_BH",
+          "on_delete": "SET NULL",
+          "source_line": 952
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_FL_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "DATASET_ID"
+            }
+          ],
+          "source_line": 746
+        },
+        {
+          "name": "IDX_FL_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "BLOCK_ID"
+            }
+          ],
+          "source_line": 748
+        },
+        {
+          "name": "IDX_FL_3",
+          "unique": false,
+          "parts": [
+            {
+              "column": "FILE_TYPE_ID"
+            }
+          ],
+          "source_line": 750
+        },
+        {
+          "name": "IDX_FL_4",
+          "unique": false,
+          "parts": [
+            {
+              "column": "BRANCH_HASH_ID"
+            }
+          ],
+          "source_line": 752
+        },
+        {
+          "name": "IDX_FL_5",
+          "unique": false,
+          "parts": [
+            {
+              "column": "FILE_SIZE"
+            }
+          ],
+          "source_line": 754
+        },
+        {
+          "name": "IDX_FL_6",
+          "unique": false,
+          "parts": [
+            {
+              "column": "CREATION_DATE"
+            }
+          ],
+          "source_line": 756
+        },
+        {
+          "name": "IDX_FL_7",
+          "unique": false,
+          "parts": [
+            {
+              "column": "CREATE_BY"
+            }
+          ],
+          "source_line": 758
+        },
+        {
+          "name": "IDX_FL_8",
+          "unique": false,
+          "parts": [
+            {
+              "column": "IS_FILE_VALID"
+            }
+          ],
+          "source_line": 760
+        }
+      ],
+      "source_line": 721
+    },
+    {
+      "name": "FILE_DATA_TYPES",
+      "columns": [
+        {
+          "name": "FILE_TYPE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FT_FILE_TYPE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "FILE_TYPE",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FT_FILE_TYPE",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_FT",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "FILE_TYPE_ID"
+          ],
+          "source_line": 384
+        },
+        {
+          "name": "TUC_FT_FILE_TYPE",
+          "type": "UNIQUE",
+          "columns": [
+            "FILE_TYPE"
+          ],
+          "source_line": 384
+        }
+      ],
+      "source_line": 384
+    },
+    {
+      "name": "FILE_LUMIS",
+      "columns": [
+        {
+          "name": "RUN_NUM",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FLM_RUN_NUM",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "LUMI_SECTION_NUM",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FLM_LUMI_SECTION_NUM",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FLM_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "EVENT_COUNT",
+          "type": "INTEGER",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_FLM",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "RUN_NUM",
+            "LUMI_SECTION_NUM",
+            "FILE_ID"
+          ],
+          "source_line": 882
+        },
+        {
+          "name": "FL_FLM",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "FILE_ID"
+          ],
+          "referenced_table": "FILES",
+          "referenced_columns": [
+            "FILE_ID"
+          ],
+          "referenced_constraint": "PK_FL",
+          "on_delete": "CASCADE",
+          "source_line": 988
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_FLM_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "FILE_ID"
+            }
+          ],
+          "source_line": 893
+        },
+        {
+          "name": "ID_FLM_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "RUN_NUM"
+            },
+            {
+              "column": "FILE_ID"
+            }
+          ],
+          "source_line": 895
+        }
+      ],
+      "source_line": 882
+    },
+    {
+      "name": "FILE_OUTPUT_MOD_CONFIGS",
+      "columns": [
+        {
+          "name": "FILE_OUTPUT_CONFIG_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FC_FILE_OUTPUT_CONFIG_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FC_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "OUTPUT_MOD_CONFIG_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FC_OUTPUT_MOD_CONFIG_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_FC",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "FILE_OUTPUT_CONFIG_ID"
+          ],
+          "source_line": 828
+        },
+        {
+          "name": "TUC_FC_1",
+          "type": "UNIQUE",
+          "columns": [
+            "FILE_ID",
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "source_line": 828
+        },
+        {
+          "name": "FL_FC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "FILE_ID"
+          ],
+          "referenced_table": "FILES",
+          "referenced_columns": [
+            "FILE_ID"
+          ],
+          "referenced_constraint": "PK_FL",
+          "on_delete": "CASCADE",
+          "source_line": 970
+        },
+        {
+          "name": "OMC_FC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "referenced_table": "OUTPUT_MODULE_CONFIGS",
+          "referenced_columns": [
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "referenced_constraint": "PK_OMC",
+          "on_delete": "CASCADE",
+          "source_line": 973
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_FC_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "FILE_ID"
+            }
+          ],
+          "source_line": 839
+        },
+        {
+          "name": "IDX_FC_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "OUTPUT_MOD_CONFIG_ID"
+            }
+          ],
+          "source_line": 841
+        }
+      ],
+      "source_line": 828
+    },
+    {
+      "name": "FILE_PARENTS",
+      "columns": [
+        {
+          "name": "THIS_FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FP_THIS_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PARENT_FILE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_FP_PARENT_FILE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_FP",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "THIS_FILE_ID",
+            "PARENT_FILE_ID"
+          ],
+          "source_line": 866
+        },
+        {
+          "name": "FL_FP",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "THIS_FILE_ID"
+          ],
+          "referenced_table": "FILES",
+          "referenced_columns": [
+            "FILE_ID"
+          ],
+          "referenced_constraint": "PK_FL",
+          "on_delete": "CASCADE",
+          "source_line": 982
+        },
+        {
+          "name": "FL_FP2",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PARENT_FILE_ID"
+          ],
+          "referenced_table": "FILES",
+          "referenced_columns": [
+            "FILE_ID"
+          ],
+          "referenced_constraint": "PK_FL",
+          "on_delete": "CASCADE",
+          "source_line": 985
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_FP_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PARENT_FILE_ID"
+            }
+          ],
+          "source_line": 876
+        }
+      ],
+      "organization": "INDEX",
+      "source_line": 866
+    },
+    {
+      "name": "MIGRATION_BLOCKS",
+      "columns": [
+        {
+          "name": "MIGRATION_BLOCK_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_MB_MIGRATION_BLOCK_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "MIGRATION_REQUEST_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_MB_MIGRATION_REQUEST_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "MIGRATION_BLOCK_NAME",
+          "type": "VARCHAR2(700)",
+          "nullable": true
+        },
+        {
+          "name": "MIGRATION_ORDER",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "MIGRATION_STATUS",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFICATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFIED_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_MB",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "MIGRATION_BLOCK_ID"
+          ],
+          "source_line": 599
+        },
+        {
+          "name": "TUC_MB_1",
+          "type": "UNIQUE",
+          "columns": [
+            "MIGRATION_BLOCK_NAME",
+            "MIGRATION_REQUEST_ID"
+          ],
+          "source_line": 599
+        },
+        {
+          "name": "MR_MB",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "MIGRATION_REQUEST_ID"
+          ],
+          "referenced_table": "MIGRATION_REQUESTS",
+          "referenced_columns": [
+            "MIGRATION_REQUEST_ID"
+          ],
+          "referenced_constraint": "PK_MR",
+          "on_delete": "CASCADE",
+          "source_line": 991
+        }
+      ],
+      "source_line": 599
+    },
+    {
+      "name": "MIGRATION_REQUESTS",
+      "columns": [
+        {
+          "name": "MIGRATION_REQUEST_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_MR_MIGRATION_REQUEST_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "MIGRATION_URL",
+          "type": "VARCHAR2(300)",
+          "nullable": true
+        },
+        {
+          "name": "MIGRATION_INPUT",
+          "type": "VARCHAR2(700)",
+          "nullable": true
+        },
+        {
+          "name": "MIGRATION_STATUS",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "MIGRATION_SERVER",
+          "type": "VARCHAR2(100)",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFICATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "LAST_MODIFIED_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "RETRY_COUNT",
+          "type": "INTEGER",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_MR",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "MIGRATION_REQUEST_ID"
+          ],
+          "source_line": 577
+        },
+        {
+          "name": "TUC_MR_1",
+          "type": "UNIQUE",
+          "columns": [
+            "MIGRATION_INPUT"
+          ],
+          "source_line": 577
+        }
+      ],
+      "source_line": 577
+    },
+    {
+      "name": "OUTPUT_MODULE_CONFIGS",
+      "columns": [
+        {
+          "name": "OUTPUT_MOD_CONFIG_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_OMC_OUTPUT_MOD_CONFIG_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "APP_EXEC_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_OMC_APP_EXEC_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "RELEASE_VERSION_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_OMC_RELEASE_VERSION_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PARAMETER_SET_HASH_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_OMC_PARAMETER_SET_HASH_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "OUTPUT_MODULE_LABEL",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "default": "'NONE'",
+          "constraints": [
+            {
+              "type": "DEFAULT"
+            },
+            {
+              "name": "NN_OMC_OUTPUT_MODULE_LABEL",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "GLOBAL_TAG",
+          "type": "VARCHAR2(255)",
+          "nullable": false,
+          "constraints": [
+            {
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "SCENARIO",
+          "type": "VARCHAR2(40)",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_OMC",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "OUTPUT_MOD_CONFIG_ID"
+          ],
+          "source_line": 475
+        },
+        {
+          "name": "TUC_OMC_1",
+          "type": "UNIQUE",
+          "columns": [
+            "APP_EXEC_ID",
+            "RELEASE_VERSION_ID",
+            "PARAMETER_SET_HASH_ID",
+            "OUTPUT_MODULE_LABEL",
+            "GLOBAL_TAG"
+          ],
+          "source_line": 475
+        },
+        {
+          "name": "AE_OMC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "APP_EXEC_ID"
+          ],
+          "referenced_table": "APPLICATION_EXECUTABLES",
+          "referenced_columns": [
+            "APP_EXEC_ID"
+          ],
+          "referenced_constraint": "PK_AE",
+          "on_delete": "CASCADE",
+          "source_line": 901
+        },
+        {
+          "name": "RV_OMC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "RELEASE_VERSION_ID"
+          ],
+          "referenced_table": "RELEASE_VERSIONS",
+          "referenced_columns": [
+            "RELEASE_VERSION_ID"
+          ],
+          "referenced_constraint": "PK_RV",
+          "on_delete": "CASCADE",
+          "source_line": 904
+        },
+        {
+          "name": "PSH_OMC",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PARAMETER_SET_HASH_ID"
+          ],
+          "referenced_table": "PARAMETER_SET_HASHES",
+          "referenced_columns": [
+            "PARAMETER_SET_HASH_ID"
+          ],
+          "referenced_constraint": "PK_PSH",
+          "on_delete": "CASCADE",
+          "source_line": 907
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ID_OMC_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "RELEASE_VERSION_ID"
+            }
+          ],
+          "source_line": 492
+        },
+        {
+          "name": "ID_OMC_2",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PARAMETER_SET_HASH_ID"
+            }
+          ],
+          "source_line": 494
+        },
+        {
+          "name": "ID_OMC_3",
+          "unique": false,
+          "parts": [
+            {
+              "column": "OUTPUT_MODULE_LABEL"
+            }
+          ],
+          "source_line": 496
+        },
+        {
+          "name": "ID_OMC_4",
+          "unique": false,
+          "parts": [
+            {
+              "column": "APP_EXEC_ID"
+            }
+          ],
+          "source_line": 498
+        }
+      ],
+      "source_line": 475
+    },
+    {
+      "name": "PARAMETER_SET_HASHES",
+      "columns": [
+        {
+          "name": "PARAMETER_SET_HASH_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PSH_PARAMETER_SET_HASH_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PSET_HASH",
+          "type": "VARCHAR2(128)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PSH_PSET_HASH",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PSET_NAME",
+          "type": "VARCHAR2(135)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_PSH",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "PARAMETER_SET_HASH_ID"
+          ],
+          "source_line": 440
+        },
+        {
+          "name": "TUC_PSH_PSET_HASH",
+          "type": "UNIQUE",
+          "columns": [
+            "PSET_HASH"
+          ],
+          "source_line": 440
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_PSH_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PSET_NAME"
+            }
+          ],
+          "source_line": 451
+        }
+      ],
+      "source_line": 440
+    },
+    {
+      "name": "PHYSICS_GROUPS",
+      "columns": [
+        {
+          "name": "PHYSICS_GROUP_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PG_PHYSICS_GROUP_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PHYSICS_GROUP_NAME",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PG_PHYSICS_GROUP_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_PG",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "PHYSICS_GROUP_ID"
+          ],
+          "source_line": 398
+        },
+        {
+          "name": "TUC_PG_PHYSICS_GROUP_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "PHYSICS_GROUP_NAME"
+          ],
+          "source_line": 398
+        }
+      ],
+      "source_line": 398
+    },
+    {
+      "name": "PRIMARY_DATASETS",
+      "columns": [
+        {
+          "name": "PRIMARY_DS_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PDS_PRIMARY_DS_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PRIMARY_DS_NAME",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PDS_PRIMARY_DS_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PRIMARY_DS_TYPE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PDS_PRIMARY_DS_TYPE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_PDS",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "PRIMARY_DS_ID"
+          ],
+          "source_line": 520
+        },
+        {
+          "name": "TUC_PDS_PRIMARY_DS_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "PRIMARY_DS_NAME"
+          ],
+          "source_line": 520
+        },
+        {
+          "name": "PDT_PDS",
+          "type": "FOREIGN KEY",
+          "columns": [
+            "PRIMARY_DS_TYPE_ID"
+          ],
+          "referenced_table": "PRIMARY_DS_TYPES",
+          "referenced_columns": [
+            "PRIMARY_DS_TYPE_ID"
+          ],
+          "referenced_constraint": "PK_PDT",
+          "source_line": 910
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_PDS_1",
+          "unique": false,
+          "parts": [
+            {
+              "column": "PRIMARY_DS_TYPE_ID"
+            }
+          ],
+          "source_line": 533
+        }
+      ],
+      "source_line": 520
+    },
+    {
+      "name": "PRIMARY_DS_TYPES",
+      "columns": [
+        {
+          "name": "PRIMARY_DS_TYPE_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PDT_PRIMARY_DS_TYPE_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PRIMARY_DS_TYPE",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PDT_PRIMARY_DS_TYPE",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_PDT",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "PRIMARY_DS_TYPE_ID"
+          ],
+          "source_line": 412
+        },
+        {
+          "name": "TUC_PDT_PRIMARY_DS_TYPE",
+          "type": "UNIQUE",
+          "columns": [
+            "PRIMARY_DS_TYPE"
+          ],
+          "source_line": 412
+        }
+      ],
+      "source_line": 412
+    },
+    {
+      "name": "PROCESSED_DATASETS",
+      "columns": [
+        {
+          "name": "PROCESSED_DS_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PSDS_PROCESSED_DS_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PROCESSED_DS_NAME",
+          "type": "VARCHAR2(235)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PSDS_PROCESSED_DS_NAME",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_PSDS",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "PROCESSED_DS_ID"
+          ],
+          "source_line": 356
+        },
+        {
+          "name": "TUC_PSDS_PROCESSED_DS_NAME",
+          "type": "UNIQUE",
+          "columns": [
+            "PROCESSED_DS_NAME"
+          ],
+          "source_line": 356
+        }
+      ],
+      "source_line": 356
+    },
+    {
+      "name": "PROCESSING_ERAS",
+      "columns": [
+        {
+          "name": "PROCESSING_ERA_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_PE_PROCESSING_ERA_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "PROCESSING_VERSION",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATION_DATE",
+          "type": "INTEGER",
+          "nullable": true
+        },
+        {
+          "name": "CREATE_BY",
+          "type": "VARCHAR2(500)",
+          "nullable": true
+        },
+        {
+          "name": "DESCRIPTION",
+          "type": "VARCHAR2(40)",
+          "nullable": true
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_PE",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "PROCESSING_ERA_ID"
+          ],
+          "source_line": 560
+        },
+        {
+          "name": "TUC_PE_PROCESSING_VERSION",
+          "type": "UNIQUE",
+          "columns": [
+            "PROCESSING_VERSION"
+          ],
+          "source_line": 560
+        }
+      ],
+      "source_line": 560
+    },
+    {
+      "name": "RELEASE_VERSIONS",
+      "columns": [
+        {
+          "name": "RELEASE_VERSION_ID",
+          "type": "INTEGER",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_RV_RELEASE_VERSION_ID",
+              "type": "NOT NULL"
+            }
+          ]
+        },
+        {
+          "name": "RELEASE_VERSION",
+          "type": "VARCHAR2(100)",
+          "nullable": false,
+          "constraints": [
+            {
+              "name": "NN_RV_RELEASE_VERSION",
+              "type": "NOT NULL"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "PK_RV",
+          "type": "PRIMARY KEY",
+          "columns": [
+            "RELEASE_VERSION_ID"
+          ],
+          "source_line": 342
+        },
+        {
+          "name": "TUC_RV_RELEASE_VERSION",
+          "type": "UNIQUE",
+          "columns": [
+            "RELEASE_VERSION"
+          ],
+          "source_line": 342
+        }
+      ],
+      "source_line": 342
+    }
+  ],
+  "foreign_keys": [
+    {
+      "constraint": "FL_AF",
+      "source_table": "ASSOCIATED_FILES",
+      "source_columns": [
+        "THIS_FILE_ID"
+      ],
+      "target_table": "FILES",
+      "target_columns": [
+        "FILE_ID"
+      ],
+      "referenced_constraint": "PK_FL",
+      "on_delete": "CASCADE",
+      "source_line": 976
+    },
+    {
+      "constraint": "FL_AF2",
+      "source_table": "ASSOCIATED_FILES",
+      "source_columns": [
+        "ASSOCATED_FILE"
+      ],
+      "target_table": "FILES",
+      "target_columns": [
+        "FILE_ID"
+      ],
+      "referenced_constraint": "PK_FL",
+      "on_delete": "CASCADE",
+      "source_line": 979
+    },
+    {
+      "constraint": "DS_BK",
+      "source_table": "BLOCKS",
+      "source_columns": [
+        "DATASET_ID"
+      ],
+      "target_table": "DATASETS",
+      "target_columns": [
+        "DATASET_ID"
+      ],
+      "referenced_constraint": "PK_DS",
+      "on_delete": "CASCADE",
+      "source_line": 934
+    },
+    {
+      "constraint": "BK_BP",
+      "source_table": "BLOCK_PARENTS",
+      "source_columns": [
+        "THIS_BLOCK_ID"
+      ],
+      "target_table": "BLOCKS",
+      "target_columns": [
+        "BLOCK_ID"
+      ],
+      "referenced_constraint": "PK_BK",
+      "on_delete": "CASCADE",
+      "source_line": 937
+    },
+    {
+      "constraint": "BK_BP2",
+      "source_table": "BLOCK_PARENTS",
+      "source_columns": [
+        "PARENT_BLOCK_ID"
+      ],
+      "target_table": "BLOCKS",
+      "target_columns": [
+        "BLOCK_ID"
+      ],
+      "referenced_constraint": "PK_BK",
+      "on_delete": "CASCADE",
+      "source_line": 940
+    },
+    {
+      "constraint": "AQE_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "ACQUISITION_ERA_ID"
+      ],
+      "target_table": "ACQUISITION_ERAS",
+      "target_columns": [
+        "ACQUISITION_ERA_ID"
+      ],
+      "referenced_constraint": "PK_AQE",
+      "on_delete": "SET NULL",
+      "source_line": 928
+    },
+    {
+      "constraint": "DTP_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "DATASET_ACCESS_TYPE_ID"
+      ],
+      "target_table": "DATASET_ACCESS_TYPES",
+      "target_columns": [
+        "DATASET_ACCESS_TYPE_ID"
+      ],
+      "referenced_constraint": "PK_DTP",
+      "source_line": 922
+    },
+    {
+      "constraint": "DT_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "DATA_TIER_ID"
+      ],
+      "target_table": "DATA_TIERS",
+      "target_columns": [
+        "DATA_TIER_ID"
+      ],
+      "referenced_constraint": "PK_DT",
+      "on_delete": "CASCADE",
+      "source_line": 916
+    },
+    {
+      "constraint": "PDS_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "PRIMARY_DS_ID"
+      ],
+      "target_table": "PRIMARY_DATASETS",
+      "target_columns": [
+        "PRIMARY_DS_ID"
+      ],
+      "referenced_constraint": "PK_PDS",
+      "on_delete": "CASCADE",
+      "source_line": 913
+    },
+    {
+      "constraint": "PE_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "PROCESSING_ERA_ID"
+      ],
+      "target_table": "PROCESSING_ERAS",
+      "target_columns": [
+        "PROCESSING_ERA_ID"
+      ],
+      "referenced_constraint": "PK_PE",
+      "on_delete": "SET NULL",
+      "source_line": 931
+    },
+    {
+      "constraint": "PG_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "PHYSICS_GROUP_ID"
+      ],
+      "target_table": "PHYSICS_GROUPS",
+      "target_columns": [
+        "PHYSICS_GROUP_ID"
+      ],
+      "referenced_constraint": "PK_PG",
+      "on_delete": "SET NULL",
+      "source_line": 925
+    },
+    {
+      "constraint": "PSDS_DS",
+      "source_table": "DATASETS",
+      "source_columns": [
+        "PROCESSED_DS_ID"
+      ],
+      "target_table": "PROCESSED_DATASETS",
+      "target_columns": [
+        "PROCESSED_DS_ID"
+      ],
+      "referenced_constraint": "PK_PSDS",
+      "on_delete": "CASCADE",
+      "source_line": 919
+    },
+    {
+      "constraint": "DS_DC",
+      "source_table": "DATASET_OUTPUT_MOD_CONFIGS",
+      "source_columns": [
+        "DATASET_ID"
+      ],
+      "target_table": "DATASETS",
+      "target_columns": [
+        "DATASET_ID"
+      ],
+      "referenced_constraint": "PK_DS",
+      "on_delete": "CASCADE",
+      "source_line": 955
+    },
+    {
+      "constraint": "OMC_DC",
+      "source_table": "DATASET_OUTPUT_MOD_CONFIGS",
+      "source_columns": [
+        "OUTPUT_MOD_CONFIG_ID"
+      ],
+      "target_table": "OUTPUT_MODULE_CONFIGS",
+      "target_columns": [
+        "OUTPUT_MOD_CONFIG_ID"
+      ],
+      "referenced_constraint": "PK_OMC",
+      "on_delete": "CASCADE",
+      "source_line": 958
+    },
+    {
+      "constraint": "DS_DP",
+      "source_table": "DATASET_PARENTS",
+      "source_columns": [
+        "THIS_DATASET_ID"
+      ],
+      "target_table": "DATASETS",
+      "target_columns": [
+        "DATASET_ID"
+      ],
+      "referenced_constraint": "PK_DS",
+      "on_delete": "CASCADE",
+      "source_line": 961
+    },
+    {
+      "constraint": "DS_DP2",
+      "source_table": "DATASET_PARENTS",
+      "source_columns": [
+        "PARENT_DATASET_ID"
+      ],
+      "target_table": "DATASETS",
+      "target_columns": [
+        "DATASET_ID"
+      ],
+      "referenced_constraint": "PK_DS",
+      "on_delete": "CASCADE",
+      "source_line": 964
+    },
+    {
+      "constraint": "DS_DR",
+      "source_table": "DATASET_RUNS",
+      "source_columns": [
+        "DATASET_ID"
+      ],
+      "target_table": "DATASETS",
+      "target_columns": [
+        "DATASET_ID"
+      ],
+      "referenced_constraint": "PK_DS",
+      "on_delete": "CASCADE",
+      "source_line": 967
+    },
+    {
+      "constraint": "BH_FL",
+      "source_table": "FILES",
+      "source_columns": [
+        "BRANCH_HASH_ID"
+      ],
+      "target_table": "BRANCH_HASHES",
+      "target_columns": [
+        "BRANCH_HASH_ID"
+      ],
+      "referenced_constraint": "PK_BH",
+      "on_delete": "SET NULL",
+      "source_line": 952
+    },
+    {
+      "constraint": "BK_FL",
+      "source_table": "FILES",
+      "source_columns": [
+        "BLOCK_ID"
+      ],
+      "target_table": "BLOCKS",
+      "target_columns": [
+        "BLOCK_ID"
+      ],
+      "referenced_constraint": "PK_BK",
+      "on_delete": "CASCADE",
+      "source_line": 946
+    },
+    {
+      "constraint": "DS_FL",
+      "source_table": "FILES",
+      "source_columns": [
+        "DATASET_ID"
+      ],
+      "target_table": "DATASETS",
+      "target_columns": [
+        "DATASET_ID"
+      ],
+      "referenced_constraint": "PK_DS",
+      "on_delete": "CASCADE",
+      "source_line": 943
+    },
+    {
+      "constraint": "FT_FL",
+      "source_table": "FILES",
+      "source_columns": [
+        "FILE_TYPE_ID"
+      ],
+      "target_table": "FILE_DATA_TYPES",
+      "target_columns": [
+        "FILE_TYPE_ID"
+      ],
+      "referenced_constraint": "PK_FT",
+      "source_line": 949
+    },
+    {
+      "constraint": "FL_FLM",
+      "source_table": "FILE_LUMIS",
+      "source_columns": [
+        "FILE_ID"
+      ],
+      "target_table": "FILES",
+      "target_columns": [
+        "FILE_ID"
+      ],
+      "referenced_constraint": "PK_FL",
+      "on_delete": "CASCADE",
+      "source_line": 988
+    },
+    {
+      "constraint": "FL_FC",
+      "source_table": "FILE_OUTPUT_MOD_CONFIGS",
+      "source_columns": [
+        "FILE_ID"
+      ],
+      "target_table": "FILES",
+      "target_columns": [
+        "FILE_ID"
+      ],
+      "referenced_constraint": "PK_FL",
+      "on_delete": "CASCADE",
+      "source_line": 970
+    },
+    {
+      "constraint": "OMC_FC",
+      "source_table": "FILE_OUTPUT_MOD_CONFIGS",
+      "source_columns": [
+        "OUTPUT_MOD_CONFIG_ID"
+      ],
+      "target_table": "OUTPUT_MODULE_CONFIGS",
+      "target_columns": [
+        "OUTPUT_MOD_CONFIG_ID"
+      ],
+      "referenced_constraint": "PK_OMC",
+      "on_delete": "CASCADE",
+      "source_line": 973
+    },
+    {
+      "constraint": "FL_FP",
+      "source_table": "FILE_PARENTS",
+      "source_columns": [
+        "THIS_FILE_ID"
+      ],
+      "target_table": "FILES",
+      "target_columns": [
+        "FILE_ID"
+      ],
+      "referenced_constraint": "PK_FL",
+      "on_delete": "CASCADE",
+      "source_line": 982
+    },
+    {
+      "constraint": "FL_FP2",
+      "source_table": "FILE_PARENTS",
+      "source_columns": [
+        "PARENT_FILE_ID"
+      ],
+      "target_table": "FILES",
+      "target_columns": [
+        "FILE_ID"
+      ],
+      "referenced_constraint": "PK_FL",
+      "on_delete": "CASCADE",
+      "source_line": 985
+    },
+    {
+      "constraint": "MR_MB",
+      "source_table": "MIGRATION_BLOCKS",
+      "source_columns": [
+        "MIGRATION_REQUEST_ID"
+      ],
+      "target_table": "MIGRATION_REQUESTS",
+      "target_columns": [
+        "MIGRATION_REQUEST_ID"
+      ],
+      "referenced_constraint": "PK_MR",
+      "on_delete": "CASCADE",
+      "source_line": 991
+    },
+    {
+      "constraint": "AE_OMC",
+      "source_table": "OUTPUT_MODULE_CONFIGS",
+      "source_columns": [
+        "APP_EXEC_ID"
+      ],
+      "target_table": "APPLICATION_EXECUTABLES",
+      "target_columns": [
+        "APP_EXEC_ID"
+      ],
+      "referenced_constraint": "PK_AE",
+      "on_delete": "CASCADE",
+      "source_line": 901
+    },
+    {
+      "constraint": "PSH_OMC",
+      "source_table": "OUTPUT_MODULE_CONFIGS",
+      "source_columns": [
+        "PARAMETER_SET_HASH_ID"
+      ],
+      "target_table": "PARAMETER_SET_HASHES",
+      "target_columns": [
+        "PARAMETER_SET_HASH_ID"
+      ],
+      "referenced_constraint": "PK_PSH",
+      "on_delete": "CASCADE",
+      "source_line": 907
+    },
+    {
+      "constraint": "RV_OMC",
+      "source_table": "OUTPUT_MODULE_CONFIGS",
+      "source_columns": [
+        "RELEASE_VERSION_ID"
+      ],
+      "target_table": "RELEASE_VERSIONS",
+      "target_columns": [
+        "RELEASE_VERSION_ID"
+      ],
+      "referenced_constraint": "PK_RV",
+      "on_delete": "CASCADE",
+      "source_line": 904
+    },
+    {
+      "constraint": "PDT_PDS",
+      "source_table": "PRIMARY_DATASETS",
+      "source_columns": [
+        "PRIMARY_DS_TYPE_ID"
+      ],
+      "target_table": "PRIMARY_DS_TYPES",
+      "target_columns": [
+        "PRIMARY_DS_TYPE_ID"
+      ],
+      "referenced_constraint": "PK_PDT",
+      "source_line": 910
+    }
+  ],
+  "auxiliary_objects": [
+    {
+      "kind": "CREATE ROLE",
+      "name": "CMS_DBS3_ADMIN_ROLE",
+      "sql": "CREATE ROLE CMS_DBS3_ADMIN_ROLE",
+      "source_line": 14
+    },
+    {
+      "kind": "CREATE ROLE",
+      "name": "CMS_DBS3_READ_ROLE",
+      "sql": "CREATE ROLE CMS_DBS3_READ_ROLE",
+      "source_line": 12
+    },
+    {
+      "kind": "CREATE ROLE",
+      "name": "CMS_DBS3_WRITE_ROLE",
+      "sql": "CREATE ROLE CMS_DBS3_WRITE_ROLE",
+      "source_line": 13
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_AE",
+      "sql": "CREATE SEQUENCE SEQ_AE START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 131
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_AF",
+      "sql": "CREATE SEQUENCE SEQ_AF START WITH 1 INCREMENT BY 120 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 248
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_AQE",
+      "sql": "CREATE SEQUENCE SEQ_AQE START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 158
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_BH",
+      "sql": "CREATE SEQUENCE SEQ_BH START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 257
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_BK",
+      "sql": "CREATE SEQUENCE SEQ_BK START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 185
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_BLST",
+      "sql": "CREATE SEQUENCE SEQ_BLST START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 284
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_BP",
+      "sql": "CREATE SEQUENCE SEQ_BP START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 140
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_BSE",
+      "sql": "CREATE SEQUENCE SEQ_BSE START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 212
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_CS",
+      "sql": "CREATE SEQUENCE SEQ_CS START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 311
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DC",
+      "sql": "CREATE SEQUENCE SEQ_DC START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 95
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DP",
+      "sql": "CREATE SEQUENCE SEQ_DP START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 104
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DR",
+      "sql": "CREATE SEQUENCE SEQ_DR START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 41
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DS",
+      "sql": "CREATE SEQUENCE SEQ_DS START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 122
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DT",
+      "sql": "CREATE SEQUENCE SEQ_DT START WITH 100 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 59
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DTP",
+      "sql": "CREATE SEQUENCE SEQ_DTP START WITH 100 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 113
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_DV",
+      "sql": "CREATE SEQUENCE SEQ_DV START WITH 100 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 275
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_FC",
+      "sql": "CREATE SEQUENCE SEQ_FC START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 266
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_FL",
+      "sql": "CREATE SEQUENCE SEQ_FL START WITH 1 INCREMENT BY 40 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 221
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_FLM",
+      "sql": "CREATE SEQUENCE SEQ_FLM START WITH 1 INCREMENT BY 1000 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 176
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_FP",
+      "sql": "CREATE SEQUENCE SEQ_FP START WITH 1 INCREMENT BY 120 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 230
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_FT",
+      "sql": "CREATE SEQUENCE SEQ_FT START WITH 100 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 239
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_MB",
+      "sql": "CREATE SEQUENCE SEQ_MB START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 293
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_MR",
+      "sql": "CREATE SEQUENCE SEQ_MR START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 302
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_OMC",
+      "sql": "CREATE SEQUENCE SEQ_OMC START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 86
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_PDS",
+      "sql": "CREATE SEQUENCE SEQ_PDS START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 68
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_PDT",
+      "sql": "CREATE SEQUENCE SEQ_PDT START WITH 100 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 77
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_PE",
+      "sql": "CREATE SEQUENCE SEQ_PE START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 167
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_PG",
+      "sql": "CREATE SEQUENCE SEQ_PG START WITH 100 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 20 noorder",
+      "source_line": 50
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_PSDS",
+      "sql": "CREATE SEQUENCE SEQ_PSDS START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 149
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_PSH",
+      "sql": "CREATE SEQUENCE SEQ_PSH START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 32
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_RV",
+      "sql": "CREATE SEQUENCE SEQ_RV START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 23
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_SE",
+      "sql": "CREATE SEQUENCE SEQ_SE START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 203
+    },
+    {
+      "kind": "CREATE SEQUENCE",
+      "name": "SEQ_SI",
+      "sql": "CREATE SEQUENCE SEQ_SI START WITH 1 INCREMENT BY 1 NOMINVALUE NOMAXVALUE nocycle CACHE 5000 noorder",
+      "source_line": 194
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT CMS_DBS3_READ_ROLE TO CMS_DBS3_READER",
+      "source_line": 15
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT CMS_DBS3_READ_ROLE, CMS_DBS3_WRITE_ROLE TO CMS_DBS3_WRITER",
+      "source_line": 16
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT CMS_DBS3_READ_ROLE, CMS_DBS3_WRITE_ROLE, CMS_DBS3_ADMIN_ROLE TO CMS_DBS3_ADMIN",
+      "source_line": 17
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON APPLICATION_EXECUTABLES TO CMS_DBS3_READ_ROLE",
+      "source_line": 334
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON APPLICATION_EXECUTABLES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 335
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON APPLICATION_EXECUTABLES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 336
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON RELEASE_VERSIONS TO CMS_DBS3_READ_ROLE",
+      "source_line": 348
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON RELEASE_VERSIONS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 349
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON RELEASE_VERSIONS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 350
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON PROCESSED_DATASETS TO CMS_DBS3_READ_ROLE",
+      "source_line": 362
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON PROCESSED_DATASETS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 363
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON PROCESSED_DATASETS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 364
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON BRANCH_HASHES TO CMS_DBS3_READ_ROLE",
+      "source_line": 376
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON BRANCH_HASHES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 377
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON BRANCH_HASHES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 378
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON FILE_DATA_TYPES TO CMS_DBS3_READ_ROLE",
+      "source_line": 390
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON FILE_DATA_TYPES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 391
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON FILE_DATA_TYPES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 392
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON PHYSICS_GROUPS TO CMS_DBS3_READ_ROLE",
+      "source_line": 404
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON PHYSICS_GROUPS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 405
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON PHYSICS_GROUPS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 406
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON PRIMARY_DS_TYPES TO CMS_DBS3_READ_ROLE",
+      "source_line": 418
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON PRIMARY_DS_TYPES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 419
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON PRIMARY_DS_TYPES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 420
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DATASET_ACCESS_TYPES TO CMS_DBS3_READ_ROLE",
+      "source_line": 432
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DATASET_ACCESS_TYPES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 433
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DATASET_ACCESS_TYPES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 434
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON PARAMETER_SET_HASHES TO CMS_DBS3_READ_ROLE",
+      "source_line": 447
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON PARAMETER_SET_HASHES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 448
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON PARAMETER_SET_HASHES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 449
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DBS_VERSIONS TO CMS_DBS3_READ_ROLE",
+      "source_line": 467
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DBS_VERSIONS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 468
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DBS_VERSIONS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 469
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON OUTPUT_MODULE_CONFIGS TO CMS_DBS3_READ_ROLE",
+      "source_line": 488
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON OUTPUT_MODULE_CONFIGS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 489
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON OUTPUT_MODULE_CONFIGS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 490
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DATA_TIERS TO CMS_DBS3_READ_ROLE",
+      "source_line": 512
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DATA_TIERS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 513
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DATA_TIERS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 514
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON PRIMARY_DATASETS TO CMS_DBS3_READ_ROLE",
+      "source_line": 529
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON PRIMARY_DATASETS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 530
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON PRIMARY_DATASETS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 531
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON ACQUISITION_ERAS TO CMS_DBS3_READ_ROLE",
+      "source_line": 552
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON ACQUISITION_ERAS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 553
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON ACQUISITION_ERAS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 554
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON PROCESSING_ERAS TO CMS_DBS3_READ_ROLE",
+      "source_line": 569
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON PROCESSING_ERAS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 570
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON PROCESSING_ERAS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 571
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON MIGRATION_REQUESTS TO CMS_DBS3_READ_ROLE",
+      "source_line": 591
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE, DELETE ON MIGRATION_REQUESTS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 592
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON MIGRATION_REQUESTS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 593
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON MIGRATION_BLOCKS TO CMS_DBS3_READ_ROLE",
+      "source_line": 612
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE, DELETE ON MIGRATION_BLOCKS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 613
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON MIGRATION_BLOCKS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 614
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DATASETS TO CMS_DBS3_READ_ROLE",
+      "source_line": 640
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DATASETS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 641
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DATASETS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 642
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON BLOCKS TO CMS_DBS3_READ_ROLE",
+      "source_line": 684
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON BLOCKS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 685
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON BLOCKS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 686
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON BLOCK_PARENTS TO CMS_DBS3_READ_ROLE",
+      "source_line": 711
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON BLOCK_PARENTS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 712
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON BLOCK_PARENTS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 713
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON FILES TO CMS_DBS3_READ_ROLE",
+      "source_line": 742
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON FILES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 743
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON FILES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 744
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DATASET_OUTPUT_MOD_CONFIGS TO CMS_DBS3_READ_ROLE",
+      "source_line": 776
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DATASET_OUTPUT_MOD_CONFIGS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 777
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DATASET_OUTPUT_MOD_CONFIGS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 778
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DATASET_PARENTS TO CMS_DBS3_READ_ROLE",
+      "source_line": 794
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DATASET_PARENTS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 795
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DATASET_PARENTS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 796
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON DATASET_RUNS TO CMS_DBS3_READ_ROLE",
+      "source_line": 814
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON DATASET_RUNS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 815
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON DATASET_RUNS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 816
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON FILE_OUTPUT_MOD_CONFIGS TO CMS_DBS3_READ_ROLE",
+      "source_line": 835
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON FILE_OUTPUT_MOD_CONFIGS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 836
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON FILE_OUTPUT_MOD_CONFIGS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 837
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON ASSOCIATED_FILES TO CMS_DBS3_READ_ROLE",
+      "source_line": 854
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON ASSOCIATED_FILES TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 855
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON ASSOCIATED_FILES TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 856
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON FILE_PARENTS TO CMS_DBS3_READ_ROLE",
+      "source_line": 872
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON FILE_PARENTS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 873
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON FILE_PARENTS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 874
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON FILE_LUMIS TO CMS_DBS3_READ_ROLE",
+      "source_line": 889
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT INSERT, UPDATE ON FILE_LUMIS TO CMS_DBS3_WRITE_ROLE",
+      "source_line": 890
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT DELETE ON FILE_LUMIS TO CMS_DBS3_ADMIN_ROLE",
+      "source_line": 891
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_AE TO CMS_DBS3_READ_ROLE",
+      "source_line": 994
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_AF TO CMS_DBS3_READ_ROLE",
+      "source_line": 995
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_AQE TO CMS_DBS3_READ_ROLE",
+      "source_line": 996
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_BH TO CMS_DBS3_READ_ROLE",
+      "source_line": 997
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_BK TO CMS_DBS3_READ_ROLE",
+      "source_line": 998
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_BP TO CMS_DBS3_READ_ROLE",
+      "source_line": 999
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_BSE TO CMS_DBS3_READ_ROLE",
+      "source_line": 1000
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_BLST TO CMS_DBS3_READ_ROLE",
+      "source_line": 1001
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_CS TO CMS_DBS3_READ_ROLE",
+      "source_line": 1002
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DC TO CMS_DBS3_READ_ROLE",
+      "source_line": 1003
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DP TO CMS_DBS3_READ_ROLE",
+      "source_line": 1004
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DR TO CMS_DBS3_READ_ROLE",
+      "source_line": 1005
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DS TO CMS_DBS3_READ_ROLE",
+      "source_line": 1006
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DT TO CMS_DBS3_READ_ROLE",
+      "source_line": 1007
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DTP TO CMS_DBS3_READ_ROLE",
+      "source_line": 1008
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_DV TO CMS_DBS3_READ_ROLE",
+      "source_line": 1009
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_FC TO CMS_DBS3_READ_ROLE",
+      "source_line": 1010
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_FL TO CMS_DBS3_READ_ROLE",
+      "source_line": 1011
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_FLM TO CMS_DBS3_READ_ROLE",
+      "source_line": 1012
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_FP TO CMS_DBS3_READ_ROLE",
+      "source_line": 1013
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_FT TO CMS_DBS3_READ_ROLE",
+      "source_line": 1014
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_MB TO CMS_DBS3_READ_ROLE",
+      "source_line": 1015
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_MR TO CMS_DBS3_READ_ROLE",
+      "source_line": 1016
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_OMC TO CMS_DBS3_READ_ROLE",
+      "source_line": 1017
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_PDS TO CMS_DBS3_READ_ROLE",
+      "source_line": 1018
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_PDT TO CMS_DBS3_READ_ROLE",
+      "source_line": 1019
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_PE TO CMS_DBS3_READ_ROLE",
+      "source_line": 1020
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_PG TO CMS_DBS3_READ_ROLE",
+      "source_line": 1021
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_PSDS TO CMS_DBS3_READ_ROLE",
+      "source_line": 1022
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_PSH TO CMS_DBS3_READ_ROLE",
+      "source_line": 1023
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_RV TO CMS_DBS3_READ_ROLE",
+      "source_line": 1024
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_SE TO CMS_DBS3_READ_ROLE",
+      "source_line": 1025
+    },
+    {
+      "kind": "GRANT",
+      "sql": "GRANT SELECT ON SEQ_SI TO CMS_DBS3_READ_ROLE",
+      "source_line": 1026
+    }
+  ]
+}

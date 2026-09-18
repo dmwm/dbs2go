@@ -1,0 +1,657 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2004 1594" width="2004" height="1594" role="img" aria-labelledby="title desc">
+<title id="title">DBS relational map — Whole-schema relations</title>
+<desc id="desc">DBS tables with exact foreign-key column connections, generated directly by the Go schema tool.</desc>
+<defs><marker id="fk-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#40566F"/></marker></defs>
+<rect width="100%" height="100%" fill="#f8fafc"/>
+<text x="32" y="38" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#172b4d">Whole-schema relations</text>
+<text x="32" y="62" font-family="system-ui, sans-serif" font-size="12" fill="#52657a">All DBS tables and relationships.</text>
+<text x="32" y="78" font-family="system-ui, sans-serif" font-size="11" fill="#52657a">Exact arrows run from FK source columns to referenced PK/UQ columns.</text>
+<rect x="32" y="92" width="12" height="12" rx="2" fill="#E6F5ED" stroke="#17734D"/><text x="50" y="103" font-family="system-ui, sans-serif" font-size="10" fill="#334155">Core</text>
+<rect x="142" y="92" width="12" height="12" rx="2" fill="#E9F2FC" stroke="#245FA9"/><text x="160" y="103" font-family="system-ui, sans-serif" font-size="10" fill="#334155">Lookup</text>
+<rect x="252" y="92" width="12" height="12" rx="2" fill="#F3EAFF" stroke="#7047AA"/><text x="270" y="103" font-family="system-ui, sans-serif" font-size="10" fill="#334155">Parentage</text>
+<rect x="362" y="92" width="12" height="12" rx="2" fill="#FFF0DF" stroke="#AC5516"/><text x="380" y="103" font-family="system-ui, sans-serif" font-size="10" fill="#334155">Config</text>
+<rect x="472" y="92" width="12" height="12" rx="2" fill="#E8F4F5" stroke="#147887"/><text x="490" y="103" font-family="system-ui, sans-serif" font-size="10" fill="#334155">Operations</text>
+<rect x="582" y="92" width="12" height="12" rx="2" fill="#F1F3F5" stroke="#596675"/><text x="600" y="103" font-family="system-ui, sans-serif" font-size="10" fill="#334155">Other</text>
+<text x="32" y="124" font-family="ui-monospace, monospace" font-size="10" fill="#52657a">PK primary key · FK foreign key · UQ unique · NN not null · +N folded columns are in the dictionary</text>
+<path d="M 292.0 222.5 H 320.0 V 305.5 H 368.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="296.0" y="212.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="330.0" y="220.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="330.0">FL_AF</tspan><tspan x="330.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 292.0 245.5 H 325.0 V 305.5 H 368.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="296.0" y="235.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="330.0" y="243.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="330.0">FL_AF2</tspan><tspan x="330.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 964.0 245.5 H 992.0 V 199.5 H 1040.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="968.0" y="235.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1002.0" y="243.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1002.0">DS_BK</tspan><tspan x="1002.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 628.0 199.5 H 656.0 V 199.5 H 704.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="632.0" y="189.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="666.0" y="197.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="666.0">BK_BP</tspan><tspan x="666.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 628.0 222.5 H 661.0 V 199.5 H 704.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="632.0" y="212.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="666.0" y="220.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="666.0">BK_BP2</tspan><tspan x="666.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1300.0 337.5 H 1496.0 V 199.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1472.0" y="327.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1506.0" y="335.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1506.0">AQE_DS</tspan><tspan x="1506.0" dy="7.5" font-size="7" font-weight="500">SET NULL</tspan></text>
+<path d="M 1300.0 314.5 H 1496.0 V 494.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1472.0" y="304.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1506.0" y="312.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1506.0">DTP_DS</tspan><tspan x="1506.0" dy="7.5" font-size="7" font-weight="500">NO ACTION</tspan></text>
+<path d="M 1300.0 291.5 H 1496.0 V 600.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1472.0" y="281.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1506.0" y="289.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1506.0">DT_DS</tspan><tspan x="1506.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1300.0 245.5 H 1328.0 V 526.5 H 1376.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1304.0" y="235.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1338.0" y="243.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1338.0">PDS_DS</tspan><tspan x="1338.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1300.0 360.5 H 1496.0 V 1425.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1472.0" y="350.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1506.0" y="358.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1506.0">PE_DS</tspan><tspan x="1506.0" dy="7.5" font-size="7" font-weight="500">SET NULL</tspan></text>
+<path d="M 1300.0 383.5 H 1496.0 V 1107.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1472.0" y="373.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1506.0" y="381.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1506.0">PG_DS</tspan><tspan x="1506.0" dy="7.5" font-size="7" font-weight="500">SET NULL</tspan></text>
+<path d="M 1300.0 268.5 H 1496.0 V 1319.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1472.0" y="258.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1506.0" y="266.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1506.0">PSDS_DS</tspan><tspan x="1506.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 964.0 351.5 H 992.0 V 199.5 H 1040.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="968.0" y="341.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1002.0" y="349.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1002.0">DS_DC</tspan><tspan x="1002.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 964.0 374.5 H 1160.0 V 328.5 H 1376.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1136.0" y="364.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1170.0" y="372.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1170.0">OMC_DC</tspan><tspan x="1170.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 964.0 457.5 H 992.0 V 199.5 H 1040.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="968.0" y="447.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1002.0" y="455.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1002.0">DS_DP</tspan><tspan x="1002.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 964.0 480.5 H 997.0 V 199.5 H 1040.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="968.0" y="470.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1002.0" y="478.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1002.0">DS_DP2</tspan><tspan x="1002.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 964.0 586.5 H 992.0 V 199.5 H 1040.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="968.0" y="576.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1002.0" y="584.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1002.0">DS_DR</tspan><tspan x="1002.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 628.0 420.5 H 1160.0 V 411.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1136.0" y="410.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1170.0" y="418.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1170.0">BH_FL</tspan><tspan x="1170.0" dy="7.5" font-size="7" font-weight="500">SET NULL</tspan></text>
+<path d="M 628.0 374.5 H 656.0 V 199.5 H 704.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="632.0" y="364.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="666.0" y="372.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="666.0">BK_FL</tspan><tspan x="666.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 628.0 351.5 H 824.0 V 199.5 H 1040.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="800.0" y="341.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="834.0" y="349.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="834.0">DS_FL</tspan><tspan x="834.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 628.0 397.5 H 1160.0 V 789.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1136.0" y="387.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1170.0" y="395.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1170.0">FT_FL</tspan><tspan x="1170.0" dy="7.5" font-size="7" font-weight="500">NO ACTION</tspan></text>
+<path d="M 292.0 374.5 H 320.0 V 305.5 H 368.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="296.0" y="364.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="330.0" y="372.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="330.0">FL_FLM</tspan><tspan x="330.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 292.0 480.5 H 320.0 V 305.5 H 368.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="296.0" y="470.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="330.0" y="478.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="330.0">FL_FC</tspan><tspan x="330.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 292.0 503.5 H 824.0 V 328.5 H 1376.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="800.0" y="493.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="834.0" y="501.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="834.0">OMC_FC</tspan><tspan x="834.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 292.0 586.5 H 320.0 V 305.5 H 368.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="296.0" y="576.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="330.0" y="584.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="330.0">FL_FP</tspan><tspan x="330.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 292.0 609.5 H 325.0 V 305.5 H 368.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="296.0" y="599.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="330.0" y="607.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="330.0">FL_FP2</tspan><tspan x="330.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1636.0 222.5 H 1664.0 V 895.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1640.0" y="212.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1674.0" y="220.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1674.0">MR_MB</tspan><tspan x="1674.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1636.0 351.5 H 1664.0 V 305.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1640.0" y="341.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1674.0" y="349.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1674.0">AE_OMC</tspan><tspan x="1674.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1636.0 397.5 H 1664.0 V 1001.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1640.0" y="387.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1674.0" y="395.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1674.0">PSH_OMC</tspan><tspan x="1674.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1636.0 374.5 H 1664.0 V 1531.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1640.0" y="364.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1674.0" y="372.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1674.0">RV_OMC</tspan><tspan x="1674.0" dy="7.5" font-size="7" font-weight="500">CASCADE</tspan></text>
+<path d="M 1636.0 572.5 H 1664.0 V 1213.5 H 1712.0" fill="none" stroke="#40566F" stroke-width="1.6" opacity="0.82" marker-end="url(#fk-arrow)"/>
+<rect x="1640.0" y="562.5" width="68" height="20" rx="3" fill="#ffffff" opacity="0.94"/>
+<text x="1674.0" y="570.0" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#40566F"><tspan x="1674.0">PDT_PDS</tspan><tspan x="1674.0" dy="7.5" font-size="7" font-weight="500">NO ACTION</tspan></text>
+<g id="table-ACQUISITION_ERAS">
+<rect x="1712.0" y="142.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 149.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="161.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">ACQUISITION_ERAS</text>
+<text x="1722.0" y="178.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_AQE · +5 folded</text>
+<rect x="1712.0" y="188.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="203.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="203.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">ACQUISITION_ERA_ID</text>
+<text x="1966.0" y="203.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="199.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="199.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="211.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="226.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="226.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">ACQUISITION_ERA_NAME</text>
+<text x="1966.0" y="226.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(120)</text>
+<circle cx="1712.0" cy="222.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="222.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-APPLICATION_EXECUTABLES">
+<rect x="1712.0" y="248.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#AC5516" stroke-width="1.4"/>
+<path d="M 1712.0 255.0 h 260.0 v 39.0 h -260.0 z" fill="#FFF0DF"/>
+<text x="1722.0" y="267.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#AC5516">APPLICATION_EXECUTABLES</text>
+<text x="1722.0" y="284.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_AE</text>
+<rect x="1712.0" y="294.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="309.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="309.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">APP_EXEC_ID</text>
+<text x="1966.0" y="309.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="305.5" r="2.5" fill="#AC5516"/><circle cx="1972.0" cy="305.5" r="2.5" fill="#AC5516"/>
+<rect x="1712.0" y="317.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="332.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="332.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">APP_NAME</text>
+<text x="1966.0" y="332.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="328.5" r="2.5" fill="#AC5516"/><circle cx="1972.0" cy="328.5" r="2.5" fill="#AC5516"/>
+</g>
+<g id="table-ASSOCIATED_FILES">
+<rect x="32.0" y="142.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#7047AA" stroke-width="1.4"/>
+<path d="M 32.0 149.0 h 260.0 v 39.0 h -260.0 z" fill="#F3EAFF"/>
+<text x="42.0" y="161.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#7047AA">ASSOCIATED_FILES</text>
+<text x="42.0" y="178.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_AF</text>
+<rect x="32.0" y="188.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="203.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="90.0" y="203.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">ASSOCATED_FILE_ID</text>
+<text x="286.0" y="203.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="199.5" r="2.5" fill="#7047AA"/><circle cx="292.0" cy="199.5" r="2.5" fill="#7047AA"/>
+<rect x="32.0" y="211.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="226.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="90.0" y="226.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">THIS_FILE_ID</text>
+<text x="286.0" y="226.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="222.5" r="2.5" fill="#7047AA"/><circle cx="292.0" cy="222.5" r="2.5" fill="#7047AA"/>
+<rect x="32.0" y="234.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="249.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="90.0" y="249.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">ASSOCATED_FILE</text>
+<text x="286.0" y="249.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="245.5" r="2.5" fill="#7047AA"/><circle cx="292.0" cy="245.5" r="2.5" fill="#7047AA"/>
+</g>
+<g id="table-BLOCKS">
+<rect x="704.0" y="142.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#17734D" stroke-width="1.4"/>
+<path d="M 704.0 149.0 h 260.0 v 39.0 h -260.0 z" fill="#E6F5ED"/>
+<text x="714.0" y="161.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#17734D">BLOCKS</text>
+<text x="714.0" y="178.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_BK · +8 folded</text>
+<rect x="704.0" y="188.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="203.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="762.0" y="203.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">BLOCK_ID</text>
+<text x="958.0" y="203.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="199.5" r="2.5" fill="#17734D"/><circle cx="964.0" cy="199.5" r="2.5" fill="#17734D"/>
+<rect x="704.0" y="211.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="226.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="762.0" y="226.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">BLOCK_NAME</text>
+<text x="958.0" y="226.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(500)</text>
+<circle cx="704.0" cy="222.5" r="2.5" fill="#17734D"/><circle cx="964.0" cy="222.5" r="2.5" fill="#17734D"/>
+<rect x="704.0" y="234.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="249.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="762.0" y="249.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ID</text>
+<text x="958.0" y="249.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="245.5" r="2.5" fill="#17734D"/><circle cx="964.0" cy="245.5" r="2.5" fill="#17734D"/>
+</g>
+<g id="table-BLOCK_PARENTS">
+<rect x="368.0" y="142.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#7047AA" stroke-width="1.4"/>
+<path d="M 368.0 149.0 h 260.0 v 39.0 h -260.0 z" fill="#F3EAFF"/>
+<text x="378.0" y="161.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#7047AA">BLOCK_PARENTS</text>
+<text x="378.0" y="178.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_BP</text>
+<rect x="368.0" y="188.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="203.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="426.0" y="203.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">THIS_BLOCK_ID</text>
+<text x="622.0" y="203.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="199.5" r="2.5" fill="#7047AA"/><circle cx="628.0" cy="199.5" r="2.5" fill="#7047AA"/>
+<rect x="368.0" y="211.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="226.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="426.0" y="226.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PARENT_BLOCK_ID</text>
+<text x="622.0" y="226.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="222.5" r="2.5" fill="#7047AA"/><circle cx="628.0" cy="222.5" r="2.5" fill="#7047AA"/>
+</g>
+<g id="table-BRANCH_HASHES">
+<rect x="1712.0" y="354.0" width="260.0" height="69.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 361.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="373.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">BRANCH_HASHES</text>
+<text x="1722.0" y="390.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_BH · +2 folded</text>
+<rect x="1712.0" y="400.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="415.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="415.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">BRANCH_HASH_ID</text>
+<text x="1966.0" y="415.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="411.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="411.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-DATASETS">
+<rect x="1040.0" y="142.0" width="260.0" height="253.0" rx="7" fill="#ffffff" stroke="#17734D" stroke-width="1.4"/>
+<path d="M 1040.0 149.0 h 260.0 v 39.0 h -260.0 z" fill="#E6F5ED"/>
+<text x="1050.0" y="161.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#17734D">DATASETS</text>
+<text x="1050.0" y="178.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DS · +7 folded</text>
+<rect x="1040.0" y="188.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="203.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1098.0" y="203.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ID</text>
+<text x="1294.0" y="203.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="199.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="199.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="211.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="226.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1098.0" y="226.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET</text>
+<text x="1294.0" y="226.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(700)</text>
+<circle cx="1040.0" cy="222.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="222.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="234.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="249.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="1098.0" y="249.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PRIMARY_DS_ID</text>
+<text x="1294.0" y="249.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="245.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="245.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="257.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="272.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="1098.0" y="272.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PROCESSED_DS_ID</text>
+<text x="1294.0" y="272.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="268.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="268.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="280.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="295.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="1098.0" y="295.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATA_TIER_ID</text>
+<text x="1294.0" y="295.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="291.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="291.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="303.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="318.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="1098.0" y="318.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ACCESS_TYPE_ID</text>
+<text x="1294.0" y="318.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="314.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="314.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="326.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="341.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK</text>
+<text x="1098.0" y="341.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">ACQUISITION_ERA_ID</text>
+<text x="1294.0" y="341.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="337.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="337.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="349.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="364.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK</text>
+<text x="1098.0" y="364.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PROCESSING_ERA_ID</text>
+<text x="1294.0" y="364.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="360.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="360.5" r="2.5" fill="#17734D"/>
+<rect x="1040.0" y="372.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1046.0" y="387.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK</text>
+<text x="1098.0" y="387.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PHYSICS_GROUP_ID</text>
+<text x="1294.0" y="387.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1040.0" cy="383.5" r="2.5" fill="#17734D"/><circle cx="1300.0" cy="383.5" r="2.5" fill="#17734D"/>
+</g>
+<g id="table-DATASET_ACCESS_TYPES">
+<rect x="1712.0" y="437.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 444.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="456.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">DATASET_ACCESS_TYPES</text>
+<text x="1722.0" y="473.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DTP</text>
+<rect x="1712.0" y="483.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="498.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="498.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ACCESS_TYPE_ID</text>
+<text x="1966.0" y="498.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="494.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="494.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="506.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="521.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="521.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ACCESS_TYPE</text>
+<text x="1966.0" y="521.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="517.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="517.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-DATASET_OUTPUT_MOD_CONFIGS">
+<rect x="704.0" y="271.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#AC5516" stroke-width="1.4"/>
+<path d="M 704.0 278.0 h 260.0 v 39.0 h -260.0 z" fill="#FFF0DF"/>
+<text x="714.0" y="290.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#AC5516">DATASET_OUTPUT_MOD_CONFIGS</text>
+<text x="714.0" y="307.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DC</text>
+<rect x="704.0" y="317.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="332.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="762.0" y="332.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DS_OUTPUT_MOD_CONF_ID</text>
+<text x="958.0" y="332.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="328.5" r="2.5" fill="#AC5516"/><circle cx="964.0" cy="328.5" r="2.5" fill="#AC5516"/>
+<rect x="704.0" y="340.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="355.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="762.0" y="355.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ID</text>
+<text x="958.0" y="355.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="351.5" r="2.5" fill="#AC5516"/><circle cx="964.0" cy="351.5" r="2.5" fill="#AC5516"/>
+<rect x="704.0" y="363.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="378.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="762.0" y="378.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">OUTPUT_MOD_CONFIG_ID</text>
+<text x="958.0" y="378.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="374.5" r="2.5" fill="#AC5516"/><circle cx="964.0" cy="374.5" r="2.5" fill="#AC5516"/>
+</g>
+<g id="table-DATASET_PARENTS">
+<rect x="704.0" y="400.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#7047AA" stroke-width="1.4"/>
+<path d="M 704.0 407.0 h 260.0 v 39.0 h -260.0 z" fill="#F3EAFF"/>
+<text x="714.0" y="419.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#7047AA">DATASET_PARENTS</text>
+<text x="714.0" y="436.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DP</text>
+<rect x="704.0" y="446.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="461.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="762.0" y="461.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">THIS_DATASET_ID</text>
+<text x="958.0" y="461.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="457.5" r="2.5" fill="#7047AA"/><circle cx="964.0" cy="457.5" r="2.5" fill="#7047AA"/>
+<rect x="704.0" y="469.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="484.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="762.0" y="484.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PARENT_DATASET_ID</text>
+<text x="958.0" y="484.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="480.5" r="2.5" fill="#7047AA"/><circle cx="964.0" cy="480.5" r="2.5" fill="#7047AA"/>
+</g>
+<g id="table-DATASET_RUNS">
+<rect x="704.0" y="506.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#17734D" stroke-width="1.4"/>
+<path d="M 704.0 513.0 h 260.0 v 39.0 h -260.0 z" fill="#E6F5ED"/>
+<text x="714.0" y="525.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#17734D">DATASET_RUNS</text>
+<text x="714.0" y="542.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DR · +5 folded</text>
+<rect x="704.0" y="552.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="567.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="762.0" y="567.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_RUN_ID</text>
+<text x="958.0" y="567.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="563.5" r="2.5" fill="#17734D"/><circle cx="964.0" cy="563.5" r="2.5" fill="#17734D"/>
+<rect x="704.0" y="575.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="710.0" y="590.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="762.0" y="590.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ID</text>
+<text x="958.0" y="590.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="704.0" cy="586.5" r="2.5" fill="#17734D"/><circle cx="964.0" cy="586.5" r="2.5" fill="#17734D"/>
+</g>
+<g id="table-DATA_TIERS">
+<rect x="1712.0" y="543.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 550.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="562.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">DATA_TIERS</text>
+<text x="1722.0" y="579.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DT · +2 folded</text>
+<rect x="1712.0" y="589.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="604.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="604.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATA_TIER_ID</text>
+<text x="1966.0" y="604.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="600.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="600.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="612.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="627.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="627.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATA_TIER_NAME</text>
+<text x="1966.0" y="627.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="623.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="623.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-DBS_VERSIONS">
+<rect x="1712.0" y="649.0" width="260.0" height="69.0" rx="7" fill="#ffffff" stroke="#147887" stroke-width="1.4"/>
+<path d="M 1712.0 656.0 h 260.0 v 39.0 h -260.0 z" fill="#E8F4F5"/>
+<text x="1722.0" y="668.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#147887">DBS_VERSIONS</text>
+<text x="1722.0" y="685.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_DV · +6 folded</text>
+<rect x="1712.0" y="695.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="710.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="710.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DBS_VERSION_ID</text>
+<text x="1966.0" y="710.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="706.5" r="2.5" fill="#147887"/><circle cx="1972.0" cy="706.5" r="2.5" fill="#147887"/>
+</g>
+<g id="table-FILES">
+<rect x="368.0" y="248.0" width="260.0" height="184.0" rx="7" fill="#ffffff" stroke="#17734D" stroke-width="1.4"/>
+<path d="M 368.0 255.0 h 260.0 v 39.0 h -260.0 z" fill="#E6F5ED"/>
+<text x="378.0" y="267.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#17734D">FILES</text>
+<text x="378.0" y="284.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_FL · +11 folded</text>
+<rect x="368.0" y="294.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="309.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="426.0" y="309.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_ID</text>
+<text x="622.0" y="309.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="305.5" r="2.5" fill="#17734D"/><circle cx="628.0" cy="305.5" r="2.5" fill="#17734D"/>
+<rect x="368.0" y="317.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="332.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="426.0" y="332.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">LOGICAL_FILE_NAME</text>
+<text x="622.0" y="332.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(500)</text>
+<circle cx="368.0" cy="328.5" r="2.5" fill="#17734D"/><circle cx="628.0" cy="328.5" r="2.5" fill="#17734D"/>
+<rect x="368.0" y="340.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="355.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="426.0" y="355.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">DATASET_ID</text>
+<text x="622.0" y="355.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="351.5" r="2.5" fill="#17734D"/><circle cx="628.0" cy="351.5" r="2.5" fill="#17734D"/>
+<rect x="368.0" y="363.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="378.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="426.0" y="378.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">BLOCK_ID</text>
+<text x="622.0" y="378.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="374.5" r="2.5" fill="#17734D"/><circle cx="628.0" cy="374.5" r="2.5" fill="#17734D"/>
+<rect x="368.0" y="386.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="401.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="426.0" y="401.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_TYPE_ID</text>
+<text x="622.0" y="401.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="397.5" r="2.5" fill="#17734D"/><circle cx="628.0" cy="397.5" r="2.5" fill="#17734D"/>
+<rect x="368.0" y="409.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="374.0" y="424.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK</text>
+<text x="426.0" y="424.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">BRANCH_HASH_ID</text>
+<text x="622.0" y="424.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="368.0" cy="420.5" r="2.5" fill="#17734D"/><circle cx="628.0" cy="420.5" r="2.5" fill="#17734D"/>
+</g>
+<g id="table-FILE_DATA_TYPES">
+<rect x="1712.0" y="732.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 739.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="751.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">FILE_DATA_TYPES</text>
+<text x="1722.0" y="768.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_FT</text>
+<rect x="1712.0" y="778.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="793.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="793.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_TYPE_ID</text>
+<text x="1966.0" y="793.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="789.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="789.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="801.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="816.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="816.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_TYPE</text>
+<text x="1966.0" y="816.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="812.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="812.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-FILE_LUMIS">
+<rect x="32.0" y="271.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#17734D" stroke-width="1.4"/>
+<path d="M 32.0 278.0 h 260.0 v 39.0 h -260.0 z" fill="#E6F5ED"/>
+<text x="42.0" y="290.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#17734D">FILE_LUMIS</text>
+<text x="42.0" y="307.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_FLM · +1 folded</text>
+<rect x="32.0" y="317.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="332.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="90.0" y="332.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">RUN_NUM</text>
+<text x="286.0" y="332.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="328.5" r="2.5" fill="#17734D"/><circle cx="292.0" cy="328.5" r="2.5" fill="#17734D"/>
+<rect x="32.0" y="340.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="355.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="90.0" y="355.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">LUMI_SECTION_NUM</text>
+<text x="286.0" y="355.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="351.5" r="2.5" fill="#17734D"/><circle cx="292.0" cy="351.5" r="2.5" fill="#17734D"/>
+<rect x="32.0" y="363.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="378.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="90.0" y="378.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_ID</text>
+<text x="286.0" y="378.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="374.5" r="2.5" fill="#17734D"/><circle cx="292.0" cy="374.5" r="2.5" fill="#17734D"/>
+</g>
+<g id="table-FILE_OUTPUT_MOD_CONFIGS">
+<rect x="32.0" y="400.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#AC5516" stroke-width="1.4"/>
+<path d="M 32.0 407.0 h 260.0 v 39.0 h -260.0 z" fill="#FFF0DF"/>
+<text x="42.0" y="419.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#AC5516">FILE_OUTPUT_MOD_CONFIGS</text>
+<text x="42.0" y="436.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_FC</text>
+<rect x="32.0" y="446.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="461.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="90.0" y="461.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_OUTPUT_CONFIG_ID</text>
+<text x="286.0" y="461.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="457.5" r="2.5" fill="#AC5516"/><circle cx="292.0" cy="457.5" r="2.5" fill="#AC5516"/>
+<rect x="32.0" y="469.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="484.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="90.0" y="484.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">FILE_ID</text>
+<text x="286.0" y="484.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="480.5" r="2.5" fill="#AC5516"/><circle cx="292.0" cy="480.5" r="2.5" fill="#AC5516"/>
+<rect x="32.0" y="492.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="507.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="90.0" y="507.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">OUTPUT_MOD_CONFIG_ID</text>
+<text x="286.0" y="507.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="503.5" r="2.5" fill="#AC5516"/><circle cx="292.0" cy="503.5" r="2.5" fill="#AC5516"/>
+</g>
+<g id="table-FILE_PARENTS">
+<rect x="32.0" y="529.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#7047AA" stroke-width="1.4"/>
+<path d="M 32.0 536.0 h 260.0 v 39.0 h -260.0 z" fill="#F3EAFF"/>
+<text x="42.0" y="548.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#7047AA">FILE_PARENTS</text>
+<text x="42.0" y="565.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_FP</text>
+<rect x="32.0" y="575.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="590.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="90.0" y="590.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">THIS_FILE_ID</text>
+<text x="286.0" y="590.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="586.5" r="2.5" fill="#7047AA"/><circle cx="292.0" cy="586.5" r="2.5" fill="#7047AA"/>
+<rect x="32.0" y="598.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="38.0" y="613.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK FK NN</text>
+<text x="90.0" y="613.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PARENT_FILE_ID</text>
+<text x="286.0" y="613.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="32.0" cy="609.5" r="2.5" fill="#7047AA"/><circle cx="292.0" cy="609.5" r="2.5" fill="#7047AA"/>
+</g>
+<g id="table-MIGRATION_BLOCKS">
+<rect x="1376.0" y="142.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#147887" stroke-width="1.4"/>
+<path d="M 1376.0 149.0 h 260.0 v 39.0 h -260.0 z" fill="#E8F4F5"/>
+<text x="1386.0" y="161.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#147887">MIGRATION_BLOCKS</text>
+<text x="1386.0" y="178.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_MB · +6 folded</text>
+<rect x="1376.0" y="188.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="203.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1434.0" y="203.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">MIGRATION_BLOCK_ID</text>
+<text x="1630.0" y="203.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="199.5" r="2.5" fill="#147887"/><circle cx="1636.0" cy="199.5" r="2.5" fill="#147887"/>
+<rect x="1376.0" y="211.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="226.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="1434.0" y="226.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">MIGRATION_REQUEST_ID</text>
+<text x="1630.0" y="226.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="222.5" r="2.5" fill="#147887"/><circle cx="1636.0" cy="222.5" r="2.5" fill="#147887"/>
+<rect x="1376.0" y="234.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="249.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ</text>
+<text x="1434.0" y="249.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">MIGRATION_BLOCK_NAME</text>
+<text x="1630.0" y="249.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(700)</text>
+<circle cx="1376.0" cy="245.5" r="2.5" fill="#147887"/><circle cx="1636.0" cy="245.5" r="2.5" fill="#147887"/>
+</g>
+<g id="table-MIGRATION_REQUESTS">
+<rect x="1712.0" y="838.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#147887" stroke-width="1.4"/>
+<path d="M 1712.0 845.0 h 260.0 v 39.0 h -260.0 z" fill="#E8F4F5"/>
+<text x="1722.0" y="857.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#147887">MIGRATION_REQUESTS</text>
+<text x="1722.0" y="874.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_MR · +8 folded</text>
+<rect x="1712.0" y="884.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="899.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="899.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">MIGRATION_REQUEST_ID</text>
+<text x="1966.0" y="899.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="895.5" r="2.5" fill="#147887"/><circle cx="1972.0" cy="895.5" r="2.5" fill="#147887"/>
+<rect x="1712.0" y="907.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="922.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ</text>
+<text x="1770.0" y="922.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">MIGRATION_INPUT</text>
+<text x="1966.0" y="922.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(700)</text>
+<circle cx="1712.0" cy="918.5" r="2.5" fill="#147887"/><circle cx="1972.0" cy="918.5" r="2.5" fill="#147887"/>
+</g>
+<g id="table-OUTPUT_MODULE_CONFIGS">
+<rect x="1376.0" y="271.0" width="260.0" height="184.0" rx="7" fill="#ffffff" stroke="#AC5516" stroke-width="1.4"/>
+<path d="M 1376.0 278.0 h 260.0 v 39.0 h -260.0 z" fill="#FFF0DF"/>
+<text x="1386.0" y="290.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#AC5516">OUTPUT_MODULE_CONFIGS</text>
+<text x="1386.0" y="307.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_OMC · +3 folded</text>
+<rect x="1376.0" y="317.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="332.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1434.0" y="332.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">OUTPUT_MOD_CONFIG_ID</text>
+<text x="1630.0" y="332.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="328.5" r="2.5" fill="#AC5516"/><circle cx="1636.0" cy="328.5" r="2.5" fill="#AC5516"/>
+<rect x="1376.0" y="340.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="355.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="1434.0" y="355.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">APP_EXEC_ID</text>
+<text x="1630.0" y="355.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="351.5" r="2.5" fill="#AC5516"/><circle cx="1636.0" cy="351.5" r="2.5" fill="#AC5516"/>
+<rect x="1376.0" y="363.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="378.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="1434.0" y="378.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">RELEASE_VERSION_ID</text>
+<text x="1630.0" y="378.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="374.5" r="2.5" fill="#AC5516"/><circle cx="1636.0" cy="374.5" r="2.5" fill="#AC5516"/>
+<rect x="1376.0" y="386.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="401.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK UQ NN</text>
+<text x="1434.0" y="401.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PARAMETER_SET_HASH_ID</text>
+<text x="1630.0" y="401.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="397.5" r="2.5" fill="#AC5516"/><circle cx="1636.0" cy="397.5" r="2.5" fill="#AC5516"/>
+<rect x="1376.0" y="409.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="424.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1434.0" y="424.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">OUTPUT_MODULE_LABEL</text>
+<text x="1630.0" y="424.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1376.0" cy="420.5" r="2.5" fill="#AC5516"/><circle cx="1636.0" cy="420.5" r="2.5" fill="#AC5516"/>
+<rect x="1376.0" y="432.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="447.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1434.0" y="447.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">GLOBAL_TAG</text>
+<text x="1630.0" y="447.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(255)</text>
+<circle cx="1376.0" cy="443.5" r="2.5" fill="#AC5516"/><circle cx="1636.0" cy="443.5" r="2.5" fill="#AC5516"/>
+</g>
+<g id="table-PARAMETER_SET_HASHES">
+<rect x="1712.0" y="944.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#AC5516" stroke-width="1.4"/>
+<path d="M 1712.0 951.0 h 260.0 v 39.0 h -260.0 z" fill="#FFF0DF"/>
+<text x="1722.0" y="963.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#AC5516">PARAMETER_SET_HASHES</text>
+<text x="1722.0" y="980.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_PSH · +1 folded</text>
+<rect x="1712.0" y="990.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1005.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="1005.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PARAMETER_SET_HASH_ID</text>
+<text x="1966.0" y="1005.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1001.5" r="2.5" fill="#AC5516"/><circle cx="1972.0" cy="1001.5" r="2.5" fill="#AC5516"/>
+<rect x="1712.0" y="1013.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1028.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="1028.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PSET_HASH</text>
+<text x="1966.0" y="1028.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(128)</text>
+<circle cx="1712.0" cy="1024.5" r="2.5" fill="#AC5516"/><circle cx="1972.0" cy="1024.5" r="2.5" fill="#AC5516"/>
+</g>
+<g id="table-PHYSICS_GROUPS">
+<rect x="1712.0" y="1050.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 1057.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="1069.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">PHYSICS_GROUPS</text>
+<text x="1722.0" y="1086.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_PG</text>
+<rect x="1712.0" y="1096.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1111.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="1111.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PHYSICS_GROUP_ID</text>
+<text x="1966.0" y="1111.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1107.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1107.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="1119.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1134.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="1134.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PHYSICS_GROUP_NAME</text>
+<text x="1966.0" y="1134.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="1130.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1130.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-PRIMARY_DATASETS">
+<rect x="1376.0" y="469.0" width="260.0" height="115.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1376.0 476.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1386.0" y="488.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">PRIMARY_DATASETS</text>
+<text x="1386.0" y="505.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_PDS · +2 folded</text>
+<rect x="1376.0" y="515.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="530.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1434.0" y="530.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PRIMARY_DS_ID</text>
+<text x="1630.0" y="530.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="526.5" r="2.5" fill="#245FA9"/><circle cx="1636.0" cy="526.5" r="2.5" fill="#245FA9"/>
+<rect x="1376.0" y="538.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="553.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1434.0" y="553.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PRIMARY_DS_NAME</text>
+<text x="1630.0" y="553.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1376.0" cy="549.5" r="2.5" fill="#245FA9"/><circle cx="1636.0" cy="549.5" r="2.5" fill="#245FA9"/>
+<rect x="1376.0" y="561.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1382.0" y="576.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">FK NN</text>
+<text x="1434.0" y="576.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PRIMARY_DS_TYPE_ID</text>
+<text x="1630.0" y="576.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1376.0" cy="572.5" r="2.5" fill="#245FA9"/><circle cx="1636.0" cy="572.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-PRIMARY_DS_TYPES">
+<rect x="1712.0" y="1156.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 1163.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="1175.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">PRIMARY_DS_TYPES</text>
+<text x="1722.0" y="1192.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_PDT</text>
+<rect x="1712.0" y="1202.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1217.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="1217.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PRIMARY_DS_TYPE_ID</text>
+<text x="1966.0" y="1217.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1213.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1213.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="1225.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1240.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="1240.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PRIMARY_DS_TYPE</text>
+<text x="1966.0" y="1240.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="1236.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1236.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-PROCESSED_DATASETS">
+<rect x="1712.0" y="1262.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 1269.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="1281.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">PROCESSED_DATASETS</text>
+<text x="1722.0" y="1298.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_PSDS</text>
+<rect x="1712.0" y="1308.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1323.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="1323.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PROCESSED_DS_ID</text>
+<text x="1966.0" y="1323.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1319.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1319.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="1331.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1346.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="1346.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PROCESSED_DS_NAME</text>
+<text x="1966.0" y="1346.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(235)</text>
+<circle cx="1712.0" cy="1342.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1342.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-PROCESSING_ERAS">
+<rect x="1712.0" y="1368.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#245FA9" stroke-width="1.4"/>
+<path d="M 1712.0 1375.0 h 260.0 v 39.0 h -260.0 z" fill="#E9F2FC"/>
+<text x="1722.0" y="1387.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#245FA9">PROCESSING_ERAS</text>
+<text x="1722.0" y="1404.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_PE · +3 folded</text>
+<rect x="1712.0" y="1414.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1429.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="1429.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PROCESSING_ERA_ID</text>
+<text x="1966.0" y="1429.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1425.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1425.5" r="2.5" fill="#245FA9"/>
+<rect x="1712.0" y="1437.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1452.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ</text>
+<text x="1770.0" y="1452.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">PROCESSING_VERSION</text>
+<text x="1966.0" y="1452.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1448.5" r="2.5" fill="#245FA9"/><circle cx="1972.0" cy="1448.5" r="2.5" fill="#245FA9"/>
+</g>
+<g id="table-RELEASE_VERSIONS">
+<rect x="1712.0" y="1474.0" width="260.0" height="92.0" rx="7" fill="#ffffff" stroke="#AC5516" stroke-width="1.4"/>
+<path d="M 1712.0 1481.0 h 260.0 v 39.0 h -260.0 z" fill="#FFF0DF"/>
+<text x="1722.0" y="1493.0" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#AC5516">RELEASE_VERSIONS</text>
+<text x="1722.0" y="1510.0" font-family="system-ui, sans-serif" font-size="9.5" fill="#53657a">PK PK_RV</text>
+<rect x="1712.0" y="1520.0" width="260.0" height="23.0" fill="#ffffff" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1535.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">PK NN</text>
+<text x="1770.0" y="1535.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">RELEASE_VERSION_ID</text>
+<text x="1966.0" y="1535.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">INTEGER</text>
+<circle cx="1712.0" cy="1531.5" r="2.5" fill="#AC5516"/><circle cx="1972.0" cy="1531.5" r="2.5" fill="#AC5516"/>
+<rect x="1712.0" y="1543.0" width="260.0" height="23.0" fill="#f8fafc" stroke="#e5eaf0" stroke-width="0.6"/>
+<text x="1718.0" y="1558.0" font-family="ui-monospace, monospace" font-size="7.5" font-weight="700" fill="#64748b">UQ NN</text>
+<text x="1770.0" y="1558.0" font-family="ui-monospace, monospace" font-size="9.0" font-weight="600" fill="#172b4d">RELEASE_VERSION</text>
+<text x="1966.0" y="1558.0" text-anchor="end" font-family="ui-monospace, monospace" font-size="7.5" fill="#52657a">VARCHAR2(100)</text>
+<circle cx="1712.0" cy="1554.5" r="2.5" fill="#AC5516"/><circle cx="1972.0" cy="1554.5" r="2.5" fill="#AC5516"/>
+</g>
+</svg>
